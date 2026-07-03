@@ -808,7 +808,7 @@ async function diagnosticarGitHub() {
     console.log('🔍 === INICIANDO DIAGNÓSTICO ===');
     
     // 1. Verificar token
-    if (!GITHUB_TOKEN || GITHUB_TOKEN.includes('PEGA_AQUI')) {
+    if (!GITHUB_TOKEN || GITHUB_TOKEN.includes('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')) {
         console.error('❌ TOKEN NO CONFIGURADO');
         alert('❌ ERROR: El token de GitHub no está configurado.\n\nBusca en el código:\nconst GITHUB_TOKEN = "ghp_..."\n\nY reemplaza con tu token real.');
         return;
