@@ -434,7 +434,7 @@
 
     <script>
         // CONFIG GITHUB
-        const GITHUB_TOKEN = "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";
+        const GITHUB_TOKEN = "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";
         const GITHUB_USER = "calm291094-del";
         const GITHUB_REPO = "meditech-tienda";
         const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
@@ -800,6 +800,13 @@
 
 
 
+
+
+
+
+
+
+
 <script>
 // ============================================
 // 🔍 DIAGNÓSTICO DE GITHUB (TEMPORAL)
@@ -808,7 +815,7 @@ async function diagnosticarGitHub() {
     console.log('🔍 === INICIANDO DIAGNÓSTICO ===');
     
     // 1. Verificar token
-    if (!GITHUB_TOKEN || GITHUB_TOKEN.includes('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')) {
+    if (!GITHUB_TOKEN || GITHUB_TOKEN.includes('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')) {
         console.error('❌ TOKEN NO CONFIGURADO');
         alert('❌ ERROR: El token de GitHub no está configurado.\n\nBusca en el código:\nconst GITHUB_TOKEN = "ghp_..."\n\nY reemplaza con tu token real.');
         return;
@@ -885,6 +892,9 @@ if (!sessionStorage.getItem('diagnostico-ejecutado')) {
     }, 2000);
 }
 </script>
+
+
+
 
 
 </body>
