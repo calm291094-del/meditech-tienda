@@ -5,860 +5,451 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediTech | Medicamentos y Tecnología</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        h1, h2, h3, h4, h5, h6, .font-sora { font-family: 'Sora', sans-serif; }
-        
-        .bg-gradient-custom { background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%); }
-        .text-teal { color: #0d9488; }
-        .bg-teal { background-color: #0d9488; }
-        .border-teal { border-color: #0d9488; }
-        .hover-teal:hover { background-color: #0f766e; }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
-            transition: all 0.3s;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(13, 148, 136, 0.3);
-        }
-        
-        .card-hover {
-            transition: all 0.3s;
-        }
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        
-        .uz {
-            border: 2px dashed #d1d5db;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .uz:hover {
-            border-color: #0d9488;
-            background: #f0fdfa;
-        }
-        
-        .fi {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            transition: all 0.3s;
-        }
-        .fi:focus {
-            outline: none;
-            border-color: #0d9488;
-            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
-        }
-        
-        .fl {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 6px;
-        }
-        
-        .bt {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: none;
-        }
-        .btp {
-            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
-            color: white;
-        }
-        .btp:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(13, 148, 136, 0.3);
-        }
-        
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 24px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 500;
-            z-index: 1000;
-            animation: slideIn 0.3s ease-out;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .chat-icon {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4);
-            transition: all 0.3s;
-            z-index: 100;
-        }
-        .chat-icon:hover {
-            transform: scale(1.1);
-        }
-        
-        .chat-window {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            width: 380px;
-            height: 500px;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            display: none;
-            flex-direction: column;
-            z-index: 100;
-            overflow: hidden;
-        }
-        
-        .chat-header {
-            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
-            color: white;
-            padding: 20px;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #f9fafb;
-        }
-        
-        .chat-input-area {
-            padding: 15px;
-            background: white;
-            border-top: 1px solid #e5e7eb;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .msg-user {
-            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
-            color: white;
-            padding: 12px 16px;
-            border-radius: 16px 16px 4px 16px;
-            margin-bottom: 12px;
-            max-width: 80%;
-            margin-left: auto;
-        }
-        
-        .msg-bot {
-            background: white;
-            padding: 12px 16px;
-            border-radius: 16px 16px 16px 4px;
-            margin-bottom: 12px;
-            max-width: 80%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        
-        @media (max-width: 640px) {
-            .chat-window {
-                width: calc(100% - 40px);
-                right: 20px;
-            }
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .glass { background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); }
+        .hover-lift { transition: transform 0.2s, box-shadow 0.2s; }
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        #chatbot-window { transform-origin: bottom right; transition: all 0.3s ease; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 text-gray-800">
 
-<!-- HEADER -->
-<header class="bg-gradient-custom text-white shadow-lg">
-    <div class="container mx-auto px-4 py-6">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="font-sora text-3xl font-bold mb-1">💊 MediTech 💻</h1>
-                <p class="text-teal-100 text-sm">Medicamentos y Tecnología - Tu tienda en línea</p>
+    <!-- HEADER -->
+    <header class="sticky top-0 z-40 glass border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 rounded-full bg-teal-600 flex items-center justify-center text-white text-xl"><i class="fas fa-heartbeat"></i></div>
+                <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Medi<span class="text-teal-600">Tech</span></h1>
             </div>
+            <nav class="hidden md:flex gap-6 font-medium text-gray-600">
+                <a href="#" class="hover:text-teal-600 transition">Inicio</a>
+                <a href="#productos" class="hover:text-teal-600 transition">Productos</a>
+                <a href="#" class="hover:text-teal-600 transition">Ofertas</a>
+            </nav>
             <div class="flex items-center gap-4">
-                <button onclick="document.getElementById('cart-modal').style.display='flex'" class="relative bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full transition">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">0</span>
+                <button class="relative p-2 text-gray-600 hover:text-teal-600 transition">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">0</span>
                 </button>
             </div>
         </div>
-    </div>
-</header>
+    </header>
 
-<!-- CARRUSEL PRODUCTOS DESTACADOS -->
-<section class="container mx-auto px-4 py-8">
-    <h2 class="font-sora text-2xl font-bold text-gray-800 mb-6">🌟 Productos Destacados</h2>
-    <div id="featured-carousel" class="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
-        <p class="text-gray-500 text-center w-full">Cargando productos destacados...</p>
-    </div>
-</section>
-
-<!-- GRID DE PRODUCTOS -->
-<section class="container mx-auto px-4 py-8">
-    <h2 class="font-sora text-2xl font-bold text-gray-800 mb-6">📦 Todos los Productos</h2>
-    <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <p class="text-gray-500 text-center col-span-full">Cargando productos...</p>
-    </div>
-</section>
-
-<!-- MODAL CARRITO -->
-<div id="cart-modal" style="display:none" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="p-6 border-b flex justify-between items-center">
-            <h3 class="font-sora text-xl font-bold">🛒 Tu Carrito</h3>
-            <button onclick="document.getElementById('cart-modal').style.display='none'" class="text-gray-500 hover:text-gray-700">
-                <i class="fas fa-times text-xl"></i>
-            </button>
+    <!-- HERO -->
+    <section class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-16 px-4 text-center">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">Salud & Tecnología en un solo lugar</h2>
+            <p class="text-lg opacity-90 mb-8">Encuentra los mejores medicamentos y componentes de PC con envío rápido y precios competitivos.</p>
+            <a href="#productos" class="inline-block bg-white text-teal-600 font-bold px-8 py-3 rounded-full hover:bg-gray-100 transition shadow-lg">Ver Catálogo</a>
         </div>
-        <div id="cart-items" class="p-6"></div>
-        <div class="p-6 border-t bg-gray-50">
-            <div class="flex justify-between items-center mb-4">
-                <span class="font-semibold text-lg">Total:</span>
-                <span id="cart-total" class="font-bold text-2xl text-teal">$0.00</span>
+    </section>
+
+    <!-- PRODUCTOS -->
+    <section id="productos" class="max-w-7xl mx-auto px-4 py-16">
+        <div class="flex justify-between items-end mb-8">
+            <h3 class="text-3xl font-bold text-gray-900">🌟 Productos Destacados</h3>
+            <span class="text-sm text-gray-500" id="product-total-label">Cargando...</span>
+        </div>
+        <div id="portada-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Se llena dinámicamente -->
+            <p class="col-span-full text-center py-10 text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i> Sincronizando catálogo...</p>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-900 text-gray-300 py-10 mt-12">
+        <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-8 text-center md:text-left">
+            <div>
+                <h4 class="text-xl font-bold text-white mb-3">MediTech</h4>
+                <p class="text-sm opacity-70">Tu tienda confiable para medicamentos y hardware de última generación.</p>
             </div>
-            <button onclick="checkout()" class="bt btp w-full justify-center">
-                <i class="fas fa-credit-card"></i> Proceder al Pago
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- PANEL DE ADMINISTRACIÓN ROOT -->
-<div id="admin-panel" style="display:none" class="fixed inset-0 bg-black/85 z-50 overflow-y-auto p-4">
-    <div class="max-w-4xl mx-auto bg-white rounded-2xl p-8 relative">
-        <button onclick="document.getElementById('admin-panel').style.display='none'" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-red-500 text-white border-none cursor-pointer text-lg">
-            <i class="fas fa-times"></i>
-        </button>
-        <h2 class="font-sora text-2xl font-bold text-teal mb-6">
-            <i class="fas fa-cog"></i> Panel de Administración Root
-        </h2>
-        
-        <div class="mb-8">
-            <h3 class="text-lg font-semibold mb-4 text-gray-800">
-                <i class="fas fa-plus-circle"></i> Agregar Nuevo Producto
-            </h3>
-            <form id="product-form" onsubmit="saveProduct(event)" class="grid gap-4">
-                <div>
-                    <label class="fl">Nombre del Producto</label>
-                    <input type="text" id="prod-name" class="fi" required placeholder="Ej: Paracetamol 500mg">
+            <div>
+                <h5 class="font-semibold text-white mb-3">Enlaces</h5>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#" class="hover:text-teal-400">Política de Privacidad</a></li>
+                    <li><a href="#" class="hover:text-teal-400">Términos y Condiciones</a></li>
+                    <li><a href="#" class="hover:text-teal-400">Contacto</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="font-semibold text-white mb-3">Síguenos</h5>
+                <div class="flex justify-center md:justify-start gap-4 text-xl">
+                    <a href="#" class="hover:text-teal-400"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="hover:text-teal-400"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="hover:text-teal-400"><i class="fab fa-twitter"></i></a>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            </div>
+        </div>
+        <div class="text-center text-xs opacity-50 mt-8 pt-4 border-t border-gray-800">© <span id="year"></span> MediTech. Todos los derechos reservados.</div>
+    </footer>
+
+    <!-- BOTÓN ADMIN ROOT -->
+    <button onclick="toggleAdminPanel()" class="fixed top-20 right-5 z-30 w-12 h-12 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg flex items-center justify-center transition hover:scale-110" title="Panel Root">
+        <i class="fas fa-user-shield"></i>
+    </button>
+
+    <!-- PANEL DE ADMINISTRACIÓN -->
+    <div id="admin-panel" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden overflow-y-auto p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full mx-auto mt-10 shadow-2xl overflow-hidden fade-in">
+            <div class="bg-teal-600 p-4 flex justify-between items-center text-white">
+                <h2 class="text-xl font-bold"><i class="fas fa-cog mr-2"></i>Panel de Administración Root</h2>
+                <button onclick="toggleAdminPanel()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-6">
+                <form id="product-form" class="space-y-4" onsubmit="saveProduct(event)">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                            <input type="text" id="prod-name" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="Ej: Paracetamol 500mg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                            <select id="prod-category" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none">
+                                <option value="medicamento">💊 Medicamento</option>
+                                <option value="tecnologia">💻 Tecnología / PC</option>
+                                <option value="salud">🩺 Salud / Bienestar</option>
+                                <option value="gaming">🎮 Gaming</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
+                            <input type="number" id="prod-price" required step="0.01" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                            <input type="number" id="prod-stock" required min="0" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="0">
+                        </div>
+                    </div>
                     <div>
-                        <label class="fl">Categoría</label>
-                        <select id="prod-category" class="fi">
-                            <option value="medicamento">💊 Medicamento</option>
-                            <option value="pc">💻 Tecnología / PC</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                        <textarea id="prod-desc" required rows="3" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="¿Para qué sirve o características técnicas?"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">📸 Imagen del Producto</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center relative hover:bg-gray-50 transition">
+                            <input type="file" id="prod-image" accept="image/*" capture="environment" onchange="previewImage(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <div id="upload-placeholder" class="pointer-events-none">
+                                <i class="fas fa-cloud-upload-alt text-2xl text-teal-500 mb-2"></i>
+                                <p class="text-sm text-gray-500">Haz clic o arrastra una imagen (PC/Móvil)</p>
+                            </div>
+                            <img id="image-preview" class="hidden mx-auto max-h-32 rounded-lg shadow-sm" alt="Preview">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">🖼️ O selecciona una foto ya subida</label>
+                        <select id="image-selector" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none bg-gray-50" onchange="onSelectExistingImage()">
+                            <option value="">-- Ninguna --</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="fl">Precio</label>
-                        <input type="number" id="prod-price" class="fi" required placeholder="0.00" step="0.01">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="prod-feat" class="w-4 h-4 text-teal-600 rounded">
+                        <label for="prod-feat" class="text-sm text-gray-700">Marcar como destacado</label>
                     </div>
-                </div>
+                    <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-2">
+                        <i class="fas fa-save"></i> Guardar y Sincronizar
+                    </button>
+                </form>
+
+                <hr class="border-gray-200">
                 <div>
-                    <label class="fl">Descripción</label>
-                    <textarea id="prod-desc" class="fi" required placeholder="Descripción del producto..." rows="3"></textarea>
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><i class="fas fa-box"></i> Inventario (<span id="admin-count">0</span>)</h3>
+                    <div id="admin-list" class="space-y-3 max-h-60 overflow-y-auto pr-2 scrollbar-hide"></div>
                 </div>
-                <div>
-                    <label class="fl">Stock</label>
-                    <input type="number" id="prod-stock" class="fi" required placeholder="0" min="0">
-                </div>
-                <div>
-                    <label class="fl">📸 Subir Foto (PC o Móvil)</label>
-                    <div class="uz mt-2">
-                        <input type="file" id="prod-image" accept="image/*" capture="environment" onchange="previewImage(event)" class="hidden">
-                        <div id="upload-placeholder" onclick="document.getElementById('prod-image').click()">
-                            <i class="fas fa-cloud-upload-alt text-4xl text-teal mb-2"></i>
-                            <p class="text-gray-500 text-sm">Haz clic para seleccionar una imagen</p>
-                        </div>
-                        <img id="image-preview" style="display:none" class="max-w-[200px] mx-auto mt-4 rounded-lg" alt="Vista previa">
-                    </div>
-                </div>
-                <div>
-                    <label class="fl">🖼️ O selecciona una foto ya subida</label>
-                    <select id="image-selector" class="fi mt-2" onchange="onSelectExistingImage()">
-                        <option value="">-- Selecciona una foto existente --</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="prod-feat" class="w-5 h-5 cursor-pointer">
-                        <span class="fl mb-0 cursor-pointer">Producto destacado</span>
-                    </label>
-                </div>
-                <button type="submit" class="bt btp w-full justify-center">
-                    <i class="fas fa-save"></i> Guardar Producto
-                </button>
-            </form>
-        </div>
-        
-        <div>
-            <h3 class="text-lg font-semibold mb-4 text-gray-800">
-                <i class="fas fa-list"></i> Productos Actuales (<span id="product-count">0</span>)
-            </h3>
-            <div id="product-list" class="grid gap-3"></div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- BOTÓN ROOT ADMIN -->
-<button onclick="toggleAdminPanel()" class="fixed top-24 right-4 z-40 w-14 h-14 rounded-full bg-red-500 text-white border-none cursor-pointer shadow-lg flex items-center justify-center text-xl hover:bg-red-600 transition" title="Panel Admin">
-    <i class="fas fa-user-shield"></i>
-</button>
-
-<!-- CHATBOT -->
-<div class="chat-icon" onclick="toggleChat()">
-    <i class="fas fa-comment-dots"></i>
-</div>
-
-<div class="chat-window" id="chat-window">
-    <div class="chat-header">
-        <span>🤖 Asistente MediTech</span>
-        <span onclick="toggleChat()" class="cursor-pointer text-xl">✖</span>
-    </div>
-    <div class="chat-messages" id="chat-messages">
-        <div class="msg-bot">
-            ¡Hola! 👋 Soy el asistente de MediTech. Pregúntame sobre <b>medicamentos</b> o <b>piezas de PC</b>.
+    <!-- CHATBOT -->
+    <div id="chatbot-container" class="fixed bottom-5 right-5 z-40">
+        <div id="chatbot-window" class="hidden w-80 sm:w-96 bg-white rounded-2xl shadow-2xl overflow-hidden mb-4 origin-bottom-right">
+            <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-3 text-white flex justify-between items-center">
+                <span class="font-bold flex items-center gap-2"><i class="fas fa-robot"></i> Asistente MediTech</span>
+                <button onclick="toggleChat()" class="hover:bg-white/20 rounded-full w-7 h-7 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="chat-messages" class="h-72 p-4 overflow-y-auto bg-gray-50 space-y-3 text-sm">
+                <div class="bg-white p-3 rounded-xl rounded-tl-none shadow-sm max-w-[85%] border border-gray-100">
+                    ¡Hola! 👋 Soy el asistente de MediTech. Pregúntame sobre <b>medicamentos</b>, <b>piezas de PC</b> o <b>estado de tu pedido</b>.
+                </div>
+            </div>
+            <div class="p-3 bg-white border-t border-gray-100 flex gap-2">
+                <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." class="flex-1 px-4 py-2 border rounded-full text-sm outline-none focus:ring-2 focus:ring-teal-500" onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()" class="w-10 h-10 bg-teal-600 hover:bg-teal-700 text-white rounded-full flex items-center justify-center transition"><i class="fas fa-paper-plane"></i></button>
+            </div>
         </div>
-    </div>
-    <div class="chat-input-area">
-        <input type="text" id="chat-input" class="fi" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter') sendMessage()">
-        <button onclick="sendMessage()" class="w-10 h-10 rounded-full bg-teal text-white border-none cursor-pointer">
-            <i class="fas fa-paper-plane"></i>
+        <button onclick="toggleChat()" class="w-14 h-14 bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-lg flex items-center justify-center text-2xl transition hover:scale-105">
+            <i class="fas fa-comment-dots"></i>
         </button>
     </div>
-</div>
 
-<script>
-// === CONFIGURACIÓN GITHUB API ===
-const GITHUB_TOKEN = "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";
-const GITHUB_USER = "calm291094-del";
-const GITHUB_REPO = "meditech-tienda";
-const API_BASE = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
-const GITHUB_HEADERS = {
-    "Authorization": `token ${GITHUB_TOKEN}`,
-    "Accept": "application/vnd.github.v3+json"
-};
+    <!-- SCRIPTS -->
+    <script>
+        // ⚠️ CONFIGURACIÓN GITHUB (PEGA TU TOKEN AQUÍ)
+        const GITHUB_TOKEN = "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";
+        const GITHUB_USER = "calm291094-del";
+        const GITHUB_REPO = "meditech-tienda";
+        const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
+        const HEADERS = { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" };
 
-// === DATOS INICIALES ===
-const DP = [
-    {id:'p1',name:'Paracetamol 500mg',price:5.99,image:'https://via.placeholder.com/300x300/0d9488/ffffff?text=Paracetamol',category:'medicamento',desc:'Analgésico y antipirético para dolores leves y fiebre',stock:100,feat:true},
-    {id:'p2',name:'Ibuprofeno 400mg',price:7.50,image:'https://via.placeholder.com/300x300/14b8a6/ffffff?text=Ibuprofeno',category:'medicamento',desc:'Antiinflamatorio para dolor e inflamación',stock:80,feat:true},
-    {id:'p3',name:'RTX 4090',price:1599.99,image:'https://via.placeholder.com/300x300/f97316/ffffff?text=RTX+4090',category:'pc',desc:'Tarjeta gráfica de alto rendimiento para gaming y diseño',stock:10,feat:true},
-    {id:'p4',name:'RAM 16GB DDR5',price:89.99,image:'https://via.placeholder.com/300x300/fb923c/ffffff?text=RAM+16GB',category:'pc',desc:'Memoria RAM de alta velocidad para tu PC',stock:50,feat:false}
-];
+        // Estado global
+        let S = { pr: [], cr: [], us: [], or: [], ca: [], au: [], u: null, cart: 0 };
+        const DP = []; // Productos por defecto (vacío, se carga desde GitHub)
 
-const DC = [
-    {id:'c1',name:'Medicamentos',icon:'💊'},
-    {id:'c2',name:'Tecnología',icon:'💻'}
-];
+        // === FUNCIONES GITHUB ===
+        async function fetchGitHub(path) {
+            const res = await fetch(`${API}/contents/${path}`, { headers: HEADERS });
+            return res.ok ? res.json() : null;
+        }
 
-// === ESTADO DE LA APP ===
-const S = {
-    pr: [], // productos
-    cr: [], // carrito
-    us: [], // usuarios
-    or: [], // órdenes
-    ca: [], // categorías
-    au: [], // auth
-    u: null, // usuario actual
-    cart: []
-};
+        async function cargarProductos() {
+            const file = await fetchGitHub('productos.json');
+            if (file) {
+                const data = JSON.parse(atob(file.content));
+                S.pr = data.productos || [];
+            } else {
+                S.pr = [];
+            }
+            renderProducts();
+            renderAdminList();
+            updateUI();
+        }
 
-// === FUNCIONES GITHUB ===
-async function cargarProductosDesdeGitHub() {
-    try {
-        const response = await fetch(`${API_BASE}/contents/productos.json`, {
-            headers: GITHUB_HEADERS
-        });
-        if (!response.ok) return null;
-        const data = await response.json();
-        const contenido = atob(data.content);
-        const json = JSON.parse(contenido);
-        return json.productos || [];
-    } catch (error) {
-        console.error("Error al cargar desde GitHub:", error);
-        return null;
-    }
-}
-
-async function guardarProductosEnGitHub(productos) {
-    try {
-        const fileResponse = await fetch(`${API_BASE}/contents/productos.json`, {
-            headers: GITHUB_HEADERS
-        });
-        const fileData = await fileResponse.json();
-        
-        await fetch(`${API_BASE}/contents/productos.json`, {
-            method: "PUT",
-            headers: GITHUB_HEADERS,
-            body: JSON.stringify({
-                message: `Actualizar productos - ${new Date().toLocaleString()}`,
-                content: btoa(JSON.stringify({ productos: productos }, null, 2)),
-                sha: fileData.sha
-            })
-        });
-        return true;
-    } catch (error) {
-        console.error("Error al guardar en GitHub:", error);
-        return false;
-    }
-}
-
-async function subirImagenAGitHub(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = async function(e) {
-            const base64 = e.target.result.split(',')[1];
-            const nombreLimpio = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-            const ruta = `imagenes/${Date.now()}_${nombreLimpio}`;
-            
+        async function guardarProductos() {
             try {
-                const response = await fetch(`${API_BASE}/contents/${ruta}`, {
+                const file = await fetchGitHub('productos.json');
+                const sha = file ? file.sha : null;
+                await fetch(`${API}/contents/productos.json`, {
                     method: "PUT",
-                    headers: GITHUB_HEADERS,
+                    headers: HEADERS,
                     body: JSON.stringify({
-                        message: `Subir imagen: ${file.name}`,
-                        content: base64
+                        message: `Sync productos ${new Date().toISOString()}`,
+                        content: btoa(JSON.stringify({ productos: S.pr }, null, 2)),
+                        sha: sha
                     })
                 });
-                if (!response.ok) throw new Error("Error al subir imagen");
-                const data = await response.json();
-                resolve(data.content.download_url);
-            } catch (error) {
-                reject(error);
-            }
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-async function cargarImagenesDisponibles() {
-    try {
-        const response = await fetch(`${API_BASE}/contents/imagenes`, {
-            headers: GITHUB_HEADERS
-        });
-        if (!response.ok) return [];
-        const archivos = await response.json();
-        return archivos
-            .filter(f => /\.(jpg|jpeg|png|webp|gif)$/i.test(f.name))
-            .map(f => ({ nombre: f.name, url: f.download_url }));
-    } catch (error) {
-        console.log("Carpeta imagenes/ vacía o no existe");
-        return [];
-    }
-}
-
-// === FUNCIONES DE STORAGE ===
-function ld() {
-    cargarProductosDesdeGitHub().then(productosGitHub => {
-        if (productosGitHub && productosGitHub.length > 0) {
-            S.pr = productosGitHub;
-        } else {
-            try {
-                S.pr = JSON.parse(localStorage.getItem('mp')) || [...DP];
-                if (!Array.isArray(S.pr)) S.pr = [...DP];
+                showNotif("✅ Sincronizado con GitHub", "success");
             } catch (e) {
-                S.pr = [...DP];
+                showNotif("❌ Error al sincronizar. Verifica el token.", "error");
             }
         }
-        renderApp();
-    });
-    
-    try { S.cr = JSON.parse(localStorage.getItem('mc')) || [...DC]; if (!Array.isArray(S.cr)) S.cr = [...DC]; } catch (e) { S.cr = [...DC]; }
-    try { S.us = JSON.parse(localStorage.getItem('mu')) || []; if (!Array.isArray(S.us)) S.us = []; } catch (e) { S.us = []; }
-    try { S.or = JSON.parse(localStorage.getItem('mo')) || []; if (!Array.isArray(S.or)) S.or = []; } catch (e) { S.or = []; }
-    try { S.ca = JSON.parse(localStorage.getItem('mk')) || []; if (!Array.isArray(S.ca)) S.ca = []; } catch (e) { S.ca = []; }
-    try { S.au = JSON.parse(localStorage.getItem('ma')) || []; if (!Array.isArray(S.au)) S.au = []; } catch (e) { S.au = []; }
-    try { const s = localStorage.getItem('ms'); if (s) { const u = S.us.find(x => x.id === s); if (u) S.u = u; } } catch (e) { S.u = null; }
-}
 
-function sv(k, v) {
-    const m = { cr: 'mc', pr: 'mp', us: 'mu', or: 'mo', ca: 'mk', au: 'ma', session: 'ms' };
-    if (m[k]) {
-        try { localStorage.setItem(m[k], JSON.stringify(v)); } catch (e) { console.warn('Storage lleno'); }
-        
-        if (k === 'pr') {
-            guardarProductosEnGitHub(v).then(success => {
-                if (success) console.log('Productos sincronizados con GitHub');
+        async function subirImagen(file) {
+            return new Promise((res, rej) => {
+                const r = new FileReader();
+                r.onload = async e => {
+                    const b64 = e.target.result.split(',')[1];
+                    const name = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                    const path = `imagenes/${Date.now()}_${name}`;
+                    try {
+                        const r2 = await fetch(`${API}/contents/${path}`, {
+                            method: "PUT", headers: HEADERS,
+                            body: JSON.stringify({ message: `Upload ${name}`, content: b64 })
+                        });
+                        const d = await r2.json();
+                        res(d.content.download_url);
+                    } catch(err) { rej(err); }
+                };
+                r.readAsDataURL(file);
             });
         }
-    }
-}
 
-// === TOAST ===
-function tt(msg, type = 's') {
-    const colors = { s: '#10b981', e: '#ef4444', i: '#3b82f6', w: '#f59e0b' };
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.style.background = colors[type];
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
-}
-
-// === RENDER APP ===
-function renderApp() {
-    renderFeatured();
-    renderProducts();
-    updateCartCount();
-}
-
-function renderFeatured() {
-    const container = document.getElementById('featured-carousel');
-    const featured = S.pr.filter(p => p.feat);
-    
-    if (featured.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 text-center w-full">No hay productos destacados</p>';
-        return;
-    }
-    
-    container.innerHTML = featured.map(p => `
-        <div class="flex-shrink-0 w-72 snap-start card-hover bg-white rounded-2xl overflow-hidden shadow-md">
-            <img src="${p.image}" alt="${p.name}" class="w-full h-48 object-cover">
-            <div class="p-4">
-                <span class="inline-block px-3 py-1 bg-teal/10 text-teal text-xs font-semibold rounded-full mb-2">
-                    ${p.category === 'medicamento' ? '💊' : '💻'} ${p.category}
-                </span>
-                <h3 class="font-sora font-bold text-lg mb-1">${p.name}</h3>
-                <p class="text-gray-600 text-sm mb-3">${p.desc}</p>
-                <div class="flex justify-between items-center">
-                    <span class="text-2xl font-bold text-teal">$${p.price.toFixed(2)}</span>
-                    <button onclick="addToCart('${p.id}')" class="bt btp text-sm px-4 py-2">
-                        <i class="fas fa-cart-plus"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function renderProducts() {
-    const container = document.getElementById('products-grid');
-    
-    if (S.pr.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 text-center col-span-full">No hay productos disponibles</p>';
-        return;
-    }
-    
-    container.innerHTML = S.pr.map(p => `
-        <div class="card-hover bg-white rounded-2xl overflow-hidden shadow-md">
-            <img src="${p.image}" alt="${p.name}" class="w-full h-48 object-cover">
-            <div class="p-4">
-                <span class="inline-block px-3 py-1 bg-teal/10 text-teal text-xs font-semibold rounded-full mb-2">
-                    ${p.category === 'medicamento' ? '💊' : '💻'} ${p.category}
-                </span>
-                <h3 class="font-sora font-bold text-lg mb-1">${p.name}</h3>
-                <p class="text-gray-600 text-sm mb-3">${p.desc}</p>
-                <div class="flex justify-between items-center">
-                    <span class="text-2xl font-bold text-teal">$${p.price.toFixed(2)}</span>
-                    <button onclick="addToCart('${p.id}')" class="bt btp text-sm px-4 py-2">
-                        <i class="fas fa-cart-plus"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-// === CARRITO ===
-function addToCart(id) {
-    const product = S.pr.find(p => p.id === id);
-    if (!product) return;
-    
-    const existing = S.cart.find(item => item.id === id);
-    if (existing) {
-        existing.qty++;
-    } else {
-        S.cart.push({ ...product, qty: 1 });
-    }
-    
-    updateCartCount();
-    tt('Producto agregado al carrito', 's');
-}
-
-function updateCartCount() {
-    const count = S.cart.reduce((sum, item) => sum + item.qty, 0);
-    document.getElementById('cart-count').textContent = count;
-    renderCart();
-}
-
-function renderCart() {
-    const container = document.getElementById('cart-items');
-    
-    if (S.cart.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 text-center py-8">Tu carrito está vacío</p>';
-        document.getElementById('cart-total').textContent = '$0.00';
-        return;
-    }
-    
-    container.innerHTML = S.cart.map(item => `
-        <div class="flex gap-4 items-center mb-4 pb-4 border-b">
-            <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded-lg">
-            <div class="flex-1">
-                <h4 class="font-semibold">${item.name}</h4>
-                <p class="text-teal font-bold">$${item.price.toFixed(2)}</p>
-                <div class="flex items-center gap-2 mt-2">
-                    <button onclick="updateCartQty('${item.id}', -1)" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300">-</button>
-                    <span class="font-semibold">${item.qty}</span>
-                    <button onclick="updateCartQty('${item.id}', 1)" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300">+</button>
-                </div>
-            </div>
-            <button onclick="removeFromCart('${item.id}')" class="text-red-500 hover:text-red-700">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-    `).join('');
-    
-    const total = S.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    document.getElementById('cart-total').textContent = `$${total.toFixed(2)}`;
-}
-
-function updateCartQty(id, delta) {
-    const item = S.cart.find(i => i.id === id);
-    if (!item) return;
-    
-    item.qty += delta;
-    if (item.qty <= 0) {
-        S.cart = S.cart.filter(i => i.id !== id);
-    }
-    
-    updateCartCount();
-}
-
-function removeFromCart(id) {
-    S.cart = S.cart.filter(i => i.id !== id);
-    updateCartCount();
-}
-
-function checkout() {
-    if (S.cart.length === 0) {
-        tt('Tu carrito está vacío', 'w');
-        return;
-    }
-    tt('Funcionalidad de pago próximamente', 'i');
-}
-
-// === PANEL ADMIN ===
-function toggleAdminPanel() {
-    const panel = document.getElementById('admin-panel');
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    if (panel.style.display === 'block') {
-        cargarImagenesDisponibles().then(imagenes => {
-            const selector = document.getElementById('image-selector');
-            selector.innerHTML = '<option value="">-- Selecciona una foto existente --</option>';
-            imagenes.forEach(img => {
-                selector.innerHTML += `<option value="${img.url}">${img.nombre}</option>`;
-            });
-        });
-        renderAdminProducts();
-    }
-}
-
-function previewImage(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const preview = document.getElementById('image-preview');
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-        document.getElementById('upload-placeholder').style.display = 'none';
-        document.getElementById('image-selector').value = "";
-    }
-    reader.readAsDataURL(file);
-}
-
-function onSelectExistingImage() {
-    const selector = document.getElementById('image-selector');
-    const preview = document.getElementById('image-preview');
-    if (selector.value) {
-        preview.src = selector.value;
-        preview.style.display = 'block';
-        document.getElementById('upload-placeholder').style.display = 'none';
-        document.getElementById('prod-image').value = '';
-    }
-}
-
-async function saveProduct(event) {
-    event.preventDefault();
-    
-    const name = document.getElementById('prod-name').value;
-    const category = document.getElementById('prod-category').value;
-    const price = parseFloat(document.getElementById('prod-price').value);
-    const desc = document.getElementById('prod-desc').value;
-    const stock = parseInt(document.getElementById('prod-stock').value);
-    const feat = document.getElementById('prod-feat').checked;
-    const fileInput = document.getElementById('prod-image');
-    const selector = document.getElementById('image-selector');
-    
-    let imageUrl = "";
-    
-    if (fileInput.files[0]) {
-        tt('Subiendo imagen a GitHub...', 'i');
-        try {
-            imageUrl = await subirImagenAGitHub(fileInput.files[0]);
-        } catch (error) {
-            tt('Error al subir imagen: ' + error.message, 'e');
-            return;
-        }
-    } else if (selector.value) {
-        imageUrl = selector.value;
-    } else {
-        tt('Sube una foto nueva o selecciona una existente', 'e');
-        return;
-    }
-    
-    const newProduct = {
-        id: 'p' + Date.now(),
-        name: name,
-        price: price,
-        image: imageUrl,
-        category: category,
-        desc: desc,
-        stock: stock,
-        feat: feat
-    };
-    
-    S.pr.push(newProduct);
-    sv('pr', S.pr);
-    
-    tt('✅ Producto agregado y sincronizado con GitHub', 's');
-    document.getElementById('product-form').reset();
-    document.getElementById('image-preview').style.display = 'none';
-    document.getElementById('upload-placeholder').style.display = 'block';
-    renderAdminProducts();
-    renderApp();
-}
-
-function deleteProduct(id) {
-    if (!confirm('¿Eliminar este producto?')) return;
-    S.pr = S.pr.filter(p => p.id !== id);
-    sv('pr', S.pr);
-    tt('Producto eliminado', 's');
-    renderAdminProducts();
-    renderApp();
-}
-
-function renderAdminProducts() {
-    const list = document.getElementById('product-list');
-    const count = document.getElementById('product-count');
-    
-    if (!list || !count) return;
-    
-    count.textContent = S.pr.length;
-    list.innerHTML = '';
-    
-    if (S.pr.length === 0) {
-        list.innerHTML = '<p class="text-gray-500 text-center py-4">No hay productos aún</p>';
-        return;
-    }
-    
-    list.innerHTML = S.pr.map(p => `
-        <div class="flex gap-4 items-center p-4 border border-gray-200 rounded-xl bg-gray-50">
-            <img src="${p.image}" alt="${p.name}" class="w-20 h-20 object-cover rounded-lg">
-            <div class="flex-1">
-                <h4 class="font-semibold">${p.name}</h4>
-                <p class="text-sm text-gray-600 mb-1">${p.category === 'medicamento' ? '💊' : '💻'} ${p.category}</p>
-                <p class="text-teal font-bold">$${p.price.toFixed(2)}</p>
-                <p class="text-xs text-gray-500">Stock: ${p.stock}</p>
-            </div>
-            <button onclick="deleteProduct('${p.id}')" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
-                <i class="fas fa-trash"></i> Eliminar
-            </button>
-        </div>
-    `).join('');
-}
-
-// === CHATBOT ===
-const knowledgeBase = {
-    "paracetamol": "El Paracetamol es un analgésico y antipirético. Sirve para aliviar dolores leves (cabeza, muscular) y bajar la fiebre. Dosis común: 500mg cada 6-8 horas.",
-    "ibuprofeno": "El Ibuprofeno es un antiinflamatorio no esteroideo (AINE). Sirve para reducir inflamación, dolor y fiebre. No usar con estómago vacío.",
-    "aspirina": "La Aspirina (ácido acetilsalicílico) es analgésico, antipirético y antiagregante plaquetario. No dar a niños por riesgo de Síndrome de Reye.",
-    "amoxicilina": "La Amoxicilina es un antibiótico penicilina. Sirve para infecciones bacterianas. Requiere receta médica y completar el tratamiento.",
-    "ram": "La memoria RAM (Random Access Memory) es la memoria de corto plazo de la PC. Donde se cargan los programas en ejecución. Más RAM = más programas abiertos a la vez.",
-    "gpu": "La GPU (Tarjeta Gráfica) procesa y renderiza imágenes, video y gráficos. Esencial para gaming, diseño 3D y edición de video. Ejemplos: NVIDIA RTX, AMD Radeon.",
-    "cpu": "El CPU (Procesador) es el cerebro de la computadora. Ejecuta las instrucciones de los programas. Ejemplos: Intel Core i7, AMD Ryzen 7.",
-    "ssd": "Un SSD (Unidad de Estado Sólido) es almacenamiento rápido sin partes móviles. Tu PC prende y carga programas en segundos. Muy superior al HDD.",
-    "hdd": "Un HDD (Disco Duro Mecánico) es almacenamiento tradicional. Más lento que SSD pero más barato para grandes capacidades.",
-    "motherboard": "La Motherboard (Placa Madre) conecta todos los componentes: CPU, RAM, GPU, almacenamiento. Define qué piezas son compatibles.",
-    "fuente": "La Fuente de Poder (PSU) suministra energía a todos los componentes. Se mide en watts (ej: 650W, 850W). Busca certificación 80 Plus.",
-    "monitor": "El Monitor muestra la imagen. Características clave: resolución (1080p, 1440p, 4K), tasa de refresco (60Hz, 144Hz) y panel (IPS, VA, TN).",
-    "teclado": "El teclado puede ser mecánico (más duradero, respuesta táctil) o membrana (más silencioso, económico). Los switches Cherry MX son los más populares.",
-    "mouse": "El mouse gamer tiene DPI ajustable, botones programables y diseño ergonómico. Los inalámbricos modernos tienen latencia casi nula.",
-    "refrigeracion": "La refrigeración mantiene el CPU/GPU a temperatura segura. Tipos: aire (disipador + ventilador) o líquida (más eficiente, más cara).",
-    "default": "No tengo información específica sobre eso en mi base de conocimientos local. Como administrador, puedes conectar este chat a una API de IA (como Google Gemini) para respuestas más completas."
-};
-
-function toggleChat() {
-    const chatWindow = document.getElementById('chat-window');
-    chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
-}
-
-function sendMessage() {
-    const input = document.getElementById('chat-input');
-    const messages = document.getElementById('chat-messages');
-    const text = input.value.trim();
-    if (!text) return;
-
-    messages.innerHTML += `<div class="msg-user">${text}</div>`;
-    input.value = '';
-
-    setTimeout(() => {
-        let response = knowledgeBase["default"];
-        const lowerText = text.toLowerCase();
-        
-        for (let key in knowledgeBase) {
-            if (lowerText.includes(key)) {
-                response = knowledgeBase[key];
-                break;
+        async function cargarImagenesExistentes() {
+            const files = await fetchGitHub('imagenes');
+            const sel = document.getElementById('image-selector');
+            sel.innerHTML = '<option value="">-- Ninguna --</option>';
+            if (files && Array.isArray(files)) {
+                files.filter(f => /\.(jpg|jpeg|png|webp|gif)$/i.test(f.name))
+                     .forEach(f => {
+                         sel.innerHTML += `<option value="${f.download_url}">${f.name}</option>`;
+                     });
             }
         }
-        
-        const foundProduct = S.pr.find(p => lowerText.includes(p.name.toLowerCase()));
-        if (foundProduct && response === knowledgeBase["default"]) {
-            response = `Sobre <b>${foundProduct.name}</b> (${foundProduct.category}): ${foundProduct.desc}`;
+
+        // === UI & RENDER ===
+        function renderProducts() {
+            const grid = document.getElementById('portada-productos');
+            if (S.pr.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-center py-10 text-gray-400">Aún no hay productos. El administrador debe agregarlos desde el panel 🔒.</p>`;
+                return;
+            }
+            grid.innerHTML = S.pr.map(p => `
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover-lift fade-in">
+                    <div class="h-48 overflow-hidden bg-gray-100 relative group">
+                        <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
+                        ${p.feat ? '<span class="absolute top-2 left-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full">⭐ Destacado</span>' : ''}
+                        <span class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-lg backdrop-blur-sm">${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : '📦'} ${p.category}</span>
+                    </div>
+                    <div class="p-4">
+                        <h4 class="font-bold text-gray-800 truncate">${p.name}</h4>
+                        <p class="text-xs text-gray-500 mt-1 line-clamp-2 h-8">${p.desc}</p>
+                        <div class="flex justify-between items-center mt-3">
+                            <span class="text-lg font-bold text-teal-600">$${parseFloat(p.price).toFixed(2)}</span>
+                            <button onclick="addToCart('${p.id}')" class="bg-gray-900 hover:bg-teal-600 text-white w-9 h-9 rounded-full flex items-center justify-center transition">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('product-total-label').textContent = `${S.pr.length} productos`;
         }
 
-        messages.innerHTML += `<div class="msg-bot">${response}</div>`;
-        messages.scrollTop = messages.scrollHeight;
-    }, 600);
-    
-    messages.scrollTop = messages.scrollHeight;
-}
+        function renderAdminList() {
+            const list = document.getElementById('admin-list');
+            document.getElementById('admin-count').textContent = S.pr.length;
+            if (!list) return;
+            if (S.pr.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-400 py-4">Sin productos</p>';
+                return;
+            }
+            list.innerHTML = S.pr.map(p => `
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <img src="${p.image}" class="w-12 h-12 object-cover rounded-md bg-white">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-semibold text-sm truncate">${p.name}</p>
+                        <p class="text-xs text-gray-500">$${p.price} | Stock: ${p.stock}</p>
+                    </div>
+                    <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded transition"><i class="fas fa-trash"></i></button>
+                </div>
+            `).join('');
+        }
 
-// === INICIALIZAR ===
-ld();
-</script>
+        function updateUI() {
+            document.getElementById('cart-count').textContent = S.cart;
+        }
 
+        // === ADMIN FUNCTIONS ===
+        function toggleAdminPanel() {
+            const p = document.getElementById('admin-panel');
+            p.classList.toggle('hidden');
+            if (!p.classList.contains('hidden')) cargarImagenesExistentes();
+        }
+
+        function previewImage(e) {
+            const f = e.target.files[0];
+            if (!f) return;
+            const r = new FileReader();
+            r.onload = ev => {
+                document.getElementById('image-preview').src = ev.target.result;
+                document.getElementById('image-preview').classList.remove('hidden');
+                document.getElementById('upload-placeholder').classList.add('hidden');
+                document.getElementById('image-selector').value = "";
+            };
+            r.readAsDataURL(f);
+        }
+
+        function onSelectExistingImage() {
+            const val = document.getElementById('image-selector').value;
+            const prev = document.getElementById('image-preview');
+            if (val) {
+                prev.src = val;
+                prev.classList.remove('hidden');
+                document.getElementById('upload-placeholder').classList.add('hidden');
+                document.getElementById('prod-image').value = "";
+            }
+        }
+
+        async function saveProduct(e) {
+            e.preventDefault();
+            const name = document.getElementById('prod-name').value;
+            const cat = document.getElementById('prod-category').value;
+            const price = document.getElementById('prod-price').value;
+            const desc = document.getElementById('prod-desc').value;
+            const stock = document.getElementById('prod-stock').value;
+            const feat = document.getElementById('prod-feat').checked;
+            const file = document.getElementById('prod-image').files[0];
+            const sel = document.getElementById('image-selector').value;
+
+            let img = "";
+            if (file) {
+                showNotif("📤 Subiendo imagen...", "info");
+                img = await subirImagen(file);
+            } else if (sel) {
+                img = sel;
+            } else {
+                showNotif("⚠️ Selecciona o sube una imagen", "warning");
+                return;
+            }
+
+            S.pr.push({ id: 'p'+Date.now(), name, category: cat, price: parseFloat(price), desc, stock: parseInt(stock), image: img, feat });
+            renderProducts();
+            renderAdminList();
+            await guardarProductos();
+            
+            e.target.reset();
+            document.getElementById('image-preview').classList.add('hidden');
+            document.getElementById('upload-placeholder').classList.remove('hidden');
+        }
+
+        function deleteProduct(id) {
+            if (!confirm("¿Eliminar este producto?")) return;
+            S.pr = S.pr.filter(p => p.id !== id);
+            renderProducts();
+            renderAdminList();
+            guardarProductos();
+        }
+
+        // === CHATBOT ===
+        const KB = {
+            "paracetamol": "Analgesico y antipiretico. Sirve para dolor leve y fiebre.",
+            "ibuprofeno": "Antiinflamatorio no esteroideo. Reduce dolor, inflamacion y fiebre.",
+            "ram": "Memoria de acceso aleatorio. Determina cuantos programas puedes ejecutar simultaneamente.",
+            "gpu": "Tarjeta grafica. Procesa imagenes y video. Clave para gaming y diseño.",
+            "cpu": "Procesador. Cerebro del PC. Ejecuta instrucciones y calculos.",
+            "ssd": "Almacenamiento solido. Mucho mas rapido que un disco duro mecanico.",
+            "default": "No tengo info exacta. Consulta el catalogo o contacta soporte medico/tecnico."
+        };
+
+        function toggleChat() {
+            document.getElementById('chatbot-window').classList.toggle('hidden');
+        }
+
+        function sendMessage() {
+            const inp = document.getElementById('chat-input');
+            const msgs = document.getElementById('chat-messages');
+            const txt = inp.value.trim();
+            if (!txt) return;
+            
+            msgs.innerHTML += `<div class="bg-teal-600 text-white p-3 rounded-xl rounded-tr-none max-w-[85%] ml-auto fade-in">${txt}</div>`;
+            inp.value = '';
+
+            setTimeout(() => {
+                let res = KB["default"];
+                const low = txt.toLowerCase();
+                for (let k in KB) if (low.includes(k)) { res = KB[k]; break; }
+                const prod = S.pr.find(p => low.includes(p.name.toLowerCase()));
+                if (prod && res === KB["default"]) res = `Sobre <b>${prod.name}</b>: ${prod.desc}`;
+                
+                msgs.innerHTML += `<div class="bg-white p-3 rounded-xl rounded-tl-none max-w-[85%] shadow-sm border border-gray-100 fade-in">${res}</div>`;
+                msgs.scrollTop = msgs.scrollHeight;
+            }, 600);
+        }
+
+        function addToCart(id) {
+            S.cart++;
+            updateUI();
+            showNotif("➕ Agregado al carrito", "success");
+        }
+
+        function showNotif(msg, type) {
+            const n = document.createElement('div');
+            n.className = `fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-sm font-medium shadow-lg fade-in ${type==='success'?'bg-green-100 text-green-800 border border-green-200':type==='error'?'bg-red-100 text-red-800 border border-red-200':'bg-blue-100 text-blue-800 border border-blue-200'}`;
+            n.innerHTML = msg;
+            document.body.appendChild(n);
+            setTimeout(() => n.remove(), 2500);
+        }
+
+        // === INIT ===
+        document.getElementById('year').textContent = new Date().getFullYear();
+        cargarProductos();
+    </script>
 </body>
 </html>
