@@ -1,0 +1,11 @@
+{
+  "usuarios": [
+    {
+      "username": "root",
+      "password": "admin123",
+      "name": "Administrador",
+      "email": "admin@meditech.com",
+      "role": "admin"
+    }
+  ]
+}
