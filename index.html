@@ -1,322 +1,653 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MediTech | Medicamentos y Tecnologia</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>tailwind.config={theme:{extend:{fontFamily:{heading:['Sora','sans-serif'],body:['Poppins','sans-serif']}}}}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<style>
-:root{--pri:#0d9488;--pri-d:#0f766e;--pri-l:#ccfbf1;--acc:#f97316;--bg:#f8f9fa;--txt:#111827;--mut:#6b7280;--bdr:#e5e7eb;--err:#ef4444;--ok:#10b981}
-*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden}
-.cw{position:relative;overflow:hidden;border-radius:0 0 24px 24px}.ctk{display:flex;transition:transform .65s cubic-bezier(.25,.46,.45,.94)}.csl{min-width:100%;position:relative;flex-shrink:0}.csl img{width:100%;height:60vh;min-height:320px;object-fit:cover;display:block;background:#115e59}.cgr{position:absolute;inset:0;background:linear-gradient(105deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,.35) 45%,transparent 100%)}.ctx{position:absolute;bottom:14%;left:5%;color:#fff;max-width:520px;z-index:5}.ctx h2{font-family:'Sora',sans-serif;font-size:2.5rem;font-weight:800;line-height:1.15;margin-bottom:10px;text-shadow:0 2px 20px rgba(0,0,0,.3)}.ctx p{font-size:1rem;opacity:.9;line-height:1.5}
-.cdt{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer;transition:all .35s;border:none}.cdt.on{background:var(--acc);width:34px;border-radius:6px}
-.car{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;z-index:10}.car:hover{background:rgba(255,255,255,.28)}.car.pv{left:16px}.car.nx{right:16px}
-.arm{position:absolute;top:14px;right:14px;z-index:20;width:36px;height:36px;border-radius:50%;background:rgba(239,68,68,.92);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s}.arm:hover{background:#dc2626;transform:scale(1.12)}
-.aad{position:absolute;bottom:54px;right:20px;z-index:20;width:50px;height:50px;border-radius:50%;background:var(--ok);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.4rem;transition:all .3s;box-shadow:0 4px 18px rgba(16,185,129,.45)}.aad:hover{transform:scale(1.12) rotate(90deg)}
-.tst{padding:13px 20px;border-radius:12px;color:#fff;font-size:.88rem;display:flex;align-items:center;gap:10px;animation:tI .35s ease,tO .35s ease 2.65s forwards;min-width:260px;box-shadow:0 10px 35px rgba(0,0,0,.18);font-weight:500}
-.tst.s{background:linear-gradient(135deg,#10b981,#059669)}.tst.e{background:linear-gradient(135deg,#ef4444,#dc2626)}.tst.i{background:linear-gradient(135deg,#0d9488,#0f766e)}
-@keyframes tI{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}@keyframes tO{from{opacity:1}to{opacity:0;transform:translateX(40px)}}
-.mbg{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);z-index:60;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}.mbg.sh{opacity:1;pointer-events:all}
-.mbx{background:#fff;border-radius:20px;padding:30px;max-width:540px;width:94%;max-height:90vh;overflow-y:auto;transform:scale(.88) translateY(20px);transition:transform .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 25px 60px rgba(0,0,0,.15)}.mbg.sh .mbx{transform:scale(1) translateY(0)}
-.fi{width:100%;padding:12px 15px;border:2px solid var(--bdr);border-radius:11px;font-family:'Poppins',sans-serif;font-size:.88rem;transition:border-color .3s,box-shadow .3s;outline:none;background:#fff}.fi:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(13,148,136,.12)}
-.fl{display:block;font-size:.8rem;font-weight:600;color:#374151;margin-bottom:5px}
-.bt{padding:12px 26px;border-radius:11px;border:none;font-family:'Poppins',sans-serif;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:8px}
-.btp{background:var(--pri);color:#fff}.btp:hover{background:var(--pri-d);transform:translateY(-2px);box-shadow:0 6px 20px rgba(13,148,136,.3)}
-.bta{background:var(--acc);color:#fff}.bta:hover{background:#c2410c;transform:translateY(-2px);box-shadow:0 6px 20px rgba(249,115,22,.3)}
-.bto{background:transparent;color:var(--pri);border:2px solid var(--pri)}.bto:hover{background:var(--pri);color:#fff}
-.btd{background:var(--err);color:#fff}.btd:hover{background:#dc2626}
-.bts{padding:8px 15px;font-size:.8rem;border-radius:8px}
-.pc{background:#fff;border-radius:18px;overflow:hidden;border:1px solid var(--bdr);transition:all .35s;position:relative}.pc:hover{transform:translateY(-8px);box-shadow:0 20px 45px rgba(0,0,0,.08)}
-.pci{width:100%;height:200px;object-fit:cover;transition:transform .5s;display:block;background:#f0fdfa}.pc:hover .pci{transform:scale(1.06)}
-.pcb{padding:16px}
-.bgm{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.bm1{background:#dbeafe;color:#1d4ed8}.bm2{background:#fef3c7;color:#92400e}
-.ccc{border-radius:20px;padding:36px 28px;color:#fff;cursor:pointer;transition:all .4s;position:relative;overflow:hidden}.ccc:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,.15)}
-.ccc::after{content:'';position:absolute;top:-50%;right:-30%;width:250px;height:250px;background:rgba(255,255,255,.08);border-radius:50%;transition:all .5s}.ccc:hover::after{transform:scale(1.3)}
-.fu{animation:fU .55s ease both}@keyframes fU{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-.d1{animation-delay:.1s}.d2{animation-delay:.2s}.d3{animation-delay:.3s}.d4{animation-delay:.4s}
-.mmn{position:fixed;top:0;right:-100%;width:280px;height:100vh;background:#fff;z-index:70;transition:right .35s;box-shadow:-5px 0 40px rgba(0,0,0,.12);padding:76px 24px 24px}.mmn.op{right:0}
-.mov{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:65;opacity:0;pointer-events:none;transition:opacity .3s}.mov.op{opacity:1;pointer-events:all}
-/* ZONA DE SUBIDA CORREGIDA: input FUERA del contenedor de preview */
-.uz-wrap{position:relative;border:2px dashed var(--bdr);border-radius:14px;overflow:hidden;transition:all .3s}
-.uz-wrap:hover{border-color:var(--pri);background:var(--pri-l)}
-.uz-prev{padding:20px;text-align:center;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.uz-prev img{max-height:130px;border-radius:10px;object-fit:contain}
-.uz-wrap input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:5}
-.sbb{transition:all .25s;cursor:pointer;background:none;border:none;font-size:1.2rem;padding:4px}.sbb:hover{transform:scale(1.2)}.so{color:#f59e0b}.sf{color:#d1d5db}
-.otb{width:100%;border-collapse:separate;border-spacing:0}.otb th{background:#f9fafb;padding:11px 12px;text-align:left;font-size:.73rem;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--bdr)}.otb td{padding:12px;border-bottom:1px solid var(--bdr);font-size:.83rem;vertical-align:middle}.otb tr:hover td{background:#f9fafb}
-.sp1{background:#fef3c7;color:#92400e}.sp2{background:#dbeafe;color:#1d4ed8}.sp3{background:#d1fae5;color:#065f46}
-.dk{position:absolute;border-radius:50%;pointer-events:none;filter:blur(80px)}
-::-webkit-scrollbar{width:7px}::-webkit-scrollbar-track{background:#f1f1f1}::-webkit-scrollbar-thumb{background:#c4c4c4;border-radius:4px}
-.cb-btn{position:fixed;bottom:24px;right:24px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--pri),#0f766e);color:#fff;border:none;cursor:pointer;z-index:55;display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 6px 28px rgba(13,148,136,.4);transition:all .35s}.cb-btn:hover{transform:scale(1.1)}.cb-btn .cb-badge{position:absolute;top:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:var(--acc);font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;animation:cbP 2s infinite}@keyframes cbP{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
-.cb-win{position:fixed;bottom:96px;right:24px;width:380px;max-width:calc(100vw - 32px);height:520px;max-height:calc(100vh - 140px);background:#fff;border-radius:20px;z-index:55;display:flex;flex-direction:column;box-shadow:0 12px 50px rgba(0,0,0,.15);overflow:hidden;transform:scale(.8) translateY(20px);opacity:0;pointer-events:none;transition:all .35s cubic-bezier(.34,1.56,.64,1);border:1px solid var(--bdr)}.cb-win.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all}
-.cb-hdr{padding:16px 20px;background:linear-gradient(135deg,var(--pri),#0f766e);color:#fff;display:flex;align-items:center;gap:12px;flex-shrink:0}.cb-hdr .cb-ava{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}.cb-hdr .cb-st{width:8px;height:8px;border-radius:50%;background:#4ade80;animation:cbP 2s infinite}
-.cb-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
-.cb-msg{max-width:85%;padding:10px 14px;border-radius:16px;font-size:.85rem;line-height:1.5;animation:cbM .3s ease}@keyframes cbM{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.cb-msg.bot{background:#f3f4f6;color:var(--txt);align-self:flex-start;border-bottom-left-radius:4px}
-.cb-msg.usr{background:var(--pri);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
-.cb-msg.bot .cb-pr{background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:10px;margin-top:8px;display:flex;gap:10px;align-items:center}.cb-msg.bot .cb-pr img{width:50px;height:50px;border-radius:8px;object-fit:cover;flex-shrink:0}
-.cb-tp{display:flex;gap:4px;padding:10px 14px;background:#f3f4f6;border-radius:16px;border-bottom-left-radius:4px;align-self:flex-start;animation:cbM .3s ease}.cb-tp span{width:8px;height:8px;border-radius:50%;background:#9ca3af;animation:cbTy 1.4s infinite}.cb-tp span:nth-child(2){animation-delay:.2s}.cb-tp span:nth-child(3){animation-delay:.4s}@keyframes cbTy{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
-.cb-inp{padding:12px 16px;border-top:1px solid var(--bdr);display:flex;gap:8px;flex-shrink:0;background:#fff}.cb-inp input{flex:1;border:2px solid var(--bdr);border-radius:12px;padding:10px 14px;font-family:'Poppins',sans-serif;font-size:.85rem;outline:none;transition:border-color .3s}.cb-inp input:focus{border-color:var(--pri)}.cb-inp button{width:42px;height:42px;border-radius:12px;background:var(--pri);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;flex-shrink:0}.cb-inp button:hover{background:var(--pri-d);transform:scale(1.05)}
-.cb-qk{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 8px;flex-shrink:0}.cb-qk button{padding:6px 12px;border-radius:20px;border:1.5px solid var(--bdr);background:#fff;font-size:.75rem;color:var(--mut);cursor:pointer;transition:all .25s;font-family:'Poppins',sans-serif;white-space:nowrap}.cb-qk button:hover{border-color:var(--pri);color:var(--pri);background:var(--pri-l)}
-@media(max-width:768px){.csl img{height:40vh;min-height:240px}.ctx{bottom:10%;left:5%;right:5%}.ctx h2{font-size:1.4rem!important}.car{width:36px;height:36px}.car.pv{left:8px}.car.nx{right:8px}.aad{width:42px;height:42px;bottom:44px;right:12px;font-size:1.1rem}.cb-win{bottom:88px;right:12px;width:calc(100vw - 24px);height:calc(100vh - 120px);max-height:none;border-radius:16px}.cb-btn{bottom:18px;right:18px;width:54px;height:54px;font-size:1.3rem}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediTech | Medicamentos y Tecnología</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f4f6f9; color: #2c3e50; }
+        
+        /* HEADER - TU DISEÑO ORIGINAL */
+        header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        header h1 { font-size: 2em; margin-bottom: 5px; }
+        header p { opacity: 0.9; }
+        
+        /* PORTADA DE PRODUCTOS */
+        .portada {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        .portada h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+        #portada-productos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .producto-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+            text-align: center;
+        }
+        .producto-card:hover { transform: translateY(-5px); }
+        .producto-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .producto-card h3 { color: #2c3e50; margin-bottom: 8px; font-size: 1.1em; }
+        .producto-card p { color: #666; font-size: 0.9em; }
+        .producto-card .categoria {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            margin-bottom: 8px;
+        }
+        
+        /* BOTÓN ROOT */
+        #root-access-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            padding: 10px 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        /* PANEL ADMIN */
+        #admin-panel {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .admin-content {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+        }
+        .admin-content h2 { color: #2c3e50; margin-bottom: 15px; }
+        .admin-content h3 { color: #34495e; margin: 20px 0 10px; }
+        .admin-content label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .admin-content input[type="text"],
+        .admin-content textarea,
+        .admin-content select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .admin-content textarea { resize: vertical; min-height: 80px; }
+        .btn-primary {
+            background: #27ae60;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+        }
+        .btn-danger {
+            background: #c0392b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #product-list { list-style: none; }
+        #product-list li {
+            border: 1px solid #eee;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: #fafafa;
+        }
+        #product-list li img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        #product-list .info { flex: 1; }
+        #image-preview {
+            display: none;
+            max-width: 150px;
+            max-height: 150px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        
+        /* CHATBOT */
+        #chatbot-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transition: transform 0.2s;
+        }
+        #chatbot-icon:hover { transform: scale(1.1); }
+        
+        #chatbot-window {
+            display: none;
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 340px;
+            height: 480px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-header span { cursor: pointer; font-size: 18px; }
+        #chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            font-size: 14px;
+        }
+        .msg-user {
+            background: #3498db;
+            color: white;
+            padding: 10px 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            max-width: 80%;
+            margin-left: auto;
+            text-align: right;
+        }
+        .msg-bot {
+            background: #e0e0e0;
+            padding: 10px 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            max-width: 80%;
+        }
+        .chat-input-area {
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 8px;
+        }
+        #chat-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            outline: none;
+            font-size: 14px;
+        }
+        #chat-send {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            #chatbot-window { width: 90%; right: 5%; }
+            .admin-content { padding: 15px; }
+        }
+    </style>
 </head>
 <body>
-<div id="tb" class="fixed top-5 right-5 z-[100] flex flex-col gap-3"></div>
-<div id="md" class="mbg"><div id="mi" class="mbx"></div></div>
-<div id="movl" class="mov"></div>
-<aside id="mmn" class="mmn"><button id="mcl" class="absolute top-6 right-6 text-2xl text-gray-500 hover:text-gray-800 transition"><i class="fas fa-times"></i></button><nav class="flex flex-col gap-2" id="mna"></nav></aside>
-<header id="nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300"></header>
-<main id="app" class="pt-[72px]"></main>
-<footer id="ft"></footer>
-<button class="cb-btn" id="cbb" onclick="toggleCB()"><i class="fas fa-comment-dots"></i><span class="cb-badge" id="cbbdg">1</span></button>
-<div class="cb-win" id="cbw"><div class="cb-hdr"><div class="cb-ava"><i class="fas fa-robot"></i></div><div class="flex-1"><div class="font-heading font-bold text-sm">Asistente MediTech</div><div class="flex items-center gap-2 text-xs opacity-80"><span class="cb-st"></span> En linea</div></div><button onclick="toggleCB()" class="text-white/70 hover:text-white transition text-lg"><i class="fas fa-times"></i></button></div><div class="cb-msgs" id="cbms"></div><div class="cb-qk" id="cbqk"></div><div class="cb-inp"><input type="text" id="cbinp" placeholder="Escribe tu mensaje..." autocomplete="off"><button onclick="sendCB()"><i class="fas fa-paper-plane"></i></button></div></div>
 
+<!-- HEADER -->
+<header>
+    <h1>💊 MediTech 💻</h1>
+    <p>Medicamentos y Tecnología - Tu tienda en línea</p>
+</header>
+
+<!-- BOTÓN ROOT -->
+<button id="root-access-btn" onclick="toggleAdminPanel()">🔒 Root Admin</button>
+
+<!-- PORTADA DE PRODUCTOS -->
+<section class="portada">
+    <h2>🌟 Productos Destacados</h2>
+    <div id="portada-productos">
+        <p style="text-align:center; grid-column:1/-1; color:#999;">Cargando productos...</p>
+    </div>
+</section>
+
+<!-- PANEL DE ADMINISTRACIÓN ROOT -->
+<div id="admin-panel">
+    <div class="admin-content">
+        <h2>⚙️ Panel de Administración Root</h2>
+        <button onclick="toggleAdminPanel()" class="btn-danger" style="float:right;">Cerrar X</button>
+        <hr style="margin: 20px 0;">
+        
+        <h3>➕ Agregar Nuevo Producto</h3>
+        <form id="product-form" onsubmit="saveProduct(event)">
+            <label>Nombre del Producto:</label>
+            <input type="text" id="prod-name" required placeholder="Ej: Paracetamol 500mg / RTX 4090">
+            
+            <label>Categoría:</label>
+            <select id="prod-category">
+                <option value="💊 Medicamento">💊 Medicamento</option>
+                <option value="💻 Tecnología">💻 Tecnología / PC</option>
+                <option value="🩺 Salud">🩺 Salud</option>
+                <option value="🎮 Gaming">🎮 Gaming</option>
+            </select>
+
+            <label>Descripción / Para qué sirve:</label>
+            <textarea id="prod-desc" required placeholder="Ej: Analgésico y antipirético..."></textarea>
+
+            <label>📸 Subir Foto NUEVA (desde PC o Móvil):</label>
+            <input type="file" id="prod-image" accept="image/*" capture="environment" onchange="previewImage(event)">
+            <img id="image-preview" alt="Vista previa">
+            
+            <label>🖼️ O selecciona una foto YA SUBIDA:</label>
+            <select id="image-selector" onchange="onSelectExistingImage()">
+                <option value="">-- Selecciona una foto existente --</option>
+            </select>
+
+            <br><br>
+            <button type="submit" class="btn-primary">💾 Guardar Producto</button>
+        </form>
+
+        <hr style="margin: 25px 0;">
+        <h3>📋 Productos en Portada</h3>
+        <ul id="product-list"></ul>
+    </div>
+</div>
+
+<!-- CHATBOT FLOTANTE -->
+<div id="chatbot-icon" onclick="toggleChat()">💬</div>
+
+<div id="chatbot-window">
+    <div class="chat-header">
+        🤖 Asistente MediTech
+        <span onclick="toggleChat()">✖</span>
+    </div>
+    <div id="chat-messages">
+        <div class="msg-bot">
+            ¡Hola! 👋 Soy el asistente de MediTech. Pregúntame sobre <b>medicamentos</b> o <b>piezas de PC</b>.
+        </div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button id="chat-send" onclick="sendMessage()">➤</button>
+    </div>
+</div>
+
+<!-- JAVASCRIPT - SOLO CAMBIÓ LA PARTE DE FOTOS A GITHUB -->
 <script>
-// === FALLBACK DE IMAGEN: Genera placeholder si la URL no carga ===
-function imgFB(el,name){
-try{const c=document.createElement('canvas');c.width=400;c.height=400;const x=c.getContext('2d');
-const g=x.createLinearGradient(0,0,400,400);g.addColorStop(0,'#0d9488');g.addColorStop(1,'#134e4a');x.fillStyle=g;x.fillRect(0,0,400,400);
-x.fillStyle='rgba(255,255,255,0.15)';x.beginPath();x.arc(200,160,50,0,Math.PI*2);x.fill();
-x.fillStyle='#fff';x.font='bold 22px Poppins,sans-serif';x.textAlign='center';x.textBaseline='middle';
-const w=(name||'Imagen').split(' ');x.fillText(w.slice(0,3).join(' '),200,260);
-x.font='14px Poppins,sans-serif';x.fillStyle='rgba(255,255,255,0.6)';x.fillText('MediTech',200,300);
-el.src=c.toDataURL();el.onerror=null}catch(e){el.style.background='#0d9488';el.onerror=null}
-}
+    // ⚠️ CONFIGURA TU TOKEN DE GITHUB AQUÍ
+    const GITHUB_TOKEN = "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";
+    const GITHUB_USER = "calm291094-del";
+    const GITHUB_REPO = "meditech-tienda";
 
-// === DATOS INICIALES ===
-const DC=[{id:'c1',image:'https://picsum.photos/seed/mtbanner1/1400/650',title:'Salud y Tecnologia',subtitle:'Todo lo que necesitas en un solo lugar, con entrega a tu puerta'},{id:'c2',image:'https://picsum.photos/seed/mtpharma2/1400/650',title:'Medicamentos de Calidad',subtitle:'Productos farmaceuticos garantizados a los mejores precios'},{id:'c3',image:'https://picsum.photos/seed/mtpcbuild3/1400/650',title:'Componentes para PC',subtitle:'Arma la computadora de tus suenos con piezas de alta gama'},{id:'c4',image:'https://picsum.photos/seed/mtdeliv4/1400/650',title:'Envio a Domicilio',subtitle:'Recibe tus productos de forma rapida y segura'}];
-const DP=[
-{id:'p1',name:'Ibuprofeno 600mg',price:85,image:'https://picsum.photos/seed/mt-ibu1/400/400',category:'medicamento',desc:'Caja con 20 tabletas. Antiinflamatorio y analgesico.',stock:150,feat:true},
-{id:'p2',name:'Paracetamol 500mg',price:45,image:'https://picsum.photos/seed/mt-para2/400/400',category:'medicamento',desc:'Caja con 30 tabletas. Alivia el dolor y reduce la fiebre.',stock:220,feat:true},
-{id:'p3',name:'Amoxicilina 500mg',price:120,image:'https://picsum.photos/seed/mt-amox3/400/400',category:'medicamento',desc:'Caja con 12 capsulas. Antibiotico de amplio espectro.',stock:80,feat:true},
-{id:'p4',name:'Omeprazol 20mg',price:95,image:'https://picsum.photos/seed/mt-ompr4/400/400',category:'medicamento',desc:'Caja con 14 capsulas. Protege el estomago contra el acido.',stock:130,feat:true},
-{id:'p5',name:'Loratadina 10mg',price:55,image:'https://picsum.photos/seed/mt-lora5/400/400',category:'medicamento',desc:'Caja con 10 tabletas. Antialergico de accion prolongada.',stock:180,feat:false},
-{id:'p6',name:'Diclofenaco 50mg',price:70,image:'https://picsum.photos/seed/mt-dicl6/400/400',category:'medicamento',desc:'Caja con 20 tabletas. Antiinflamatorio para dolores articulares.',stock:110,feat:false},
-{id:'p7',name:'Azitromicina 500mg',price:185,image:'https://picsum.photos/seed/mt-azit7/400/400',category:'medicamento',desc:'Caja con 6 tabletas. Antibiotico para infecciones respiratorias.',stock:60,feat:false},
-{id:'p8',name:'Metformina 850mg',price:65,image:'https://picsum.photos/seed/mt-metf8/400/400',category:'medicamento',desc:'Caja con 30 tabletas. Control de glucosa en sangre.',stock:200,feat:false},
-{id:'p9',name:'Procesador Intel i5-13400F',price:4299,image:'https://picsum.photos/seed/mt-i5x9/400/400',category:'pc',desc:'10 nucleos, 16 hilos, 4.6GHz turbo. Ideal para gaming.',stock:18,feat:true},
-{id:'p10',name:'RAM DDR5 16GB 5600MHz',price:1299,image:'https://picsum.photos/seed/mt-ddr10/400/400',category:'pc',desc:'Modulo de alta velocidad para plataformas actuales.',stock:35,feat:true},
-{id:'p11',name:'SSD NVMe 1TB',price:1599,image:'https://picsum.photos/seed/mt-ssd11/400/400',category:'pc',desc:'Lectura 7000MB/s, escritura 5500MB/s. M.2 2280.',stock:42,feat:true},
-{id:'p12',name:'RTX 4060 8GB',price:8999,image:'https://picsum.photos/seed/mt-rtx12/400/400',category:'pc',desc:'8GB GDDR6, ray tracing, DLSS 3. Gaming sin compromiso.',stock:12,feat:true},
-{id:'p13',name:'Fuente de Poder 650W 80 Plus',price:1199,image:'https://picsum.photos/seed/mt-psu13/400/400',category:'pc',desc:'80 Plus Bronze, modular, ventilador silencioso.',stock:28,feat:false},
-{id:'p14',name:'Placa Madre B760 LGA 1700',price:2799,image:'https://picsum.photos/seed/mt-b7614/400/400',category:'pc',desc:'DDR5, PCIe 4.0, WiFi 6, USB 3.2 Gen 2.',stock:15,feat:false},
-{id:'p15',name:'Gabinete ATX Vidrio Templado',price:1899,image:'https://picsum.photos/seed/mt-case15/400/400',category:'pc',desc:'Malla frontal, vidrio templado lateral, 4 ventiladores.',stock:22,feat:false},
-{id:'p16',name:'Cooler CPU Torre Doble Fan',price:699,image:'https://picsum.photos/seed/mt-cool16/400/400',category:'pc',desc:'2 ventiladores PWM, compatible AM5 y LGA1700.',stock:30,feat:false}
-];
+    const API_BASE = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
+    const HEADERS = {
+        "Authorization": `token ${GITHUB_TOKEN}`,
+        "Accept": "application/vnd.github.v3+json"
+    };
 
-// === ESTADO GLOBAL ===
-const S={u:null,v:'home',cr:[],pr:[],us:[],ca:[],or:[],au:[],ci:0,ct:null,fc:'todos',sq:''};
-const $=s=>document.querySelector(s);
-const uid=()=>'i'+Date.now()+Math.random().toString(36).substr(2,6);
-const fm=n=>'$'+n.toLocaleString('es-MX');
-const ad=()=>S.u&&S.u.username==='root';
+    let products = [];
+    let imagenesDisponibles = [];
 
-// === UTILIDADES ===
-function tt(m,t){try{const ic={s:'fa-check-circle',e:'fa-exclamation-circle',i:'fa-info-circle'};const e=document.createElement('div');e.className='tst '+(t||'i');e.innerHTML='<i class="fas '+ic[t||'i']+'"></i><span>'+m+'</span>';$('#tb').appendChild(e);setTimeout(()=>e.remove(),3100)}catch(er){}}
-function om(h){try{$('#mi').innerHTML=h;$('#md').classList.add('sh')}catch(er){}}
-function cm(){try{$('#md').classList.remove('sh')}catch(er){}}
+    // BASE DE CONOCIMIENTOS DEL CHATBOT
+    const knowledgeBase = {
+        "paracetamol": "El Paracetamol es un analgésico y antipirético. Sirve para aliviar dolores leves (cabeza, muscular) y bajar la fiebre. Dosis común: 500mg cada 6-8 horas.",
+        "ibuprofeno": "El Ibuprofeno es un antiinflamatorio no esteroideo (AINE). Sirve para reducir inflamación, dolor y fiebre. No usar con estómago vacío.",
+        "aspirina": "La Aspirina (ácido acetilsalicílico) es analgésico, antipirético y antiagregante plaquetario. No dar a niños por riesgo de Síndrome de Reye.",
+        "amoxicilina": "La Amoxicilina es un antibiótico penicilina. Sirve para infecciones bacterianas. Requiere receta médica y completar el tratamiento.",
+        "ram": "La memoria RAM (Random Access Memory) es la memoria de corto plazo de la PC. Donde se cargan los programas en ejecución. Más RAM = más programas abiertos a la vez.",
+        "gpu": "La GPU (Tarjeta Gráfica) procesa y renderiza imágenes, video y gráficos. Esencial para gaming, diseño 3D y edición de video. Ejemplos: NVIDIA RTX, AMD Radeon.",
+        "cpu": "El CPU (Procesador) es el cerebro de la computadora. Ejecuta las instrucciones de los programas. Ejemplos: Intel Core i7, AMD Ryzen 7.",
+        "ssd": "Un SSD (Unidad de Estado Sólido) es almacenamiento rápido sin partes móviles. Tu PC prende y carga programas en segundos. Muy superior al HDD.",
+        "hdd": "Un HDD (Disco Duro Mecánico) es almacenamiento tradicional. Más lento que SSD pero más barato para grandes capacidades.",
+        "motherboard": "La Motherboard (Placa Madre) conecta todos los componentes: CPU, RAM, GPU, almacenamiento. Define qué piezas son compatibles.",
+        "fuente": "La Fuente de Poder (PSU) suministra energía a todos los componentes. Se mide en watts (ej: 650W, 850W). Busca certificación 80 Plus.",
+        "monitor": "El Monitor muestra la imagen. Características clave: resolución (1080p, 1440p, 4K), tasa de refresco (60Hz, 144Hz) y panel (IPS, VA, TN).",
+        "teclado": "El teclado puede ser mecánico (más duradero, respuesta táctil) o membrana (más silencioso, económico). Los switches Cherry MX son los más populares.",
+        "mouse": "El mouse gamer tiene DPI ajustable, botones programables y diseño ergonómico. Los inalámbricos modernos tienen latencia casi nula.",
+        "refrigeracion": "La refrigeración mantiene el CPU/GPU a temperatura segura. Tipos: aire (disipador + ventilador) o líquida (más eficiente, más cara).",
+        "default": "No tengo información específica sobre eso en mi base de conocimientos local. Como administrador, puedes conectar este chat a una API de IA (como Google Gemini) para respuestas más completas."
+    };
 
-// === COMPRESION DE IMAGEN (CORREGIDA) ===
-function cmpImg(file,mx,q){
-mx=mx||600;q=q||0.55;
-return new Promise(function(res,rej){
-if(!file||!file.type.startsWith('image/')){rej('Archivo no es una imagen valida');return}
-if(file.size>5*1024*1024){rej('Imagen mayor a 5MB, reducela');return}
-var reader=new FileReader();
-reader.onerror=function(){rej('Error al leer el archivo')};
-reader.onload=function(ev){
-var img=new Image();
-img.onerror=function(){rej('No se pudo procesar la imagen')};
-img.onload=function(){
-var w=img.width,h=img.height;
-if(w>mx||h>mx){if(w>h){h=Math.round(h*mx/w);w=mx}else{w=Math.round(w*mx/h);h=mx}}
-w=Math.max(1,w);h=Math.max(1,h);
-var c=document.createElement('canvas');c.width=w;c.height=h;
-var ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);
-try{res(c.toDataURL('image/jpeg',q))}catch(e){rej('Error al comprimir')}}
-img.src=ev.target.result};
-reader.readAsDataURL(file)
-})}
+    // CARGAR PRODUCTOS DESDE GITHUB
+    async function cargarProductos() {
+        try {
+            const response = await fetch(`${API_BASE}/contents/productos.json`, {
+                headers: HEADERS
+            });
+            if (!response.ok) throw new Error("No se pudo cargar productos.json");
+            const data = await response.json();
+            const contenido = atob(data.content);
+            const json = JSON.parse(contenido);
+            products = json.productos || [];
+            renderProducts();
+        } catch (error) {
+            console.error("Error al cargar productos:", error);
+            document.getElementById('portada-productos').innerHTML = 
+                '<p style="text-align:center; grid-column:1/-1; color:#e74c3c;">⚠️ Error al cargar productos. Verifica tu token de GitHub.</p>';
+        }
+    }
 
-// === VISTA PREVIA (CORREGIDA: NO destruye el input) ===
-function pvImg(inp,prevId){
-var f=inp.files[0];if(!f)return;
-if(f.size>5*1024*1024){tt('Muy grande (5MB max)','e');inp.value='';return}
-var r=new FileReader();
-r.onload=function(e){var prev=$('#'+prevId);if(prev)prev.innerHTML='<img src="'+e.target.result+'" alt="Vista previa">'};
-r.readAsDataURL(f);
-// El input NO se destruye porque esta posicionado sobre el preview, no dentro
-}
+    // CARGAR IMÁGENES DE /imagenes/
+    async function cargarImagenesDisponibles() {
+        try {
+            const response = await fetch(`${API_BASE}/contents/imagenes`, {
+                headers: HEADERS
+            });
+            if (!response.ok) return;
+            const archivos = await response.json();
+            imagenesDisponibles = archivos
+                .filter(f => /\.(jpg|jpeg|png|webp|gif)$/i.test(f.name))
+                .map(f => ({ nombre: f.name, url: f.download_url }));
+            
+            const selector = document.getElementById('image-selector');
+            selector.innerHTML = '<option value="">-- Selecciona una foto existente --</option>';
+            imagenesDisponibles.forEach(img => {
+                selector.innerHTML += `<option value="${img.url}">${img.nombre}</option>`;
+            });
+        } catch (error) {
+            console.log("Carpeta imagenes/ vacía o no existe");
+        }
+    }
 
-// === AUDITORIA ===
-function logAu(type,detail){try{S.au.push({type:type,detail:detail,date:new Date().toISOString()});if(S.au.length>500)S.au=S.au.slice(-500);sv('au',S.au)}catch(e){}}
+    function onSelectExistingImage() {
+        const selector = document.getElementById('image-selector');
+        const preview = document.getElementById('image-preview');
+        if (selector.value) {
+            preview.src = selector.value;
+            preview.style.display = 'block';
+            document.getElementById('prod-image').value = '';
+        }
+    }
 
-// === LOCALSTORAGE SEGURO ===
-function ld(){
-try{S.cr=JSON.parse(localStorage.getItem('mc'));if(!Array.isArray(S.cr))throw 0}catch(e){S.cr=JSON.parse(JSON.stringify(DC))}
-try{S.pr=JSON.parse(localStorage.getItem('mp'));if(!Array.isArray(S.pr))throw 0}catch(e){S.pr=JSON.parse(JSON.stringify(DP))}
-try{S.us=JSON.parse(localStorage.getItem('mu'));if(!Array.isArray(S.us))throw 0}catch(e){S.us=[]}
-try{S.or=JSON.parse(localStorage.getItem('mo'));if(!Array.isArray(S.or))throw 0}catch(e){S.or=[]}
-try{S.ca=JSON.parse(localStorage.getItem('mk'));if(!Array.isArray(S.ca))throw 0}catch(e){S.ca=[]}
-try{S.au=JSON.parse(localStorage.getItem('ma'));if(!Array.isArray(S.au))throw 0}catch(e){S.au=[]}
-try{var s=localStorage.getItem('ms');if(s){var u=S.us.find(function(x){return x.id===s});if(u)S.u=u}}catch(e){S.u=null}
-}
-function sv(k,v){var m={cr:'mc',pr:'mp',us:'mu',or:'mo',ca:'mk',au:'ma',session:'ms'};if(m[k])try{localStorage.setItem(m[k],JSON.stringify(v))}catch(e){console.warn('Storage lleno o bloqueado')}}
+    // SUBIR IMAGEN A GITHUB
+    async function subirImagenAGitHub(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const base64 = e.target.result.split(',')[1];
+                const nombreLimpio = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                const ruta = `imagenes/${Date.now()}_${nombreLimpio}`;
+                
+                try {
+                    const response = await fetch(`${API_BASE}/contents/${ruta}`, {
+                        method: "PUT",
+                        headers: HEADERS,
+                        body: JSON.stringify({
+                            message: `Subir imagen: ${file.name}`,
+                            content: base64
+                        })
+                    });
+                    if (!response.ok) throw new Error("Error al subir imagen");
+                    const data = await response.json();
+                    resolve(data.content.download_url);
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 
-// === AUTH ===
-function doLg(u,p){var x=S.us.find(function(a){return a.username===u&&a.password===p});if(!x)return tt('Usuario o contrasena incorrectos','e');S.u=x;sv('session',x.id);logAu('login','Inicio sesion: '+u);tt('Bienvenido, '+x.fullName,'s');go('home')}
-function doRg(d){if(d.pw!==d.p2)return tt('Contrasenas no coinciden','e');if(d.pw.length<6)return tt('Minimo 6 caracteres','e');if(S.us.find(function(u){return u.username===d.un}))return tt('Usuario ya registrado','e');if(!d.fn||!d.un||!d.ad||!d.ph)return tt('Todos los campos son obligatorios','e');var u={id:uid(),fullName:d.fn,username:d.un,address:d.ad,phone:d.ph,password:d.pw};S.us.push(u);sv('us',S.us);logAu('registro','Se registro: '+d.un);tt('Registro exitoso','s');go('login')}
-function doLo(){S.u=null;S.ca=[];sv('session',null);sv('ca',[]);tt('Sesion cerrada','i');go('home')}
+    // GUARDAR PRODUCTO EN productos.json
+    async function actualizarProductosEnGitHub(mensaje) {
+        const fileResponse = await fetch(`${API_BASE}/contents/productos.json`, {
+            headers: HEADERS
+        });
+        const fileData = await fileResponse.json();
+        
+        await fetch(`${API_BASE}/contents/productos.json`, {
+            method: "PUT",
+            headers: HEADERS,
+            body: JSON.stringify({
+                message: mensaje,
+                content: btoa(JSON.stringify({ productos: products }, null, 2)),
+                sha: fileData.sha
+            })
+        });
+    }
 
-// === CARRITO ===
-function aC(pid){if(!S.u){tt('Inicia sesion primero','e');go('login');return}var p=S.pr.find(function(x){return x.id===pid});if(!p||p.stock<=0)return tt('Sin stock','e');var ex=S.ca.find(function(c){return c.pid===pid});if(ex){if(ex.q>=p.stock)return tt('Stock maximo','e');ex.q++}else S.ca.push({pid:pid,q:1});sv('ca',S.ca);tt(p.name+' agregado','s');rN()}
-function rC(pid){S.ca=S.ca.filter(function(c){return c.pid!==pid});sv('ca',S.ca);rAll()}
-function uQ(pid,d){var it=S.ca.find(function(c){return c.pid===pid});if(!it)return;var p=S.pr.find(function(x){return x.id===pid});it.q+=d;if(it.q<=0){rC(pid);return}if(p&&it.q>p.stock){it.q=p.stock;tt('Stock maximo','i')}sv('ca',S.ca);rAll()}
-function cT(){var s=0;S.ca.forEach(function(c){var p=S.pr.find(function(x){return x.id===c.pid});if(p)s+=p.price*c.q});var e=S.ca.length>0?49:0;return{s:s,e:e,t:s+e}}
-function doCk(){if(S.ca.length===0)return tt('Carrito vacio','e');var r=cT();var items=S.ca.map(function(c){var p=S.pr.find(function(x){return x.id===c.pid});return{pid:c.pid,name:p?p.name:'',price:p?p.price:0,q:c.q,sub:p?p.price*c.q:0}});items.forEach(function(it){var p=S.pr.find(function(x){return x.id===it.pid});if(p)p.stock=Math.max(0,p.stock-it.q)});var o={id:uid(),uid:S.u.id,un:S.u.fullName,uph:S.u.phone,addr:S.u.address,items:items,s:r.s,e:r.e,t:r.t,date:new Date().toISOString(),status:'pendiente'};S.or.push(o);S.ca=[];sv('or',S.or);sv('ca',S.ca);sv('pr',S.pr);logAu('pedido','Pedido '+o.id.substr(0,8)+' por '+o.un+' - '+fm(o.t));tt('Pedido realizado','s');go('home')}
+    // FUNCIÓN PRINCIPAL: GUARDAR PRODUCTO
+    async function saveProduct(event) {
+        event.preventDefault();
+        const name = document.getElementById('prod-name').value;
+        const category = document.getElementById('prod-category').value;
+        const desc = document.getElementById('prod-desc').value;
+        const fileInput = document.getElementById('prod-image');
+        const selector = document.getElementById('image-selector');
+        
+        let imageUrl = "";
 
-// === CARRUSEL ===
-function sCT(){eCT();if(S.cr.length<=1)return;S.ct=setInterval(function(){S.ci=(S.ci+1)%S.cr.length;mC()},5000)}
-function eCT(){if(S.ct){clearInterval(S.ct);S.ct=null}}
-function mC(){var t=$('#ctrk');if(t)t.style.transform='translateX(-'+S.ci*100+'%)';uDo()}
-function uDo(){document.querySelectorAll('.cdt').forEach(function(d,i){d.classList.toggle('on',i===S.ci)})}
-function aSl(data){var img=data.image||'';if(data.file){cmpImg(data.file).then(function(r){img=r;S.cr.push({id:uid(),image:img,title:data.title||'Sin titulo',subtitle:data.subtitle||''});sv('cr',S.cr);logAu('carrusel','Diapositiva agregada');tt('Diapositiva agregada','s');cm();rAll()}).catch(function(e){tt(e,'e')})}else{if(!img)return tt('Proporciona una imagen','e');S.cr.push({id:uid(),image:img,title:data.title||'Sin titulo',subtitle:data.subtitle||''});sv('cr',S.cr);logAu('carrusel','Diapositiva agregada');tt('Diapositiva agregada','s');cm();rAll()}}
-function rSl(sid){S.cr=S.cr.filter(function(s){return s.id!==sid});if(S.ci>=S.cr.length)S.ci=Math.max(0,S.cr.length-1);sv('cr',S.cr);logAu('carrusel','Diapositiva eliminada');tt('Eliminada','i');rAll()}
+        if (fileInput.files[0]) {
+            alert("📤 Subiendo imagen a GitHub... Esto puede tardar unos segundos.");
+            try {
+                imageUrl = await subirImagenAGitHub(fileInput.files[0]);
+                await cargarImagenesDisponibles();
+            } catch (error) {
+                alert("❌ Error al subir la imagen: " + error.message);
+                return;
+            }
+        } else if (selector.value) {
+            imageUrl = selector.value;
+        } else {
+            alert("⚠️ Sube una foto nueva o selecciona una existente.");
+            return;
+        }
 
-// === PRODUCTOS ADMIN ===
-function tFt(pid){var p=S.pr.find(function(x){return x.id===pid});if(p){p.feat=!p.feat;sv('pr',S.pr);tt(p.feat?'En portada':'Fuera de portada','i');rAll()}}
-function sPrd(form,eid){
-var fd=new FormData(form);var img=eid?S.pr.find(function(x){return x.id===eid}):null;var oldImg=img?img.image:'';
-var fileInput=form.querySelector('input[type="file"]');
-var file=fileInput?fileInput.files[0]:null;
-var url=fd.get('imageUrl')?fd.get('imageUrl').trim():'';
-var nm=fd.get('name')?fd.get('name').trim():'';
-var ds=fd.get('desc')?fd.get('desc').trim():'';
-var pr=parseFloat(fd.get('price'))||0;
-var st=parseInt(fd.get('stock'))||0;
-var ct=fd.get('category')||'medicamento';
-var ft=!!(form.querySelector('input[name="featured"]')&&form.querySelector('input[name="featured"]').checked);
-if(!nm)return tt('Nombre requerido','e');
-if(pr<=0)return tt('Precio invalido','e');
+        const newProduct = {
+            id: Date.now().toString(),
+            name, category, desc, image: imageUrl
+        };
+        products.push(newProduct);
 
-if(file){
-cmpImg(file).then(function(compressedImg){
-var finalImg=compressedImg;
-doSavePrd(eid,{name:nm,desc:ds,price:pr,stock:st,category:ct,feat:ft,image:finalImg})
-}).catch(function(e){tt(e,'e')});
-}else{
-var finalImg=url||oldImg;
-if(!finalImg)return tt('Se necesita una imagen (sube un archivo o pega URL)','e');
-doSavePrd(eid,{name:nm,desc:ds,price:pr,stock:st,category:ct,feat:ft,image:finalImg})
-}
-}
-function doSavePrd(eid,data){
-if(eid){var p=S.pr.find(function(x){return x.id===eid});if(p)Object.assign(p,data);logAu('producto','Editado: '+data.name);tt('Actualizado','s')}
-else{S.pr.push(Object.assign({id:uid()},data));logAu('producto','Agregado: '+data.name);tt('Agregado','s')}
-sv('pr',S.pr);cm();rAll()
-}
-function dPrd(pid){var p=S.pr.find(function(x){return x.id===pid});S.pr=S.pr.filter(function(x){return x.id!==pid});S.ca=S.ca.filter(function(c){return c.pid!==pid});sv('pr',S.pr);sv('ca',S.ca);logAu('producto','Eliminado: '+(p?p.name:''));tt('Eliminado','i');cm();rAll()}
-function cSt(oid,st){var o=S.or.find(function(x){return x.id===oid});if(o){o.status=st;sv('or',S.or);logAu('pedido','Estado '+oid.substr(0,8)+': '+st);tt('Actualizado','s')}}
+        try {
+            await actualizarProductosEnGitHub(`Agregar producto: ${name}`);
+            alert('✅ Producto agregado. Ya es visible para todos los dispositivos.');
+            document.getElementById('product-form').reset();
+            document.getElementById('image-preview').style.display = 'none';
+            cargarProductos();
+        } catch (error) {
+            alert("❌ Error al guardar: " + error.message);
+            products.pop();
+        }
+    }
 
-// === NAV ===
-function go(v){S.v=v;window.scrollTo({top:0,behavior:'smooth'});cMm();rAll()}
+    // ELIMINAR PRODUCTO
+    async function deleteProduct(id) {
+        if (!confirm('¿Eliminar este producto?')) return;
+        
+        const producto = products.find(p => p.id === id);
+        products = products.filter(p => p.id !== id);
+        
+        try {
+            await actualizarProductosEnGitHub(`Eliminar producto: ${producto?.name}`);
+            cargarProductos();
+        } catch (error) {
+            alert("❌ Error al eliminar: " + error.message);
+            cargarProductos();
+        }
+    }
 
-// === IMAGEN CON FALLBACK ===
-function imgTag(src,name,cls){return'<img src="'+src+'" alt="'+name+'" class="'+cls+'" loading="lazy" onerror="imgFB(this,\''+name.replace(/'/g,"\\'")+'\')">'}
+    // MOSTRAR PRODUCTOS
+    function renderProducts() {
+        const list = document.getElementById('product-list');
+        const portada = document.getElementById('portada-productos');
+        
+        if (list) {
+            list.innerHTML = '';
+            if (products.length === 0) {
+                list.innerHTML = '<li style="text-align:center; color:#999;">No hay productos aún</li>';
+            }
+            products.forEach(p => {
+                list.innerHTML += `
+                    <li>
+                        <img src="${p.image}" alt="${p.name}">
+                        <div class="info">
+                            <b>${p.name}</b><br>
+                            <small style="color:#3498db;">${p.category}</small><br>
+                            <small>${p.desc.substring(0, 60)}...</small>
+                        </div>
+                        <button onclick="deleteProduct('${p.id}')" class="btn-danger">🗑️</button>
+                    </li>
+                `;
+            });
+        }
 
-// === RENDER ===
-function rAll(){try{rN();var a=$('#app');switch(S.v){case'home':a.innerHTML=vHo();break;case'products':a.innerHTML=vPr();break;case'cart':a.innerHTML=vCr();break;case'login':a.innerHTML=vLi();break;case'register':a.innerHTML=vRg();break;case'adm_prod':a.innerHTML=vAP();break;case'orders':a.innerHTML=ad()?vAO():vUO();break;case'audit':a.innerHTML=vAu();break;default:a.innerHTML=vHo()}rFt();if(S.v==='home'){setTimeout(function(){mC();sCT()},50)}else eCT();hSc()}catch(er){console.error('Render:',er);$('#app').innerHTML='<div class="p-10 text-center max-w-lg mx-auto"><i class="fas fa-exclamation-triangle text-5xl text-orange-400 mb-4"></i><h2 class="text-xl font-bold mb-3">Error al cargar</h2><p class="text-gray-500 text-sm mb-4">Los datos del navegador pueden estar corruptos. Ejecuta esto en la consola (F12):</p><code class="block bg-gray-100 p-3 rounded-lg text-sm text-left">localStorage.clear(); location.reload();</code></div>'}}
+        if (portada) {
+            portada.innerHTML = '';
+            if (products.length === 0) {
+                portada.innerHTML = '<p style="text-align:center; grid-column:1/-1; color:#999;">Aún no hay productos. El administrador debe agregar productos desde el panel Root.</p>';
+                return;
+            }
+            products.forEach(p => {
+                portada.innerHTML += `
+                    <div class="producto-card">
+                        <img src="${p.image}" alt="${p.name}">
+                        <span class="categoria">${p.category}</span>
+                        <h3>${p.name}</h3>
+                        <p>${p.desc}</p>
+                    </div>
+                `;
+            });
+        }
+    }
 
-// === NAVBAR ===
-function rN(){var cc=S.ca.reduce(function(a,c){return a+c.q},0);$('#nav').innerHTML='<div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-[72px]"><a href="#" onclick="go(\'home\');return false" class="flex items-center gap-2 no-underline"><div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-lg" style="background:linear-gradient(135deg,var(--pri),var(--acc))">M</div><span class="font-heading font-extrabold text-xl tracking-tight">Medi<span style="color:var(--pri)">Tech</span></span></a><nav class="hidden md:flex items-center gap-1"><a href="#" onclick="go(\'home\');return false" class="px-4 py-2 rounded-lg text-sm font-medium transition hover:bg-gray-100 '+(S.v==='home'?'text-teal-700 bg-teal-50':'text-gray-600')+'">Inicio</a><a href="#" onclick="go(\'products\');return false" class="px-4 py-2 rounded-lg text-sm font-medium transition hover:bg-gray-100 '+(S.v==='products'?'text-teal-700 bg-teal-50':'text-gray-600')+'">Productos</a>'+(ad()?'<a href="#" onclick="go(\'adm_prod\');return false" class="px-4 py-2 rounded-lg text-sm font-medium transition hover:bg-gray-100 '+(S.v==='adm_prod'?'text-teal-700 bg-teal-50':'text-gray-600')+'">Gestionar</a><a href="#" onclick="go(\'orders\');return false" class="px-4 py-2 rounded-lg text-sm font-medium transition hover:bg-gray-100 '+(S.v==='orders'?'text-teal-700 bg-teal-50':'text-gray-600')+'">Pedidos</a><a href="#" onclick="go(\'audit\');return false" class="px-4 py-2 rounded-lg text-sm font-medium transition hover:bg-gray-100 '+(S.v==='audit'?'text-teal-700 bg-teal-50':'text-gray-600')+'">Auditoria</a>':'')+'</nav><div class="flex items-center gap-3">'+(S.u&&!ad()?'<button onclick="go(\'cart\')" class="relative p-2.5 rounded-xl transition hover:bg-gray-100"><i class="fas fa-shopping-cart text-gray-600 text-lg"></i>'+(cc>0?'<span class="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full text-white text-xs flex items-center justify-center font-bold" style="background:var(--acc)">'+cc+'</span>':'')+'</button>':'')+(S.u?'<div class="hidden md:flex items-center gap-2">'+(ad()?'<span class="text-xs font-bold px-2.5 py-1 rounded-full text-white" style="background:var(--acc)">ADMIN</span>':'')+'<span class="text-sm font-medium text-gray-700 max-w-[120px] truncate">'+S.u.fullName.split(' ')[0]+'</span><button onclick="doLo()" class="text-sm text-gray-400 hover:text-red-500 transition"><i class="fas fa-sign-out-alt"></i></button></div>':'<button onclick="go(\'login\')" class="hidden md:inline-flex bt bto bts">Ingresar</button><button onclick="go(\'register\')" class="hidden md:inline-flex bt btp bts">Registrarse</button>')+'<button id="mbn" class="md:hidden p-2.5 rounded-xl hover:bg-gray-100 transition"><i class="fas fa-bars text-gray-600 text-lg"></i></button></div></div>';
-$('#mna').innerHTML='<a href="#" onclick="go(\'home\');return false" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 font-medium"><i class="fas fa-home w-5 text-center" style="color:var(--pri)"></i>Inicio</a><a href="#" onclick="go(\'products\');return false" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 font-medium"><i class="fas fa-box w-5 text-center" style="color:var(--pri)"></i>Productos</a>'+(ad()?'<a href="#" onclick="go(\'adm_prod\');return false" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 font-medium"><i class="fas fa-cog w-5 text-center" style="color:var(--pri)"></i>Gestionar</a><a href="#" onclick="go(\'orders\');return false" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 font-medium"><i class="fas fa-clipboard-list w-5 text-center" style="color:var(--pri)"></i>Pedidos</a><a href="#" onclick="go(\'audit\');return false" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 font-medium"><i class="fas fa-shield-halved w-5 text-center" style="color:var(--pri)"></i>Auditoria</a>':'')+(S.u&&!ad()?'<a href="#" onclick="go(\'cart\');return false" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 font-medium"><i class="fas fa-shopping-cart w-5 text-center" style="color:var(--pri)"></i>Carrito '+(cc>0?'<span class="ml-auto text-xs font-bold px-2 py-0.5 rounded-full text-white" style="background:var(--acc)">'+cc+'</span>':'')+'</a>':'')+'<div class="border-t border-gray-100 my-2"></div>'+(S.u?'<div class="px-4 py-2 text-sm text-gray-500"><strong class="text-gray-700">'+S.u.fullName+'</strong></div><a href="#" onclick="doLo();return false" class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 font-medium"><i class="fas fa-sign-out-alt w-5 text-center"></i>Salir</a>':'<a href="#" onclick="go(\'login\');return false" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 font-medium"><i class="fas fa-sign-in-alt w-5 text-center" style="color:var(--pri)"></i>Ingresar</a><a href="#" onclick="go(\'register\');return false" class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 font-medium"><i class="fas fa-user-plus w-5 text-center" style="color:var(--pri)"></i>Registrarse</a>')}
+    // PREVIEW DE IMAGEN
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('image-preview');
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            document.getElementById('image-selector').value = "";
+        }
+        reader.readAsDataURL(file);
+    }
 
-// === TARJETA PRODUCTO ===
-function pC(p,i){var o=p.stock<=0;return'<div class="pc fu" style="animation-delay:'+(i||0)*.05+'s"><div class="relative overflow-hidden">'+imgTag(p.image,p.name,'pci')+'<span class="bgm '+(p.category==='medicamento'?'bm1':'bm2')+' absolute top-3 left-3">'+(p.category==='medicamento'?'Medicamento':'PC')+'</span>'+(o?'<div class="absolute inset-0 bg-black/50 flex items-center justify-center"><span class="text-white font-bold text-sm bg-red-500 px-4 py-2 rounded-lg">Agotado</span></div>':'')+'</div><div class="pcb"><h3 class="font-semibold text-[.93rem] mb-1 leading-tight" style="min-height:2.5em">'+p.name+'</h3><p class="text-gray-400 text-xs mb-3" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+p.desc+'</p><div class="flex items-end justify-between"><div><span class="font-heading font-extrabold text-xl" style="color:var(--pri)">'+fm(p.price)+'</span><span class="text-xs text-gray-400 block mt-0.5">'+p.stock+' disp.</span></div><button onclick="aC(\''+p.id+'\')" class="bt btp bts '+(o?'opacity-40 pointer-events-none':'')+'" '+(o?'disabled':'')+'><i class="fas fa-plus"></i> Agregar</button></div></div></div>'}
+    // PANEL ADMIN
+    function toggleAdminPanel() {
+        const panel = document.getElementById('admin-panel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        if (panel.style.display === 'block') {
+            cargarImagenesDisponibles();
+        }
+    }
 
-// === ZONA DE SUBIDA HTML (CORREGIDA) ===
-function upzHTML(prevId,hint){return'<div class="uz-wrap"><div class="uz-prev" id="'+prevId+'"><i class="fas fa-cloud-upload-alt text-3xl text-gray-300 mb-2"></i><p class="text-sm text-gray-500">'+(hint||'Clic para subir imagen')+'</p><p class="text-xs text-gray-400 mt-1">Max 5MB</p></div><input type="file" accept="image/*" name="file" onchange="pvImg(this,\''+prevId+'\')"></div>'}
+    // CHATBOT
+    function toggleChat() {
+        const chatWindow = document.getElementById('chatbot-window');
+        chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
+    }
 
-// === VISTAS ===
-function vHo(){var a=ad(),sl=S.cr,ft=S.pr.filter(function(p){return p.feat}).slice(0,8);var ch='';if(sl.length>0){ch='<div class="cw" onmouseenter="eCT()" onmouseleave="sCT()"><div class="ctk" id="ctrk">'+sl.map(function(s){return'<div class="csl">'+imgTag(s.image,s.title,'')+'<div class="cgr"></div><div class="ctx"><h2>'+s.title+'</h2><p>'+s.subtitle+'</p><button onclick="go(\'products\')" class="bt bta mt-4"><i class="fas fa-shopping-bag"></i> Ver productos</button></div>'+(a?'<button class="arm" onclick="event.stopPropagation();rSl(\''+s.id+'\')" title="Quitar"><i class="fas fa-times"></i></button>':'')+'</div>'}).join('')+'</div>'+(sl.length>1?'<button class="car pv" onclick="event.stopPropagation();S.ci=(S.ci-1+'+sl.length+')%'+sl.length+';mC();sCT()"><i class="fas fa-chevron-left"></i></button><button class="car nx" onclick="event.stopPropagation();S.ci=(S.ci+1)%'+sl.length+';mC();sCT()"><i class="fas fa-chevron-right"></i></button><div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2 z-10">'+sl.map(function(_,i){return'<button class="cdt '+(i===0?'on':'')+'" onclick="event.stopPropagation();S.ci='+i+';mC();sCT()"></button>'}).join('')+'</div>':'')+(a?'<button class="aad" onclick="event.stopPropagation();omSlM()" title="Agregar diapositiva"><i class="fas fa-plus"></i></button>':'')+'</div>'}else{ch='<div class="cw flex items-center justify-center" style="height:40vh;background:linear-gradient(135deg,#0f766e,#134e4a)"><div class="text-center text-white"><i class="fas fa-images text-4xl mb-3 opacity-60"></i><p class="text-lg opacity-80">Sin diapositivas</p>'+(a?'<button onclick="omSlM()" class="bt bta mt-4"><i class="fas fa-plus"></i> Agregar</button>':'')+'</div></div>'}
-return ch+'<section class="max-w-7xl mx-auto px-4 sm:px-6 -mt-10 relative z-10 mb-16"><div class="grid grid-cols-1 md:grid-cols-2 gap-5"><div class="ccc" style="background:linear-gradient(135deg,#0d9488,#115e59)" onclick="S.fc=\'medicamento\';go(\'products\')"><div class="relative z-10"><div class="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center mb-4"><i class="fas fa-pills text-2xl text-white"></i></div><h3 class="font-heading font-bold text-2xl mb-2">Medicamentos</h3><p class="text-sm opacity-80 mb-3">Productos farmaceuticos de calidad</p><span class="text-sm font-semibold opacity-90">Explorar <i class="fas fa-arrow-right ml-1"></i></span></div></div><div class="ccc" style="background:linear-gradient(135deg,#f97316,#c2410c)" onclick="S.fc=\'pc\';go(\'products\')"><div class="relative z-10"><div class="w-14 h-14 rounded-2xl bg-white/15 flex items-center justify-center mb-4"><i class="fas fa-microchip text-2xl text-white"></i></div><h3 class="font-heading font-bold text-2xl mb-2">Componentes PC</h3><p class="text-sm opacity-80 mb-3">Piezas de alta gama</p><span class="text-sm font-semibold opacity-90">Explorar <i class="fas fa-arrow-right ml-1"></i></span></div></div></div></section><section class="max-w-7xl mx-auto px-4 sm:px-6 mb-20 relative"><div class="dk" style="width:400px;height:400px;background:rgba(13,148,136,.06);top:-100px;right:-100px"></div><div class="flex items-end justify-between mb-8 flex-wrap gap-3"><div><h2 class="font-heading font-extrabold text-3xl mb-1">Productos Destacados</h2><p class="text-gray-500 text-sm">Lo mas buscado</p></div><div class="flex gap-3">'+(a?'<a href="#" onclick="go(\'adm_prod\');return false" class="inline-flex items-center gap-2 text-sm font-semibold text-orange-500 hover:underline"><i class="fas fa-cog"></i> Gestionar</a>':'')+'<a href="#" onclick="S.fc=\'todos\';go(\'products\');return false" class="hidden sm:inline-flex items-center gap-2 text-sm font-semibold hover:underline" style="color:var(--pri)">Ver todos <i class="fas fa-arrow-right text-xs"></i></a></div></div>'+(ft.length>0?'<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">'+ft.map(function(p,i){return pC(p,i)}).join('')+'</div>':'<div class="text-center py-16 bg-white rounded-2xl border border-gray-100"><i class="fas fa-star text-4xl text-gray-300 mb-3"></i><p class="text-gray-400">'+(a?'No hay destacados. Ve a Gestionar y activa la estrella.':'Sin destacados.')+'</p></div>')+'</section><section class="py-16" style="background:linear-gradient(135deg,#f0fdfa,#ecfdf5)"><div class="max-w-7xl mx-auto px-4 sm:px-6"><h2 class="font-heading font-extrabold text-3xl text-center mb-12">Por que elegirnos</h2><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">'+[{i:'fa-truck-fast',t:'Envio a Domicilio',d:'Recibe en tu puerta'},{i:'fa-shield-halved',t:'Productos Garantizados',d:'Originales y verificados'},{i:'fa-tags',t:'Precios Competitivos',d:'Mejores tarifas'},{i:'fa-headset',t:'Atencion Personalizada',d:'Te ayudamos siempre'}].map(function(f,i){return'<div class="bg-white rounded-2xl p-7 text-center border border-gray-100 fu d'+(i+1)+'" style="box-shadow:0 4px 20px rgba(0,0,0,.04)"><div class="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center text-2xl" style="background:var(--pri-l);color:var(--pri)"><i class="fas '+f.i+'"></i></div><h3 class="font-heading font-bold text-lg mb-2">'+f.t+'</h3><p class="text-gray-500 text-sm leading-relaxed">'+f.d+'</p></div>'}).join('')+'</div></div></section>'}
+    function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const messages = document.getElementById('chat-messages');
+        const text = input.value.trim();
+        if (!text) return;
 
-function vPr(){var ps=S.pr.slice();if(S.fc!=='todos')ps=ps.filter(function(p){return p.category===S.fc});if(S.sq.trim()){var q=S.sq.toLowerCase();ps=ps.filter(function(p){return p.name.toLowerCase().includes(q)||p.desc.toLowerCase().includes(q)})}return'<section class="max-w-7xl mx-auto px-4 sm:px-6 py-10"><div class="mb-8"><h1 class="font-heading font-extrabold text-3xl mb-1">Catalogo</h1></div><div class="flex flex-col sm:flex-row gap-4 mb-8"><div class="relative flex-1 max-w-md"><i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i><input type="text" class="fi pl-11" placeholder="Buscar..." value="'+S.sq+'" oninput="S.sq=this.value;rAll()"></div><div class="flex gap-2 flex-wrap">'+['todos','medicamento','pc'].map(function(c){return'<button onclick="S.fc=\''+c+'\';rAll()" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition border-2 '+(S.fc===c?'border-teal-600 bg-teal-50 text-teal-700':'border-gray-200 bg-white text-gray-500 hover:border-gray-300')+'">'+(c==='todos'?'Todos':c==='medicamento'?'Medicamentos':'Componentes PC')+'</button>'}).join('')+'</div></div>'+(ps.length>0?'<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">'+ps.map(function(p,i){return pC(p,i)}).join('')+'</div>':'<div class="text-center py-20"><i class="fas fa-search text-5xl text-gray-300 mb-4"></i><p class="text-gray-400">Sin resultados</p><button onclick="S.fc=\'todos\';S.sq=\'\';rAll()" class="bt bto mt-4">Limpiar</button></div>')+'</section>'}
+        messages.innerHTML += `<div class="msg-user">${text}</div>`;
+        input.value = '';
 
-function vCr(){if(!S.u){go('login');return''}if(S.ca.length===0)return'<section class="max-w-3xl mx-auto px-4 sm:px-6 py-16 text-center"><div class="w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center" style="background:var(--pri-l)"><i class="fas fa-shopping-cart text-4xl" style="color:var(--pri)"></i></div><h2 class="font-heading font-extrabold text-2xl mb-2">Carrito vacio</h2><button onclick="go(\'products\')" class="bt btp mt-4"><i class="fas fa-box"></i> Ver productos</button></section>';var r=cT();return'<section class="max-w-6xl mx-auto px-4 sm:px-6 py-10"><h1 class="font-heading font-extrabold text-3xl mb-8">Mi Carrito</h1><div class="grid grid-cols-1 lg:grid-cols-3 gap-8"><div class="lg:col-span-2 space-y-4">'+S.ca.map(function(c){var p=S.pr.find(function(x){return x.id===c.pid});if(!p)return'';return'<div class="bg-white rounded-2xl p-4 sm:p-5 flex gap-4 items-center border border-gray-100 fu">'+imgTag(p.image,p.name,'w-20 h-20 rounded-xl object-cover flex-shrink-0')+'<div class="flex-1 min-w-0"><h3 class="font-semibold text-sm truncate">'+p.name+'</h3><span class="text-xs font-bold" style="color:var(--pri)">'+fm(p.price)+'</span></div><div class="flex items-center gap-2"><button onclick="uQ(\''+p.id+'\',-1)" class="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50"><i class="fas fa-minus text-xs"></i></button><span class="w-8 text-center font-semibold text-sm">'+c.q+'</span><button onclick="uQ(\''+p.id+'\',1)" class="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50"><i class="fas fa-plus text-xs"></i></button></div><div class="text-right min-w-[80px]"><span class="font-heading font-bold">'+fm(p.price*c.q)+'</span></div><button onclick="rC(\''+p.id+'\')" class="text-gray-300 hover:text-red-500 p-1"><i class="fas fa-trash-alt"></i></button></div>'}).join('')+'</div><div><div class="bg-white rounded-2xl p-6 border border-gray-100 sticky top-24" style="box-shadow:0 4px 20px rgba(0,0,0,.04)"><h3 class="font-heading font-bold text-lg mb-5">Resumen</h3><div class="space-y-3 text-sm mb-5"><div class="flex justify-between"><span class="text-gray-500">Subtotal</span><span>'+fm(r.s)+'</span></div><div class="flex justify-between"><span class="text-gray-500">Envio</span><span>'+fm(r.e)+'</span></div><div class="border-t border-gray-100 pt-3 flex justify-between"><span class="font-semibold">Total</span><span class="font-heading font-extrabold text-xl" style="color:var(--pri)">'+fm(r.t)+'</span></div></div><div class="bg-gray-50 rounded-xl p-4 mb-5 space-y-2 text-sm"><div class="flex items-start gap-2"><i class="fas fa-map-marker-alt mt-0.5" style="color:var(--pri)"></i><span class="text-gray-600">'+S.u.address+'</span></div><div class="flex items-center gap-2"><i class="fas fa-phone" style="color:var(--pri)"></i><span class="text-gray-600">'+S.u.phone+'</span></div></div><button onclick="doCk()" class="bt bta w-full justify-center text-base"><i class="fas fa-check"></i> Confirmar Pedido</button></div></div></div></section>'}
+        setTimeout(() => {
+            let response = knowledgeBase["default"];
+            const lowerText = text.toLowerCase();
+            
+            for (let key in knowledgeBase) {
+                if (lowerText.includes(key)) {
+                    response = knowledgeBase[key];
+                    break;
+                }
+            }
+            
+            const foundProduct = products.find(p => 
+                lowerText.includes(p.name.toLowerCase())
+            );
+            if (foundProduct && response === knowledgeBase["default"]) {
+                response = `Sobre <b>${foundProduct.name}</b> (${foundProduct.category}): ${foundProduct.desc}`;
+            }
 
-function vLi(){return'<section class="min-h-[80vh] flex items-center justify-center px-4 py-12"><div class="w-full max-w-md bg-white rounded-3xl p-8 sm:p-10 border border-gray-100 fu" style="box-shadow:0 8px 40px rgba(0,0,0,.06)"><div class="text-center mb-8"><div class="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center text-2xl text-white" style="background:linear-gradient(135deg,var(--pri),var(--acc))"><i class="fas fa-user"></i></div><h1 class="font-heading font-extrabold text-2xl">Iniciar Sesion</h1></div><form id="lf" class="space-y-4" novalidate><div><label class="fl">Usuario</label><input type="text" name="username" class="fi" required></div><div><label class="fl">Contrasena</label><input type="password" name="password" class="fi" required></div><button type="submit" class="bt btp w-full justify-center text-base mt-2">Ingresar</button></form><p class="text-center text-sm text-gray-400 mt-6">No tienes cuenta? <a href="#" onclick="go(\'register\');return false" class="font-semibold hover:underline" style="color:var(--pri)">Registrate</a></p></div></section>'}
+            messages.innerHTML += `<div class="msg-bot">${response}</div>`;
+            messages.scrollTop = messages.scrollHeight;
+        }, 600);
+        
+        messages.scrollTop = messages.scrollHeight;
+    }
 
-function vRg(){return'<section class="min-h-[80vh] flex items-center justify-center px-4 py-12"><div class="w-full max-w-lg bg-white rounded-3xl p-8 sm:p-10 border border-gray-100 fu" style="box-shadow:0 8px 40px rgba(0,0,0,.06)"><div class="text-center mb-8"><div class="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center text-2xl text-white" style="background:linear-gradient(135deg,var(--acc),#dc2626)"><i class="fas fa-user-plus"></i></div><h1 class="font-heading font-extrabold text-2xl">Crear Cuenta</h1></div><form id="rf" class="space-y-4" novalidate><div><label class="fl">Nombre completo</label><input type="text" name="fullName" class="fi" required></div><div><label class="fl">Usuario</label><input type="text" name="username" class="fi" required></div><div><label class="fl">Direccion</label><input type="text" name="address" class="fi" required></div><div><label class="fl">Telefono</label><input type="tel" name="phone" class="fi" required></div><div class="grid grid-cols-2 gap-4"><div><label class="fl">Contrasena</label><input type="password" name="password" class="fi" required></div><div><label class="fl">Confirmar</label><input type="password" name="password2" class="fi" required></div></div><button type="submit" class="bt bta w-full justify-center text-base mt-2">Crear Cuenta</button></form><p class="text-center text-sm text-gray-400 mt-6">Ya tienes cuenta? <a href="#" onclick="go(\'login\');return false" class="font-semibold hover:underline" style="color:var(--pri)">Inicia sesion</a></p></div></section>'}
-
-function vAP(){var sorted=S.pr.slice().sort(function(a,b){return(b.feat?1:0)-(a.feat?1:0)});return'<section class="max-w-7xl mx-auto px-4 sm:px-6 py-10"><div class="flex items-center justify-between mb-8 flex-wrap gap-4"><div><h1 class="font-heading font-extrabold text-3xl mb-1">Gestionar Productos</h1><p class="text-gray-500 text-sm">'+S.pr.length+' productos</p></div><button onclick="omPrdM()" class="bt bta"><i class="fas fa-plus"></i> Nuevo Producto</button></div><div class="bg-white rounded-2xl border border-gray-100 overflow-x-auto" style="box-shadow:0 2px 16px rgba(0,0,0,.04)"><table class="otb"><thead><tr><th>Img</th><th>Nombre</th><th>Cat.</th><th>Precio</th><th>Stock</th><th>Portada</th><th>Acciones</th></tr></thead><tbody>'+sorted.map(function(p){return'<tr><td>'+imgTag(p.image,p.name,'w-14 h-14 rounded-lg object-cover')+'</td><td class="font-medium text-sm max-w-[180px] truncate">'+p.name+'</td><td><span class="bgm '+(p.category==='medicamento'?'bm1':'bm2')+'">'+(p.category==='medicamento'?'Med.':'PC')+'</span></td><td class="font-heading font-bold" style="color:var(--pri)">'+fm(p.price)+'</td><td>'+p.stock+'</td><td><button class="sbb '+(p.feat?'so':'sf')+'" onclick="tFt(\''+p.id+'\')"><i class="fas fa-star"></i></button></td><td class="flex gap-2"><button onclick="omEdM(\''+p.id+'\')" class="bt btp bts text-xs px-3"><i class="fas fa-edit"></i></button><button onclick="omDlM(\''+p.id+'\')" class="bt btd bts text-xs px-3"><i class="fas fa-trash"></i></button></td></tr>'}).join('')+'</tbody></table></div></section>'}
-
-function vAO(){var sorted=S.or.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date)});return'<section class="max-w-7xl mx-auto px-4 sm:px-6 py-10"><div class="flex items-center justify-between mb-8 flex-wrap gap-4"><div><h1 class="font-heading font-extrabold text-3xl mb-1">Pedidos</h1><p class="text-gray-500 text-sm">'+sorted.length+' pedidos</p></div><span class="text-xs font-bold px-3 py-1.5 rounded-full text-white" style="background:var(--acc)">ADMIN</span></div>'+(sorted.length>0?'<div class="bg-white rounded-2xl border border-gray-100 overflow-x-auto" style="box-shadow:0 2px 16px rgba(0,0,0,.04)"><table class="otb"><thead><tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>'+sorted.map(function(o){return'<tr><td class="font-mono text-xs text-gray-400">'+o.id.substr(0,10)+'</td><td class="text-xs text-gray-500 whitespace-nowrap">'+new Date(o.date).toLocaleDateString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})+'</td><td class="font-medium text-sm">'+o.un+'</td><td class="font-heading font-bold" style="color:var(--pri)">'+fm(o.t)+'</td><td><span class="text-xs font-semibold px-3 py-1 rounded-full '+(o.status==='pendiente'?'sp1':o.status==='en_camino'?'sp2':'sp3')+'">'+o.status.replace('_',' ')+'</span></td><td><select onchange="cSt(\''+o.id+'\',this.value)" class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none"><option value="pendiente" '+(o.status==='pendiente'?'selected':'')+'>Pendiente</option><option value="en_camino" '+(o.status==='en_camino'?'selected':'')+'>En camino</option><option value="entregado" '+(o.status==='entregado'?'selected':'')+'>Entregado</option></select></td></tr>'}).join('')+'</tbody></table></div>':'<div class="text-center py-20 text-gray-400">Sin pedidos</div>')+'</section>'}
-
-function vAu(){if(!ad())return'<section class="max-w-4xl mx-auto px-4 py-20 text-center"><i class="fas fa-lock text-5xl text-gray-300 mb-4"></i><p class="text-gray-400">Acceso restringido</p></section>';var sorted=S.au.slice().sort(function(a,b){return new Date(b.date)-new Date(a.date)});var st={v:0,r:0,l:0,p:0,pr:0};sorted.forEach(function(x){if(x.type==='visita')st.v++;if(x.type==='registro')st.r++;if(x.type==='login')st.l++;if(x.type==='pedido')st.p++;if(x.type==='producto')st.pr++});return'<section class="max-w-7xl mx-auto px-4 sm:px-6 py-10"><div class="mb-8"><h1 class="font-heading font-extrabold text-3xl mb-1">Panel de Auditoria</h1></div><div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">'+[{l:'Visitas',v:st.v,i:'fa-eye',c:'bg-teal-50 text-teal-700'},{l:'Registros',v:st.r,i:'fa-user-plus',c:'bg-blue-50 text-blue-700'},{l:'Logins',v:st.l,i:'fa-sign-in-alt',c:'bg-purple-50 text-purple-700'},{l:'Pedidos',v:st.p,i:'fa-shopping-bag',c:'bg-orange-50 text-orange-700'},{l:'Cambios Prod.',v:st.pr,i:'fa-box',c:'bg-pink-50 text-pink-700'}].map(function(s){return'<div class="rounded-2xl p-5 '+s.c+'"><i class="fas '+s.i+' text-2xl mb-2 opacity-70"></i><div class="font-heading font-extrabold text-3xl">'+s.v+'</div><div class="text-sm opacity-70 mt-1">'+s.l+'</div></div>'}).join('')+'</div><div class="bg-white rounded-2xl border border-gray-100 overflow-hidden" style="box-shadow:0 2px 16px rgba(0,0,0,.04)"><div class="p-4 border-b border-gray-100 flex items-center justify-between"><h3 class="font-heading font-bold">Registro Detallado</h3><span class="text-xs text-gray-400">'+sorted.length+' eventos</span></div>'+(sorted.length>0?'<div class="overflow-x-auto max-h-[500px] overflow-y-auto"><table class="otb"><thead style="position:sticky;top:0;z-index:2"><tr><th>Fecha/Hora</th><th>Tipo</th><th>Detalle</th></tr></thead><tbody>'+sorted.map(function(l){var cols={visita:'bg-gray-100 text-gray-700',registro:'bg-blue-100 text-blue-700',login:'bg-purple-100 text-purple-700',pedido:'bg-orange-100 text-orange-700',producto:'bg-pink-100 text-pink-700',carrusel:'bg-teal-100 text-teal-700'};return'<tr><td class="text-xs text-gray-500 whitespace-nowrap">'+new Date(l.date).toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'})+'<br>'+new Date(l.date).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'</td><td><span class="text-xs font-semibold px-2.5 py-1 rounded-full '+(cols[l.type]||'bg-gray-100 text-gray-700')+'">'+l.type+'</span></td><td class="text-sm text-gray-600">'+l.detail+'</td></tr>'}).join('')+'</tbody></table></div>':'<div class="p-10 text-center text-gray-400">Sin eventos</div>')+'</div></section>'}
-
-function vUO(){var my=S.or.filter(function(o){return o.uid===S.u.id}).sort(function(a,b){return new Date(b.date)-new Date(a.date)});return'<section class="max-w-4xl mx-auto px-4 sm:px-6 py-10"><h1 class="font-heading font-extrabold text-3xl mb-2">Mis Pedidos</h1><p class="text-gray-500 text-sm mb-8">Historial</p>'+(my.length>0?'<div class="space-y-4">'+my.map(function(o){return'<div class="bg-white rounded-2xl p-5 sm:p-6 border border-gray-100"><div class="flex flex-wrap items-center justify-between gap-3 mb-4"><div><span class="font-mono text-xs text-gray-400">'+o.id.substr(0,14)+'</span><span class="text-sm text-gray-500 ml-3">'+new Date(o.date).toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'})+'</span></div><span class="text-xs font-semibold px-3 py-1 rounded-full '+(o.status==='pendiente'?'sp1':o.status==='en_camino'?'sp2':'sp3')+'">'+o.status.replace('_',' ')+'</span></div><div class="space-y-2 mb-4">'+o.items.map(function(i){return'<div class="flex justify-between text-sm"><span class="text-gray-600">'+i.name+' x'+i.q+'</span><span class="font-medium">'+fm(i.sub)+'</span></div>'}).join('')+'</div><div class="border-t border-gray-100 pt-3 flex flex-wrap justify-between items-center gap-2 text-sm"><div class="text-gray-400"><i class="fas fa-map-marker-alt mr-1"></i> '+o.addr+'</div><span class="font-heading font-extrabold text-lg" style="color:var(--pri)">'+fm(o.t)+'</span></div></div>'}).join('')+'</div>':'<div class="text-center py-20"><i class="fas fa-receipt text-5xl text-gray-300 mb-4"></i><p class="text-gray-400">Sin pedidos</p><button onclick="go(\'products\')" class="bt btp mt-4"><i class="fas fa-box"></i> Ver productos</button></div>')+'</section>'}
-
-function rFt(){$('#ft').innerHTML='<footer class="mt-12 border-t border-gray-200" style="background:#111827"><div class="max-w-7xl mx-auto px-4 sm:px-6 py-12"><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10"><div><div class="flex items-center gap-2 mb-4"><div class="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm" style="background:linear-gradient(135deg,var(--pri),var(--acc))">M</div><span class="font-heading font-extrabold text-lg text-white">MediTech</span></div><p class="text-gray-400 text-sm">Tu tienda de confianza.</p></div><div><h4 class="text-white font-semibold text-sm mb-4 uppercase">Navegacion</h4><ul class="space-y-2 text-sm text-gray-400"><li><a href="#" onclick="go(\'home\');return false" class="hover:text-white transition">Inicio</a></li><li><a href="#" onclick="go(\'products\');return false" class="hover:text-white transition">Productos</a></li></ul></div><div><h4 class="text-white font-semibold text-sm mb-4 uppercase">Categorias</h4><ul class="space-y-2 text-sm text-gray-400"><li><a href="#" onclick="S.fc=\'medicamento\';go(\'products\');return false" class="hover:text-white transition">Medicamentos</a></li><li><a href="#" onclick="S.fc=\'pc\';go(\'products\');return false" class="hover:text-white transition">Componentes PC</a></li></ul></div><div><h4 class="text-white font-semibold text-sm mb-4 uppercase">Contacto</h4><ul class="space-y-3 text-sm text-gray-400"><li class="flex items-center gap-2"><i class="fas fa-phone w-4 text-center" style="color:var(--pri)"></i> +52 55 1234 5678</li><li class="flex items-center gap-2"><i class="fas fa-envelope w-4 text-center" style="color:var(--pri)"></i> contacto@meditech.com</li></ul></div></div><div class="border-t border-gray-800 pt-6 text-center text-xs text-gray-500">&copy; '+new Date().getFullYear()+' MediTech.</div></div></footer>'}
-
-// === MODALES (CORREGIDOS con zona de subida arreglada) ===
-function omSlM(){om('<div class="flex items-center justify-between mb-6"><h2 class="font-heading font-bold text-xl">Agregar Diapositiva</h2><button onclick="cm()" class="text-gray-400 hover:text-gray-700 text-xl"><i class="fas fa-times"></i></button></div><form id="slf" class="space-y-4" novalidate><div><label class="fl">Imagen</label>'+upzHTML('slp','Clic para subir imagen del banner')+'</div><div class="text-center text-xs text-gray-400">-- o pega URL --</div><div><input type="url" name="imageUrl" class="fi" placeholder="https://..."></div><div><label class="fl">Titulo</label><input type="text" name="title" class="fi" required></div><div><label class="fl">Subtitulo</label><input type="text" name="subtitle" class="fi"></div><button type="submit" class="bt btp w-full justify-center"><i class="fas fa-plus"></i> Agregar</button></form>');setTimeout(function(){$('#slf').addEventListener('submit',function(e){e.preventDefault();var fd=new FormData(e.target);aSl({file:e.target.querySelector('input[type="file"]').files[0],image:fd.get('imageUrl'),title:fd.get('title'),subtitle:fd.get('subtitle')})})},50)}
-function omPrdM(){om('<div class="flex items-center justify-between mb-6"><h2 class="font-heading font-bold text-xl">Nuevo Producto</h2><button onclick="cm()" class="text-gray-400 hover:text-gray-700 text-xl"><i class="fas fa-times"></i></button></div><form id="pf" class="space-y-4" novalidate><div><label class="fl">Foto del producto</label>'+upzHTML('pp','Sube foto del producto')+'</div><div class="text-center text-xs text-gray-400">-- o pega URL --</div><div><input type="url" name="imageUrl" class="fi" placeholder="https://..."></div><div><label class="fl">Nombre</label><input type="text" name="name" class="fi" required></div><div><label class="fl">Descripcion</label><textarea name="desc" class="fi" rows="2"></textarea></div><div class="grid grid-cols-3 gap-4"><div><label class="fl">Precio</label><input type="number" name="price" class="fi" min="1" required></div><div><label class="fl">Stock</label><input type="number" name="stock" class="fi" min="0" required></div><div><label class="fl">Categoria</label><select name="category" class="fi"><option value="medicamento">Medicamento</option><option value="pc">Componente PC</option></select></div></div><div class="flex items-center gap-3"><input type="checkbox" name="featured" id="ftck" class="w-4 h-4 accent-teal-600 rounded"><label for="ftck" class="text-sm cursor-pointer">Mostrar en portada</label></div><button type="submit" class="bt btp w-full justify-center"><i class="fas fa-plus"></i> Agregar</button></form>');setTimeout(function(){$('#pf').addEventListener('submit',function(e){e.preventDefault();sPrd(e.target,null)})},50)}
-function omEdM(pid){var p=S.pr.find(function(x){return x.id===pid});if(!p)return;om('<div class="flex items-center justify-between mb-6"><h2 class="font-heading font-bold text-xl">Editar Producto</h2><button onclick="cm()" class="text-gray-400 hover:text-gray-700 text-xl"><i class="fas fa-times"></i></button></div><form id="ef" class="space-y-4" novalidate><div><label class="fl">Foto actual</label><div class="uz-wrap"><div class="uz-prev" id="ep">'+imgTag(p.image,p.name,'max-h-[130px] rounded-lg object-contain')+'</div><input type="file" accept="image/*" name="file" onchange="pvImg(this,\'ep\')"></div><p class="text-xs text-gray-400 mt-1">Sube nueva imagen para reemplazar</p></div><div class="text-center text-xs text-gray-400">-- o nueva URL --</div><div><input type="url" name="imageUrl" class="fi" placeholder="Dejar vacio para mantener actual"></div><div><label class="fl">Nombre</label><input type="text" name="name" class="fi" value="'+p.name+'" required></div><div><label class="fl">Descripcion</label><textarea name="desc" class="fi" rows="2">'+p.desc+'</textarea></div><div class="grid grid-cols-3 gap-4"><div><label class="fl">Precio</label><input type="number" name="price" class="fi" value="'+p.price+'" min="1" required></div><div><label class="fl">Stock</label><input type="number" name="stock" class="fi" value="'+p.stock+'" min="0" required></div><div><label class="fl">Categoria</label><select name="category" class="fi"><option value="medicamento" '+(p.category==='medicamento'?'selected':'')+'>Medicamento</option><option value="pc" '+(p.category==='pc'?'selected':'')+'>Componente PC</option></select></div></div><div class="flex items-center gap-3"><input type="checkbox" name="featured" id="ftck2" class="w-4 h-4 accent-teal-600 rounded" '+(p.feat?'checked':'')+'><label for="ftck2" class="text-sm cursor-pointer">Mostrar en portada</label></div><button type="submit" class="bt btp w-full justify-center"><i class="fas fa-save"></i> Guardar</button></form>');setTimeout(function(){$('#ef').addEventListener('submit',function(e){e.preventDefault();sPrd(e.target,pid)})},50)}
-function omDlM(pid){var p=S.pr.find(function(x){return x.id===pid});if(!p)return;om('<div class="text-center"><div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center bg-red-100"><i class="fas fa-trash-alt text-2xl text-red-500"></i></div><h2 class="font-heading font-bold text-xl mb-2">Eliminar?</h2><p class="text-gray-500 text-sm mb-6">Eliminaras <strong>'+p.name+'</strong>.</p><div class="flex gap-3 justify-center"><button onclick="cm()" class="bt bto">Cancelar</button><button onclick="dPrd(\''+pid+'\')" class="bt btd"><i class="fas fa-trash"></i> Eliminar</button></div></div>')}
-
-function oMm(){$('#mmn').classList.add('op');$('#movl').classList.add('op');document.body.style.overflow='hidden'}
-function cMm(){$('#mmn').classList.remove('op');$('#movl').classList.remove('op');document.body.style.overflow=''}
-function hSc(){var n=$('#nav');if(!n)return;if(window.scrollY>30){n.style.background='rgba(255,255,255,.92)';n.style.backdropFilter='blur(12px)';n.style.boxShadow='0 1px 12px rgba(0,0,0,.06)'}else{n.style.background='transparent';n.style.backdropFilter='none';n.style.boxShadow='none'}}
-
-/* === CHATBOT NLP LOCAL === */
-var CB={open:false,msgs:[]};
-function norm(t){return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim()}
-function fPr(q){var nq=norm(q),w=nq.split(' ').filter(function(x){return x.length>1});var r=[];S.pr.forEach(function(p){var nn=norm(p.name),nd=norm(p.desc),sc=0;w.forEach(function(x){if(nn.indexOf(x)>=0)sc+=3;if(nd.indexOf(x)>=0)sc+=1;nn.split(' ').forEach(function(y){if(y===x||(y.length>3&&x.length>3&&(y.indexOf(x)>=0||x.indexOf(y)>=0)))sc+=2})});if(sc>0)r.push({p:p,score:sc})});r.sort(function(a,b){return b.score-a.score});return r.map(function(x){return x.p})}
-function dI(msg){var n=norm(msg);var rules=[{t:'saludo',w:['hola','buenos dias','buenas tardes','buenas noches','que tal','hey','saludos','hi','buen dia']},{t:'despedida',w:['adios','bye','hasta luego','nos vemos','chao','chau','me voy']},{t:'gracias',w:['gracias','muchas gracias','genial','perfecto','excelente']},{t:'precio',w:['precio','cuesta','cuanto cuesta','cuanto vale','costo','valor']},{t:'stock',w:['stock','disponible','hay','tienen','queda','quedan','existencia']},{t:'catm',w:['medicamento','medicamentos','medicina','farmacia','pastilla','tableta','capsula']},{t:'catp',w:['pc','computadora','componente','pieza','tarjeta','procesador','ram','disco','fuente','gabinete','cooler','placa','gpu','ssd']},{t:'envio',w:['envio','domicilio','entrega','despacho','envian','llega','cuanto tarda']},{t:'pago',w:['pago','pagar','forma de pago','metodo de pago','tarjeta','efectivo','transferencia']},{t:'registro',w:['registrarme','registro','crear cuenta','cuenta nueva']},{t:'pedido',w:['pedido','pedidos','mi pedido','ver pedido','rastrear','estado']},{t:'carrito',w:['carrito','agregar al carrito','comprar','compra']},{t:'busqueda',w:['buscar','busco','necesito','quiero','dame','muestrame','tienen de']},{t:'contacto',w:['contacto','telefono','whatsapp','direccion','ubicacion','horario']},{t:'ayuda',w:['ayuda','help','que puedes','que haces','funciones','que sabes']}];var best={t:'desc',s:0};rules.forEach(function(r){var sc=0;r.w.forEach(function(x){if(n.indexOf(x)>=0)sc+=1});if(sc>best.s)best={t:r.t,s:sc}});return best.t}
-function gR(msg){var it=dI(msg),pr=fPr(msg);switch(it){case'saludo':return{txt:'Hola! Bienvenido a MediTech. En que puedo ayudarte?',prods:[],quick:['Medicamentos','Componentes PC','Precios','Envio']};case'despedida':return{txt:'Hasta luego! Fue un placer ayudarte.',prods:[],quick:[]};case'gracias':return{txt:'Con mucho gusto! Algo mas?',prods:[],quick:['Buscar producto','Contacto']};case'precio':if(pr.length>0)return{txt:pr[0].name+': '+fm(pr[0].price)+'.',prods:pr.slice(0,2),quick:['Stock','Ver mas']};return{txt:'Dime que producto buscas y te dare el precio.',prods:[],quick:['Medicamentos','Componentes PC']};case'stock':if(pr.length>0){var p=pr[0];return{txt:p.name+': '+(p.stock>0?p.stock+' unidades disponibles.':'Agotado.'),prods:pr.slice(0,2),quick:['Precio','Ver mas']}}return{txt:'Dime que producto necesitas y reviso el stock.',prods:[],quick:[]};case'catm':var m=S.pr.filter(function(p){return p.category==='medicamento'});return{txt:'Tenemos '+m.length+' medicamentos:',prods:m.slice(0,3),quick:['Ver todos','Precios','Componentes PC']};case'catp':var p2=S.pr.filter(function(x){return x.category==='pc'});return{txt:'Tenemos '+p2.length+' componentes:',prods:p2.slice(0,3),quick:['Ver todos','Precios','Medicamentos']};case'envio':return{txt:'Envio a domicilio por $49. Entrega en 1-3 dias habiles.',prods:[],quick:['Pago','Como comprar','Contacto']};case'pago':return{txt:'Aceptamos pago contra entrega (efectivo) y transferencia bancaria.',prods:[],quick:['Envio','Como comprar']};case'registro':return{txt:'Haz clic en "Registrarse" en el menu. Necesitas nombre, usuario, direccion, telefono y contrasena.',prods:[],quick:['Iniciar sesion','Que puedo comprar?']};case'pedido':return S.u?{txt:'Ve a "Mis Pedidos" en el menu para ver el estado.',prods:[],quick:['Ver productos','Contacto']}:{txt:'Necesitas iniciar sesion para ver tus pedidos.',prods:[],quick:['Iniciar sesion','Registrarse']};case'carrito':return S.u?{txt:'Ve al catalogo, haz clic en "Agregar" y luego "Mi Carrito" para confirmar.',prods:[],quick:['Ver productos','Ver mi carrito']}:{txt:'Inicia sesion para usar el carrito.',prods:[],quick:['Iniciar sesion','Registrarse']};case'busqueda':if(pr.length>0)return{txt:'Encontre '+pr.length+' producto(s):',prods:pr.slice(0,3),quick:pr.length>3?['Ver mas','Otra busqueda']:['Precio','Stock']};return{txt:'No encontre productos. Intenta con otro termino.',prods:[],quick:['Medicamentos','Componentes PC']};case'contacto':return{txt:'Telefono: +52 55 1234 5678\nEmail: contacto@meditech.com\nHorario: Lun-Sab 8:00-20:00',prods:[],quick:['Ver productos','Envio']};case'ayuda':return{txt:'Puedo ayudarte con:\n- Buscar productos\n- Consultar precios y stock\n- Info sobre envios y pagos\n- Guiarte en el registro\n\nEscribe lo que necesites!',prods:[],quick:['Medicamentos','Componentes PC','Envio','Precios']};default:if(pr.length>0)return{txt:'Encontre esto:',prods:pr.slice(0,3),quick:['Ver mas','Otra busqueda']};return{txt:'No entendi bien. Puedo ayudar con productos, precios, stock, envios o registro.',prods:[],quick:['Medicamentos','Componentes PC','Envio','Ayuda']}}}
-function toggleCB(){CB.open=!CB.open;$('#cbw').classList.toggle('open',CB.open);$('#cbbdg').style.display=CB.open?'none':'flex';if(CB.open){$('#cbinp').focus();if(CB.msgs.length===0){CB.msgs.push({role:'bot',txt:'Hola! Soy el asistente de MediTech. Puedo buscar productos, precios y mas.',prods:[],quick:['Medicamentos','Componentes PC','Precios','Envio']});rCB()}sCB()}}
-function sendCB(txt){var inp=$('#cbinp');var msg=txt||inp.value.trim();if(!msg)return;inp.value='';CB.msgs.push({role:'usr',txt:msg});rCB();sCB();sTp();setTimeout(function(){hTp();try{var r=gR(msg);CB.msgs.push(r);rCB();sCB()}catch(e){CB.msgs.push({role:'bot',txt:'Hubo un error. Intenta de nuevo.',prods:[],quick:['Ayuda']});rCB();sCB()}},500+Math.random()*400)}
-function rCB(){var c=$('#cbms');c.innerHTML=CB.msgs.map(function(m){if(m.role==='usr')return'<div class="cb-msg usr">'+esc(m.txt)+'</div>';var h='<div class="cb-msg bot">'+esc(m.txt).replace(/\n/g,'<br>');if(m.prods&&m.prods.length>0)m.prods.forEach(function(p){h+='<div class="cb-pr">'+imgTag(p.image,p.name,'')+'<div><div class="font-semibold text-sm">'+esc(p.name)+'</div><div class="text-xs text-gray-500">'+esc(p.desc.substring(0,50))+'...</div><div class="font-bold text-sm mt-1" style="color:var(--pri)">'+fm(p.price)+' <span class="text-xs font-normal text-gray-400">('+p.stock+')</span></div></div></div>'});h+='</div>';return h}).join('');var qk=$('#cbqk');var last=CB.msgs[CB.msgs.length-1];if(last&&last.quick&&last.quick.length>0){qk.innerHTML=last.quick.map(function(q){return'<button onclick="sendCB(\''+q.replace(/'/g,"\\'")+'\')">'+q+'</button>'}).join('');qk.style.display='flex'}else qk.style.display='none'}
-function esc(t){var d=document.createElement('div');d.textContent=t;return d.innerHTML}
-function sCB(){var c=$('#cbms');setTimeout(function(){c.scrollTop=c.scrollHeight},50)}
-function sTp(){var d=document.createElement('div');d.id='cbty';d.className='cb-tp';d.innerHTML='<span></span><span></span><span></span>';$('#cbms').appendChild(d);sCB()}
-function hTp(){var t=$('#cbty');if(t)t.remove()}
-
-// === EVENTOS ===
-function initEv(){
-document.addEventListener('click',function(e){if(e.target.closest('#mbn')){oMm();return}if(e.target.closest('#mcl')||e.target.closest('#movl')){cMm();return}});
-document.addEventListener('submit',function(e){
-if(e.target.id==='lf'){e.preventDefault();var fd=new FormData(e.target);doLg(fd.get('username').trim(),fd.get('password'))}
-if(e.target.id==='rf'){e.preventDefault();var fd=new FormData(e.target);doRg({fn:fd.get('fullName').trim(),un:fd.get('username').trim(),ad:fd.get('address').trim(),ph:fd.get('phone').trim(),pw:fd.get('password'),p2:fd.get('password2')})}
-});
-$('#md').addEventListener('click',function(e){if(e.target===$('#md'))cm()});
-window.addEventListener('scroll',hSc,{passive:true});
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){cm();cMm();if(CB.open)toggleCB()}});
-$('#cbinp').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendCB()}})}
-
-// === INIT ===
-function init(){
-try{
-ld();
-if(!S.us.find(function(u){return u.username==='root'})){S.us.push({id:'root_id',fullName:'Administrador',username:'root',address:'Sistema',phone:'000',password:'Root*4815162342+-'});sv('us',S.us)}
-logAu('visita','Nueva visita a la pagina');
-initEv();
-rAll();
-}catch(er){
-console.error('Init:',er);
-document.body.innerHTML='<div style="padding:40px;text-align:center;font-family:Poppins,sans-serif;max-width:500px;margin:40px auto"><div style="width:80px;height:80px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;margin:0 auto 20px"><i class="fas fa-exclamation-triangle" style="font-size:36px;color:#f59e0b"></i></div><h1 style="font-size:24px;font-weight:700;margin-bottom:12px">Error al cargar</h1><p style="color:#6b7280;margin-bottom:20px">Los datos del navegador estan corruptos o el almacenamiento esta lleno.</p><p style="color:#374151;font-weight:600;margin-bottom:8px">Solucion:</p><ol style="text-align:left;color:#6b7280;font-size:14px;line-height:2;padding-left:20px"><li>Presiona <kbd style="background:#f3f4f6;padding:2px 8px;border-radius:4px;font-size:12px">F12</kbd> para abrir la consola</li><li>Pega esto y presiona Enter:</li></ol><code style="display:block;background:#1f2937;color:#4ade80;padding:16px;border-radius:12px;text-align:left;font-size:14px;margin:12px 0">localStorage.clear();<br>location.reload();</code></div>'
-}
-}
-document.addEventListener('DOMContentLoaded',init);
+    // INICIAR
+    cargarProductos();
 </script>
+
 </body>
 </html>
