@@ -2,7 +2,7 @@
   "usuarios": [
     {
       "username": "root",
-      "password": "admin123",
+      "password": "Root*4815162342+-",
       "name": "Administrador",
       "email": "admin@meditech.com",
       "role": "admin"
