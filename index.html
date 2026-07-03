@@ -434,7 +434,7 @@
 
     <script>
         // CONFIG GITHUB
-        const GITHUB_TOKEN = "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";
+        const GITHUB_TOKEN = "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";
         const GITHUB_USER = "calm291094-del";
         const GITHUB_REPO = "meditech-tienda";
         const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
@@ -860,32 +860,73 @@ Función: Bloquea F12, Ctrl+U, Ctrl+S, Ctrl+P, Ctrl+Shift+I/J/C
 </script>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<!-- ============================================
+🛡️ PROTECCIÓN: DETECCIÓN DE DEVTOOLS ABIERTOS
+Función: Detecta si el usuario abrió F12/Inspeccionar
+         y muestra alerta o redirige
+============================================ -->
+<script>
+(function() {
+    'use strict';
+    
+    let devtoolsAbiertos = false;
+    let intervaloDeteccion;
+    
+    // Método 1: Detección por tamaño de ventana
+    function detectarPorTamano() {
+        const umbral = 160; // pixels de diferencia sospechosa
+        const diffWidth = window.outerWidth - window.innerWidth;
+        const diffHeight = window.outerHeight - window.innerHeight;
+        
+        if ((diffWidth > umbral || diffHeight > umbral) && !devtoolsAbiertos) {
+            devtoolsAbiertos = true;
+            onDevToolsAbiertos();
+        } else if (diffWidth <= umbral && diffHeight <= umbral && devtoolsAbiertos) {
+            devtoolsAbiertos = false;
+            onDevToolsCerrados();
+        }
+    }
+    
+    // Método 2: Detección con debugger (más agresivo)
+    function detectarConDebugger() {
+        const element = new Image();
+        Object.defineProperty(element, 'id', {
+            get: function() {
+                devtoolsAbiertos = true;
+                onDevToolsAbiertos();
+            }
+        });
+        console.log('%c', element);
+    }
+    
+    function onDevToolsAbiertos() {
+        console.clear();
+        console.log('%c⚠️ DEVTOOLS DETECTADOS', 
+            'background: red; color: white; font-size: 30px; padding: 10px;');
+        console.log('%cEsta acción está siendo monitoreada y registrada.', 
+            'color: orange; font-size: 16px;');
+        
+        if (typeof showToast === 'function') {
+            showToast('🔍 Se detectaron herramientas de desarrollador. Tu sesión está siendo monitoreada.', 'error', 5000);
+        }
+        
+        // Opcional: Desenfocar la página
+        document.body.style.filter = 'blur(5px)';
+        document.body.style.pointerEvents = 'none';
+    }
+    
+    function onDevToolsCerrados() {
+        document.body.style.filter = '';
+        document.body.style.pointerEvents = '';
+    }
+    
+    // Iniciar detección
+    intervaloDeteccion = setInterval(detectarPorTamano, 1000);
+    
+    // Ejecutar debugger cada 3 segundos
+    setInterval(detectarConDebugger, 3000);
+})();
+</script>
 
 
 <!-- ============================================
