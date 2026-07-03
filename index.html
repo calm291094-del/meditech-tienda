@@ -6,112 +6,398 @@
     <title>MediTech | Medicamentos y Tecnología</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        * { font-family: 'Inter', sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass { background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); }
-        .hover-lift { transition: transform 0.2s, box-shadow 0.2s; }
-        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        #chatbot-window { transform-origin: bottom right; transition: all 0.3s ease; }
-        .fade-in { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .glass { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); }
+        .hover-lift { transition: all 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0,0,0,0.12); }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-in { animation: slideIn 0.6s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+        .gradient-text { background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .pulse-dot { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .carousel-container { scroll-behavior: smooth; }
+        .carousel-container::-webkit-scrollbar { display: none; }
+        .badge-new { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+        .category-card { transition: all 0.3s ease; }
+        .category-card:hover { transform: scale(1.05); }
+        .category-card:hover .category-icon { transform: scale(1.2); }
+        .category-icon { transition: transform 0.3s ease; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
     <!-- HEADER -->
-    <header class="sticky top-0 z-40 glass border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <div class="w-10 h-10 rounded-full bg-teal-600 flex items-center justify-center text-white text-xl"><i class="fas fa-heartbeat"></i></div>
-                <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Medi<span class="text-teal-600">Tech</span></h1>
-            </div>
-            <nav class="hidden md:flex gap-6 font-medium text-gray-600">
-                <a href="#" class="hover:text-teal-600 transition">Inicio</a>
-                <a href="#productos" class="hover:text-teal-600 transition">Productos</a>
-                <a href="#" class="hover:text-teal-600 transition">Ofertas</a>
-            </nav>
-            <div class="flex items-center gap-4">
-                <button class="relative p-2 text-gray-600 hover:text-teal-600 transition">
-                    <i class="fas fa-shopping-cart text-xl"></i>
-                    <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">0</span>
-                </button>
+    <header class="sticky top-0 z-40 glass border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white text-xl shadow-lg">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Medi<span class="gradient-text">Tech</span></h1>
+                        <p class="text-xs text-gray-500 -mt-1">Salud & Tecnología</p>
+                    </div>
+                </div>
+                <nav class="hidden md:flex gap-8 font-medium text-gray-600">
+                    <a href="#inicio" class="hover:text-teal-600 transition relative group">
+                        Inicio
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-600 transition-all group-hover:w-full"></span>
+                    </a>
+                    <a href="#productos" class="hover:text-teal-600 transition relative group">
+                        Productos
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-600 transition-all group-hover:w-full"></span>
+                    </a>
+                    <a href="#categorias" class="hover:text-teal-600 transition relative group">
+                        Categorías
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-600 transition-all group-hover:w-full"></span>
+                    </a>
+                    <a href="#ofertas" class="hover:text-teal-600 transition relative group">
+                        Ofertas
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-teal-600 transition-all group-hover:w-full"></span>
+                    </a>
+                </nav>
+                <div class="flex items-center gap-4">
+                    <button class="relative p-2 text-gray-600 hover:text-teal-600 transition">
+                        <i class="fas fa-search text-xl"></i>
+                    </button>
+                    <button class="relative p-2 text-gray-600 hover:text-teal-600 transition">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- HERO -->
-    <section class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-16 px-4 text-center">
-        <div class="max-w-3xl mx-auto">
-            <h2 class="text-4xl md:text-5xl font-bold mb-4">Salud & Tecnología en un solo lugar</h2>
-            <p class="text-lg opacity-90 mb-8">Encuentra los mejores medicamentos y componentes de PC con envío rápido y precios competitivos.</p>
-            <a href="#productos" class="inline-block bg-white text-teal-600 font-bold px-8 py-3 rounded-full hover:bg-gray-100 transition shadow-lg">Ver Catálogo</a>
+    <!-- HERO SECTION -->
+    <section id="inicio" class="relative bg-gradient-to-br from-teal-600 via-cyan-600 to-blue-700 text-white py-20 px-4 overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-10 left-10 w-72 h-72 bg-white rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
+            <div class="absolute top-40 right-10 w-72 h-72 bg-yellow-200 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+            <div class="absolute bottom-10 left-1/2 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-4000"></div>
+        </div>
+        <div class="max-w-6xl mx-auto relative z-10">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="slide-in">
+                    <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium mb-6">
+                        <span class="w-2 h-2 bg-green-400 rounded-full pulse-dot"></span>
+                        Envío gratis en pedidos +$50
+                    </div>
+                    <h2 class="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
+                        Salud & <span class="text-yellow-300">Tecnología</span> en un solo lugar
+                    </h2>
+                    <p class="text-lg opacity-90 mb-8 leading-relaxed">
+                        Encuentra los mejores medicamentos y componentes de PC con envío rápido, precios competitivos y garantía de calidad.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#productos" class="inline-flex items-center gap-2 bg-white text-teal-600 font-bold px-8 py-4 rounded-full hover:bg-gray-100 transition shadow-xl hover:shadow-2xl">
+                            <i class="fas fa-shopping-bag"></i>
+                            Ver Catálogo
+                        </a>
+                        <a href="#ofertas" class="inline-flex items-center gap-2 bg-transparent border-2 border-white text-white font-bold px-8 py-4 rounded-full hover:bg-white hover:text-teal-600 transition">
+                            <i class="fas fa-tags"></i>
+                            Ver Ofertas
+                        </a>
+                    </div>
+                    <div class="flex gap-8 mt-10 pt-8 border-t border-white/20">
+                        <div>
+                            <p class="text-3xl font-bold">500+</p>
+                            <p class="text-sm opacity-80">Productos</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold">10K+</p>
+                            <p class="text-sm opacity-80">Clientes</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold">4.9⭐</p>
+                            <p class="text-sm opacity-80">Calificación</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden md:block fade-in">
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl transform rotate-6"></div>
+                        <div class="relative bg-white rounded-3xl p-8 shadow-2xl">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-6 text-center">
+                                    <i class="fas fa-pills text-4xl text-teal-600 mb-3"></i>
+                                    <p class="font-bold text-gray-800">Medicamentos</p>
+                                    <p class="text-xs text-gray-500 mt-1">Certificados</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 text-center">
+                                    <i class="fas fa-microchip text-4xl text-blue-600 mb-3"></i>
+                                    <p class="font-bold text-gray-800">Hardware</p>
+                                    <p class="text-xs text-gray-500 mt-1">Última gen</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 text-center">
+                                    <i class="fas fa-truck-fast text-4xl text-green-600 mb-3"></i>
+                                    <p class="font-bold text-gray-800">Envío Rápido</p>
+                                    <p class="text-xs text-gray-500 mt-1">24-48h</p>
+                                </div>
+                                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 text-center">
+                                    <i class="fas fa-shield-halved text-4xl text-purple-600 mb-3"></i>
+                                    <p class="font-bold text-gray-800">Garantía</p>
+                                    <p class="text-xs text-gray-500 mt-1">100%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- PRODUCTOS -->
-    <section id="productos" class="max-w-7xl mx-auto px-4 py-16">
-        <div class="flex justify-between items-end mb-8">
-            <h3 class="text-3xl font-bold text-gray-900">🌟 Productos Destacados</h3>
-            <span class="text-sm text-gray-500" id="product-total-label">Cargando...</span>
+    <!-- CATEGORÍAS -->
+    <section id="categorias" class="py-16 px-4 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-bold text-gray-900 mb-3">Explora por Categoría</h3>
+                <p class="text-gray-600">Encuentra exactamente lo que necesitas</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="category-card bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
+                    <div class="category-icon w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-pills text-4xl"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Medicamentos</h4>
+                    <p class="text-sm opacity-90">+200 productos</p>
+                </div>
+                <div class="category-card bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
+                    <div class="category-icon w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-laptop text-4xl"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Tecnología</h4>
+                    <p class="text-sm opacity-90">+150 productos</p>
+                </div>
+                <div class="category-card bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
+                    <div class="category-icon w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-heart-pulse text-4xl"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Salud</h4>
+                    <p class="text-sm opacity-90">+100 productos</p>
+                </div>
+                <div class="category-card bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
+                    <div class="category-icon w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-gamepad text-4xl"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Gaming</h4>
+                    <p class="text-sm opacity-90">+80 productos</p>
+                </div>
+            </div>
         </div>
-        <div id="portada-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Se llena dinámicamente -->
-            <p class="col-span-full text-center py-10 text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i> Sincronizando catálogo...</p>
+    </section>
+
+    <!-- PRODUCTOS DESTACADOS -->
+    <section id="productos" class="py-16 px-4 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-end mb-10">
+                <div>
+                    <h3 class="text-4xl font-bold text-gray-900 mb-2">🌟 Productos Destacados</h3>
+                    <p class="text-gray-600">Los más populares entre nuestros clientes</p>
+                </div>
+                <span class="text-sm text-gray-500 font-medium bg-white px-4 py-2 rounded-full shadow-sm" id="product-total-label">Cargando...</span>
+            </div>
+            <div id="portada-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <p class="col-span-full text-center py-16 text-gray-400">
+                    <i class="fas fa-spinner fa-spin text-3xl mb-4 block"></i>
+                    Sincronizando catálogo desde la nube...
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- OFERTAS -->
+    <section id="ofertas" class="py-16 px-4 bg-gradient-to-br from-orange-500 to-red-600 text-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium mb-4">
+                    <i class="fas fa-fire"></i>
+                    Ofertas por tiempo limitado
+                </div>
+                <h3 class="text-4xl font-bold mb-3">🔥 Ofertas Especiales</h3>
+                <p class="opacity-90">Aprovecha estos descuentos exclusivos</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
+                    <div class="text-5xl font-bold mb-2">20%</div>
+                    <p class="text-lg font-semibold mb-2">Medicamentos</p>
+                    <p class="text-sm opacity-80 mb-4">En toda la línea de analgésicos</p>
+                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Ver productos</button>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
+                    <div class="text-5xl font-bold mb-2">15%</div>
+                    <p class="text-lg font-semibold mb-2">Hardware PC</p>
+                    <p class="text-sm opacity-80 mb-4">Componentes seleccionados</p>
+                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Ver productos</button>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
+                    <div class="text-5xl font-bold mb-2">ENVÍO</div>
+                    <p class="text-lg font-semibold mb-2">Gratis</p>
+                    <p class="text-sm opacity-80 mb-4">En compras mayores a $50</p>
+                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Comprar ahora</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIOS -->
+    <section class="py-16 px-4 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h3 class="text-4xl font-bold text-gray-900 mb-3">Lo que dicen nuestros clientes</h3>
+                <p class="text-gray-600">Miles de clientes satisfechos confían en nosotros</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-6 border border-teal-100">
+                    <div class="flex items-center gap-1 mb-4 text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-gray-700 mb-4 italic">"Excelente servicio, los medicamentos llegaron en perfectas condiciones y muy rápido. 100% recomendado."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-full flex items-center justify-center text-white font-bold">MC</div>
+                        <div>
+                            <p class="font-bold text-gray-900">María C.</p>
+                            <p class="text-sm text-gray-500">Cliente verificada</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
+                    <div class="flex items-center gap-1 mb-4 text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-gray-700 mb-4 italic">"Compré una RTX 4070 y llegó en 2 días. Precios increíbles y el soporte técnico es de primera."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">JR</div>
+                        <div>
+                            <p class="font-bold text-gray-900">Juan R.</p>
+                            <p class="text-sm text-gray-500">Cliente verificado</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
+                    <div class="flex items-center gap-1 mb-4 text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-gray-700 mb-4 italic">"La mejor tienda online que he encontrado. Productos originales, precios justos y envío rápido."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold">AL</div>
+                        <div>
+                            <p class="font-bold text-gray-900">Ana L.</p>
+                            <p class="text-sm text-gray-500">Cliente verificada</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEWSLETTER -->
+    <section class="py-16 px-4 bg-gradient-to-br from-teal-600 to-cyan-700 text-white">
+        <div class="max-w-4xl mx-auto text-center">
+            <h3 class="text-3xl font-bold mb-4">📧 Suscríbete a nuestro newsletter</h3>
+            <p class="opacity-90 mb-8">Recibe ofertas exclusivas y novedades directamente en tu correo</p>
+            <form class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                <input type="email" placeholder="tu@email.com" class="flex-1 px-6 py-4 rounded-full text-gray-800 outline-none focus:ring-4 focus:ring-white/30">
+                <button type="submit" class="bg-white text-teal-600 font-bold px-8 py-4 rounded-full hover:bg-gray-100 transition shadow-lg">
+                    Suscribirse
+                </button>
+            </form>
         </div>
     </section>
 
     <!-- FOOTER -->
-    <footer class="bg-gray-900 text-gray-300 py-10 mt-12">
-        <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-8 text-center md:text-left">
-            <div>
-                <h4 class="text-xl font-bold text-white mb-3">MediTech</h4>
-                <p class="text-sm opacity-70">Tu tienda confiable para medicamentos y hardware de última generación.</p>
-            </div>
-            <div>
-                <h5 class="font-semibold text-white mb-3">Enlaces</h5>
-                <ul class="space-y-2 text-sm">
-                    <li><a href="#" class="hover:text-teal-400">Política de Privacidad</a></li>
-                    <li><a href="#" class="hover:text-teal-400">Términos y Condiciones</a></li>
-                    <li><a href="#" class="hover:text-teal-400">Contacto</a></li>
-                </ul>
-            </div>
-            <div>
-                <h5 class="font-semibold text-white mb-3">Síguenos</h5>
-                <div class="flex justify-center md:justify-start gap-4 text-xl">
-                    <a href="#" class="hover:text-teal-400"><i class="fab fa-facebook"></i></a>
-                    <a href="#" class="hover:text-teal-400"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="hover:text-teal-400"><i class="fab fa-twitter"></i></a>
+    <footer class="bg-gray-900 text-gray-300 py-12 mt-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-white">MediTech</h4>
+                    </div>
+                    <p class="text-sm opacity-70 leading-relaxed">Tu tienda confiable para medicamentos y hardware de última generación.</p>
+                </div>
+                <div>
+                    <h5 class="font-semibold text-white mb-4">Enlaces</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-teal-400 transition">Inicio</a></li>
+                        <li><a href="#productos" class="hover:text-teal-400 transition">Productos</a></li>
+                        <li><a href="#ofertas" class="hover:text-teal-400 transition">Ofertas</a></li>
+                        <li><a href="#" class="hover:text-teal-400 transition">Contacto</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold text-white mb-4">Legal</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-teal-400 transition">Política de Privacidad</a></li>
+                        <li><a href="#" class="hover:text-teal-400 transition">Términos y Condiciones</a></li>
+                        <li><a href="#" class="hover:text-teal-400 transition">Devoluciones</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold text-white mb-4">Síguenos</h5>
+                    <div class="flex gap-4 text-2xl mb-4">
+                        <a href="#" class="hover:text-teal-400 transition"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="hover:text-teal-400 transition"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="hover:text-teal-400 transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="hover:text-teal-400 transition"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                    <p class="text-sm opacity-70">Atención al cliente:<br><span class="text-teal-400 font-semibold">+1 234 567 890</span></p>
                 </div>
             </div>
+            <div class="text-center text-sm opacity-50 pt-8 border-t border-gray-800">
+                © <span id="year"></span> MediTech. Todos los derechos reservados.
+            </div>
         </div>
-        <div class="text-center text-xs opacity-50 mt-8 pt-4 border-t border-gray-800">© <span id="year"></span> MediTech. Todos los derechos reservados.</div>
     </footer>
 
     <!-- BOTÓN ADMIN ROOT -->
-    <button onclick="toggleAdminPanel()" class="fixed top-20 right-5 z-30 w-12 h-12 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg flex items-center justify-center transition hover:scale-110" title="Panel Root">
-        <i class="fas fa-user-shield"></i>
+    <button onclick="toggleAdminPanel()" class="fixed top-24 right-5 z-30 w-14 h-14 bg-gradient-to-br from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white rounded-full shadow-xl flex items-center justify-center transition hover:scale-110" title="Panel Root">
+        <i class="fas fa-user-shield text-xl"></i>
     </button>
 
     <!-- PANEL DE ADMINISTRACIÓN -->
-    <div id="admin-panel" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden overflow-y-auto p-4">
-        <div class="bg-white rounded-2xl max-w-2xl w-full mx-auto mt-10 shadow-2xl overflow-hidden fade-in">
-            <div class="bg-teal-600 p-4 flex justify-between items-center text-white">
-                <h2 class="text-xl font-bold"><i class="fas fa-cog mr-2"></i>Panel de Administración Root</h2>
-                <button onclick="toggleAdminPanel()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center"><i class="fas fa-times"></i></button>
+    <div id="admin-panel" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden overflow-y-auto p-4">
+        <div class="bg-white rounded-3xl max-w-3xl w-full mx-auto mt-10 shadow-2xl overflow-hidden fade-in">
+            <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-6 flex justify-between items-center text-white">
+                <h2 class="text-2xl font-bold flex items-center gap-3">
+                    <i class="fas fa-cog"></i>
+                    Panel de Administración Root
+                </h2>
+                <button onclick="toggleAdminPanel()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
             </div>
-            <div class="p-6 space-y-6">
-                <form id="product-form" class="space-y-4" onsubmit="saveProduct(event)">
-                    <div class="grid md:grid-cols-2 gap-4">
+            <div class="p-8 space-y-6">
+                <form id="product-form" class="space-y-5" onsubmit="saveProduct(event)">
+                    <div class="grid md:grid-cols-2 gap-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                            <input type="text" id="prod-name" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="Ej: Paracetamol 500mg">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre del Producto</label>
+                            <input type="text" id="prod-name" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition" placeholder="Ej: Paracetamol 500mg">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                            <select id="prod-category" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Categoría</label>
+                            <select id="prod-category" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition bg-white">
                                 <option value="medicamento">💊 Medicamento</option>
                                 <option value="tecnologia">💻 Tecnología / PC</option>
                                 <option value="salud">🩺 Salud / Bienestar</option>
@@ -119,73 +405,87 @@
                             </select>
                         </div>
                     </div>
-                    <div class="grid md:grid-cols-2 gap-4">
+                    <div class="grid md:grid-cols-2 gap-5">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Precio ($)</label>
-                            <input type="number" id="prod-price" required step="0.01" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="0.00">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Precio ($)</label>
+                            <input type="number" id="prod-price" required step="0.01" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition" placeholder="0.00">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-                            <input type="number" id="prod-stock" required min="0" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="0">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Stock</label>
+                            <input type="number" id="prod-stock" required min="0" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition" placeholder="0">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
-                        <textarea id="prod-desc" required rows="3" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none" placeholder="¿Para qué sirve o características técnicas?"></textarea>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
+                        <textarea id="prod-desc" required rows="4" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition resize-none" placeholder="¿Para qué sirve o características técnicas?"></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">📸 Imagen del Producto</label>
-                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center relative hover:bg-gray-50 transition">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">📸 Imagen del Producto</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center relative hover:bg-gray-50 transition cursor-pointer">
                             <input type="file" id="prod-image" accept="image/*" capture="environment" onchange="previewImage(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                             <div id="upload-placeholder" class="pointer-events-none">
-                                <i class="fas fa-cloud-upload-alt text-2xl text-teal-500 mb-2"></i>
-                                <p class="text-sm text-gray-500">Haz clic o arrastra una imagen (PC/Móvil)</p>
+                                <i class="fas fa-cloud-upload-alt text-4xl text-teal-500 mb-3"></i>
+                                <p class="text-gray-600 font-medium">Haz clic o arrastra una imagen</p>
+                                <p class="text-sm text-gray-400 mt-1">Desde PC o Móvil</p>
                             </div>
-                            <img id="image-preview" class="hidden mx-auto max-h-32 rounded-lg shadow-sm" alt="Preview">
+                            <img id="image-preview" class="hidden mx-auto max-h-40 rounded-lg shadow-md" alt="Preview">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">🖼️ O selecciona una foto ya subida</label>
-                        <select id="image-selector" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none bg-gray-50" onchange="onSelectExistingImage()">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">🖼️ O selecciona una foto ya subida</label>
+                        <select id="image-selector" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition bg-gray-50" onchange="onSelectExistingImage()">
                             <option value="">-- Ninguna --</option>
                         </select>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" id="prod-feat" class="w-4 h-4 text-teal-600 rounded">
-                        <label for="prod-feat" class="text-sm text-gray-700">Marcar como destacado</label>
+                    <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                        <input type="checkbox" id="prod-feat" class="w-5 h-5 text-teal-600 rounded cursor-pointer">
+                        <label for="prod-feat" class="text-sm font-medium text-gray-700 cursor-pointer">Marcar como producto destacado</label>
                     </div>
-                    <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-2">
-                        <i class="fas fa-save"></i> Guardar y Sincronizar
+                    <button type="submit" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-3 shadow-lg hover:shadow-xl">
+                        <i class="fas fa-save text-xl"></i>
+                        <span class="text-lg">Guardar y Sincronizar con GitHub</span>
                     </button>
                 </form>
 
                 <hr class="border-gray-200">
+                
                 <div>
-                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center gap-2"><i class="fas fa-box"></i> Inventario (<span id="admin-count">0</span>)</h3>
-                    <div id="admin-list" class="space-y-3 max-h-60 overflow-y-auto pr-2 scrollbar-hide"></div>
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 text-lg">
+                        <i class="fas fa-box text-teal-600"></i>
+                        Inventario Actual (<span id="admin-count" class="text-teal-600">0</span>)
+                    </h3>
+                    <div id="admin-list" class="space-y-3 max-h-96 overflow-y-auto pr-2 scrollbar-hide"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- CHATBOT -->
-    <div id="chatbot-container" class="fixed bottom-5 right-5 z-40">
-        <div id="chatbot-window" class="hidden w-80 sm:w-96 bg-white rounded-2xl shadow-2xl overflow-hidden mb-4 origin-bottom-right">
-            <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-3 text-white flex justify-between items-center">
-                <span class="font-bold flex items-center gap-2"><i class="fas fa-robot"></i> Asistente MediTech</span>
-                <button onclick="toggleChat()" class="hover:bg-white/20 rounded-full w-7 h-7 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+    <div id="chatbot-container" class="fixed bottom-6 right-6 z-40">
+        <div id="chatbot-window" class="hidden w-80 sm:w-96 bg-white rounded-3xl shadow-2xl overflow-hidden mb-4 origin-bottom-right border border-gray-200">
+            <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-4 text-white flex justify-between items-center">
+                <span class="font-bold flex items-center gap-2 text-lg">
+                    <i class="fas fa-robot"></i>
+                    Asistente MediTech
+                </span>
+                <button onclick="toggleChat()" class="hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center transition">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div id="chat-messages" class="h-72 p-4 overflow-y-auto bg-gray-50 space-y-3 text-sm">
-                <div class="bg-white p-3 rounded-xl rounded-tl-none shadow-sm max-w-[85%] border border-gray-100">
-                    ¡Hola! 👋 Soy el asistente de MediTech. Pregúntame sobre <b>medicamentos</b>, <b>piezas de PC</b> o <b>estado de tu pedido</b>.
+            <div id="chat-messages" class="h-80 p-4 overflow-y-auto bg-gray-50 space-y-3 text-sm">
+                <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm max-w-[85%] border border-gray-100">
+                    <p class="font-semibold text-gray-800 mb-1">¡Hola! 👋</p>
+                    <p class="text-gray-600">Soy el asistente de MediTech. Pregúntame sobre <b>medicamentos</b>, <b>piezas de PC</b> o <b>estado de tu pedido</b>.</p>
                 </div>
             </div>
-            <div class="p-3 bg-white border-t border-gray-100 flex gap-2">
-                <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." class="flex-1 px-4 py-2 border rounded-full text-sm outline-none focus:ring-2 focus:ring-teal-500" onkeypress="if(event.key==='Enter') sendMessage()">
-                <button onclick="sendMessage()" class="w-10 h-10 bg-teal-600 hover:bg-teal-700 text-white rounded-full flex items-center justify-center transition"><i class="fas fa-paper-plane"></i></button>
+            <div class="p-4 bg-white border-t border-gray-100 flex gap-2">
+                <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-full text-sm outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition" onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()" class="w-12 h-12 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-full flex items-center justify-center transition shadow-lg">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
             </div>
         </div>
-        <button onclick="toggleChat()" class="w-14 h-14 bg-teal-600 hover:bg-teal-700 text-white rounded-full shadow-lg flex items-center justify-center text-2xl transition hover:scale-105">
+        <button onclick="toggleChat()" class="w-16 h-16 bg-gradient-to-br from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-full shadow-2xl flex items-center justify-center text-3xl transition hover:scale-110">
             <i class="fas fa-comment-dots"></i>
         </button>
     </div>
@@ -200,8 +500,7 @@
         const HEADERS = { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" };
 
         // Estado global
-        let S = { pr: [], cr: [], us: [], or: [], ca: [], au: [], u: null, cart: 0 };
-        const DP = []; // Productos por defecto (vacío, se carga desde GitHub)
+        let S = { pr: [], cart: 0 };
 
         // === FUNCIONES GITHUB ===
         async function fetchGitHub(path) {
@@ -277,29 +576,34 @@
         function renderProducts() {
             const grid = document.getElementById('portada-productos');
             if (S.pr.length === 0) {
-                grid.innerHTML = `<p class="col-span-full text-center py-10 text-gray-400">Aún no hay productos. El administrador debe agregarlos desde el panel 🔒.</p>`;
+                grid.innerHTML = `<p class="col-span-full text-center py-16 text-gray-400">
+                    <i class="fas fa-box-open text-5xl mb-4 block opacity-50"></i>
+                    Aún no hay productos. El administrador debe agregarlos desde el panel 🔒.
+                </p>`;
                 return;
             }
             grid.innerHTML = S.pr.map(p => `
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover-lift fade-in">
-                    <div class="h-48 overflow-hidden bg-gray-100 relative group">
-                        <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition duration-300 group-hover:scale-105">
-                        ${p.feat ? '<span class="absolute top-2 left-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full">⭐ Destacado</span>' : ''}
-                        <span class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-lg backdrop-blur-sm">${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : '📦'} ${p.category}</span>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover-lift fade-in group">
+                    <div class="h-56 overflow-hidden bg-gray-100 relative">
+                        <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                        ${p.feat ? '<span class="badge-new"><i class="fas fa-star mr-1"></i>Destacado</span>' : ''}
+                        <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                            ${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}
+                        </div>
                     </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-gray-800 truncate">${p.name}</h4>
-                        <p class="text-xs text-gray-500 mt-1 line-clamp-2 h-8">${p.desc}</p>
-                        <div class="flex justify-between items-center mt-3">
-                            <span class="text-lg font-bold text-teal-600">$${parseFloat(p.price).toFixed(2)}</span>
-                            <button onclick="addToCart('${p.id}')" class="bg-gray-900 hover:bg-teal-600 text-white w-9 h-9 rounded-full flex items-center justify-center transition">
+                    <div class="p-5">
+                        <h4 class="font-bold text-gray-900 text-lg mb-2 truncate">${p.name}</h4>
+                        <p class="text-sm text-gray-500 mb-4 line-clamp-2 h-10">${p.desc}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-2xl font-bold gradient-text">$${parseFloat(p.price).toFixed(2)}</span>
+                            <button onclick="addToCart('${p.id}')" class="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-teal-600 hover:to-cyan-600 text-white w-11 h-11 rounded-full flex items-center justify-center transition shadow-lg hover:shadow-xl">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
                     </div>
                 </div>
             `).join('');
-            document.getElementById('product-total-label').textContent = `${S.pr.length} productos`;
+            document.getElementById('product-total-label').textContent = `${S.pr.length} productos disponibles`;
         }
 
         function renderAdminList() {
@@ -307,17 +611,19 @@
             document.getElementById('admin-count').textContent = S.pr.length;
             if (!list) return;
             if (S.pr.length === 0) {
-                list.innerHTML = '<p class="text-center text-gray-400 py-4">Sin productos</p>';
+                list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin productos en el inventario</p>';
                 return;
             }
             list.innerHTML = S.pr.map(p => `
-                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <img src="${p.image}" class="w-12 h-12 object-cover rounded-md bg-white">
+                <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200 hover:shadow-md transition">
+                    <img src="${p.image}" class="w-16 h-16 object-cover rounded-lg bg-white shadow-sm">
                     <div class="flex-1 min-w-0">
-                        <p class="font-semibold text-sm truncate">${p.name}</p>
-                        <p class="text-xs text-gray-500">$${p.price} | Stock: ${p.stock}</p>
+                        <p class="font-bold text-gray-900 truncate">${p.name}</p>
+                        <p class="text-sm text-gray-500">$${p.price} | Stock: ${p.stock}</p>
                     </div>
-                    <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded transition"><i class="fas fa-trash"></i></button>
+                    <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:bg-red-50 p-3 rounded-lg transition">
+                        <i class="fas fa-trash text-lg"></i>
+                    </button>
                 </div>
             `).join('');
         }
@@ -370,7 +676,7 @@
 
             let img = "";
             if (file) {
-                showNotif("📤 Subiendo imagen...", "info");
+                showNotif("📤 Subiendo imagen a GitHub...", "info");
                 img = await subirImagen(file);
             } else if (sel) {
                 img = sel;
@@ -399,13 +705,13 @@
 
         // === CHATBOT ===
         const KB = {
-            "paracetamol": "Analgesico y antipiretico. Sirve para dolor leve y fiebre.",
-            "ibuprofeno": "Antiinflamatorio no esteroideo. Reduce dolor, inflamacion y fiebre.",
-            "ram": "Memoria de acceso aleatorio. Determina cuantos programas puedes ejecutar simultaneamente.",
-            "gpu": "Tarjeta grafica. Procesa imagenes y video. Clave para gaming y diseño.",
-            "cpu": "Procesador. Cerebro del PC. Ejecuta instrucciones y calculos.",
-            "ssd": "Almacenamiento solido. Mucho mas rapido que un disco duro mecanico.",
-            "default": "No tengo info exacta. Consulta el catalogo o contacta soporte medico/tecnico."
+            "paracetamol": "El Paracetamol es un analgésico y antipirético. Sirve para aliviar dolores leves y bajar la fiebre. Dosis común: 500mg cada 6-8 horas.",
+            "ibuprofeno": "El Ibuprofeno es un antiinflamatorio no esteroideo (AINE). Sirve para reducir inflamación, dolor y fiebre. No usar con estómago vacío.",
+            "ram": "La memoria RAM (Random Access Memory) es la memoria de corto plazo de la PC. Donde se cargan los programas en ejecución. Más RAM = más programas abiertos a la vez.",
+            "gpu": "La GPU (Tarjeta Gráfica) procesa y renderiza imágenes, video y gráficos. Esencial para gaming, diseño 3D y edición de video.",
+            "cpu": "El CPU (Procesador) es el cerebro de la computadora. Ejecuta las instrucciones de los programas.",
+            "ssd": "Un SSD (Unidad de Estado Sólido) es almacenamiento rápido sin partes móviles. Tu PC prende y carga programas en segundos.",
+            "default": "No tengo información específica sobre eso. Consulta el catálogo o contacta a soporte para más detalles."
         };
 
         function toggleChat() {
@@ -418,7 +724,7 @@
             const txt = inp.value.trim();
             if (!txt) return;
             
-            msgs.innerHTML += `<div class="bg-teal-600 text-white p-3 rounded-xl rounded-tr-none max-w-[85%] ml-auto fade-in">${txt}</div>`;
+            msgs.innerHTML += `<div class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] ml-auto fade-in shadow-md">${txt}</div>`;
             inp.value = '';
 
             setTimeout(() => {
@@ -428,7 +734,7 @@
                 const prod = S.pr.find(p => low.includes(p.name.toLowerCase()));
                 if (prod && res === KB["default"]) res = `Sobre <b>${prod.name}</b>: ${prod.desc}`;
                 
-                msgs.innerHTML += `<div class="bg-white p-3 rounded-xl rounded-tl-none max-w-[85%] shadow-sm border border-gray-100 fade-in">${res}</div>`;
+                msgs.innerHTML += `<div class="bg-white p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm border border-gray-100 fade-in">${res}</div>`;
                 msgs.scrollTop = msgs.scrollHeight;
             }, 600);
         }
@@ -436,20 +742,31 @@
         function addToCart(id) {
             S.cart++;
             updateUI();
-            showNotif("➕ Agregado al carrito", "success");
+            showNotif("✅ Agregado al carrito", "success");
         }
 
         function showNotif(msg, type) {
             const n = document.createElement('div');
-            n.className = `fixed top-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-sm font-medium shadow-lg fade-in ${type==='success'?'bg-green-100 text-green-800 border border-green-200':type==='error'?'bg-red-100 text-red-800 border border-red-200':'bg-blue-100 text-blue-800 border border-blue-200'}`;
+            n.className = `fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full text-sm font-semibold shadow-2xl fade-in ${type==='success'?'bg-green-100 text-green-800 border-2 border-green-200':type==='error'?'bg-red-100 text-red-800 border-2 border-red-200':type==='warning'?'bg-yellow-100 text-yellow-800 border-2 border-yellow-200':'bg-blue-100 text-blue-800 border-2 border-blue-200'}`;
             n.innerHTML = msg;
             document.body.appendChild(n);
-            setTimeout(() => n.remove(), 2500);
+            setTimeout(() => n.remove(), 3000);
         }
 
         // === INIT ===
         document.getElementById('year').textContent = new Date().getFullYear();
         cargarProductos();
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
     </script>
 </body>
 </html>
