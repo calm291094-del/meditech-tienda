@@ -860,73 +860,32 @@ Función: Bloquea F12, Ctrl+U, Ctrl+S, Ctrl+P, Ctrl+Shift+I/J/C
 </script>
 
 
-<!-- ============================================
-🛡️ PROTECCIÓN: DETECCIÓN DE DEVTOOLS ABIERTOS
-Función: Detecta si el usuario abrió F12/Inspeccionar
-         y muestra alerta o redirige
-============================================ -->
-<script>
-(function() {
-    'use strict';
-    
-    let devtoolsAbiertos = false;
-    let intervaloDeteccion;
-    
-    // Método 1: Detección por tamaño de ventana
-    function detectarPorTamano() {
-        const umbral = 160; // pixels de diferencia sospechosa
-        const diffWidth = window.outerWidth - window.innerWidth;
-        const diffHeight = window.outerHeight - window.innerHeight;
-        
-        if ((diffWidth > umbral || diffHeight > umbral) && !devtoolsAbiertos) {
-            devtoolsAbiertos = true;
-            onDevToolsAbiertos();
-        } else if (diffWidth <= umbral && diffHeight <= umbral && devtoolsAbiertos) {
-            devtoolsAbiertos = false;
-            onDevToolsCerrados();
-        }
-    }
-    
-    // Método 2: Detección con debugger (más agresivo)
-    function detectarConDebugger() {
-        const element = new Image();
-        Object.defineProperty(element, 'id', {
-            get: function() {
-                devtoolsAbiertos = true;
-                onDevToolsAbiertos();
-            }
-        });
-        console.log('%c', element);
-    }
-    
-    function onDevToolsAbiertos() {
-        console.clear();
-        console.log('%c⚠️ DEVTOOLS DETECTADOS', 
-            'background: red; color: white; font-size: 30px; padding: 10px;');
-        console.log('%cEsta acción está siendo monitoreada y registrada.', 
-            'color: orange; font-size: 16px;');
-        
-        if (typeof showToast === 'function') {
-            showToast('🔍 Se detectaron herramientas de desarrollador. Tu sesión está siendo monitoreada.', 'error', 5000);
-        }
-        
-        // Opcional: Desenfocar la página
-        document.body.style.filter = 'blur(5px)';
-        document.body.style.pointerEvents = 'none';
-    }
-    
-    function onDevToolsCerrados() {
-        document.body.style.filter = '';
-        document.body.style.pointerEvents = '';
-    }
-    
-    // Iniciar detección
-    intervaloDeteccion = setInterval(detectarPorTamano, 1000);
-    
-    // Ejecutar debugger cada 3 segundos
-    setInterval(detectarConDebugger, 3000);
-})();
-</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 <!-- ============================================
@@ -1201,6 +1160,93 @@ Función: Bloquea clic derecho, arrastre, guardado
     const observer = new MutationObserver(protegerImagenes);
     observer.observe(document.body, { childList: true, subtree: true });
 })();
+</script>
+
+
+<script>
+// ============================================
+// 🔍 DIAGNÓSTICO DE GITHUB (TEMPORAL)
+// ============================================
+async function diagnosticarGitHub() {
+    console.log('🔍 === INICIANDO DIAGNÓSTICO ===');
+    
+    // 1. Verificar token
+    if (!GITHUB_TOKEN || GITHUB_TOKEN.includes('PEGA_AQUI')) {
+        console.error('❌ TOKEN NO CONFIGURADO');
+        alert('❌ ERROR: El token de GitHub no está configurado.\n\nBusca en el código:\nconst GITHUB_TOKEN = "ghp_..."\n\nY reemplaza con tu token real.');
+        return;
+    }
+    console.log('✅ Token configurado:', GITHUB_TOKEN.substring(0, 10) + '...');
+    
+    // 2. Verificar conexión al repo
+    try {
+        const res = await fetch(API, { headers: HEADERS });
+        if (!res.ok) {
+            console.error('❌ ERROR AL ACCEDER AL REPO:', res.status, res.statusText);
+            alert('❌ ERROR: No se puede acceder al repositorio.\n\nPosibles causas:\n- Token inválido o revocado\n- Usuario/repositorio incorrecto\n- Sin permisos suficientes');
+            return;
+        }
+        console.log('✅ Conexión al repo exitosa');
+    } catch (e) {
+        console.error('❌ ERROR DE RED:', e);
+        alert('❌ ERROR DE RED: ' + e.message);
+        return;
+    }
+    
+    // 3. Verificar productos.json
+    const productosFile = await fetchGitHub('productos.json');
+    if (!productosFile) {
+        console.error('❌ productos.json NO EXISTE');
+        alert('❌ ERROR: El archivo productos.json no existe en tu repo.\n\nCrea el archivo con contenido:\n{"productos": []}');
+        return;
+    }
+    console.log('✅ productos.json existe');
+    
+    // 4. Verificar carpeta imagenes/
+    const imagenesFolder = await fetchGitHub('imagenes');
+    if (!imagenesFolder) {
+        console.error('❌ Carpeta imagenes/ NO EXISTE');
+        alert('❌ ERROR: La carpeta imagenes/ no existe en tu repo.\n\nCrea un archivo:\nimagenes/.gitkeep\n(con contenido vacío)');
+        return;
+    }
+    console.log('✅ Carpeta imagenes/ existe');
+    
+    // 5. Probar subida de imagen
+    console.log('🧪 Probando subida de imagen de prueba...');
+    try {
+        const testCanvas = document.createElement('canvas');
+        testCanvas.width = 100;
+        testCanvas.height = 100;
+        const ctx = testCanvas.getContext('2d');
+        ctx.fillStyle = '#0d9488';
+        ctx.fillRect(0, 0, 100, 100);
+        ctx.fillStyle = '#fff';
+        ctx.font = '20px Arial';
+        ctx.fillText('TEST', 20, 55);
+        
+        const testBlob = await new Promise(resolve => testCanvas.toBlob(resolve, 'image/png'));
+        const testFile = new File([testBlob], 'test.png', { type: 'image/png' });
+        
+        const testUrl = await subirImagen(testFile);
+        console.log('✅ IMAGEN DE PRUEBA SUBIDA:', testUrl);
+        alert('✅ ¡TODO FUNCIONA CORRECTAMENTE!\n\nLa imagen de prueba se subió a:\n' + testUrl);
+    } catch (e) {
+        console.error('❌ ERROR AL SUBIR IMAGEN:', e);
+        alert('❌ ERROR AL SUBIR IMAGEN:\n\n' + e.message + '\n\nPosibles causas:\n- Token sin permisos de escritura\n- Repo no accesible\n- Problema de CORS');
+        return;
+    }
+    
+    console.log('🎉 === DIAGNÓSTICO COMPLETADO ===');
+}
+
+// Ejecutar diagnóstico al cargar la página (SOLO UNA VEZ)
+if (!sessionStorage.getItem('diagnostico-ejecutado')) {
+    setTimeout(() => {
+        console.log('%c🔍 DIAGNÓSTICO AUTOMÁTICO', 'background: #0d9488; color: white; padding: 10px; font-size: 16px;');
+        diagnosticarGitHub();
+        sessionStorage.setItem('diagnostico-ejecutado', 'true');
+    }, 2000);
+}
 </script>
 
 
