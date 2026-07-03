@@ -21,13 +21,14 @@
         .gradient-text { background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .pulse-dot { animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .carousel-container { scroll-behavior: smooth; }
-        .carousel-container::-webkit-scrollbar { display: none; }
         .badge-new { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
         .category-card { transition: all 0.3s ease; }
         .category-card:hover { transform: scale(1.05); }
         .category-card:hover .category-icon { transform: scale(1.2); }
         .category-icon { transition: transform 0.3s ease; }
+        .modal-overlay { animation: fadeIn 0.3s ease; }
+        .modal-content { animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -71,6 +72,44 @@
                         <i class="fas fa-shopping-cart text-xl"></i>
                         <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
                     </button>
+                    <!-- BOTÓN DE USUARIO -->
+                    <div id="user-section" class="relative">
+                        <button id="user-btn" onclick="toggleUserMenu()" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full transition">
+                            <i class="fas fa-user-circle text-xl text-gray-600"></i>
+                            <span id="user-name-display" class="text-sm font-medium text-gray-700 hidden md:inline">Iniciar Sesión</span>
+                            <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                        </button>
+                        <!-- MENÚ DROPDOWN -->
+                        <div id="user-menu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50">
+                            <!-- Cuando NO está logueado -->
+                            <div id="menu-logged-out">
+                                <button onclick="openLoginModal()" class="w-full text-left px-4 py-3 hover:bg-gray-50 transition flex items-center gap-3">
+                                    <i class="fas fa-sign-in-alt text-teal-600"></i>
+                                    <span>Iniciar Sesión</span>
+                                </button>
+                                <button onclick="openRegisterModal()" class="w-full text-left px-4 py-3 hover:bg-gray-50 transition flex items-center gap-3">
+                                    <i class="fas fa-user-plus text-teal-600"></i>
+                                    <span>Registrarse</span>
+                                </button>
+                            </div>
+                            <!-- Cuando ESTÁ logueado -->
+                            <div id="menu-logged-in" class="hidden">
+                                <div class="px-4 py-3 border-b border-gray-200">
+                                    <p class="text-sm text-gray-500">Conectado como</p>
+                                    <p id="user-menu-name" class="font-bold text-gray-900"></p>
+                                    <span id="user-role-badge" class="inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full"></span>
+                                </div>
+                                <button id="admin-menu-btn" onclick="toggleAdminPanel()" class="hidden w-full text-left px-4 py-3 hover:bg-gray-50 transition flex items-center gap-3">
+                                    <i class="fas fa-cog text-orange-600"></i>
+                                    <span>Panel Admin</span>
+                                </button>
+                                <button onclick="logout()" class="w-full text-left px-4 py-3 hover:bg-gray-50 transition flex items-center gap-3 text-red-600">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Cerrar Sesión</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -371,15 +410,91 @@
         </div>
     </footer>
 
-    <!-- BOTÓN ADMIN ROOT -->
-    <button onclick="toggleAdminPanel()" class="fixed top-24 right-5 z-30 w-14 h-14 bg-gradient-to-br from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white rounded-full shadow-xl flex items-center justify-center transition hover:scale-110" title="Panel Root">
-        <i class="fas fa-user-shield text-xl"></i>
-    </button>
+    <!-- MODAL DE LOGIN -->
+    <div id="login-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl modal-content overflow-hidden">
+            <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-6 text-white">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Iniciar Sesión
+                    </h2>
+                    <button onclick="closeLoginModal()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <form id="login-form" onsubmit="handleLogin(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Usuario</label>
+                    <input type="text" id="login-username" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition" placeholder="Ingresa tu usuario">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Contraseña</label>
+                    <input type="password" id="login-password" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition" placeholder="Ingresa tu contraseña">
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold py-3 rounded-xl transition shadow-lg">
+                    Iniciar Sesión
+                </button>
+                <p class="text-center text-sm text-gray-600">
+                    ¿No tienes cuenta? 
+                    <button type="button" onclick="closeLoginModal(); openRegisterModal();" class="text-teal-600 font-semibold hover:underline">Regístrate aquí</button>
+                </p>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
+                    <p class="font-semibold text-blue-900 mb-1">💡 Usuario Root (Administrador):</p>
+                    <p class="text-blue-700">Usuario: <code class="bg-blue-100 px-2 py-1 rounded">root</code></p>
+                    <p class="text-blue-700">Contraseña: <code class="bg-blue-100 px-2 py-1 rounded">admin123</code></p>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    <!-- PANEL DE ADMINISTRACIÓN -->
-    <div id="admin-panel" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden overflow-y-auto p-4">
+    <!-- MODAL DE REGISTRO -->
+    <div id="register-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl modal-content overflow-hidden">
+            <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-6 text-white">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i class="fas fa-user-plus"></i>
+                        Registrarse
+                    </h2>
+                    <button onclick="closeRegisterModal()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <form id="register-form" onsubmit="handleRegister(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre Completo</label>
+                    <input type="text" id="register-name" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition" placeholder="Tu nombre completo">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Usuario</label>
+                    <input type="text" id="register-username" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition" placeholder="Elige un nombre de usuario">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Correo Electrónico</label>
+                    <input type="email" id="register-email" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition" placeholder="tu@email.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Contraseña</label>
+                    <input type="password" id="register-password" required minlength="6" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition" placeholder="Mínimo 6 caracteres">
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold py-3 rounded-xl transition shadow-lg">
+                    Crear Cuenta
+                </button>
+                <p class="text-center text-sm text-gray-600">
+                    ¿Ya tienes cuenta? 
+                    <button type="button" onclick="closeRegisterModal(); openLoginModal();" class="text-teal-600 font-semibold hover:underline">Inicia sesión aquí</button>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- PANEL DE ADMINISTRACIÓN (SOLO PARA ROOT) -->
+    <div id="admin-panel" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-y-auto p-4">
         <div class="bg-white rounded-3xl max-w-3xl w-full mx-auto mt-10 shadow-2xl overflow-hidden fade-in">
-            <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-6 flex justify-between items-center text-white">
+            <div class="bg-gradient-to-r from-orange-500 to-red-600 p-6 flex justify-between items-center text-white">
                 <h2 class="text-2xl font-bold flex items-center gap-3">
                     <i class="fas fa-cog"></i>
                     Panel de Administración Root
@@ -492,7 +607,7 @@
 
     <!-- SCRIPTS -->
     <script>
-        // ⚠️ CONFIGURACIÓN GITHUB (PEGA TU TOKEN AQUÍ)
+        // ⚠️ CONFIGURACIÓN GITHUB
         const GITHUB_TOKEN = "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";
         const GITHUB_USER = "calm291094-del";
         const GITHUB_REPO = "meditech-tienda";
@@ -500,7 +615,150 @@
         const HEADERS = { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" };
 
         // Estado global
-        let S = { pr: [], cart: 0 };
+        let S = { pr: [], cart: 0, currentUser: null };
+
+        // === SISTEMA DE AUTENTICACIÓN ===
+        function initAuth() {
+            // Crear usuario root por defecto si no existe
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            const rootExists = users.find(u => u.username === 'root');
+            if (!rootExists) {
+                users.push({
+                    username: 'root',
+                    password: 'admin123',
+                    name: 'Administrador',
+                    email: 'admin@meditech.com',
+                    role: 'admin'
+                });
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+
+            // Restaurar sesión
+            const session = localStorage.getItem('session');
+            if (session) {
+                S.currentUser = JSON.parse(session);
+                updateUIForLoggedUser();
+            }
+        }
+
+        function openLoginModal() {
+            document.getElementById('login-modal').classList.remove('hidden');
+            closeUserMenu();
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.add('hidden');
+        }
+
+        function openRegisterModal() {
+            document.getElementById('register-modal').classList.remove('hidden');
+            closeUserMenu();
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('register-modal').classList.add('hidden');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                S.currentUser = user;
+                localStorage.setItem('session', JSON.stringify(user));
+                updateUIForLoggedUser();
+                closeLoginModal();
+                showNotif(`✅ Bienvenido, ${user.name}`, 'success');
+                document.getElementById('login-form').reset();
+            } else {
+                showNotif('❌ Usuario o contraseña incorrectos', 'error');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            
+            if (users.find(u => u.username === username)) {
+                showNotif('❌ El nombre de usuario ya existe', 'error');
+                return;
+            }
+
+            const newUser = {
+                username,
+                password,
+                name,
+                email,
+                role: 'user'
+            };
+
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+
+            S.currentUser = newUser;
+            localStorage.setItem('session', JSON.stringify(newUser));
+            updateUIForLoggedUser();
+            closeRegisterModal();
+            showNotif(`✅ Cuenta creada. Bienvenido, ${name}`, 'success');
+            document.getElementById('register-form').reset();
+        }
+
+        function logout() {
+            S.currentUser = null;
+            localStorage.removeItem('session');
+            updateUIForLoggedOut();
+            closeUserMenu();
+            showNotif('👋 Sesión cerrada', 'info');
+        }
+
+        function updateUIForLoggedUser() {
+            document.getElementById('user-name-display').textContent = S.currentUser.name;
+            document.getElementById('user-menu-name').textContent = S.currentUser.name;
+            
+            const badge = document.getElementById('user-role-badge');
+            if (S.currentUser.role === 'admin') {
+                badge.textContent = '🔒 Administrador';
+                badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800';
+                document.getElementById('admin-menu-btn').classList.remove('hidden');
+            } else {
+                badge.textContent = '👤 Cliente';
+                badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800';
+                document.getElementById('admin-menu-btn').classList.add('hidden');
+            }
+
+            document.getElementById('menu-logged-out').classList.add('hidden');
+            document.getElementById('menu-logged-in').classList.remove('hidden');
+        }
+
+        function updateUIForLoggedOut() {
+            document.getElementById('user-name-display').textContent = 'Iniciar Sesión';
+            document.getElementById('menu-logged-out').classList.remove('hidden');
+            document.getElementById('menu-logged-in').classList.add('hidden');
+        }
+
+        function toggleUserMenu() {
+            document.getElementById('user-menu').classList.toggle('hidden');
+        }
+
+        function closeUserMenu() {
+            document.getElementById('user-menu').classList.add('hidden');
+        }
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#user-section')) {
+                closeUserMenu();
+            }
+        });
 
         // === FUNCIONES GITHUB ===
         async function fetchGitHub(path) {
@@ -634,9 +892,14 @@
 
         // === ADMIN FUNCTIONS ===
         function toggleAdminPanel() {
+            if (!S.currentUser || S.currentUser.role !== 'admin') {
+                showNotif('❌ Solo el administrador puede acceder al panel', 'error');
+                return;
+            }
             const p = document.getElementById('admin-panel');
             p.classList.toggle('hidden');
             if (!p.classList.contains('hidden')) cargarImagenesExistentes();
+            closeUserMenu();
         }
 
         function previewImage(e) {
@@ -665,6 +928,11 @@
 
         async function saveProduct(e) {
             e.preventDefault();
+            if (!S.currentUser || S.currentUser.role !== 'admin') {
+                showNotif('❌ Solo el administrador puede agregar productos', 'error');
+                return;
+            }
+
             const name = document.getElementById('prod-name').value;
             const cat = document.getElementById('prod-category').value;
             const price = document.getElementById('prod-price').value;
@@ -696,6 +964,10 @@
         }
 
         function deleteProduct(id) {
+            if (!S.currentUser || S.currentUser.role !== 'admin') {
+                showNotif('❌ Solo el administrador puede eliminar productos', 'error');
+                return;
+            }
             if (!confirm("¿Eliminar este producto?")) return;
             S.pr = S.pr.filter(p => p.id !== id);
             renderProducts();
@@ -755,6 +1027,7 @@
 
         // === INIT ===
         document.getElementById('year').textContent = new Date().getFullYear();
+        initAuth();
         cargarProductos();
 
         // Smooth scroll
