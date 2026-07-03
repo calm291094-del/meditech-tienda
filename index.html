@@ -4,649 +4,860 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediTech | Medicamentos y Tecnología</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #f4f6f9; color: #2c3e50; }
+        * { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .font-sora { font-family: 'Sora', sans-serif; }
         
-        /* HEADER - TU DISEÑO ORIGINAL */
-        header {
-            background: linear-gradient(135deg, #2c3e50, #3498db);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        header h1 { font-size: 2em; margin-bottom: 5px; }
-        header p { opacity: 0.9; }
+        .bg-gradient-custom { background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%); }
+        .text-teal { color: #0d9488; }
+        .bg-teal { background-color: #0d9488; }
+        .border-teal { border-color: #0d9488; }
+        .hover-teal:hover { background-color: #0f766e; }
         
-        /* PORTADA DE PRODUCTOS */
-        .portada {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 20px;
-        }
-        .portada h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: #2c3e50;
-        }
-        #portada-productos {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .producto-card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            transition: transform 0.2s;
-            text-align: center;
-        }
-        .producto-card:hover { transform: translateY(-5px); }
-        .producto-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-        .producto-card h3 { color: #2c3e50; margin-bottom: 8px; font-size: 1.1em; }
-        .producto-card p { color: #666; font-size: 0.9em; }
-        .producto-card .categoria {
-            display: inline-block;
-            background: #3498db;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            margin-bottom: 8px;
-        }
-        
-        /* BOTÓN ROOT */
-        #root-access-btn {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            padding: 10px 15px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        
-        /* PANEL ADMIN */
-        #admin-panel {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 2000;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        .admin-content {
-            max-width: 800px;
-            margin: auto;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-        }
-        .admin-content h2 { color: #2c3e50; margin-bottom: 15px; }
-        .admin-content h3 { color: #34495e; margin: 20px 0 10px; }
-        .admin-content label {
-            display: block;
-            margin: 10px 0 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        .admin-content input[type="text"],
-        .admin-content textarea,
-        .admin-content select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-        .admin-content textarea { resize: vertical; min-height: 80px; }
         .btn-primary {
-            background: #27ae60;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 15px;
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+            transition: all 0.3s;
         }
-        .btn-danger {
-            background: #c0392b;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        #product-list { list-style: none; }
-        #product-list li {
-            border: 1px solid #eee;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            background: #fafafa;
-        }
-        #product-list li img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 6px;
-        }
-        #product-list .info { flex: 1; }
-        #image-preview {
-            display: none;
-            max-width: 150px;
-            max-height: 150px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(13, 148, 136, 0.3);
         }
         
-        /* CHATBOT */
-        #chatbot-icon {
+        .card-hover {
+            transition: all 0.3s;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .uz {
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .uz:hover {
+            border-color: #0d9488;
+            background: #f0fdfa;
+        }
+        
+        .fi {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        .fi:focus {
+            outline: none;
+            border-color: #0d9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+        }
+        
+        .fl {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        
+        .bt {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        .btp {
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+            color: white;
+        }
+        .btp:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(13, 148, 136, 0.3);
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .chat-icon {
             position: fixed;
             bottom: 20px;
             right: 20px;
             width: 60px;
             height: 60px;
-            background: #3498db;
-            color: white;
             border-radius: 50%;
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
+            font-size: 1.5rem;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            z-index: 1000;
-            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4);
+            transition: all 0.3s;
+            z-index: 100;
         }
-        #chatbot-icon:hover { transform: scale(1.1); }
+        .chat-icon:hover {
+            transform: scale(1.1);
+        }
         
-        #chatbot-window {
-            display: none;
+        .chat-window {
             position: fixed;
             bottom: 90px;
             right: 20px;
-            width: 340px;
-            height: 480px;
+            width: 380px;
+            height: 500px;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-            z-index: 1000;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: none;
             flex-direction: column;
+            z-index: 100;
             overflow: hidden;
         }
+        
         .chat-header {
-            background: #2c3e50;
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
             color: white;
-            padding: 15px;
-            font-weight: bold;
+            padding: 20px;
+            font-weight: 600;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .chat-header span { cursor: pointer; font-size: 18px; }
-        #chat-messages {
+        
+        .chat-messages {
             flex: 1;
-            padding: 15px;
+            padding: 20px;
             overflow-y: auto;
-            background: #f9f9f9;
-            font-size: 14px;
-        }
-        .msg-user {
-            background: #3498db;
-            color: white;
-            padding: 10px 12px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            max-width: 80%;
-            margin-left: auto;
-            text-align: right;
-        }
-        .msg-bot {
-            background: #e0e0e0;
-            padding: 10px 12px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            max-width: 80%;
-        }
-        .chat-input-area {
-            padding: 10px;
-            background: white;
-            border-top: 1px solid #ddd;
-            display: flex;
-            gap: 8px;
-        }
-        #chat-input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ccc;
-            border-radius: 20px;
-            outline: none;
-            font-size: 14px;
-        }
-        #chat-send {
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            font-size: 16px;
+            background: #f9fafb;
         }
         
-        /* RESPONSIVE */
-        @media (max-width: 600px) {
-            #chatbot-window { width: 90%; right: 5%; }
-            .admin-content { padding: 15px; }
+        .chat-input-area {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .msg-user {
+            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 16px 16px 4px 16px;
+            margin-bottom: 12px;
+            max-width: 80%;
+            margin-left: auto;
+        }
+        
+        .msg-bot {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 16px 16px 16px 4px;
+            margin-bottom: 12px;
+            max-width: 80%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        @media (max-width: 640px) {
+            .chat-window {
+                width: calc(100% - 40px);
+                right: 20px;
+            }
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-50">
 
 <!-- HEADER -->
-<header>
-    <h1>💊 MediTech 💻</h1>
-    <p>Medicamentos y Tecnología - Tu tienda en línea</p>
+<header class="bg-gradient-custom text-white shadow-lg">
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="font-sora text-3xl font-bold mb-1">💊 MediTech 💻</h1>
+                <p class="text-teal-100 text-sm">Medicamentos y Tecnología - Tu tienda en línea</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="document.getElementById('cart-modal').style.display='flex'" class="relative bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full transition">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold">0</span>
+                </button>
+            </div>
+        </div>
+    </div>
 </header>
 
-<!-- BOTÓN ROOT -->
-<button id="root-access-btn" onclick="toggleAdminPanel()">🔒 Root Admin</button>
-
-<!-- PORTADA DE PRODUCTOS -->
-<section class="portada">
-    <h2>🌟 Productos Destacados</h2>
-    <div id="portada-productos">
-        <p style="text-align:center; grid-column:1/-1; color:#999;">Cargando productos...</p>
+<!-- CARRUSEL PRODUCTOS DESTACADOS -->
+<section class="container mx-auto px-4 py-8">
+    <h2 class="font-sora text-2xl font-bold text-gray-800 mb-6">🌟 Productos Destacados</h2>
+    <div id="featured-carousel" class="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+        <p class="text-gray-500 text-center w-full">Cargando productos destacados...</p>
     </div>
 </section>
 
-<!-- PANEL DE ADMINISTRACIÓN ROOT -->
-<div id="admin-panel">
-    <div class="admin-content">
-        <h2>⚙️ Panel de Administración Root</h2>
-        <button onclick="toggleAdminPanel()" class="btn-danger" style="float:right;">Cerrar X</button>
-        <hr style="margin: 20px 0;">
-        
-        <h3>➕ Agregar Nuevo Producto</h3>
-        <form id="product-form" onsubmit="saveProduct(event)">
-            <label>Nombre del Producto:</label>
-            <input type="text" id="prod-name" required placeholder="Ej: Paracetamol 500mg / RTX 4090">
-            
-            <label>Categoría:</label>
-            <select id="prod-category">
-                <option value="💊 Medicamento">💊 Medicamento</option>
-                <option value="💻 Tecnología">💻 Tecnología / PC</option>
-                <option value="🩺 Salud">🩺 Salud</option>
-                <option value="🎮 Gaming">🎮 Gaming</option>
-            </select>
+<!-- GRID DE PRODUCTOS -->
+<section class="container mx-auto px-4 py-8">
+    <h2 class="font-sora text-2xl font-bold text-gray-800 mb-6">📦 Todos los Productos</h2>
+    <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <p class="text-gray-500 text-center col-span-full">Cargando productos...</p>
+    </div>
+</section>
 
-            <label>Descripción / Para qué sirve:</label>
-            <textarea id="prod-desc" required placeholder="Ej: Analgésico y antipirético..."></textarea>
-
-            <label>📸 Subir Foto NUEVA (desde PC o Móvil):</label>
-            <input type="file" id="prod-image" accept="image/*" capture="environment" onchange="previewImage(event)">
-            <img id="image-preview" alt="Vista previa">
-            
-            <label>🖼️ O selecciona una foto YA SUBIDA:</label>
-            <select id="image-selector" onchange="onSelectExistingImage()">
-                <option value="">-- Selecciona una foto existente --</option>
-            </select>
-
-            <br><br>
-            <button type="submit" class="btn-primary">💾 Guardar Producto</button>
-        </form>
-
-        <hr style="margin: 25px 0;">
-        <h3>📋 Productos en Portada</h3>
-        <ul id="product-list"></ul>
+<!-- MODAL CARRITO -->
+<div id="cart-modal" style="display:none" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b flex justify-between items-center">
+            <h3 class="font-sora text-xl font-bold">🛒 Tu Carrito</h3>
+            <button onclick="document.getElementById('cart-modal').style.display='none'" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div id="cart-items" class="p-6"></div>
+        <div class="p-6 border-t bg-gray-50">
+            <div class="flex justify-between items-center mb-4">
+                <span class="font-semibold text-lg">Total:</span>
+                <span id="cart-total" class="font-bold text-2xl text-teal">$0.00</span>
+            </div>
+            <button onclick="checkout()" class="bt btp w-full justify-center">
+                <i class="fas fa-credit-card"></i> Proceder al Pago
+            </button>
+        </div>
     </div>
 </div>
 
-<!-- CHATBOT FLOTANTE -->
-<div id="chatbot-icon" onclick="toggleChat()">💬</div>
-
-<div id="chatbot-window">
-    <div class="chat-header">
-        🤖 Asistente MediTech
-        <span onclick="toggleChat()">✖</span>
+<!-- PANEL DE ADMINISTRACIÓN ROOT -->
+<div id="admin-panel" style="display:none" class="fixed inset-0 bg-black/85 z-50 overflow-y-auto p-4">
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl p-8 relative">
+        <button onclick="document.getElementById('admin-panel').style.display='none'" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-red-500 text-white border-none cursor-pointer text-lg">
+            <i class="fas fa-times"></i>
+        </button>
+        <h2 class="font-sora text-2xl font-bold text-teal mb-6">
+            <i class="fas fa-cog"></i> Panel de Administración Root
+        </h2>
+        
+        <div class="mb-8">
+            <h3 class="text-lg font-semibold mb-4 text-gray-800">
+                <i class="fas fa-plus-circle"></i> Agregar Nuevo Producto
+            </h3>
+            <form id="product-form" onsubmit="saveProduct(event)" class="grid gap-4">
+                <div>
+                    <label class="fl">Nombre del Producto</label>
+                    <input type="text" id="prod-name" class="fi" required placeholder="Ej: Paracetamol 500mg">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="fl">Categoría</label>
+                        <select id="prod-category" class="fi">
+                            <option value="medicamento">💊 Medicamento</option>
+                            <option value="pc">💻 Tecnología / PC</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="fl">Precio</label>
+                        <input type="number" id="prod-price" class="fi" required placeholder="0.00" step="0.01">
+                    </div>
+                </div>
+                <div>
+                    <label class="fl">Descripción</label>
+                    <textarea id="prod-desc" class="fi" required placeholder="Descripción del producto..." rows="3"></textarea>
+                </div>
+                <div>
+                    <label class="fl">Stock</label>
+                    <input type="number" id="prod-stock" class="fi" required placeholder="0" min="0">
+                </div>
+                <div>
+                    <label class="fl">📸 Subir Foto (PC o Móvil)</label>
+                    <div class="uz mt-2">
+                        <input type="file" id="prod-image" accept="image/*" capture="environment" onchange="previewImage(event)" class="hidden">
+                        <div id="upload-placeholder" onclick="document.getElementById('prod-image').click()">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-teal mb-2"></i>
+                            <p class="text-gray-500 text-sm">Haz clic para seleccionar una imagen</p>
+                        </div>
+                        <img id="image-preview" style="display:none" class="max-w-[200px] mx-auto mt-4 rounded-lg" alt="Vista previa">
+                    </div>
+                </div>
+                <div>
+                    <label class="fl">🖼️ O selecciona una foto ya subida</label>
+                    <select id="image-selector" class="fi mt-2" onchange="onSelectExistingImage()">
+                        <option value="">-- Selecciona una foto existente --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="prod-feat" class="w-5 h-5 cursor-pointer">
+                        <span class="fl mb-0 cursor-pointer">Producto destacado</span>
+                    </label>
+                </div>
+                <button type="submit" class="bt btp w-full justify-center">
+                    <i class="fas fa-save"></i> Guardar Producto
+                </button>
+            </form>
+        </div>
+        
+        <div>
+            <h3 class="text-lg font-semibold mb-4 text-gray-800">
+                <i class="fas fa-list"></i> Productos Actuales (<span id="product-count">0</span>)
+            </h3>
+            <div id="product-list" class="grid gap-3"></div>
+        </div>
     </div>
-    <div id="chat-messages">
+</div>
+
+<!-- BOTÓN ROOT ADMIN -->
+<button onclick="toggleAdminPanel()" class="fixed top-24 right-4 z-40 w-14 h-14 rounded-full bg-red-500 text-white border-none cursor-pointer shadow-lg flex items-center justify-center text-xl hover:bg-red-600 transition" title="Panel Admin">
+    <i class="fas fa-user-shield"></i>
+</button>
+
+<!-- CHATBOT -->
+<div class="chat-icon" onclick="toggleChat()">
+    <i class="fas fa-comment-dots"></i>
+</div>
+
+<div class="chat-window" id="chat-window">
+    <div class="chat-header">
+        <span>🤖 Asistente MediTech</span>
+        <span onclick="toggleChat()" class="cursor-pointer text-xl">✖</span>
+    </div>
+    <div class="chat-messages" id="chat-messages">
         <div class="msg-bot">
             ¡Hola! 👋 Soy el asistente de MediTech. Pregúntame sobre <b>medicamentos</b> o <b>piezas de PC</b>.
         </div>
     </div>
     <div class="chat-input-area">
-        <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter') sendMessage()">
-        <button id="chat-send" onclick="sendMessage()">➤</button>
+        <input type="text" id="chat-input" class="fi" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()" class="w-10 h-10 rounded-full bg-teal text-white border-none cursor-pointer">
+            <i class="fas fa-paper-plane"></i>
+        </button>
     </div>
 </div>
 
-<!-- JAVASCRIPT - SOLO CAMBIÓ LA PARTE DE FOTOS A GITHUB -->
 <script>
-    // ⚠️ CONFIGURA TU TOKEN DE GITHUB AQUÍ
-    const GITHUB_TOKEN = "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";
-    const GITHUB_USER = "calm291094-del";
-    const GITHUB_REPO = "meditech-tienda";
+// === CONFIGURACIÓN GITHUB API ===
+const GITHUB_TOKEN = "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";
+const GITHUB_USER = "calm291094-del";
+const GITHUB_REPO = "meditech-tienda";
+const API_BASE = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
+const GITHUB_HEADERS = {
+    "Authorization": `token ${GITHUB_TOKEN}`,
+    "Accept": "application/vnd.github.v3+json"
+};
 
-    const API_BASE = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
-    const HEADERS = {
-        "Authorization": `token ${GITHUB_TOKEN}`,
-        "Accept": "application/vnd.github.v3+json"
-    };
+// === DATOS INICIALES ===
+const DP = [
+    {id:'p1',name:'Paracetamol 500mg',price:5.99,image:'https://via.placeholder.com/300x300/0d9488/ffffff?text=Paracetamol',category:'medicamento',desc:'Analgésico y antipirético para dolores leves y fiebre',stock:100,feat:true},
+    {id:'p2',name:'Ibuprofeno 400mg',price:7.50,image:'https://via.placeholder.com/300x300/14b8a6/ffffff?text=Ibuprofeno',category:'medicamento',desc:'Antiinflamatorio para dolor e inflamación',stock:80,feat:true},
+    {id:'p3',name:'RTX 4090',price:1599.99,image:'https://via.placeholder.com/300x300/f97316/ffffff?text=RTX+4090',category:'pc',desc:'Tarjeta gráfica de alto rendimiento para gaming y diseño',stock:10,feat:true},
+    {id:'p4',name:'RAM 16GB DDR5',price:89.99,image:'https://via.placeholder.com/300x300/fb923c/ffffff?text=RAM+16GB',category:'pc',desc:'Memoria RAM de alta velocidad para tu PC',stock:50,feat:false}
+];
 
-    let products = [];
-    let imagenesDisponibles = [];
+const DC = [
+    {id:'c1',name:'Medicamentos',icon:'💊'},
+    {id:'c2',name:'Tecnología',icon:'💻'}
+];
 
-    // BASE DE CONOCIMIENTOS DEL CHATBOT
-    const knowledgeBase = {
-        "paracetamol": "El Paracetamol es un analgésico y antipirético. Sirve para aliviar dolores leves (cabeza, muscular) y bajar la fiebre. Dosis común: 500mg cada 6-8 horas.",
-        "ibuprofeno": "El Ibuprofeno es un antiinflamatorio no esteroideo (AINE). Sirve para reducir inflamación, dolor y fiebre. No usar con estómago vacío.",
-        "aspirina": "La Aspirina (ácido acetilsalicílico) es analgésico, antipirético y antiagregante plaquetario. No dar a niños por riesgo de Síndrome de Reye.",
-        "amoxicilina": "La Amoxicilina es un antibiótico penicilina. Sirve para infecciones bacterianas. Requiere receta médica y completar el tratamiento.",
-        "ram": "La memoria RAM (Random Access Memory) es la memoria de corto plazo de la PC. Donde se cargan los programas en ejecución. Más RAM = más programas abiertos a la vez.",
-        "gpu": "La GPU (Tarjeta Gráfica) procesa y renderiza imágenes, video y gráficos. Esencial para gaming, diseño 3D y edición de video. Ejemplos: NVIDIA RTX, AMD Radeon.",
-        "cpu": "El CPU (Procesador) es el cerebro de la computadora. Ejecuta las instrucciones de los programas. Ejemplos: Intel Core i7, AMD Ryzen 7.",
-        "ssd": "Un SSD (Unidad de Estado Sólido) es almacenamiento rápido sin partes móviles. Tu PC prende y carga programas en segundos. Muy superior al HDD.",
-        "hdd": "Un HDD (Disco Duro Mecánico) es almacenamiento tradicional. Más lento que SSD pero más barato para grandes capacidades.",
-        "motherboard": "La Motherboard (Placa Madre) conecta todos los componentes: CPU, RAM, GPU, almacenamiento. Define qué piezas son compatibles.",
-        "fuente": "La Fuente de Poder (PSU) suministra energía a todos los componentes. Se mide en watts (ej: 650W, 850W). Busca certificación 80 Plus.",
-        "monitor": "El Monitor muestra la imagen. Características clave: resolución (1080p, 1440p, 4K), tasa de refresco (60Hz, 144Hz) y panel (IPS, VA, TN).",
-        "teclado": "El teclado puede ser mecánico (más duradero, respuesta táctil) o membrana (más silencioso, económico). Los switches Cherry MX son los más populares.",
-        "mouse": "El mouse gamer tiene DPI ajustable, botones programables y diseño ergonómico. Los inalámbricos modernos tienen latencia casi nula.",
-        "refrigeracion": "La refrigeración mantiene el CPU/GPU a temperatura segura. Tipos: aire (disipador + ventilador) o líquida (más eficiente, más cara).",
-        "default": "No tengo información específica sobre eso en mi base de conocimientos local. Como administrador, puedes conectar este chat a una API de IA (como Google Gemini) para respuestas más completas."
-    };
+// === ESTADO DE LA APP ===
+const S = {
+    pr: [], // productos
+    cr: [], // carrito
+    us: [], // usuarios
+    or: [], // órdenes
+    ca: [], // categorías
+    au: [], // auth
+    u: null, // usuario actual
+    cart: []
+};
 
-    // CARGAR PRODUCTOS DESDE GITHUB
-    async function cargarProductos() {
-        try {
-            const response = await fetch(`${API_BASE}/contents/productos.json`, {
-                headers: HEADERS
-            });
-            if (!response.ok) throw new Error("No se pudo cargar productos.json");
-            const data = await response.json();
-            const contenido = atob(data.content);
-            const json = JSON.parse(contenido);
-            products = json.productos || [];
-            renderProducts();
-        } catch (error) {
-            console.error("Error al cargar productos:", error);
-            document.getElementById('portada-productos').innerHTML = 
-                '<p style="text-align:center; grid-column:1/-1; color:#e74c3c;">⚠️ Error al cargar productos. Verifica tu token de GitHub.</p>';
-        }
-    }
-
-    // CARGAR IMÁGENES DE /imagenes/
-    async function cargarImagenesDisponibles() {
-        try {
-            const response = await fetch(`${API_BASE}/contents/imagenes`, {
-                headers: HEADERS
-            });
-            if (!response.ok) return;
-            const archivos = await response.json();
-            imagenesDisponibles = archivos
-                .filter(f => /\.(jpg|jpeg|png|webp|gif)$/i.test(f.name))
-                .map(f => ({ nombre: f.name, url: f.download_url }));
-            
-            const selector = document.getElementById('image-selector');
-            selector.innerHTML = '<option value="">-- Selecciona una foto existente --</option>';
-            imagenesDisponibles.forEach(img => {
-                selector.innerHTML += `<option value="${img.url}">${img.nombre}</option>`;
-            });
-        } catch (error) {
-            console.log("Carpeta imagenes/ vacía o no existe");
-        }
-    }
-
-    function onSelectExistingImage() {
-        const selector = document.getElementById('image-selector');
-        const preview = document.getElementById('image-preview');
-        if (selector.value) {
-            preview.src = selector.value;
-            preview.style.display = 'block';
-            document.getElementById('prod-image').value = '';
-        }
-    }
-
-    // SUBIR IMAGEN A GITHUB
-    async function subirImagenAGitHub(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64 = e.target.result.split(',')[1];
-                const nombreLimpio = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-                const ruta = `imagenes/${Date.now()}_${nombreLimpio}`;
-                
-                try {
-                    const response = await fetch(`${API_BASE}/contents/${ruta}`, {
-                        method: "PUT",
-                        headers: HEADERS,
-                        body: JSON.stringify({
-                            message: `Subir imagen: ${file.name}`,
-                            content: base64
-                        })
-                    });
-                    if (!response.ok) throw new Error("Error al subir imagen");
-                    const data = await response.json();
-                    resolve(data.content.download_url);
-                } catch (error) {
-                    reject(error);
-                }
-            };
-            reader.readAsDataURL(file);
+// === FUNCIONES GITHUB ===
+async function cargarProductosDesdeGitHub() {
+    try {
+        const response = await fetch(`${API_BASE}/contents/productos.json`, {
+            headers: GITHUB_HEADERS
         });
+        if (!response.ok) return null;
+        const data = await response.json();
+        const contenido = atob(data.content);
+        const json = JSON.parse(contenido);
+        return json.productos || [];
+    } catch (error) {
+        console.error("Error al cargar desde GitHub:", error);
+        return null;
     }
+}
 
-    // GUARDAR PRODUCTO EN productos.json
-    async function actualizarProductosEnGitHub(mensaje) {
+async function guardarProductosEnGitHub(productos) {
+    try {
         const fileResponse = await fetch(`${API_BASE}/contents/productos.json`, {
-            headers: HEADERS
+            headers: GITHUB_HEADERS
         });
         const fileData = await fileResponse.json();
         
         await fetch(`${API_BASE}/contents/productos.json`, {
             method: "PUT",
-            headers: HEADERS,
+            headers: GITHUB_HEADERS,
             body: JSON.stringify({
-                message: mensaje,
-                content: btoa(JSON.stringify({ productos: products }, null, 2)),
+                message: `Actualizar productos - ${new Date().toLocaleString()}`,
+                content: btoa(JSON.stringify({ productos: productos }, null, 2)),
                 sha: fileData.sha
             })
         });
+        return true;
+    } catch (error) {
+        console.error("Error al guardar en GitHub:", error);
+        return false;
     }
+}
 
-    // FUNCIÓN PRINCIPAL: GUARDAR PRODUCTO
-    async function saveProduct(event) {
-        event.preventDefault();
-        const name = document.getElementById('prod-name').value;
-        const category = document.getElementById('prod-category').value;
-        const desc = document.getElementById('prod-desc').value;
-        const fileInput = document.getElementById('prod-image');
-        const selector = document.getElementById('image-selector');
-        
-        let imageUrl = "";
-
-        if (fileInput.files[0]) {
-            alert("📤 Subiendo imagen a GitHub... Esto puede tardar unos segundos.");
+async function subirImagenAGitHub(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const base64 = e.target.result.split(',')[1];
+            const nombreLimpio = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const ruta = `imagenes/${Date.now()}_${nombreLimpio}`;
+            
             try {
-                imageUrl = await subirImagenAGitHub(fileInput.files[0]);
-                await cargarImagenesDisponibles();
+                const response = await fetch(`${API_BASE}/contents/${ruta}`, {
+                    method: "PUT",
+                    headers: GITHUB_HEADERS,
+                    body: JSON.stringify({
+                        message: `Subir imagen: ${file.name}`,
+                        content: base64
+                    })
+                });
+                if (!response.ok) throw new Error("Error al subir imagen");
+                const data = await response.json();
+                resolve(data.content.download_url);
             } catch (error) {
-                alert("❌ Error al subir la imagen: " + error.message);
-                return;
+                reject(error);
             }
-        } else if (selector.value) {
-            imageUrl = selector.value;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+async function cargarImagenesDisponibles() {
+    try {
+        const response = await fetch(`${API_BASE}/contents/imagenes`, {
+            headers: GITHUB_HEADERS
+        });
+        if (!response.ok) return [];
+        const archivos = await response.json();
+        return archivos
+            .filter(f => /\.(jpg|jpeg|png|webp|gif)$/i.test(f.name))
+            .map(f => ({ nombre: f.name, url: f.download_url }));
+    } catch (error) {
+        console.log("Carpeta imagenes/ vacía o no existe");
+        return [];
+    }
+}
+
+// === FUNCIONES DE STORAGE ===
+function ld() {
+    cargarProductosDesdeGitHub().then(productosGitHub => {
+        if (productosGitHub && productosGitHub.length > 0) {
+            S.pr = productosGitHub;
         } else {
-            alert("⚠️ Sube una foto nueva o selecciona una existente.");
+            try {
+                S.pr = JSON.parse(localStorage.getItem('mp')) || [...DP];
+                if (!Array.isArray(S.pr)) S.pr = [...DP];
+            } catch (e) {
+                S.pr = [...DP];
+            }
+        }
+        renderApp();
+    });
+    
+    try { S.cr = JSON.parse(localStorage.getItem('mc')) || [...DC]; if (!Array.isArray(S.cr)) S.cr = [...DC]; } catch (e) { S.cr = [...DC]; }
+    try { S.us = JSON.parse(localStorage.getItem('mu')) || []; if (!Array.isArray(S.us)) S.us = []; } catch (e) { S.us = []; }
+    try { S.or = JSON.parse(localStorage.getItem('mo')) || []; if (!Array.isArray(S.or)) S.or = []; } catch (e) { S.or = []; }
+    try { S.ca = JSON.parse(localStorage.getItem('mk')) || []; if (!Array.isArray(S.ca)) S.ca = []; } catch (e) { S.ca = []; }
+    try { S.au = JSON.parse(localStorage.getItem('ma')) || []; if (!Array.isArray(S.au)) S.au = []; } catch (e) { S.au = []; }
+    try { const s = localStorage.getItem('ms'); if (s) { const u = S.us.find(x => x.id === s); if (u) S.u = u; } } catch (e) { S.u = null; }
+}
+
+function sv(k, v) {
+    const m = { cr: 'mc', pr: 'mp', us: 'mu', or: 'mo', ca: 'mk', au: 'ma', session: 'ms' };
+    if (m[k]) {
+        try { localStorage.setItem(m[k], JSON.stringify(v)); } catch (e) { console.warn('Storage lleno'); }
+        
+        if (k === 'pr') {
+            guardarProductosEnGitHub(v).then(success => {
+                if (success) console.log('Productos sincronizados con GitHub');
+            });
+        }
+    }
+}
+
+// === TOAST ===
+function tt(msg, type = 's') {
+    const colors = { s: '#10b981', e: '#ef4444', i: '#3b82f6', w: '#f59e0b' };
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.style.background = colors[type];
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// === RENDER APP ===
+function renderApp() {
+    renderFeatured();
+    renderProducts();
+    updateCartCount();
+}
+
+function renderFeatured() {
+    const container = document.getElementById('featured-carousel');
+    const featured = S.pr.filter(p => p.feat);
+    
+    if (featured.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center w-full">No hay productos destacados</p>';
+        return;
+    }
+    
+    container.innerHTML = featured.map(p => `
+        <div class="flex-shrink-0 w-72 snap-start card-hover bg-white rounded-2xl overflow-hidden shadow-md">
+            <img src="${p.image}" alt="${p.name}" class="w-full h-48 object-cover">
+            <div class="p-4">
+                <span class="inline-block px-3 py-1 bg-teal/10 text-teal text-xs font-semibold rounded-full mb-2">
+                    ${p.category === 'medicamento' ? '💊' : '💻'} ${p.category}
+                </span>
+                <h3 class="font-sora font-bold text-lg mb-1">${p.name}</h3>
+                <p class="text-gray-600 text-sm mb-3">${p.desc}</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-teal">$${p.price.toFixed(2)}</span>
+                    <button onclick="addToCart('${p.id}')" class="bt btp text-sm px-4 py-2">
+                        <i class="fas fa-cart-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderProducts() {
+    const container = document.getElementById('products-grid');
+    
+    if (S.pr.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center col-span-full">No hay productos disponibles</p>';
+        return;
+    }
+    
+    container.innerHTML = S.pr.map(p => `
+        <div class="card-hover bg-white rounded-2xl overflow-hidden shadow-md">
+            <img src="${p.image}" alt="${p.name}" class="w-full h-48 object-cover">
+            <div class="p-4">
+                <span class="inline-block px-3 py-1 bg-teal/10 text-teal text-xs font-semibold rounded-full mb-2">
+                    ${p.category === 'medicamento' ? '💊' : '💻'} ${p.category}
+                </span>
+                <h3 class="font-sora font-bold text-lg mb-1">${p.name}</h3>
+                <p class="text-gray-600 text-sm mb-3">${p.desc}</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-2xl font-bold text-teal">$${p.price.toFixed(2)}</span>
+                    <button onclick="addToCart('${p.id}')" class="bt btp text-sm px-4 py-2">
+                        <i class="fas fa-cart-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// === CARRITO ===
+function addToCart(id) {
+    const product = S.pr.find(p => p.id === id);
+    if (!product) return;
+    
+    const existing = S.cart.find(item => item.id === id);
+    if (existing) {
+        existing.qty++;
+    } else {
+        S.cart.push({ ...product, qty: 1 });
+    }
+    
+    updateCartCount();
+    tt('Producto agregado al carrito', 's');
+}
+
+function updateCartCount() {
+    const count = S.cart.reduce((sum, item) => sum + item.qty, 0);
+    document.getElementById('cart-count').textContent = count;
+    renderCart();
+}
+
+function renderCart() {
+    const container = document.getElementById('cart-items');
+    
+    if (S.cart.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-8">Tu carrito está vacío</p>';
+        document.getElementById('cart-total').textContent = '$0.00';
+        return;
+    }
+    
+    container.innerHTML = S.cart.map(item => `
+        <div class="flex gap-4 items-center mb-4 pb-4 border-b">
+            <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded-lg">
+            <div class="flex-1">
+                <h4 class="font-semibold">${item.name}</h4>
+                <p class="text-teal font-bold">$${item.price.toFixed(2)}</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <button onclick="updateCartQty('${item.id}', -1)" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300">-</button>
+                    <span class="font-semibold">${item.qty}</span>
+                    <button onclick="updateCartQty('${item.id}', 1)" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300">+</button>
+                </div>
+            </div>
+            <button onclick="removeFromCart('${item.id}')" class="text-red-500 hover:text-red-700">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `).join('');
+    
+    const total = S.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    document.getElementById('cart-total').textContent = `$${total.toFixed(2)}`;
+}
+
+function updateCartQty(id, delta) {
+    const item = S.cart.find(i => i.id === id);
+    if (!item) return;
+    
+    item.qty += delta;
+    if (item.qty <= 0) {
+        S.cart = S.cart.filter(i => i.id !== id);
+    }
+    
+    updateCartCount();
+}
+
+function removeFromCart(id) {
+    S.cart = S.cart.filter(i => i.id !== id);
+    updateCartCount();
+}
+
+function checkout() {
+    if (S.cart.length === 0) {
+        tt('Tu carrito está vacío', 'w');
+        return;
+    }
+    tt('Funcionalidad de pago próximamente', 'i');
+}
+
+// === PANEL ADMIN ===
+function toggleAdminPanel() {
+    const panel = document.getElementById('admin-panel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    if (panel.style.display === 'block') {
+        cargarImagenesDisponibles().then(imagenes => {
+            const selector = document.getElementById('image-selector');
+            selector.innerHTML = '<option value="">-- Selecciona una foto existente --</option>';
+            imagenes.forEach(img => {
+                selector.innerHTML += `<option value="${img.url}">${img.nombre}</option>`;
+            });
+        });
+        renderAdminProducts();
+    }
+}
+
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('image-preview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        document.getElementById('upload-placeholder').style.display = 'none';
+        document.getElementById('image-selector').value = "";
+    }
+    reader.readAsDataURL(file);
+}
+
+function onSelectExistingImage() {
+    const selector = document.getElementById('image-selector');
+    const preview = document.getElementById('image-preview');
+    if (selector.value) {
+        preview.src = selector.value;
+        preview.style.display = 'block';
+        document.getElementById('upload-placeholder').style.display = 'none';
+        document.getElementById('prod-image').value = '';
+    }
+}
+
+async function saveProduct(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('prod-name').value;
+    const category = document.getElementById('prod-category').value;
+    const price = parseFloat(document.getElementById('prod-price').value);
+    const desc = document.getElementById('prod-desc').value;
+    const stock = parseInt(document.getElementById('prod-stock').value);
+    const feat = document.getElementById('prod-feat').checked;
+    const fileInput = document.getElementById('prod-image');
+    const selector = document.getElementById('image-selector');
+    
+    let imageUrl = "";
+    
+    if (fileInput.files[0]) {
+        tt('Subiendo imagen a GitHub...', 'i');
+        try {
+            imageUrl = await subirImagenAGitHub(fileInput.files[0]);
+        } catch (error) {
+            tt('Error al subir imagen: ' + error.message, 'e');
             return;
         }
-
-        const newProduct = {
-            id: Date.now().toString(),
-            name, category, desc, image: imageUrl
-        };
-        products.push(newProduct);
-
-        try {
-            await actualizarProductosEnGitHub(`Agregar producto: ${name}`);
-            alert('✅ Producto agregado. Ya es visible para todos los dispositivos.');
-            document.getElementById('product-form').reset();
-            document.getElementById('image-preview').style.display = 'none';
-            cargarProductos();
-        } catch (error) {
-            alert("❌ Error al guardar: " + error.message);
-            products.pop();
-        }
+    } else if (selector.value) {
+        imageUrl = selector.value;
+    } else {
+        tt('Sube una foto nueva o selecciona una existente', 'e');
+        return;
     }
+    
+    const newProduct = {
+        id: 'p' + Date.now(),
+        name: name,
+        price: price,
+        image: imageUrl,
+        category: category,
+        desc: desc,
+        stock: stock,
+        feat: feat
+    };
+    
+    S.pr.push(newProduct);
+    sv('pr', S.pr);
+    
+    tt('✅ Producto agregado y sincronizado con GitHub', 's');
+    document.getElementById('product-form').reset();
+    document.getElementById('image-preview').style.display = 'none';
+    document.getElementById('upload-placeholder').style.display = 'block';
+    renderAdminProducts();
+    renderApp();
+}
 
-    // ELIMINAR PRODUCTO
-    async function deleteProduct(id) {
-        if (!confirm('¿Eliminar este producto?')) return;
+function deleteProduct(id) {
+    if (!confirm('¿Eliminar este producto?')) return;
+    S.pr = S.pr.filter(p => p.id !== id);
+    sv('pr', S.pr);
+    tt('Producto eliminado', 's');
+    renderAdminProducts();
+    renderApp();
+}
+
+function renderAdminProducts() {
+    const list = document.getElementById('product-list');
+    const count = document.getElementById('product-count');
+    
+    if (!list || !count) return;
+    
+    count.textContent = S.pr.length;
+    list.innerHTML = '';
+    
+    if (S.pr.length === 0) {
+        list.innerHTML = '<p class="text-gray-500 text-center py-4">No hay productos aún</p>';
+        return;
+    }
+    
+    list.innerHTML = S.pr.map(p => `
+        <div class="flex gap-4 items-center p-4 border border-gray-200 rounded-xl bg-gray-50">
+            <img src="${p.image}" alt="${p.name}" class="w-20 h-20 object-cover rounded-lg">
+            <div class="flex-1">
+                <h4 class="font-semibold">${p.name}</h4>
+                <p class="text-sm text-gray-600 mb-1">${p.category === 'medicamento' ? '💊' : '💻'} ${p.category}</p>
+                <p class="text-teal font-bold">$${p.price.toFixed(2)}</p>
+                <p class="text-xs text-gray-500">Stock: ${p.stock}</p>
+            </div>
+            <button onclick="deleteProduct('${p.id}')" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                <i class="fas fa-trash"></i> Eliminar
+            </button>
+        </div>
+    `).join('');
+}
+
+// === CHATBOT ===
+const knowledgeBase = {
+    "paracetamol": "El Paracetamol es un analgésico y antipirético. Sirve para aliviar dolores leves (cabeza, muscular) y bajar la fiebre. Dosis común: 500mg cada 6-8 horas.",
+    "ibuprofeno": "El Ibuprofeno es un antiinflamatorio no esteroideo (AINE). Sirve para reducir inflamación, dolor y fiebre. No usar con estómago vacío.",
+    "aspirina": "La Aspirina (ácido acetilsalicílico) es analgésico, antipirético y antiagregante plaquetario. No dar a niños por riesgo de Síndrome de Reye.",
+    "amoxicilina": "La Amoxicilina es un antibiótico penicilina. Sirve para infecciones bacterianas. Requiere receta médica y completar el tratamiento.",
+    "ram": "La memoria RAM (Random Access Memory) es la memoria de corto plazo de la PC. Donde se cargan los programas en ejecución. Más RAM = más programas abiertos a la vez.",
+    "gpu": "La GPU (Tarjeta Gráfica) procesa y renderiza imágenes, video y gráficos. Esencial para gaming, diseño 3D y edición de video. Ejemplos: NVIDIA RTX, AMD Radeon.",
+    "cpu": "El CPU (Procesador) es el cerebro de la computadora. Ejecuta las instrucciones de los programas. Ejemplos: Intel Core i7, AMD Ryzen 7.",
+    "ssd": "Un SSD (Unidad de Estado Sólido) es almacenamiento rápido sin partes móviles. Tu PC prende y carga programas en segundos. Muy superior al HDD.",
+    "hdd": "Un HDD (Disco Duro Mecánico) es almacenamiento tradicional. Más lento que SSD pero más barato para grandes capacidades.",
+    "motherboard": "La Motherboard (Placa Madre) conecta todos los componentes: CPU, RAM, GPU, almacenamiento. Define qué piezas son compatibles.",
+    "fuente": "La Fuente de Poder (PSU) suministra energía a todos los componentes. Se mide en watts (ej: 650W, 850W). Busca certificación 80 Plus.",
+    "monitor": "El Monitor muestra la imagen. Características clave: resolución (1080p, 1440p, 4K), tasa de refresco (60Hz, 144Hz) y panel (IPS, VA, TN).",
+    "teclado": "El teclado puede ser mecánico (más duradero, respuesta táctil) o membrana (más silencioso, económico). Los switches Cherry MX son los más populares.",
+    "mouse": "El mouse gamer tiene DPI ajustable, botones programables y diseño ergonómico. Los inalámbricos modernos tienen latencia casi nula.",
+    "refrigeracion": "La refrigeración mantiene el CPU/GPU a temperatura segura. Tipos: aire (disipador + ventilador) o líquida (más eficiente, más cara).",
+    "default": "No tengo información específica sobre eso en mi base de conocimientos local. Como administrador, puedes conectar este chat a una API de IA (como Google Gemini) para respuestas más completas."
+};
+
+function toggleChat() {
+    const chatWindow = document.getElementById('chat-window');
+    chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
+}
+
+function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const messages = document.getElementById('chat-messages');
+    const text = input.value.trim();
+    if (!text) return;
+
+    messages.innerHTML += `<div class="msg-user">${text}</div>`;
+    input.value = '';
+
+    setTimeout(() => {
+        let response = knowledgeBase["default"];
+        const lowerText = text.toLowerCase();
         
-        const producto = products.find(p => p.id === id);
-        products = products.filter(p => p.id !== id);
+        for (let key in knowledgeBase) {
+            if (lowerText.includes(key)) {
+                response = knowledgeBase[key];
+                break;
+            }
+        }
         
-        try {
-            await actualizarProductosEnGitHub(`Eliminar producto: ${producto?.name}`);
-            cargarProductos();
-        } catch (error) {
-            alert("❌ Error al eliminar: " + error.message);
-            cargarProductos();
-        }
-    }
-
-    // MOSTRAR PRODUCTOS
-    function renderProducts() {
-        const list = document.getElementById('product-list');
-        const portada = document.getElementById('portada-productos');
-        
-        if (list) {
-            list.innerHTML = '';
-            if (products.length === 0) {
-                list.innerHTML = '<li style="text-align:center; color:#999;">No hay productos aún</li>';
-            }
-            products.forEach(p => {
-                list.innerHTML += `
-                    <li>
-                        <img src="${p.image}" alt="${p.name}">
-                        <div class="info">
-                            <b>${p.name}</b><br>
-                            <small style="color:#3498db;">${p.category}</small><br>
-                            <small>${p.desc.substring(0, 60)}...</small>
-                        </div>
-                        <button onclick="deleteProduct('${p.id}')" class="btn-danger">🗑️</button>
-                    </li>
-                `;
-            });
+        const foundProduct = S.pr.find(p => lowerText.includes(p.name.toLowerCase()));
+        if (foundProduct && response === knowledgeBase["default"]) {
+            response = `Sobre <b>${foundProduct.name}</b> (${foundProduct.category}): ${foundProduct.desc}`;
         }
 
-        if (portada) {
-            portada.innerHTML = '';
-            if (products.length === 0) {
-                portada.innerHTML = '<p style="text-align:center; grid-column:1/-1; color:#999;">Aún no hay productos. El administrador debe agregar productos desde el panel Root.</p>';
-                return;
-            }
-            products.forEach(p => {
-                portada.innerHTML += `
-                    <div class="producto-card">
-                        <img src="${p.image}" alt="${p.name}">
-                        <span class="categoria">${p.category}</span>
-                        <h3>${p.name}</h3>
-                        <p>${p.desc}</p>
-                    </div>
-                `;
-            });
-        }
-    }
-
-    // PREVIEW DE IMAGEN
-    function previewImage(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const preview = document.getElementById('image-preview');
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-            document.getElementById('image-selector').value = "";
-        }
-        reader.readAsDataURL(file);
-    }
-
-    // PANEL ADMIN
-    function toggleAdminPanel() {
-        const panel = document.getElementById('admin-panel');
-        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        if (panel.style.display === 'block') {
-            cargarImagenesDisponibles();
-        }
-    }
-
-    // CHATBOT
-    function toggleChat() {
-        const chatWindow = document.getElementById('chatbot-window');
-        chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
-    }
-
-    function sendMessage() {
-        const input = document.getElementById('chat-input');
-        const messages = document.getElementById('chat-messages');
-        const text = input.value.trim();
-        if (!text) return;
-
-        messages.innerHTML += `<div class="msg-user">${text}</div>`;
-        input.value = '';
-
-        setTimeout(() => {
-            let response = knowledgeBase["default"];
-            const lowerText = text.toLowerCase();
-            
-            for (let key in knowledgeBase) {
-                if (lowerText.includes(key)) {
-                    response = knowledgeBase[key];
-                    break;
-                }
-            }
-            
-            const foundProduct = products.find(p => 
-                lowerText.includes(p.name.toLowerCase())
-            );
-            if (foundProduct && response === knowledgeBase["default"]) {
-                response = `Sobre <b>${foundProduct.name}</b> (${foundProduct.category}): ${foundProduct.desc}`;
-            }
-
-            messages.innerHTML += `<div class="msg-bot">${response}</div>`;
-            messages.scrollTop = messages.scrollHeight;
-        }, 600);
-        
+        messages.innerHTML += `<div class="msg-bot">${response}</div>`;
         messages.scrollTop = messages.scrollHeight;
-    }
+    }, 600);
+    
+    messages.scrollTop = messages.scrollHeight;
+}
 
-    // INICIAR
-    cargarProductos();
+// === INICIALIZAR ===
+ld();
 </script>
 
 </body>
