@@ -17,9 +17,6 @@
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .gradient-text { background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .pulse-dot { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
         .carousel { position: relative; overflow: hidden; border-radius: 20px; }
         .carousel-inner { display: flex; transition: transform 0.5s ease-in-out; }
         .carousel-item { min-width: 100%; position: relative; }
@@ -32,70 +29,24 @@
         .carousel-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; }
         .carousel-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s; }
         .carousel-dot.active { background: white; width: 30px; border-radius: 6px; }
-        
         .badge-new { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
         .category-card { transition: all 0.3s ease; }
         .category-card:hover { transform: scale(1.05); }
         .modal-overlay { animation: fadeIn 0.3s ease; }
         .modal-content { animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .image-option {
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .image-option:hover {
-            background: #f0fdfa;
-            border-color: #0d9488;
-        }
-        .image-option.active {
-            background: #f0fdfa;
-            border-color: #0d9488;
-            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
-        }
-        .image-preview-container {
-            position: relative;
-            display: inline-block;
-        }
-        .image-preview-container .remove-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            transition: all 0.2s;
-        }
-        .image-preview-container .remove-btn:hover {
-            background: #dc2626;
-            transform: scale(1.1);
-        }
-        .no-image-placeholder {
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #9ca3af;
-        }
-        .admin-tab-btn {
-            transition: all 0.2s;
-        }
-        .admin-tab-btn.active {
-            background: #0d9488;
-            color: white;
-            border-color: #0d9488;
-        }
-        .admin-tab-btn:hover:not(.active) {
-            background: #f0fdfa;
-        }
+        .image-option { transition: all 0.2s ease; cursor: pointer; }
+        .image-option:hover { background: #f0fdfa; border-color: #0d9488; }
+        .image-option.active { background: #f0fdfa; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
+        .image-preview-container { position: relative; display: inline-block; }
+        .image-preview-container .remove-btn { position: absolute; top: 5px; right: 5px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.2s; }
+        .image-preview-container .remove-btn:hover { background: #dc2626; transform: scale(1.1); }
+        .no-image-placeholder { background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); display: flex; align-items: center; justify-content: center; color: #9ca3af; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 12px 24px; border-radius: 12px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideDown 0.3s ease; }
+        .toast-success { background: #10b981; color: white; }
+        .toast-error { background: #ef4444; color: white; }
+        .toast-info { background: #3b82f6; color: white; }
+        @keyframes slideDown { from { opacity: 0; transform: translateX(-50%) translateY(-20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -319,12 +270,6 @@
                         <a href="#" class="hover:text-teal-400 transition"><i class="fab fa-instagram"></i></a>
                         <a href="#" class="hover:text-teal-400 transition"><i class="fab fa-twitter"></i></a>
                     </div>
-                    <!-- Botones de exportar/importar -->
-                    <div class="flex gap-2 mt-2 flex-wrap">
-                        <button onclick="exportData()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs py-1 px-3 rounded-full">Exportar datos</button>
-                        <button onclick="importData()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs py-1 px-3 rounded-full">Importar datos</button>
-                        <input type="file" id="fileInput" accept=".json" class="hidden" onchange="importDataFile(event)">
-                    </div>
                 </div>
             </div>
             <div class="text-center text-sm opacity-50 pt-8 border-t border-gray-800">
@@ -353,7 +298,6 @@
                 </div>
                 <button type="submit" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-3 rounded-xl transition shadow-lg">Iniciar Sesión</button>
                 <p class="text-center text-sm text-gray-600">¿No tienes cuenta? <button type="button" onclick="closeLoginModal(); openRegisterModal();" class="text-teal-600 font-semibold hover:underline">Regístrate aquí</button></p>
-                <!-- Eliminado el bloque de "Usuario Root" -->
             </form>
         </div>
     </div>
@@ -390,169 +334,157 @@
         </div>
     </div>
 
-    <!-- PANEL ADMIN (con pestañas: Productos, Configuración) -->
+    <!-- PANEL ADMIN (con nuevas secciones) -->
     <div id="admin-panel" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-y-auto p-4">
         <div class="bg-white rounded-3xl max-w-4xl w-full mx-auto mt-10 shadow-2xl overflow-hidden fade-in">
             <div class="bg-gradient-to-r from-orange-500 to-red-600 p-6 flex justify-between items-center text-white">
                 <h2 class="text-2xl font-bold"><i class="fas fa-cog mr-2"></i>Panel Admin</h2>
                 <button onclick="toggleAdminPanel()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center"><i class="fas fa-times text-xl"></i></button>
             </div>
-            
-            <!-- Pestañas -->
-            <div class="flex border-b border-gray-200 px-6 pt-4 gap-2">
-                <button onclick="switchAdminTab('productos')" id="tab-productos" class="admin-tab-btn active px-4 py-2 rounded-t-lg border-2 border-b-0 border-gray-200 font-medium text-sm transition">📦 Productos</button>
-                <button onclick="switchAdminTab('config')" id="tab-config" class="admin-tab-btn px-4 py-2 rounded-t-lg border-2 border-b-0 border-gray-200 font-medium text-sm transition">⚙️ Configuración</button>
-            </div>
-
-            <!-- Contenido de pestañas -->
-            <div id="tab-content" class="p-8 space-y-6">
-                <!-- Pestaña Productos -->
-                <div id="panel-productos">
-                    <form id="product-form" class="space-y-5" onsubmit="saveProduct(event)">
-                        <div class="grid md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre</label>
-                                <input type="text" id="prod-name" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Ej: Paracetamol 500mg">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Categoría</label>
-                                <select id="prod-category" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white">
-                                    <option value="medicamento">💊 Medicamento</option>
-                                    <option value="tecnologia">💻 Tecnología / PC</option>
-                                    <option value="salud">🩺 Salud</option>
-                                    <option value="gaming">🎮 Gaming</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="grid md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Precio ($)</label>
-                                <input type="number" id="prod-price" required step="0.01" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="0.00">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Stock</label>
-                                <input type="number" id="prod-stock" required min="0" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="0">
-                            </div>
-                        </div>
+            <div class="p-8 space-y-6">
+                <!-- Configuración GitHub -->
+                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fab fa-github text-gray-700"></i> Configuración GitHub
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
-                            <textarea id="prod-desc" required rows="4" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none resize-none" placeholder="¿Para qué sirve?"></textarea>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Token de acceso</label>
+                            <input type="text" id="github-token-input" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Ingresa tu token">
                         </div>
-                        
-                        <!-- SELECCIÓN DE IMAGEN -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-3">
-                                🖼️ Imagen del Producto <span class="text-gray-400 font-normal">(Opcional)</span>
-                            </label>
-                            <div class="grid grid-cols-2 gap-2 mb-4">
-                                <button type="button" onclick="selectImageOption('url')" id="tab-url" class="image-option border-2 border-gray-200 rounded-xl p-3 text-center">
-                                    <i class="fas fa-link text-teal-600 text-xl mb-1"></i>
-                                    <p class="text-xs font-semibold">URL</p>
-                                </button>
-                                <button type="button" onclick="selectImageOption('existing')" id="tab-existing" class="image-option border-2 border-gray-200 rounded-xl p-3 text-center">
-                                    <i class="fas fa-folder-open text-teal-600 text-xl mb-1"></i>
-                                    <p class="text-xs font-semibold">Existente</p>
-                                </button>
-                            </div>
-                            
-                            <div id="option-url" class="hidden">
-                                <label class="block text-sm text-gray-600 mb-2">Pega el link de una imagen pública</label>
-                                <input type="url" id="prod-image-url" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" 
-                                       placeholder="https://ejemplo.com/imagen.jpg" oninput="previewUrlImage()">
-                            </div>
-                            
-                            <div id="option-existing" class="hidden">
-                                <select id="image-selector" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-gray-50" onchange="onSelectExistingImage()">
-                                    <option value="">-- Selecciona una imagen de ejemplo --</option>
-                                    <option value="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop">💊 Medicamento genérico</option>
-                                    <option value="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=300&h=300&fit=crop">💻 Laptop</option>
-                                    <option value="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=300&fit=crop">🩺 Salud</option>
-                                    <option value="https://images.unsplash.com/photo-1592155931584-901ac15763e3?w=300&h=300&fit=crop">🎮 Gaming</option>
-                                </select>
-                            </div>
-                            
-                            <div id="option-none" class="hidden">
-                                <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
-                                    <i class="fas fa-image text-4xl text-gray-300 mb-2"></i>
-                                    <p class="text-gray-500 text-sm">Sin imagen (se usará un placeholder)</p>
-                                </div>
-                            </div>
-                            
-                            <div id="image-preview-wrapper" class="hidden mt-4">
-                                <label class="block text-sm text-gray-600 mb-2">Vista previa:</label>
-                                <div class="image-preview-container">
-                                    <img id="image-preview" class="max-h-40 rounded-lg shadow-md border-2 border-gray-200" alt="Preview">
-                                    <button type="button" onclick="clearImageSelection()" class="remove-btn" title="Quitar imagen">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div id="image-status" class="mt-3 text-sm text-gray-500 flex items-center gap-2">
-                                <i class="fas fa-info-circle"></i>
-                                <span>Selecciona una opción arriba (o déjalo vacío)</span>
-                            </div>
+                        <div class="flex items-end gap-3">
+                            <button onclick="testGitHubConnection()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-semibold transition flex items-center gap-2">
+                                <i class="fas fa-plug"></i> Probar conexión
+                            </button>
+                            <button onclick="saveGitHubToken()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-3 rounded-xl font-semibold transition flex items-center gap-2">
+                                <i class="fas fa-save"></i> Guardar token
+                            </button>
                         </div>
-                        
-                        <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                            <input type="checkbox" id="prod-feat" class="w-5 h-5 text-teal-600 rounded cursor-pointer">
-                            <label for="prod-feat" class="text-sm font-medium text-gray-700 cursor-pointer">Marcar como destacado</label>
-                        </div>
-                        <button type="submit" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-3 shadow-lg">
-                            <i class="fas fa-save text-xl"></i>
-                            <span class="text-lg">Guardar Producto</span>
-                        </button>
-                    </form>
-                    <hr class="border-gray-200 my-6">
-                    <div>
-                        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 text-lg">
-                            <i class="fas fa-box text-teal-600"></i>
-                            Inventario (<span id="admin-count" class="text-teal-600">0</span>)
-                        </h3>
-                        <div id="admin-list" class="space-y-3 max-h-96 overflow-y-auto pr-2 scrollbar-hide"></div>
+                    </div>
+                    <div id="github-status" class="mt-3 text-sm text-gray-600 flex items-center gap-2">
+                        <i class="fas fa-circle text-gray-400"></i> Estado: <span id="github-status-text">No configurado</span>
                     </div>
                 </div>
 
-                <!-- Pestaña Configuración -->
-                <div id="panel-config" class="hidden">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">⚙️ Configuración de la Tienda</h3>
-                    
-                    <!-- Cambiar Token -->
-                    <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200 mb-6">
-                        <h4 class="font-bold text-gray-800 mb-2">🔑 Token de GitHub</h4>
-                        <p class="text-sm text-gray-500 mb-3">Cambia el token de acceso a GitHub para sincronizar los datos con el repositorio.</p>
-                        <div class="flex gap-3">
-                            <input type="text" id="github-token-input" class="flex-1 px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="ghp_xxxxxxxxxxxx">
-                            <button onclick="saveGitHubToken()" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-xl font-bold transition">Guardar Token</button>
+                <!-- Gestión de usuarios -->
+                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="fas fa-users text-teal-600"></i> Gestión de Usuarios
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Usuario a modificar</label>
+                            <select id="user-selector" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white" onchange="loadUserData()">
+                            </select>
                         </div>
-                        <div id="token-status" class="mt-2 text-sm text-gray-500"></div>
-                    </div>
-
-                    <!-- Cambiar Contraseña del Admin (usuario actual si es admin) -->
-                    <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                        <h4 class="font-bold text-gray-800 mb-2">🔒 Cambiar Contraseña de Administrador</h4>
-                        <p class="text-sm text-gray-500 mb-3">Cambia la contraseña del usuario administrador actual.</p>
-                        <form onsubmit="changeAdminPassword(event)" class="space-y-3">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Nueva Contraseña</label>
-                                <input type="password" id="new-admin-password" required minlength="6" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Mínimo 6 caracteres">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nueva contraseña</label>
+                            <div class="flex gap-2">
+                                <input type="password" id="new-password-input" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Nueva contraseña">
+                                <button onclick="updateUserPassword()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-xl font-semibold transition flex items-center gap-2">
+                                    <i class="fas fa-key"></i> Actualizar
+                                </button>
                             </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Confirmar Contraseña</label>
-                                <input type="password" id="confirm-admin-password" required minlength="6" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Repite la contraseña">
-                            </div>
-                            <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-xl font-bold transition">Actualizar Contraseña</button>
-                        </form>
-                        <div id="password-status" class="mt-2 text-sm text-gray-500"></div>
+                        </div>
                     </div>
+                    <div id="user-status" class="mt-3 text-sm text-gray-600"></div>
+                </div>
 
-                    <!-- Sincronización manual -->
-                    <div class="mt-6 flex gap-3">
-                        <button onclick="syncData()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold transition">
-                            <i class="fas fa-sync mr-2"></i>Sincronizar con GitHub
-                        </button>
-                        <span id="sync-status" class="text-sm text-gray-500 self-center"></span>
+                <!-- Formulario de productos (igual que antes) -->
+                <form id="product-form" class="space-y-5" onsubmit="saveProduct(event)">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-plus-circle text-teal-600"></i> Agregar Producto
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre</label>
+                            <input type="text" id="prod-name" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Ej: Paracetamol 500mg">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Categoría</label>
+                            <select id="prod-category" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white">
+                                <option value="medicamento">💊 Medicamento</option>
+                                <option value="tecnologia">💻 Tecnología / PC</option>
+                                <option value="salud">🩺 Salud</option>
+                                <option value="gaming">🎮 Gaming</option>
+                            </select>
+                        </div>
                     </div>
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Precio ($)</label>
+                            <input type="number" id="prod-price" required step="0.01" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Stock</label>
+                            <input type="number" id="prod-stock" required min="0" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="0">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
+                        <textarea id="prod-desc" required rows="4" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none resize-none" placeholder="¿Para qué sirve?"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">🖼️ Imagen del Producto <span class="text-gray-400 font-normal">(Opcional)</span></label>
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <button type="button" onclick="selectImageOption('url')" id="tab-url" class="image-option border-2 border-gray-200 rounded-xl p-3 text-center">
+                                <i class="fas fa-link text-teal-600 text-xl mb-1"></i>
+                                <p class="text-xs font-semibold">URL</p>
+                            </button>
+                            <button type="button" onclick="selectImageOption('existing')" id="tab-existing" class="image-option border-2 border-gray-200 rounded-xl p-3 text-center">
+                                <i class="fas fa-folder-open text-teal-600 text-xl mb-1"></i>
+                                <p class="text-xs font-semibold">Existente</p>
+                            </button>
+                        </div>
+                        <div id="option-url" class="hidden">
+                            <input type="url" id="prod-image-url" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="https://ejemplo.com/imagen.jpg" oninput="previewUrlImage()">
+                        </div>
+                        <div id="option-existing" class="hidden">
+                            <select id="image-selector" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-gray-50" onchange="onSelectExistingImage()">
+                                <option value="">-- Selecciona una imagen de ejemplo --</option>
+                                <option value="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop">💊 Medicamento genérico</option>
+                                <option value="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=300&h=300&fit=crop">💻 Laptop</option>
+                                <option value="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=300&fit=crop">🩺 Salud</option>
+                                <option value="https://images.unsplash.com/photo-1592155931584-901ac15763e3?w=300&h=300&fit=crop">🎮 Gaming</option>
+                            </select>
+                        </div>
+                        <div id="option-none" class="hidden">
+                            <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
+                                <i class="fas fa-image text-4xl text-gray-300 mb-2"></i>
+                                <p class="text-gray-500 text-sm">Sin imagen (placeholder)</p>
+                            </div>
+                        </div>
+                        <div id="image-preview-wrapper" class="hidden mt-4">
+                            <label class="block text-sm text-gray-600 mb-2">Vista previa:</label>
+                            <div class="image-preview-container">
+                                <img id="image-preview" class="max-h-40 rounded-lg shadow-md border-2 border-gray-200" alt="Preview">
+                                <button type="button" onclick="clearImageSelection()" class="remove-btn" title="Quitar imagen">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="image-status" class="mt-3 text-sm text-gray-500 flex items-center gap-2">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Selecciona una opción</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                        <input type="checkbox" id="prod-feat" class="w-5 h-5 text-teal-600 rounded cursor-pointer">
+                        <label for="prod-feat" class="text-sm font-medium text-gray-700 cursor-pointer">Marcar como destacado</label>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-3 shadow-lg">
+                        <i class="fas fa-save text-xl"></i>
+                        <span class="text-lg">Guardar Producto</span>
+                    </button>
+                </form>
+
+                <hr class="border-gray-200">
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 text-lg">
+                        <i class="fas fa-box text-teal-600"></i>
+                        Inventario (<span id="admin-count" class="text-teal-600">0</span>)
+                    </h3>
+                    <div id="admin-list" class="space-y-3 max-h-96 overflow-y-auto pr-2 scrollbar-hide"></div>
                 </div>
             </div>
         </div>
@@ -582,18 +514,22 @@
     </div>
 
     <script>
-        // =========== CONFIGURACIÓN GITHUB ===========
-        // Token por defecto (el que proporcionaste)
+        // ========================= CONFIGURACIÓN GITHUB =========================
+        // El token se guarda en localStorage con la clave 'github_token'
+        // Si no existe, se usa el token por defecto (el que proporcionaste)
         const DEFAULT_TOKEN = "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";
         const GITHUB_USER = "calm291094-del";
         const GITHUB_REPO = "meditech-tienda";
 
-        // Obtener token guardado o usar el default
         function getGitHubToken() {
             return localStorage.getItem('github_token') || DEFAULT_TOKEN;
         }
 
-        function getAPIHeaders() {
+        function setGitHubToken(token) {
+            localStorage.setItem('github_token', token);
+        }
+
+        function getHeaders() {
             const token = getGitHubToken();
             return {
                 "Authorization": `token ${token}`,
@@ -601,75 +537,30 @@
             };
         }
 
-        function getAPIBase() {
-            return `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
-        }
+        const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
 
-        // =========== DATOS EN LOCALSTORAGE ===========
+        // ========================= ESTADO GLOBAL =========================
         let S = { pr: [], cart: 0, currentUser: null, users: [] };
         let currentImageMode = 'none';
         let currentImageUrl = '';
 
-        // Cargar datos desde localStorage (y luego sincronizar con GitHub)
-        function loadLocalData() {
-            const productos = localStorage.getItem('productos');
-            if (productos) {
-                try { S.pr = JSON.parse(productos); } catch(e) { S.pr = []; }
-            } else {
-                // Datos de ejemplo
-                S.pr = [
-                    { id: 'p1', name: 'Paracetamol 500mg', category: 'medicamento', price: 5.99, desc: 'Analgésico y antipirético para dolores leves y fiebre.', stock: 100, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: true },
-                    { id: 'p2', name: 'Ibuprofeno 400mg', category: 'medicamento', price: 7.50, desc: 'Antiinflamatorio no esteroideo, alivia dolor e inflamación.', stock: 80, image: '', feat: false },
-                    { id: 'p3', name: 'SSD 1TB NVMe', category: 'tecnologia', price: 89.99, desc: 'Disco sólido de alta velocidad, perfecto para gaming y cargas rápidas.', stock: 45, image: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=300&h=300&fit=crop', feat: true },
-                    { id: 'p4', name: 'Mouse Gamer RGB', category: 'gaming', price: 34.99, desc: 'Ratón inalámbrico con sensor óptico y luces personalizables.', stock: 30, image: 'https://images.unsplash.com/photo-1592155931584-901ac15763e3?w=300&h=300&fit=crop', feat: false }
-                ];
-                saveLocalProducts();
-            }
-
-            const users = localStorage.getItem('usuarios');
-            if (users) {
-                try { S.users = JSON.parse(users); } catch(e) { S.users = []; }
-            } else {
-                S.users = [
-                    { username: 'admin', password: 'admin123', name: 'Administrador', email: 'admin@meditech.com', role: 'admin' },
-                    { username: 'cliente', password: 'cliente123', name: 'Cliente Prueba', email: 'cliente@email.com', role: 'user' }
-                ];
-                saveLocalUsers();
-            }
-
-            const session = localStorage.getItem('session');
-            if (session) {
-                try {
-                    const savedUser = JSON.parse(session);
-                    const userExists = S.users.find(u => u.username === savedUser.username);
-                    if (userExists) { S.currentUser = userExists; updateUIForLoggedUser(); }
-                    else localStorage.removeItem('session');
-                } catch(e) { localStorage.removeItem('session'); }
-            }
-        }
-
-        function saveLocalProducts() {
-            localStorage.setItem('productos', JSON.stringify(S.pr));
-        }
-
-        function saveLocalUsers() {
-            localStorage.setItem('usuarios', JSON.stringify(S.users));
-        }
-
-        // =========== FUNCIONES DE GITHUB ===========
+        // ========================= FUNCIONES GITHUB =========================
         async function fetchGitHub(path) {
             try {
-                const res = await fetch(`${getAPIBase()}/contents/${path}`, { headers: getAPIHeaders() });
+                const res = await fetch(`${API}/contents/${path}`, { headers: getHeaders() });
                 if (res.status === 404) return null;
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(`HTTP ${res.status}: ${err.message || 'Error'}`);
+                }
                 return await res.json();
             } catch (e) {
                 console.error(`Error al leer ${path}:`, e);
-                return null;
+                throw e;
             }
         }
 
-        async function guardarArchivoGitHub(path, contenido, mensaje) {
+        async function guardarArchivo(path, contenido, mensaje) {
             const maxReintentos = 3;
             for (let intento = 0; intento < maxReintentos; intento++) {
                 try {
@@ -680,9 +571,9 @@
                         content: btoa(unescape(encodeURIComponent(JSON.stringify(contenido, null, 2)))),
                         sha: sha || undefined
                     };
-                    const res = await fetch(`${getAPIBase()}/contents/${path}`, {
+                    const res = await fetch(`${API}/contents/${path}`, {
                         method: "PUT",
-                        headers: getAPIHeaders(),
+                        headers: getHeaders(),
                         body: JSON.stringify(body)
                     });
                     if (!res.ok) {
@@ -694,12 +585,12 @@
                         }
                         throw new Error(`HTTP ${res.status}: ${errorData.message || 'Error desconocido'}`);
                     }
-                    console.log(`✅ ${path} guardado en GitHub`);
+                    console.log(`✅ ${path} guardado correctamente`);
                     return true;
                 } catch (e) {
                     console.error(`Error al guardar ${path} (intento ${intento+1}):`, e);
                     if (intento === maxReintentos - 1) {
-                        showNotif(`❌ Error al guardar en GitHub: ${e.message}`, 'error');
+                        showToast(`❌ Error al guardar: ${e.message}`, 'error');
                         return false;
                     }
                     await new Promise(r => setTimeout(r, 500 * (intento+1)));
@@ -708,53 +599,262 @@
             return false;
         }
 
-        async function syncProductos() {
+        async function guardarProductos() {
             const data = { productos: S.pr };
-            return guardarArchivoGitHub('productos.json', data, 'Sync productos');
+            return guardarArchivo('productos.json', data, 'Sync productos');
         }
 
-        async function syncUsuarios() {
+        async function guardarUsuarios() {
             const data = { usuarios: S.users };
-            return guardarArchivoGitHub('usuarios.json', data, 'Sync usuarios');
+            return guardarArchivo('usuarios.json', data, 'Sync usuarios');
         }
 
-        async function syncAll() {
-            const pOk = await syncProductos();
-            const uOk = await syncUsuarios();
-            return pOk && uOk;
-        }
-
-        // Cargar desde GitHub y fusionar con local
-        async function loadFromGitHub() {
+        async function testGitHubConnection() {
+            const token = document.getElementById('github-token-input').value.trim() || getGitHubToken();
+            if (!token) {
+                showToast('❌ Ingresa un token válido', 'error');
+                return;
+            }
+            const statusText = document.getElementById('github-status-text');
+            const statusIcon = document.querySelector('#github-status i');
+            statusText.textContent = 'Probando...';
+            statusIcon.className = 'fas fa-spinner fa-spin text-blue-500';
+            
             try {
-                const prodFile = await fetchGitHub('productos.json');
-                if (prodFile) {
-                    const data = JSON.parse(atob(prodFile.content));
-                    if (data.productos && data.productos.length > 0) {
-                        S.pr = data.productos;
-                        saveLocalProducts();
-                    }
+                const res = await fetch(`https://api.github.com/user`, {
+                    headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    statusText.textContent = `✅ Conectado como ${data.login}`;
+                    statusIcon.className = 'fas fa-check-circle text-green-500';
+                    showToast('✅ Conexión exitosa', 'success');
+                } else {
+                    statusText.textContent = '❌ Token inválido o sin permisos';
+                    statusIcon.className = 'fas fa-times-circle text-red-500';
+                    showToast('❌ Error de autenticación', 'error');
                 }
-                const usersFile = await fetchGitHub('usuarios.json');
-                if (usersFile) {
-                    const data = JSON.parse(atob(usersFile.content));
-                    if (data.usuarios && data.usuarios.length > 0) {
-                        S.users = data.usuarios;
-                        saveLocalUsers();
-                    }
-                }
-                renderProducts();
-                renderAdminList();
-                updateUI();
-                showNotif('✅ Datos sincronizados con GitHub', 'success');
-                return true;
             } catch (e) {
-                showNotif('⚠️ No se pudo sincronizar con GitHub, usando datos locales', 'warning');
-                return false;
+                statusText.textContent = '❌ Error de red';
+                statusIcon.className = 'fas fa-exclamation-triangle text-red-500';
+                showToast('❌ Error al conectar', 'error');
             }
         }
 
-        // =========== FUNCIONES DE IMAGEN ===========
+        function saveGitHubToken() {
+            const token = document.getElementById('github-token-input').value.trim();
+            if (!token) {
+                showToast('❌ Ingresa un token', 'error');
+                return;
+            }
+            setGitHubToken(token);
+            document.getElementById('github-token-input').value = token;
+            showToast('✅ Token guardado en localStorage', 'success');
+            // Actualizar estado
+            const statusText = document.getElementById('github-status-text');
+            statusText.textContent = 'Token guardado. Prueba la conexión.';
+            document.querySelector('#github-status i').className = 'fas fa-circle text-yellow-500';
+        }
+
+        // ========================= CARGA INICIAL =========================
+        async function cargarProductos() {
+            try {
+                const file = await fetchGitHub('productos.json');
+                if (file) {
+                    const data = JSON.parse(atob(file.content));
+                    S.pr = data.productos || [];
+                } else {
+                    S.pr = [];
+                    await guardarProductos(); // crear archivo vacío
+                }
+            } catch (e) {
+                showToast('⚠️ Error al cargar productos, usando datos locales', 'error');
+                S.pr = [];
+            }
+            renderProducts();
+            renderAdminList();
+            updateUI();
+        }
+
+        async function initAuth() {
+            try {
+                const file = await fetchGitHub('usuarios.json');
+                if (file) {
+                    const data = JSON.parse(atob(file.content));
+                    S.users = data.usuarios || [];
+                } else {
+                    // Crear usuario root por defecto
+                    S.users = [{ username: 'root', password: 'admin123', name: 'Administrador', email: 'admin@meditech.com', role: 'admin' }];
+                    await guardarUsuarios();
+                }
+            } catch (e) {
+                showToast('⚠️ Error al cargar usuarios, usando datos locales', 'error');
+                S.users = [{ username: 'root', password: 'admin123', name: 'Administrador', email: 'admin@meditech.com', role: 'admin' }];
+            }
+            // Sesión
+            const session = localStorage.getItem('session');
+            if (session) {
+                try {
+                    const savedUser = JSON.parse(session);
+                    const userExists = S.users.find(u => u.username === savedUser.username);
+                    if (userExists) { S.currentUser = userExists; updateUIForLoggedUser(); }
+                    else localStorage.removeItem('session');
+                } catch(e) { localStorage.removeItem('session'); }
+            }
+            // Cargar token guardado en el input del panel
+            const savedToken = getGitHubToken();
+            document.getElementById('github-token-input').value = savedToken;
+            // Actualizar estado de GitHub
+            const statusText = document.getElementById('github-status-text');
+            if (savedToken && savedToken !== DEFAULT_TOKEN) {
+                statusText.textContent = 'Token configurado (prueba conexión)';
+                document.querySelector('#github-status i').className = 'fas fa-circle text-green-500';
+            } else if (savedToken === DEFAULT_TOKEN) {
+                statusText.textContent = 'Token por defecto configurado';
+                document.querySelector('#github-status i').className = 'fas fa-circle text-yellow-500';
+            } else {
+                statusText.textContent = 'No configurado';
+                document.querySelector('#github-status i').className = 'fas fa-circle text-gray-400';
+            }
+        }
+
+        // ========================= FUNCIONES DE USUARIOS (Admin) =========================
+        function loadUserData() {
+            const selector = document.getElementById('user-selector');
+            const selected = selector.value;
+            const user = S.users.find(u => u.username === selected);
+            if (user) {
+                document.getElementById('new-password-input').value = '';
+                document.getElementById('user-status').innerHTML = `Usuario: <strong>${user.username}</strong> (${user.role})`;
+            }
+        }
+
+        function populateUserSelector() {
+            const selector = document.getElementById('user-selector');
+            selector.innerHTML = '';
+            S.users.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.username;
+                opt.textContent = `${u.username} (${u.role})`;
+                selector.appendChild(opt);
+            });
+            if (S.users.length > 0) loadUserData();
+        }
+
+        async function updateUserPassword() {
+            const selector = document.getElementById('user-selector');
+            const username = selector.value;
+            const newPass = document.getElementById('new-password-input').value.trim();
+            if (!newPass || newPass.length < 6) {
+                showToast('❌ La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+            const user = S.users.find(u => u.username === username);
+            if (!user) {
+                showToast('❌ Usuario no encontrado', 'error');
+                return;
+            }
+            user.password = newPass;
+            const success = await guardarUsuarios();
+            if (success) {
+                showToast(`✅ Contraseña actualizada para ${username}`, 'success');
+                document.getElementById('new-password-input').value = '';
+                // Si el usuario actual es el mismo, actualizar sesión
+                if (S.currentUser && S.currentUser.username === username) {
+                    S.currentUser.password = newPass;
+                    localStorage.setItem('session', JSON.stringify(S.currentUser));
+                }
+            } else {
+                showToast('❌ Error al guardar cambios', 'error');
+            }
+        }
+
+        // ========================= LOGIN / REGISTRO =========================
+        function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); closeUserMenu(); }
+        function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
+        function openRegisterModal() { document.getElementById('register-modal').classList.remove('hidden'); closeUserMenu(); }
+        function closeRegisterModal() { document.getElementById('register-modal').classList.add('hidden'); }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const user = S.users.find(u => u.username === username && u.password === password);
+            if (user) {
+                S.currentUser = user;
+                localStorage.setItem('session', JSON.stringify(user));
+                updateUIForLoggedUser();
+                closeLoginModal();
+                showToast(`✅ Bienvenido, ${user.name}`, 'success');
+                document.getElementById('login-form').reset();
+            } else {
+                showToast('❌ Usuario o contraseña incorrectos', 'error');
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            if (S.users.find(u => u.username === username)) {
+                showToast('❌ El usuario ya existe', 'error');
+                return;
+            }
+            const newUser = { username, password, name, email, role: 'user' };
+            S.users.push(newUser);
+            const success = await guardarUsuarios();
+            if (success) {
+                S.currentUser = newUser;
+                localStorage.setItem('session', JSON.stringify(newUser));
+                updateUIForLoggedUser();
+                closeRegisterModal();
+                showToast(`✅ Cuenta creada. Bienvenido, ${name}`, 'success');
+                document.getElementById('register-form').reset();
+                populateUserSelector();
+            } else {
+                S.users.pop(); // revertir
+                showToast('❌ Error al guardar usuario en GitHub', 'error');
+            }
+        }
+
+        function logout() {
+            S.currentUser = null;
+            localStorage.removeItem('session');
+            updateUIForLoggedOut();
+            closeUserMenu();
+            showToast('👋 Sesión cerrada', 'info');
+        }
+
+        function updateUIForLoggedUser() {
+            document.getElementById('user-name-display').textContent = S.currentUser.name;
+            document.getElementById('user-menu-name').textContent = S.currentUser.name;
+            const badge = document.getElementById('user-role-badge');
+            if (S.currentUser.role === 'admin') {
+                badge.textContent = '🔒 Administrador';
+                badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800';
+                document.getElementById('admin-menu-btn').classList.remove('hidden');
+            } else {
+                badge.textContent = '👤 Cliente';
+                badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800';
+                document.getElementById('admin-menu-btn').classList.add('hidden');
+            }
+            document.getElementById('menu-logged-out').classList.add('hidden');
+            document.getElementById('menu-logged-in').classList.remove('hidden');
+        }
+
+        function updateUIForLoggedOut() {
+            document.getElementById('user-name-display').textContent = 'Iniciar Sesión';
+            document.getElementById('menu-logged-out').classList.remove('hidden');
+            document.getElementById('menu-logged-in').classList.add('hidden');
+        }
+
+        function toggleUserMenu() { document.getElementById('user-menu').classList.toggle('hidden'); }
+        function closeUserMenu() { document.getElementById('user-menu').classList.add('hidden'); }
+        document.addEventListener('click', (e) => { if (!e.target.closest('#user-section')) closeUserMenu(); });
+
+        // ========================= FUNCIONES DE IMAGEN =========================
         function selectImageOption(mode) {
             currentImageMode = mode;
             document.getElementById('option-url').classList.add('hidden');
@@ -764,9 +864,7 @@
             document.getElementById('option-' + mode).classList.remove('hidden');
             document.getElementById('tab-' + mode).classList.add('active');
             updateImageStatus();
-            if (mode !== 'url' && mode !== 'existing') {
-                clearImageSelection();
-            }
+            if (mode !== 'url' && mode !== 'existing') clearImageSelection();
         }
 
         function updateImageStatus() {
@@ -830,112 +928,7 @@
             updateImageStatus();
         }
 
-        // =========== CARRUSEL ===========
-        let currentSlide = 0;
-        const totalSlides = 3;
-        function moveCarousel(direction) {
-            currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
-            updateCarousel();
-        }
-        function updateCarousel() {
-            document.getElementById('carousel-inner').style.transform = `translateX(-${currentSlide * 100}%)`;
-            document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
-                dot.classList.toggle('active', i === currentSlide);
-            });
-        }
-        function initCarousel() {
-            const dotsContainer = document.getElementById('carousel-dots');
-            for (let i = 0; i < totalSlides; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-                dot.onclick = () => { currentSlide = i; updateCarousel(); };
-                dotsContainer.appendChild(dot);
-            }
-            setInterval(() => moveCarousel(1), 5000);
-        }
-
-        // =========== AUTH ===========
-        function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); closeUserMenu(); }
-        function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
-        function openRegisterModal() { document.getElementById('register-modal').classList.remove('hidden'); closeUserMenu(); }
-        function closeRegisterModal() { document.getElementById('register-modal').classList.add('hidden'); }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-            const user = S.users.find(u => u.username === username && u.password === password);
-            if (user) {
-                S.currentUser = user;
-                localStorage.setItem('session', JSON.stringify(user));
-                updateUIForLoggedUser();
-                closeLoginModal();
-                showNotif(`✅ Bienvenido, ${user.name}`, 'success');
-                document.getElementById('login-form').reset();
-            } else {
-                showNotif('❌ Usuario o contraseña incorrectos', 'error');
-            }
-        }
-
-        function handleRegister(e) {
-            e.preventDefault();
-            const name = document.getElementById('register-name').value;
-            const username = document.getElementById('register-username').value;
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
-            if (S.users.find(u => u.username === username)) {
-                showNotif('❌ El usuario ya existe', 'error');
-                return;
-            }
-            const newUser = { username, password, name, email, role: 'user' };
-            S.users.push(newUser);
-            saveLocalUsers();
-            S.currentUser = newUser;
-            localStorage.setItem('session', JSON.stringify(newUser));
-            updateUIForLoggedUser();
-            closeRegisterModal();
-            showNotif(`✅ Cuenta creada. Bienvenido, ${name}`, 'success');
-            document.getElementById('register-form').reset();
-            // Sincronizar usuarios con GitHub
-            syncUsuarios();
-        }
-
-        function logout() {
-            S.currentUser = null;
-            localStorage.removeItem('session');
-            updateUIForLoggedOut();
-            closeUserMenu();
-            showNotif('👋 Sesión cerrada', 'info');
-        }
-
-        function updateUIForLoggedUser() {
-            document.getElementById('user-name-display').textContent = S.currentUser.name;
-            document.getElementById('user-menu-name').textContent = S.currentUser.name;
-            const badge = document.getElementById('user-role-badge');
-            if (S.currentUser.role === 'admin') {
-                badge.textContent = '🔒 Administrador';
-                badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800';
-                document.getElementById('admin-menu-btn').classList.remove('hidden');
-            } else {
-                badge.textContent = '👤 Cliente';
-                badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800';
-                document.getElementById('admin-menu-btn').classList.add('hidden');
-            }
-            document.getElementById('menu-logged-out').classList.add('hidden');
-            document.getElementById('menu-logged-in').classList.remove('hidden');
-        }
-
-        function updateUIForLoggedOut() {
-            document.getElementById('user-name-display').textContent = 'Iniciar Sesión';
-            document.getElementById('menu-logged-out').classList.remove('hidden');
-            document.getElementById('menu-logged-in').classList.add('hidden');
-        }
-
-        function toggleUserMenu() { document.getElementById('user-menu').classList.toggle('hidden'); }
-        function closeUserMenu() { document.getElementById('user-menu').classList.add('hidden'); }
-        document.addEventListener('click', (e) => { if (!e.target.closest('#user-section')) closeUserMenu(); });
-
-        // =========== PRODUCTOS ===========
+        // ========================= PRODUCTOS =========================
         function renderProducts() {
             const grid = document.getElementById('portada-productos');
             if (S.pr.length === 0) {
@@ -999,29 +992,27 @@
         function updateUI() { document.getElementById('cart-count').textContent = S.cart; }
 
         function toggleAdminPanel() {
-            if (!S.currentUser || S.currentUser.role !== 'admin') { showNotif('❌ Solo admin puede acceder', 'error'); return; }
+            if (!S.currentUser || S.currentUser.role !== 'admin') {
+                showToast('❌ Solo administradores pueden acceder', 'error');
+                return;
+            }
             const p = document.getElementById('admin-panel');
             p.classList.toggle('hidden');
             if (!p.classList.contains('hidden')) {
                 selectImageOption('none');
-                // Mostrar token actual en el campo
+                populateUserSelector();
+                // Cargar token en el campo
                 document.getElementById('github-token-input').value = getGitHubToken();
-                document.getElementById('token-status').innerHTML = '';
-                document.getElementById('password-status').innerHTML = '';
             }
             closeUserMenu();
         }
 
-        function switchAdminTab(tab) {
-            document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('tab-' + tab).classList.add('active');
-            document.getElementById('panel-productos').classList.toggle('hidden', tab !== 'productos');
-            document.getElementById('panel-config').classList.toggle('hidden', tab !== 'config');
-        }
-
-        function saveProduct(e) {
+        async function saveProduct(e) {
             e.preventDefault();
-            if (!S.currentUser || S.currentUser.role !== 'admin') { showNotif('❌ Solo admin', 'error'); return; }
+            if (!S.currentUser || S.currentUser.role !== 'admin') {
+                showToast('❌ Solo administradores', 'error');
+                return;
+            }
             
             const name = document.getElementById('prod-name').value;
             const cat = document.getElementById('prod-category').value;
@@ -1048,31 +1039,41 @@
                 feat 
             });
             
-            saveLocalProducts();
-            renderProducts();
-            renderAdminList();
-            e.target.reset();
-            clearImageSelection();
-            showNotif("✅ Producto guardado localmente", "success");
-            // Sincronizar con GitHub
-            syncProductos().then(ok => {
-                if (!ok) showNotif('⚠️ No se pudo sincronizar con GitHub', 'warning');
-            });
+            const success = await guardarProductos();
+            if (success) {
+                renderProducts();
+                renderAdminList();
+                e.target.reset();
+                clearImageSelection();
+                showToast("✅ Producto guardado correctamente", "success");
+            } else {
+                S.pr.pop(); // revertir
+                showToast("❌ Error al guardar producto en GitHub", "error");
+            }
         }
 
-        function deleteProduct(id) {
-            if (!S.currentUser || S.currentUser.role !== 'admin') { showNotif('❌ Solo admin', 'error'); return; }
-            if (!confirm("¿Eliminar?")) return;
+        async function deleteProduct(id) {
+            if (!S.currentUser || S.currentUser.role !== 'admin') {
+                showToast('❌ Solo administradores', 'error');
+                return;
+            }
+            if (!confirm("¿Eliminar producto?")) return;
             S.pr = S.pr.filter(p => p.id !== id);
-            saveLocalProducts();
-            renderProducts();
-            renderAdminList();
-            syncProductos();
+            const success = await guardarProductos();
+            if (success) {
+                renderProducts();
+                renderAdminList();
+                showToast("✅ Producto eliminado", "success");
+            } else {
+                // Revertir
+                await cargarProductos();
+                showToast("❌ Error al eliminar", "error");
+            }
         }
 
-        function addToCart(id) { S.cart++; updateUI(); showNotif("✅ Agregado al carrito", "success"); }
+        function addToCart(id) { S.cart++; updateUI(); showToast("✅ Agregado al carrito", "success"); }
 
-        // =========== CHATBOT ===========
+        // ========================= CHATBOT =========================
         const KB = {
             "paracetamol": "El Paracetamol es un analgésico y antipirético. Sirve para dolores leves y fiebre.",
             "ibuprofeno": "El Ibuprofeno es un antiinflamatorio. Reduce dolor, inflamación y fiebre.",
@@ -1103,149 +1104,52 @@
             }, 600);
         }
 
-        // =========== EXPORTAR / IMPORTAR DATOS ===========
-        function exportData() {
-            const data = {
-                productos: S.pr,
-                usuarios: S.users
-            };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'meditech_backup.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            showNotif('📦 Datos exportados correctamente', 'success');
+        // ========================= TOAST =========================
+        function showToast(msg, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
         }
 
-        function importData() {
-            document.getElementById('fileInput').click();
+        // ========================= CARRUSEL =========================
+        let currentSlide = 0;
+        const totalSlides = 3;
+        function moveCarousel(direction) {
+            currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+            updateCarousel();
         }
-
-        function importDataFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.productos) S.pr = data.productos;
-                    if (data.usuarios) S.users = data.usuarios;
-                    saveLocalProducts();
-                    saveLocalUsers();
-                    renderProducts();
-                    renderAdminList();
-                    showNotif('✅ Datos importados correctamente', 'success');
-                    // Sincronizar con GitHub
-                    syncAll();
-                } catch(err) {
-                    showNotif('❌ Error al leer el archivo', 'error');
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
+        function updateCarousel() {
+            document.getElementById('carousel-inner').style.transform = `translateX(-${currentSlide * 100}%)`;
+            document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
         }
-
-        // =========== CONFIGURACIÓN: TOKEN Y CONTRASEÑA ===========
-        function saveGitHubToken() {
-            const token = document.getElementById('github-token-input').value.trim();
-            if (!token || !token.startsWith('ghp_')) {
-                document.getElementById('token-status').innerHTML = '<span class="text-red-600">❌ Token inválido (debe comenzar con ghp_)</span>';
-                return;
+        function initCarousel() {
+            const dotsContainer = document.getElementById('carousel-dots');
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => { currentSlide = i; updateCarousel(); };
+                dotsContainer.appendChild(dot);
             }
-            localStorage.setItem('github_token', token);
-            document.getElementById('token-status').innerHTML = '<span class="text-green-600">✅ Token guardado correctamente</span>';
-            showNotif('✅ Token de GitHub actualizado', 'success');
-            // Probar token con una petición de prueba
-            testGitHubToken(token);
+            setInterval(() => moveCarousel(1), 5000);
         }
 
-        async function testGitHubToken(token) {
-            try {
-                const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`, {
-                    headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" }
-                });
-                if (res.ok) {
-                    document.getElementById('token-status').innerHTML += ' <span class="text-green-600">✅ Conexión exitosa</span>';
-                } else {
-                    document.getElementById('token-status').innerHTML += ' <span class="text-red-600">❌ Error de conexión</span>';
-                }
-            } catch(e) {
-                document.getElementById('token-status').innerHTML += ' <span class="text-red-600">❌ Error de red</span>';
-            }
-        }
-
-        function changeAdminPassword(e) {
-            e.preventDefault();
-            if (!S.currentUser || S.currentUser.role !== 'admin') {
-                showNotif('❌ Solo el administrador puede cambiar su contraseña', 'error');
-                return;
-            }
-            const newPass = document.getElementById('new-admin-password').value;
-            const confirmPass = document.getElementById('confirm-admin-password').value;
-            if (newPass !== confirmPass) {
-                document.getElementById('password-status').innerHTML = '<span class="text-red-600">❌ Las contraseñas no coinciden</span>';
-                return;
-            }
-            if (newPass.length < 6) {
-                document.getElementById('password-status').innerHTML = '<span class="text-red-600">❌ La contraseña debe tener al menos 6 caracteres</span>';
-                return;
-            }
-            // Actualizar en S.users
-            const adminUser = S.users.find(u => u.username === S.currentUser.username && u.role === 'admin');
-            if (adminUser) {
-                adminUser.password = newPass;
-                saveLocalUsers();
-                // Actualizar sesión
-                S.currentUser.password = newPass;
-                localStorage.setItem('session', JSON.stringify(S.currentUser));
-                document.getElementById('password-status').innerHTML = '<span class="text-green-600">✅ Contraseña actualizada correctamente</span>';
-                showNotif('✅ Contraseña de administrador actualizada', 'success');
-                // Sincronizar usuarios con GitHub
-                syncUsuarios();
-                e.target.reset();
-            } else {
-                document.getElementById('password-status').innerHTML = '<span class="text-red-600">❌ No se encontró el usuario administrador</span>';
-            }
-        }
-
-        async function syncData() {
-            document.getElementById('sync-status').textContent = '⏳ Sincronizando...';
-            const ok = await syncAll();
-            if (ok) {
-                document.getElementById('sync-status').textContent = '✅ Sincronización completa';
-                showNotif('✅ Datos sincronizados con GitHub', 'success');
-            } else {
-                document.getElementById('sync-status').textContent = '❌ Error al sincronizar';
-                showNotif('❌ Error al sincronizar con GitHub', 'error');
-            }
-            // Recargar datos de GitHub para reflejar cambios
-            await loadFromGitHub();
-        }
-
-        // =========== NOTIFICACIONES ===========
-        function showNotif(msg, type) {
-            const n = document.createElement('div');
-            n.className = `fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full text-sm font-semibold shadow-2xl fade-in ${type==='success'?'bg-green-100 text-green-800 border-2 border-green-200':type==='error'?'bg-red-100 text-red-800 border-2 border-red-200':type==='warning'?'bg-yellow-100 text-yellow-800 border-2 border-yellow-200':'bg-blue-100 text-blue-800 border-2 border-blue-200'}`;
-            n.innerHTML = msg;
-            document.body.appendChild(n);
-            setTimeout(() => n.remove(), 3000);
-        }
-
-        // =========== INICIALIZACIÓN ===========
+        // ========================= INICIALIZACIÓN =========================
         document.getElementById('year').textContent = new Date().getFullYear();
         initCarousel();
-        loadLocalData();
-        renderProducts();
-        renderAdminList();
-        updateUI();
-
-        // Intentar cargar desde GitHub al inicio (si hay token válido)
         (async function init() {
-            const token = getGitHubToken();
-            if (token && token.startsWith('ghp_')) {
-                await loadFromGitHub();
+            await initAuth();
+            await cargarProductos();
+            renderProducts();
+            renderAdminList();
+            updateUI();
+            populateUserSelector();
+            // Mostrar mensaje de bienvenida
+            if (S.currentUser) {
+                showToast(`Bienvenido de nuevo, ${S.currentUser.name}`, 'info');
             }
         })();
 
