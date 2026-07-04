@@ -17,6 +17,7 @@
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .gradient-text { background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        
         .carousel { position: relative; overflow: hidden; border-radius: 20px; }
         .carousel-inner { display: flex; transition: transform 0.5s ease-in-out; }
         .carousel-item { min-width: 100%; position: relative; }
@@ -29,24 +30,72 @@
         .carousel-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; }
         .carousel-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s; }
         .carousel-dot.active { background: white; width: 30px; border-radius: 6px; }
+        
         .badge-new { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
-        .category-card { transition: all 0.3s ease; }
+        .category-card { transition: all 0.3s ease; cursor: default; }
         .category-card:hover { transform: scale(1.05); }
         .modal-overlay { animation: fadeIn 0.3s ease; }
         .modal-content { animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        .image-option { transition: all 0.2s ease; cursor: pointer; }
-        .image-option:hover { background: #f0fdfa; border-color: #0d9488; }
-        .image-option.active { background: #f0fdfa; border-color: #0d9488; box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
-        .image-preview-container { position: relative; display: inline-block; }
-        .image-preview-container .remove-btn { position: absolute; top: 5px; right: 5px; background: rgba(239,68,68,0.9); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.2s; }
-        .image-preview-container .remove-btn:hover { background: #dc2626; transform: scale(1.1); }
-        .no-image-placeholder { background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); display: flex; align-items: center; justify-content: center; color: #9ca3af; }
-        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 12px 24px; border-radius: 12px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideDown 0.3s ease; }
-        .toast-success { background: #10b981; color: white; }
-        .toast-error { background: #ef4444; color: white; }
-        .toast-info { background: #3b82f6; color: white; }
-        @keyframes slideDown { from { opacity: 0; transform: translateX(-50%) translateY(-20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        
+        .image-option {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .image-option:hover {
+            background: #f0fdfa;
+            border-color: #0d9488;
+        }
+        .image-option.active {
+            background: #f0fdfa;
+            border-color: #0d9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+        }
+        .image-preview-container {
+            position: relative;
+            display: inline-block;
+        }
+        .image-preview-container .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .image-preview-container .remove-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+        .no-image-placeholder {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+        }
+        .stock-badge {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .stock-badge.available { background: rgba(34,197,94,0.9); color: white; }
+        .stock-badge.agotado { background: rgba(239,68,68,0.9); color: white; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -118,27 +167,7 @@
     <section id="inicio" class="max-w-7xl mx-auto px-4 py-8">
         <div class="carousel">
             <div class="carousel-inner" id="carousel-inner">
-                <div class="carousel-item">
-                    <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop" alt="Medicamentos">
-                    <div class="carousel-caption">
-                        <h3 class="text-2xl font-bold mb-2">Medicamentos de Calidad</h3>
-                        <p class="text-sm opacity-90">Los mejores precios en productos farmacéuticos certificados</p>
-                    </div>
-                </div>
-                <div class="carousel-item">
-                    <img src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1200&h=400&fit=crop" alt="Tecnología">
-                    <div class="carousel-caption">
-                        <h3 class="text-2xl font-bold mb-2">Tecnología de Última Generación</h3>
-                        <p class="text-sm opacity-90">Componentes de PC y hardware gaming al mejor precio</p>
-                    </div>
-                </div>
-                <div class="carousel-item">
-                    <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=400&fit=crop" alt="Ofertas">
-                    <div class="carousel-caption">
-                        <h3 class="text-2xl font-bold mb-2">Ofertas Especiales</h3>
-                        <p class="text-sm opacity-90">Descuentos exclusivos por tiempo limitado</p>
-                    </div>
-                </div>
+                <!-- Los slides se generarán dinámicamente desde el estado -->
             </div>
             <button class="carousel-btn prev" onclick="moveCarousel(-1)"><i class="fas fa-chevron-left"></i></button>
             <button class="carousel-btn next" onclick="moveCarousel(1)"><i class="fas fa-chevron-right"></i></button>
@@ -146,42 +175,15 @@
         </div>
     </section>
 
-    <!-- CATEGORÍAS -->
+    <!-- CATEGORÍAS (textos editables desde admin) -->
     <section id="categorias" class="py-16 px-4 bg-white">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-12">
-                <h3 class="text-4xl font-bold text-gray-900 mb-3">Explora por Categoría</h3>
-                <p class="text-gray-600">Encuentra exactamente lo que necesitas</p>
+                <h3 id="cat-title" class="text-4xl font-bold text-gray-900 mb-3">Explora por Categoría</h3>
+                <p id="cat-sub" class="text-gray-600">Encuentra exactamente lo que necesitas</p>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div class="category-card bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
-                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-pills text-4xl"></i>
-                    </div>
-                    <h4 class="text-xl font-bold mb-2">Medicamentos</h4>
-                    <p class="text-sm opacity-90">+200 productos</p>
-                </div>
-                <div class="category-card bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
-                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-laptop text-4xl"></i>
-                    </div>
-                    <h4 class="text-xl font-bold mb-2">Tecnología</h4>
-                    <p class="text-sm opacity-90">+150 productos</p>
-                </div>
-                <div class="category-card bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
-                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-heart-pulse text-4xl"></i>
-                    </div>
-                    <h4 class="text-xl font-bold mb-2">Salud</h4>
-                    <p class="text-sm opacity-90">+100 productos</p>
-                </div>
-                <div class="category-card bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
-                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-gamepad text-4xl"></i>
-                    </div>
-                    <h4 class="text-xl font-bold mb-2">Gaming</h4>
-                    <p class="text-sm opacity-90">+80 productos</p>
-                </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6" id="category-grid">
+                <!-- Las categorías se generan desde estado -->
             </div>
         </div>
     </section>
@@ -205,32 +207,15 @@
         </div>
     </section>
 
-    <!-- OFERTAS -->
+    <!-- OFERTAS (textos editables) -->
     <section id="ofertas" class="py-16 px-4 bg-gradient-to-br from-orange-500 to-red-600 text-white">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-12">
-                <h3 class="text-4xl font-bold mb-3">🔥 Ofertas Especiales</h3>
-                <p class="opacity-90">Aprovecha estos descuentos exclusivos</p>
+                <h3 id="offer-title" class="text-4xl font-bold mb-3">🔥 Ofertas Especiales</h3>
+                <p id="offer-sub" class="opacity-90">Aprovecha estos descuentos exclusivos</p>
             </div>
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
-                    <div class="text-5xl font-bold mb-2">20%</div>
-                    <p class="text-lg font-semibold mb-2">Medicamentos</p>
-                    <p class="text-sm opacity-80 mb-4">En toda la línea de analgésicos</p>
-                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Ver productos</button>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
-                    <div class="text-5xl font-bold mb-2">15%</div>
-                    <p class="text-lg font-semibold mb-2">Hardware PC</p>
-                    <p class="text-sm opacity-80 mb-4">Componentes seleccionados</p>
-                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Ver productos</button>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
-                    <div class="text-5xl font-bold mb-2">ENVÍO</div>
-                    <p class="text-lg font-semibold mb-2">Gratis</p>
-                    <p class="text-sm opacity-80 mb-4">En compras mayores a $50</p>
-                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Comprar ahora</button>
-                </div>
+            <div class="grid md:grid-cols-3 gap-6" id="offers-grid">
+                <!-- Generado desde estado -->
             </div>
         </div>
     </section>
@@ -270,6 +255,9 @@
                         <a href="#" class="hover:text-teal-400 transition"><i class="fab fa-instagram"></i></a>
                         <a href="#" class="hover:text-teal-400 transition"><i class="fab fa-twitter"></i></a>
                     </div>
+                    <button onclick="exportData()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs py-1 px-3 rounded-full">Exportar datos</button>
+                    <button onclick="importData()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs py-1 px-3 rounded-full ml-2">Importar datos</button>
+                    <input type="file" id="fileInput" accept=".json" class="hidden" onchange="importDataFile(event)">
                 </div>
             </div>
             <div class="text-center text-sm opacity-50 pt-8 border-t border-gray-800">
@@ -334,157 +322,170 @@
         </div>
     </div>
 
-    <!-- PANEL ADMIN (con nuevas secciones) -->
+    <!-- PANEL ADMIN (con pestañas) -->
     <div id="admin-panel" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-y-auto p-4">
-        <div class="bg-white rounded-3xl max-w-4xl w-full mx-auto mt-10 shadow-2xl overflow-hidden fade-in">
+        <div class="bg-white rounded-3xl max-w-5xl w-full mx-auto mt-10 shadow-2xl overflow-hidden fade-in">
             <div class="bg-gradient-to-r from-orange-500 to-red-600 p-6 flex justify-between items-center text-white">
                 <h2 class="text-2xl font-bold"><i class="fas fa-cog mr-2"></i>Panel Admin</h2>
                 <button onclick="toggleAdminPanel()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <div class="p-8 space-y-6">
-                <!-- Configuración GitHub -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <i class="fab fa-github text-gray-700"></i> Configuración GitHub
-                    </h3>
-                    <div class="grid md:grid-cols-2 gap-4">
+            <div class="p-6">
+                <!-- Pestañas -->
+                <div class="flex flex-wrap gap-2 border-b border-gray-200 mb-6">
+                    <button onclick="switchTab('productos')" class="tab-btn px-4 py-2 font-semibold text-sm rounded-t-lg border-b-2 border-transparent hover:border-teal-500 text-gray-600" data-tab="productos">📦 Productos</button>
+                    <button onclick="switchTab('carrusel')" class="tab-btn px-4 py-2 font-semibold text-sm rounded-t-lg border-b-2 border-transparent hover:border-teal-500 text-gray-600" data-tab="carrusel">🖼️ Carrusel</button>
+                    <button onclick="switchTab('textos')" class="tab-btn px-4 py-2 font-semibold text-sm rounded-t-lg border-b-2 border-transparent hover:border-teal-500 text-gray-600" data-tab="textos">✏️ Textos</button>
+                    <button onclick="switchTab('config')" class="tab-btn px-4 py-2 font-semibold text-sm rounded-t-lg border-b-2 border-transparent hover:border-teal-500 text-gray-600" data-tab="config">⚙️ Configuración</button>
+                </div>
+
+                <!-- Contenido de pestañas -->
+                <div id="tab-productos" class="tab-content">
+                    <form id="product-form" class="space-y-5" onsubmit="saveProduct(event)">
+                        <h3 class="font-bold text-xl text-gray-800 mb-4">Agregar / Editar Producto</h3>
+                        <input type="hidden" id="edit-product-id" value="">
+                        <div class="grid md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre</label>
+                                <input type="text" id="prod-name" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Ej: Paracetamol 500mg">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Categoría</label>
+                                <select id="prod-category" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white">
+                                    <option value="medicamento">💊 Medicamento</option>
+                                    <option value="tecnologia">💻 Tecnología</option>
+                                    <option value="salud">🩺 Salud</option>
+                                    <option value="gaming">🎮 Gaming</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-5">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Precio ($)</label>
+                                <input type="number" id="prod-price" required step="0.01" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Stock</label>
+                                <input type="number" id="prod-stock" required min="0" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
+                                <select id="prod-status" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white">
+                                    <option value="disponible">✅ Disponible</option>
+                                    <option value="agotado">❌ Agotado</option>
+                                </select>
+                            </div>
+                        </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Token de acceso</label>
-                            <input type="text" id="github-token-input" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Ingresa tu token">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
+                            <textarea id="prod-desc" required rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none resize-none" placeholder="¿Para qué sirve?"></textarea>
                         </div>
-                        <div class="flex items-end gap-3">
-                            <button onclick="testGitHubConnection()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-semibold transition flex items-center gap-2">
-                                <i class="fas fa-plug"></i> Probar conexión
-                            </button>
-                            <button onclick="saveGitHubToken()" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-3 rounded-xl font-semibold transition flex items-center gap-2">
-                                <i class="fas fa-save"></i> Guardar token
-                            </button>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Imagen URL (opcional)</label>
+                            <input type="url" id="prod-image" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="https://ejemplo.com/imagen.jpg">
+                            <div id="image-preview-wrapper" class="hidden mt-2">
+                                <img id="image-preview" class="max-h-32 rounded-lg shadow-md border-2 border-gray-200" alt="Preview">
+                            </div>
                         </div>
-                    </div>
-                    <div id="github-status" class="mt-3 text-sm text-gray-600 flex items-center gap-2">
-                        <i class="fas fa-circle text-gray-400"></i> Estado: <span id="github-status-text">No configurado</span>
+                        <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                            <input type="checkbox" id="prod-feat" class="w-5 h-5 text-teal-600 rounded cursor-pointer">
+                            <label for="prod-feat" class="text-sm font-medium text-gray-700 cursor-pointer">Marcar como destacado</label>
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="submit" class="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-3 rounded-xl transition shadow-lg">
+                                <i class="fas fa-save mr-2"></i> Guardar Producto
+                            </button>
+                            <button type="button" onclick="cancelEdit()" class="bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-xl hover:bg-gray-400 transition">Cancelar</button>
+                        </div>
+                    </form>
+                    <hr class="my-6 border-gray-200">
+                    <div>
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 text-lg">
+                            <i class="fas fa-box text-teal-600"></i>
+                            Inventario (<span id="admin-count" class="text-teal-600">0</span>)
+                        </h3>
+                        <div id="admin-list" class="space-y-3 max-h-96 overflow-y-auto pr-2 scrollbar-hide"></div>
                     </div>
                 </div>
 
-                <!-- Gestión de usuarios -->
-                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <i class="fas fa-users text-teal-600"></i> Gestión de Usuarios
-                    </h3>
-                    <div class="grid md:grid-cols-2 gap-4">
+                <div id="tab-carrusel" class="tab-content hidden">
+                    <h3 class="font-bold text-xl text-gray-800 mb-4">Editar Carrusel</h3>
+                    <p class="text-sm text-gray-500 mb-4">Cambia las imágenes, títulos y subtítulos de cada slide.</p>
+                    <div id="carousel-editor" class="space-y-4"></div>
+                    <button onclick="saveCarouselData()" class="mt-4 bg-teal-600 text-white font-bold py-2 px-6 rounded-xl hover:bg-teal-700 transition">Guardar Carrusel</button>
+                </div>
+
+                <div id="tab-textos" class="tab-content hidden">
+                    <h3 class="font-bold text-xl text-gray-800 mb-4">Editar Textos Generales</h3>
+                    <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Usuario a modificar</label>
-                            <select id="user-selector" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white" onchange="loadUserData()">
-                            </select>
+                            <label class="block font-semibold">Título Categorías</label>
+                            <input type="text" id="edit-cat-title" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nueva contraseña</label>
+                            <label class="block font-semibold">Subtítulo Categorías</label>
+                            <input type="text" id="edit-cat-sub" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-semibold">Título Ofertas</label>
+                            <input type="text" id="edit-offer-title" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-semibold">Subtítulo Ofertas</label>
+                            <input type="text" id="edit-offer-sub" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                        </div>
+                        <!-- También podemos editar los textos de las ofertas individuales (los 3 bloques) -->
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block font-semibold">Oferta 1 - Título</label>
+                                <input type="text" id="offer1-title" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                                <label class="block font-semibold mt-2">Oferta 1 - Descripción</label>
+                                <input type="text" id="offer1-desc" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-semibold">Oferta 2 - Título</label>
+                                <input type="text" id="offer2-title" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                                <label class="block font-semibold mt-2">Oferta 2 - Descripción</label>
+                                <input type="text" id="offer2-desc" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-semibold">Oferta 3 - Título</label>
+                                <input type="text" id="offer3-title" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                                <label class="block font-semibold mt-2">Oferta 3 - Descripción</label>
+                                <input type="text" id="offer3-desc" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="saveTextsData()" class="mt-4 bg-teal-600 text-white font-bold py-2 px-6 rounded-xl hover:bg-teal-700 transition">Guardar Textos</button>
+                </div>
+
+                <div id="tab-config" class="tab-content hidden">
+                    <h3 class="font-bold text-xl text-gray-800 mb-4">Configuración</h3>
+                    <div class="space-y-6">
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <h4 class="font-bold text-gray-700">🔑 Token de GitHub</h4>
+                            <p class="text-sm text-gray-500 mb-2">Cambia el token si el actual expira o quieres usar otro.</p>
                             <div class="flex gap-2">
-                                <input type="password" id="new-password-input" class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Nueva contraseña">
-                                <button onclick="updateUserPassword()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-xl font-semibold transition flex items-center gap-2">
-                                    <i class="fas fa-key"></i> Actualizar
-                                </button>
+                                <input type="text" id="github-token-input" class="flex-1 px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="ghp_...">
+                                <button onclick="updateGitHubToken()" class="bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition">Actualizar</button>
+                            </div>
+                            <div class="mt-2 text-sm text-gray-600">
+                                Estado: <span id="github-status" class="font-semibold">Desconocido</span>
                             </div>
                         </div>
-                    </div>
-                    <div id="user-status" class="mt-3 text-sm text-gray-600"></div>
-                </div>
-
-                <!-- Formulario de productos (igual que antes) -->
-                <form id="product-form" class="space-y-5" onsubmit="saveProduct(event)">
-                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <i class="fas fa-plus-circle text-teal-600"></i> Agregar Producto
-                    </h3>
-                    <div class="grid md:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre</label>
-                            <input type="text" id="prod-name" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Ej: Paracetamol 500mg">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Categoría</label>
-                            <select id="prod-category" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white">
-                                <option value="medicamento">💊 Medicamento</option>
-                                <option value="tecnologia">💻 Tecnología / PC</option>
-                                <option value="salud">🩺 Salud</option>
-                                <option value="gaming">🎮 Gaming</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="grid md:grid-cols-2 gap-5">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Precio ($)</label>
-                            <input type="number" id="prod-price" required step="0.01" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="0.00">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Stock</label>
-                            <input type="number" id="prod-stock" required min="0" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="0">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
-                        <textarea id="prod-desc" required rows="4" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none resize-none" placeholder="¿Para qué sirve?"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-3">🖼️ Imagen del Producto <span class="text-gray-400 font-normal">(Opcional)</span></label>
-                        <div class="grid grid-cols-2 gap-2 mb-4">
-                            <button type="button" onclick="selectImageOption('url')" id="tab-url" class="image-option border-2 border-gray-200 rounded-xl p-3 text-center">
-                                <i class="fas fa-link text-teal-600 text-xl mb-1"></i>
-                                <p class="text-xs font-semibold">URL</p>
-                            </button>
-                            <button type="button" onclick="selectImageOption('existing')" id="tab-existing" class="image-option border-2 border-gray-200 rounded-xl p-3 text-center">
-                                <i class="fas fa-folder-open text-teal-600 text-xl mb-1"></i>
-                                <p class="text-xs font-semibold">Existente</p>
-                            </button>
-                        </div>
-                        <div id="option-url" class="hidden">
-                            <input type="url" id="prod-image-url" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="https://ejemplo.com/imagen.jpg" oninput="previewUrlImage()">
-                        </div>
-                        <div id="option-existing" class="hidden">
-                            <select id="image-selector" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-gray-50" onchange="onSelectExistingImage()">
-                                <option value="">-- Selecciona una imagen de ejemplo --</option>
-                                <option value="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop">💊 Medicamento genérico</option>
-                                <option value="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=300&h=300&fit=crop">💻 Laptop</option>
-                                <option value="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=300&h=300&fit=crop">🩺 Salud</option>
-                                <option value="https://images.unsplash.com/photo-1592155931584-901ac15763e3?w=300&h=300&fit=crop">🎮 Gaming</option>
-                            </select>
-                        </div>
-                        <div id="option-none" class="hidden">
-                            <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
-                                <i class="fas fa-image text-4xl text-gray-300 mb-2"></i>
-                                <p class="text-gray-500 text-sm">Sin imagen (placeholder)</p>
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <h4 class="font-bold text-gray-700">🔒 Cambiar contraseña de root</h4>
+                            <p class="text-sm text-gray-500 mb-2">La contraseña del usuario administrador (root).</p>
+                            <div class="flex gap-2">
+                                <input type="password" id="new-root-password" class="flex-1 px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Nueva contraseña">
+                                <button onclick="updateRootPassword()" class="bg-orange-600 text-white px-4 py-2 rounded-xl hover:bg-orange-700 transition">Cambiar</button>
                             </div>
                         </div>
-                        <div id="image-preview-wrapper" class="hidden mt-4">
-                            <label class="block text-sm text-gray-600 mb-2">Vista previa:</label>
-                            <div class="image-preview-container">
-                                <img id="image-preview" class="max-h-40 rounded-lg shadow-md border-2 border-gray-200" alt="Preview">
-                                <button type="button" onclick="clearImageSelection()" class="remove-btn" title="Quitar imagen">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div id="image-status" class="mt-3 text-sm text-gray-500 flex items-center gap-2">
-                            <i class="fas fa-info-circle"></i>
-                            <span>Selecciona una opción</span>
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <h4 class="font-bold text-gray-700">💾 Sincronización con GitHub</h4>
+                            <button onclick="syncAllToGitHub()" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">Sincronizar ahora</button>
+                            <span id="sync-status" class="ml-3 text-sm text-gray-500"></span>
                         </div>
                     </div>
-                    <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                        <input type="checkbox" id="prod-feat" class="w-5 h-5 text-teal-600 rounded cursor-pointer">
-                        <label for="prod-feat" class="text-sm font-medium text-gray-700 cursor-pointer">Marcar como destacado</label>
-                    </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-3 shadow-lg">
-                        <i class="fas fa-save text-xl"></i>
-                        <span class="text-lg">Guardar Producto</span>
-                    </button>
-                </form>
-
-                <hr class="border-gray-200">
-                <div>
-                    <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 text-lg">
-                        <i class="fas fa-box text-teal-600"></i>
-                        Inventario (<span id="admin-count" class="text-teal-600">0</span>)
-                    </h3>
-                    <div id="admin-list" class="space-y-3 max-h-96 overflow-y-auto pr-2 scrollbar-hide"></div>
                 </div>
             </div>
         </div>
@@ -500,7 +501,7 @@
             <div id="chat-messages" class="h-80 p-4 overflow-y-auto bg-gray-50 space-y-3 text-sm">
                 <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm max-w-[85%] border border-gray-100">
                     <p class="font-semibold text-gray-800 mb-1">¡Hola! 👋</p>
-                    <p class="text-gray-600">Pregúntame sobre <b>medicamentos</b> o <b>piezas de PC</b>.</p>
+                    <p class="text-gray-600">Pregúntame sobre nuestros productos o servicios.</p>
                 </div>
             </div>
             <div class="p-4 bg-white border-t border-gray-100 flex gap-2">
@@ -514,324 +515,795 @@
     </div>
 
     <script>
-        // ========================= CONFIGURACIÓN GITHUB =========================
-        // El token se guarda en localStorage con la clave 'github_token'
-        // Si no existe, se usa el token por defecto (el que proporcionaste)
-        const DEFAULT_TOKEN = "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";
+        // ============================================================
+        // ESTADO GLOBAL
+        // ============================================================
+        let STATE = {
+            productos: [],
+            usuarios: [],
+            carrusel: [
+                { img: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop', titulo: 'Medicamentos de Calidad', subtitulo: 'Los mejores precios en productos farmacéuticos certificados' },
+                { img: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1200&h=400&fit=crop', titulo: 'Tecnología de Última Generación', subtitulo: 'Componentes de PC y hardware gaming al mejor precio' },
+                { img: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=400&fit=crop', titulo: 'Ofertas Especiales', subtitulo: 'Descuentos exclusivos por tiempo limitado' }
+            ],
+            textos: {
+                catTitulo: 'Explora por Categoría',
+                catSubtitulo: 'Encuentra exactamente lo que necesitas',
+                offerTitulo: '🔥 Ofertas Especiales',
+                offerSubtitulo: 'Aprovecha estos descuentos exclusivos',
+                ofertas: [
+                    { titulo: '20%', desc: 'En toda la línea de analgésicos' },
+                    { titulo: '15%', desc: 'Componentes seleccionados' },
+                    { titulo: 'ENVÍO', desc: 'Gratis en compras mayores a $50' }
+                ]
+            },
+            categorias: [
+                { icono: 'fa-pills', nombre: 'Medicamentos', bg: 'from-teal-500 to-cyan-600' },
+                { icono: 'fa-laptop', nombre: 'Tecnología', bg: 'from-blue-500 to-indigo-600' },
+                { icono: 'fa-heart-pulse', nombre: 'Salud', bg: 'from-green-500 to-emerald-600' },
+                { icono: 'fa-gamepad', nombre: 'Gaming', bg: 'from-purple-500 to-pink-600' }
+            ]
+        };
+
+        let currentUser = null;
+        let cartCount = 0;
+        let currentSlide = 0;
+        let editingProductId = null;
+
+        // Token GitHub (por defecto el que proporcionaste)
+        let GITHUB_TOKEN = "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";
         const GITHUB_USER = "calm291094-del";
         const GITHUB_REPO = "meditech-tienda";
+        const API_BASE = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
+        const HEADERS = () => ({
+            "Authorization": `token ${GITHUB_TOKEN}`,
+            "Accept": "application/vnd.github.v3+json"
+        });
 
-        function getGitHubToken() {
-            return localStorage.getItem('github_token') || DEFAULT_TOKEN;
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        function init() {
+            // Cargar desde localStorage primero
+            const saved = localStorage.getItem('meditech_state');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    STATE = parsed;
+                } catch(e) {}
+            }
+
+            // Cargar usuarios desde localStorage
+            const users = localStorage.getItem('usuarios');
+            if (users) {
+                try { STATE.usuarios = JSON.parse(users); } catch(e) {}
+            }
+
+            // Si no hay usuarios, crear root
+            if (!STATE.usuarios || STATE.usuarios.length === 0) {
+                STATE.usuarios = [
+                    { username: 'root', password: 'root123', name: 'Administrador', email: 'admin@meditech.com', role: 'admin' }
+                ];
+                saveUsers();
+            }
+
+            // Si no hay productos, cargar los datos iniciales
+            if (!STATE.productos || STATE.productos.length === 0) {
+                STATE.productos = getInitialProducts();
+                saveProducts();
+            }
+
+            // Si no hay carrusel, usar el de ejemplo
+            if (!STATE.carrusel || STATE.carrusel.length === 0) {
+                STATE.carrusel = [
+                    { img: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop', titulo: 'Medicamentos de Calidad', subtitulo: 'Los mejores precios en productos farmacéuticos certificados' },
+                    { img: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1200&h=400&fit=crop', titulo: 'Tecnología de Última Generación', subtitulo: 'Componentes de PC y hardware gaming al mejor precio' },
+                    { img: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=400&fit=crop', titulo: 'Ofertas Especiales', subtitulo: 'Descuentos exclusivos por tiempo limitado' }
+                ];
+                saveState();
+            }
+
+            // Restaurar sesión
+            const session = localStorage.getItem('session');
+            if (session) {
+                try {
+                    const user = JSON.parse(session);
+                    const found = STATE.usuarios.find(u => u.username === user.username);
+                    if (found) {
+                        currentUser = found;
+                        updateUIForLoggedUser();
+                    } else {
+                        localStorage.removeItem('session');
+                    }
+                } catch(e) { localStorage.removeItem('session'); }
+            }
+
+            // Renderizar todo
+            renderAll();
+            initCarousel();
+            document.getElementById('year').textContent = new Date().getFullYear();
+
+            // Cargar token guardado
+            const savedToken = localStorage.getItem('github_token');
+            if (savedToken) {
+                GITHUB_TOKEN = savedToken;
+            }
+            document.getElementById('github-token-input').value = GITHUB_TOKEN;
+            checkGitHubStatus();
+
+            // Sincronizar con GitHub en segundo plano
+            setTimeout(() => {
+                syncAllFromGitHub().then(() => {
+                    renderAll();
+                });
+            }, 1000);
+
+            // Configurar eventos de pestañas
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('border-teal-500', 'text-teal-600'));
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.add('text-gray-600'));
+                    this.classList.add('border-teal-500', 'text-teal-600');
+                    this.classList.remove('text-gray-600');
+                });
+            });
+            // Activar primera pestaña
+            document.querySelector('.tab-btn[data-tab="productos"]')?.click();
         }
 
-        function setGitHubToken(token) {
-            localStorage.setItem('github_token', token);
+        // ============================================================
+        // DATOS INICIALES (medicamentos)
+        // ============================================================
+        function getInitialProducts() {
+            return [
+                { id: 'p1', name: 'Paracetamol con Diclofenaco 550 mg', category: 'medicamento', price: 260, desc: 'Analgésico y antiinflamatorio para dolores moderados.', stock: 50, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: true, status: 'disponible' },
+                { id: 'p2', name: 'Ibuprofeno 800 mg', category: 'medicamento', price: 300, desc: 'Antiinflamatorio potente para dolores intensos.', stock: 40, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: true, status: 'disponible' },
+                { id: 'p3', name: 'Nifedipino 20 mg', category: 'medicamento', price: 250, desc: 'Para la presión arterial alta.', stock: 30, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p4', name: 'Alodipino 10 mg', category: 'medicamento', price: 250, desc: 'Antihipertensivo, relaja los vasos sanguíneos.', stock: 25, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p5', name: 'Captopril 25 mg', category: 'medicamento', price: 250, desc: 'Inhibidor de la ECA para hipertensión.', stock: 20, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p6', name: 'Enalapril 10 mg (largo)', category: 'medicamento', price: 280, desc: 'Para el tratamiento de la presión arterial.', stock: 15, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p7', name: 'Sulfaprim 200/40 mg', category: 'medicamento', price: 280, desc: 'Antibiótico para infecciones bacterianas.', stock: 35, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p8', name: 'Metronidazol 250 mg', category: 'medicamento', price: 280, desc: 'Antibiótico para infecciones parasitarias y bacterianas.', stock: 40, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p9', name: 'Amoxicilina 500 mg', category: 'medicamento', price: 350, desc: 'Antibiótico de amplio espectro.', stock: 45, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p10', name: 'Omeprazol 20 mg', category: 'medicamento', price: 250, desc: 'Inhibidor de la bomba de protones para reflujo y úlceras.', stock: 60, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p11', name: 'Metoclopramida 10 mg', category: 'medicamento', price: 230, desc: 'Antiemético, estimula el vaciamiento gástrico.', stock: 30, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p12', name: 'Domozaol (Omeprazol + Domperidona)', category: 'medicamento', price: 300, desc: 'Para reflujo con náuseas y vómitos.', stock: 20, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p13', name: 'Furosemide 40 mg', category: 'medicamento', price: 230, desc: 'Diurético para edemas e hipertensión.', stock: 25, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p14', name: 'Hidroclorotiazida 50 mg', category: 'medicamento', price: 230, desc: 'Diurético para presión arterial alta.', stock: 30, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p15', name: 'Loratadina 10 mg', category: 'medicamento', price: 230, desc: 'Antihistamínico para alergias.', stock: 40, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p16', name: 'Benadrilina 25 mg', category: 'medicamento', price: 250, desc: 'Antihistamínico sedante, para reacciones alérgicas.', stock: 20, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
+                { id: 'p17', name: 'Alprazolam 1 mg', category: 'medicamento', price: 550, desc: 'Ansiolítico, control de ansiedad y pánico.', stock: 10, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' }
+            ];
         }
 
-        function getHeaders() {
-            const token = getGitHubToken();
-            return {
-                "Authorization": `token ${token}`,
-                "Accept": "application/vnd.github.v3+json"
-            };
+        // ============================================================
+        // FUNCIONES DE GUARDADO EN LOCALSTORAGE
+        // ============================================================
+        function saveProducts() {
+            localStorage.setItem('productos', JSON.stringify(STATE.productos));
+            saveState();
         }
 
-        const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
+        function saveUsers() {
+            localStorage.setItem('usuarios', JSON.stringify(STATE.usuarios));
+            saveState();
+        }
 
-        // ========================= ESTADO GLOBAL =========================
-        let S = { pr: [], cart: 0, currentUser: null, users: [] };
-        let currentImageMode = 'none';
-        let currentImageUrl = '';
+        function saveState() {
+            localStorage.setItem('meditech_state', JSON.stringify(STATE));
+        }
 
-        // ========================= FUNCIONES GITHUB =========================
-        async function fetchGitHub(path) {
-            try {
-                const res = await fetch(`${API}/contents/${path}`, { headers: getHeaders() });
-                if (res.status === 404) return null;
-                if (!res.ok) {
-                    const err = await res.json();
-                    throw new Error(`HTTP ${res.status}: ${err.message || 'Error'}`);
+        function saveCarousel() {
+            saveState();
+        }
+
+        function saveTexts() {
+            saveState();
+        }
+
+        // ============================================================
+        // RENDERIZADO COMPLETO
+        // ============================================================
+        function renderAll() {
+            renderProducts();
+            renderAdminList();
+            renderCarousel();
+            renderCategories();
+            renderOffers();
+            updateUI();
+            fillTextsEditor();
+            fillCarouselEditor();
+            document.getElementById('product-total-label').textContent = `${STATE.productos.length} productos`;
+            document.getElementById('admin-count').textContent = STATE.productos.length;
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('portada-productos');
+            if (STATE.productos.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-center py-16 text-gray-400"><i class="fas fa-box-open text-5xl mb-4 block opacity-50"></i>Aún no hay productos.</p>`;
+                return;
+            }
+            grid.innerHTML = STATE.productos.map(p => {
+                const statusClass = p.status === 'disponible' ? 'available' : 'agotado';
+                const statusText = p.status === 'disponible' ? '✅ Disponible' : '❌ Agotado';
+                const imageHtml = p.image 
+                    ? `<img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
+                    : `<div class="no-image-placeholder w-full h-full">
+                           <div class="text-center">
+                               <i class="fas fa-image text-4xl mb-2"></i>
+                               <p class="text-xs">Sin imagen</p>
+                           </div>
+                       </div>`;
+                return `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover-lift fade-in group">
+                    <div class="h-56 overflow-hidden bg-gray-100 relative">
+                        ${imageHtml}
+                        ${p.feat ? '<span class="badge-new"><i class="fas fa-star mr-1"></i>Destacado</span>' : ''}
+                        <span class="stock-badge ${statusClass}">${statusText}</span>
+                        <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                            ${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <h4 class="font-bold text-gray-900 text-lg mb-2 truncate">${p.name}</h4>
+                        <p class="text-sm text-gray-500 mb-4 line-clamp-2 h-10">${p.desc}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-2xl font-bold gradient-text">$${parseFloat(p.price).toFixed(2)}</span>
+                            <button onclick="addToCart('${p.id}')" class="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-teal-600 hover:to-cyan-600 text-white w-11 h-11 rounded-full flex items-center justify-center transition shadow-lg">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function renderAdminList() {
+            const list = document.getElementById('admin-list');
+            if (!list) return;
+            if (STATE.productos.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin productos</p>';
+                return;
+            }
+            list.innerHTML = STATE.productos.map(p => {
+                const statusText = p.status === 'disponible' ? '✅ Disponible' : '❌ Agotado';
+                const imgHtml = p.image 
+                    ? `<img src="${p.image}" class="w-16 h-16 object-cover rounded-lg bg-white shadow-sm" onerror="this.outerHTML='<div class=\\'w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400\\'><i class=\\'fas fa-image\\'></i></div>'">`
+                    : `<div class="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-image"></i></div>`;
+                return `
+                <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200 hover:shadow-md transition">
+                    ${imgHtml}
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-gray-900 truncate">${p.name}</p>
+                        <p class="text-sm text-gray-500">$${p.price} | Stock: ${p.stock} | ${statusText}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editProduct('${p.id}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function renderCarousel() {
+            const inner = document.getElementById('carousel-inner');
+            inner.innerHTML = STATE.carrusel.map((slide, idx) => `
+                <div class="carousel-item">
+                    <img src="${slide.img}" alt="${slide.titulo}" onerror="this.src='https://via.placeholder.com/1200x400?text=MediTech'">
+                    <div class="carousel-caption">
+                        <h3 class="text-2xl font-bold mb-2">${slide.titulo}</h3>
+                        <p class="text-sm opacity-90">${slide.subtitulo}</p>
+                    </div>
+                </div>
+            `).join('');
+            // Recrear dots
+            const dotsContainer = document.getElementById('carousel-dots');
+            dotsContainer.innerHTML = '';
+            STATE.carrusel.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'carousel-dot' + (i === currentSlide ? ' active' : '');
+                dot.onclick = () => { currentSlide = i; updateCarousel(); };
+                dotsContainer.appendChild(dot);
+            });
+            updateCarousel();
+        }
+
+        function renderCategories() {
+            const grid = document.getElementById('category-grid');
+            grid.innerHTML = STATE.categorias.map(c => `
+                <div class="category-card bg-gradient-to-br ${c.bg} rounded-2xl p-8 text-white text-center shadow-lg">
+                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas ${c.icono} text-4xl"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">${c.nombre}</h4>
+                    <p class="text-sm opacity-90">+${Math.floor(Math.random()*100)+50} productos</p>
+                </div>
+            `).join('');
+            // Actualizar títulos
+            document.getElementById('cat-title').textContent = STATE.textos.catTitulo;
+            document.getElementById('cat-sub').textContent = STATE.textos.catSubtitulo;
+        }
+
+        function renderOffers() {
+            const grid = document.getElementById('offers-grid');
+            const offers = STATE.textos.ofertas;
+            grid.innerHTML = offers.map(o => `
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
+                    <div class="text-5xl font-bold mb-2">${o.titulo}</div>
+                    <p class="text-lg font-semibold mb-2">${o.desc}</p>
+                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Ver productos</button>
+                </div>
+            `).join('');
+            document.getElementById('offer-title').textContent = STATE.textos.offerTitulo;
+            document.getElementById('offer-sub').textContent = STATE.textos.offerSubtitulo;
+        }
+
+        function updateUI() {
+            document.getElementById('cart-count').textContent = cartCount;
+        }
+
+        // ============================================================
+        // CARRUSEL
+        // ============================================================
+        function updateCarousel() {
+            const inner = document.getElementById('carousel-inner');
+            if (inner) inner.style.transform = `translateX(-${currentSlide * 100}%)`;
+            document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        function moveCarousel(direction) {
+            const total = STATE.carrusel.length;
+            currentSlide = (currentSlide + direction + total) % total;
+            updateCarousel();
+        }
+
+        function initCarousel() {
+            if (STATE.carrusel.length > 0) {
+                renderCarousel();
+                setInterval(() => moveCarousel(1), 5000);
+            }
+        }
+
+        // ============================================================
+        // ADMIN: EDITAR PRODUCTOS
+        // ============================================================
+        function editProduct(id) {
+            const p = STATE.productos.find(prod => prod.id === id);
+            if (!p) return;
+            editingProductId = id;
+            document.getElementById('edit-product-id').value = id;
+            document.getElementById('prod-name').value = p.name;
+            document.getElementById('prod-category').value = p.category;
+            document.getElementById('prod-price').value = p.price;
+            document.getElementById('prod-stock').value = p.stock;
+            document.getElementById('prod-status').value = p.status || 'disponible';
+            document.getElementById('prod-desc').value = p.desc;
+            document.getElementById('prod-image').value = p.image || '';
+            document.getElementById('prod-feat').checked = p.feat || false;
+            // Mostrar preview
+            const preview = document.getElementById('image-preview');
+            const wrapper = document.getElementById('image-preview-wrapper');
+            if (p.image) {
+                preview.src = p.image;
+                wrapper.classList.remove('hidden');
+            } else {
+                wrapper.classList.add('hidden');
+            }
+            // Cambiar texto del botón
+            document.querySelector('#product-form button[type="submit"] span').textContent = 'Actualizar Producto';
+            // Scroll al formulario
+            document.getElementById('product-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            editingProductId = null;
+            document.getElementById('edit-product-id').value = '';
+            document.getElementById('product-form').reset();
+            document.getElementById('image-preview-wrapper').classList.add('hidden');
+            document.querySelector('#product-form button[type="submit"] span').textContent = 'Guardar Producto';
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            if (!currentUser || currentUser.role !== 'admin') {
+                showNotif('❌ Solo administradores pueden guardar productos', 'error');
+                return;
+            }
+            const id = document.getElementById('edit-product-id').value;
+            const name = document.getElementById('prod-name').value;
+            const category = document.getElementById('prod-category').value;
+            const price = parseFloat(document.getElementById('prod-price').value);
+            const stock = parseInt(document.getElementById('prod-stock').value);
+            const status = document.getElementById('prod-status').value;
+            const desc = document.getElementById('prod-desc').value;
+            const image = document.getElementById('prod-image').value.trim();
+            const feat = document.getElementById('prod-feat').checked;
+
+            if (id) {
+                // Editar
+                const idx = STATE.productos.findIndex(p => p.id === id);
+                if (idx !== -1) {
+                    STATE.productos[idx] = { ...STATE.productos[idx], name, category, price, stock, status, desc, image, feat };
                 }
-                return await res.json();
-            } catch (e) {
-                console.error(`Error al leer ${path}:`, e);
-                throw e;
+                showNotif('✅ Producto actualizado', 'success');
+            } else {
+                // Nuevo
+                const newProduct = {
+                    id: 'p' + Date.now(),
+                    name,
+                    category,
+                    price,
+                    stock,
+                    status,
+                    desc,
+                    image,
+                    feat
+                };
+                STATE.productos.push(newProduct);
+                showNotif('✅ Producto agregado', 'success');
+            }
+            saveProducts();
+            renderAll();
+            cancelEdit();
+            // Sincronizar con GitHub
+            syncAllToGitHub();
+        }
+
+        function deleteProduct(id) {
+            if (!currentUser || currentUser.role !== 'admin') {
+                showNotif('❌ Solo administradores pueden eliminar', 'error');
+                return;
+            }
+            if (!confirm('¿Eliminar este producto?')) return;
+            STATE.productos = STATE.productos.filter(p => p.id !== id);
+            saveProducts();
+            renderAll();
+            syncAllToGitHub();
+            showNotif('🗑️ Producto eliminado', 'info');
+        }
+
+        // ============================================================
+        // ADMIN: EDITAR CARRUSEL
+        // ============================================================
+        function fillCarouselEditor() {
+            const container = document.getElementById('carousel-editor');
+            container.innerHTML = STATE.carrusel.map((slide, i) => `
+                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <h4 class="font-bold text-gray-700">Slide ${i+1}</h4>
+                    <div class="grid md:grid-cols-2 gap-3 mt-2">
+                        <div>
+                            <label class="block text-sm font-medium">Imagen URL</label>
+                            <input type="text" class="slide-img w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-teal-500 outline-none" value="${slide.img}" data-index="${i}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Título</label>
+                            <input type="text" class="slide-title w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-teal-500 outline-none" value="${slide.titulo}" data-index="${i}">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium">Subtítulo</label>
+                            <input type="text" class="slide-sub w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-teal-500 outline-none" value="${slide.subtitulo}" data-index="${i}">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function saveCarouselData() {
+            const imgs = document.querySelectorAll('.slide-img');
+            const titles = document.querySelectorAll('.slide-title');
+            const subs = document.querySelectorAll('.slide-sub');
+            const newCarousel = [];
+            imgs.forEach((img, idx) => {
+                newCarousel.push({
+                    img: img.value,
+                    titulo: titles[idx].value,
+                    subtitulo: subs[idx].value
+                });
+            });
+            STATE.carrusel = newCarousel;
+            saveCarousel();
+            renderCarousel();
+            showNotif('✅ Carrusel actualizado', 'success');
+            syncAllToGitHub();
+        }
+
+        // ============================================================
+        // ADMIN: EDITAR TEXTOS
+        // ============================================================
+        function fillTextsEditor() {
+            document.getElementById('edit-cat-title').value = STATE.textos.catTitulo;
+            document.getElementById('edit-cat-sub').value = STATE.textos.catSubtitulo;
+            document.getElementById('edit-offer-title').value = STATE.textos.offerTitulo;
+            document.getElementById('edit-offer-sub').value = STATE.textos.offerSubtitulo;
+            const ofertas = STATE.textos.ofertas;
+            document.getElementById('offer1-title').value = ofertas[0]?.titulo || '';
+            document.getElementById('offer1-desc').value = ofertas[0]?.desc || '';
+            document.getElementById('offer2-title').value = ofertas[1]?.titulo || '';
+            document.getElementById('offer2-desc').value = ofertas[1]?.desc || '';
+            document.getElementById('offer3-title').value = ofertas[2]?.titulo || '';
+            document.getElementById('offer3-desc').value = ofertas[2]?.desc || '';
+        }
+
+        function saveTextsData() {
+            STATE.textos.catTitulo = document.getElementById('edit-cat-title').value;
+            STATE.textos.catSubtitulo = document.getElementById('edit-cat-sub').value;
+            STATE.textos.offerTitulo = document.getElementById('edit-offer-title').value;
+            STATE.textos.offerSubtitulo = document.getElementById('edit-offer-sub').value;
+            STATE.textos.ofertas = [
+                { titulo: document.getElementById('offer1-title').value, desc: document.getElementById('offer1-desc').value },
+                { titulo: document.getElementById('offer2-title').value, desc: document.getElementById('offer2-desc').value },
+                { titulo: document.getElementById('offer3-title').value, desc: document.getElementById('offer3-desc').value }
+            ];
+            saveTexts();
+            renderAll();
+            showNotif('✅ Textos actualizados', 'success');
+            syncAllToGitHub();
+        }
+
+        // ============================================================
+        // ADMIN: CONFIGURACIÓN (TOKEN, CONTRASEÑA, SINCRONIZACIÓN)
+        // ============================================================
+        function updateGitHubToken() {
+            const newToken = document.getElementById('github-token-input').value.trim();
+            if (!newToken) {
+                showNotif('❌ Ingresa un token válido', 'error');
+                return;
+            }
+            GITHUB_TOKEN = newToken;
+            localStorage.setItem('github_token', newToken);
+            showNotif('✅ Token actualizado', 'success');
+            checkGitHubStatus();
+        }
+
+        async function checkGitHubStatus() {
+            const statusEl = document.getElementById('github-status');
+            statusEl.textContent = 'Verificando...';
+            try {
+                const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`, {
+                    headers: { "Authorization": `token ${GITHUB_TOKEN}` }
+                });
+                if (res.ok) {
+                    statusEl.textContent = '✅ Conectado';
+                    statusEl.className = 'text-green-600';
+                } else {
+                    statusEl.textContent = '❌ Error de conexión (token inválido o sin permisos)';
+                    statusEl.className = 'text-red-600';
+                }
+            } catch(e) {
+                statusEl.textContent = '⚠️ No se pudo verificar';
+                statusEl.className = 'text-yellow-600';
+            }
+        }
+
+        function updateRootPassword() {
+            const newPass = document.getElementById('new-root-password').value.trim();
+            if (!newPass) {
+                showNotif('❌ Ingresa una nueva contraseña', 'error');
+                return;
+            }
+            const rootUser = STATE.usuarios.find(u => u.username === 'root');
+            if (rootUser) {
+                rootUser.password = newPass;
+                saveUsers();
+                showNotif('✅ Contraseña de root actualizada', 'success');
+                document.getElementById('new-root-password').value = '';
+                // Si el usuario actual es root, actualizar sesión
+                if (currentUser && currentUser.username === 'root') {
+                    currentUser.password = newPass;
+                    localStorage.setItem('session', JSON.stringify(currentUser));
+                }
+                syncAllToGitHub();
+            } else {
+                showNotif('❌ Usuario root no encontrado', 'error');
+            }
+        }
+
+        // ============================================================
+        // SINCRONIZACIÓN CON GITHUB
+        // ============================================================
+        async function syncAllToGitHub() {
+            const statusEl = document.getElementById('sync-status');
+            statusEl.textContent = '⏳ Sincronizando...';
+            try {
+                // Guardar productos
+                await guardarArchivo('productos.json', { productos: STATE.productos }, 'Sync productos');
+                // Guardar usuarios
+                await guardarArchivo('usuarios.json', { usuarios: STATE.usuarios }, 'Sync usuarios');
+                // Guardar estado completo (opcional)
+                await guardarArchivo('estado.json', STATE, 'Sync estado');
+                statusEl.textContent = '✅ Sincronizado correctamente';
+                showNotif('✅ Datos sincronizados con GitHub', 'success');
+            } catch(e) {
+                statusEl.textContent = '❌ Error al sincronizar: ' + e.message;
+                showNotif('❌ Error al sincronizar con GitHub', 'error');
             }
         }
 
         async function guardarArchivo(path, contenido, mensaje) {
-            const maxReintentos = 3;
-            for (let intento = 0; intento < maxReintentos; intento++) {
-                try {
-                    const file = await fetchGitHub(path);
-                    const sha = file ? file.sha : null;
-                    const body = {
-                        message: mensaje || `Actualización ${path} ${new Date().toISOString()}`,
-                        content: btoa(unescape(encodeURIComponent(JSON.stringify(contenido, null, 2)))),
-                        sha: sha || undefined
-                    };
-                    const res = await fetch(`${API}/contents/${path}`, {
-                        method: "PUT",
-                        headers: getHeaders(),
-                        body: JSON.stringify(body)
-                    });
-                    if (!res.ok) {
-                        const errorData = await res.json();
-                        if (res.status === 422 && errorData.message && errorData.message.includes('sha')) {
-                            console.warn(`Conflicto de SHA en ${path}, reintentando... (${intento+1}/${maxReintentos})`);
-                            await new Promise(r => setTimeout(r, 500));
-                            continue;
-                        }
-                        throw new Error(`HTTP ${res.status}: ${errorData.message || 'Error desconocido'}`);
-                    }
-                    console.log(`✅ ${path} guardado correctamente`);
-                    return true;
-                } catch (e) {
-                    console.error(`Error al guardar ${path} (intento ${intento+1}):`, e);
-                    if (intento === maxReintentos - 1) {
-                        showToast(`❌ Error al guardar: ${e.message}`, 'error');
-                        return false;
-                    }
-                    await new Promise(r => setTimeout(r, 500 * (intento+1)));
-                }
-            }
-            return false;
-        }
-
-        async function guardarProductos() {
-            const data = { productos: S.pr };
-            return guardarArchivo('productos.json', data, 'Sync productos');
-        }
-
-        async function guardarUsuarios() {
-            const data = { usuarios: S.users };
-            return guardarArchivo('usuarios.json', data, 'Sync usuarios');
-        }
-
-        async function testGitHubConnection() {
-            const token = document.getElementById('github-token-input').value.trim() || getGitHubToken();
-            if (!token) {
-                showToast('❌ Ingresa un token válido', 'error');
-                return;
-            }
-            const statusText = document.getElementById('github-status-text');
-            const statusIcon = document.querySelector('#github-status i');
-            statusText.textContent = 'Probando...';
-            statusIcon.className = 'fas fa-spinner fa-spin text-blue-500';
-            
             try {
-                const res = await fetch(`https://api.github.com/user`, {
-                    headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" }
+                // Obtener SHA actual
+                let sha = null;
+                try {
+                    const res = await fetch(`${API_BASE}/contents/${path}`, { headers: HEADERS() });
+                    if (res.ok) {
+                        const data = await res.json();
+                        sha = data.sha;
+                    }
+                } catch(e) {}
+
+                const body = {
+                    message: mensaje || `Actualización ${path}`,
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(contenido, null, 2)))),
+                    sha: sha || undefined
+                };
+                const res = await fetch(`${API_BASE}/contents/${path}`, {
+                    method: "PUT",
+                    headers: HEADERS(),
+                    body: JSON.stringify(body)
                 });
-                if (res.ok) {
-                    const data = await res.json();
-                    statusText.textContent = `✅ Conectado como ${data.login}`;
-                    statusIcon.className = 'fas fa-check-circle text-green-500';
-                    showToast('✅ Conexión exitosa', 'success');
-                } else {
-                    statusText.textContent = '❌ Token inválido o sin permisos';
-                    statusIcon.className = 'fas fa-times-circle text-red-500';
-                    showToast('❌ Error de autenticación', 'error');
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || 'Error al guardar');
                 }
-            } catch (e) {
-                statusText.textContent = '❌ Error de red';
-                statusIcon.className = 'fas fa-exclamation-triangle text-red-500';
-                showToast('❌ Error al conectar', 'error');
+                return true;
+            } catch(e) {
+                console.error('Error guardando en GitHub:', e);
+                throw e;
             }
         }
 
-        function saveGitHubToken() {
-            const token = document.getElementById('github-token-input').value.trim();
-            if (!token) {
-                showToast('❌ Ingresa un token', 'error');
-                return;
-            }
-            setGitHubToken(token);
-            document.getElementById('github-token-input').value = token;
-            showToast('✅ Token guardado en localStorage', 'success');
-            // Actualizar estado
-            const statusText = document.getElementById('github-status-text');
-            statusText.textContent = 'Token guardado. Prueba la conexión.';
-            document.querySelector('#github-status i').className = 'fas fa-circle text-yellow-500';
-        }
-
-        // ========================= CARGA INICIAL =========================
-        async function cargarProductos() {
+        async function syncAllFromGitHub() {
             try {
-                const file = await fetchGitHub('productos.json');
-                if (file) {
-                    const data = JSON.parse(atob(file.content));
-                    S.pr = data.productos || [];
-                } else {
-                    S.pr = [];
-                    await guardarProductos(); // crear archivo vacío
+                // Productos
+                const prod = await obtenerArchivo('productos.json');
+                if (prod && prod.productos) {
+                    STATE.productos = prod.productos;
+                    saveProducts();
                 }
-            } catch (e) {
-                showToast('⚠️ Error al cargar productos, usando datos locales', 'error');
-                S.pr = [];
+                // Usuarios
+                const users = await obtenerArchivo('usuarios.json');
+                if (users && users.usuarios) {
+                    STATE.usuarios = users.usuarios;
+                    saveUsers();
+                }
+                // Estado (carrusel, textos, etc.)
+                const est = await obtenerArchivo('estado.json');
+                if (est && est.carrusel && est.textos) {
+                    STATE.carrusel = est.carrusel;
+                    STATE.textos = est.textos;
+                    saveState();
+                }
+                renderAll();
+            } catch(e) {
+                console.warn('No se pudo sincronizar desde GitHub, usando datos locales');
             }
-            renderProducts();
-            renderAdminList();
-            updateUI();
         }
 
-        async function initAuth() {
+        async function obtenerArchivo(path) {
             try {
-                const file = await fetchGitHub('usuarios.json');
-                if (file) {
-                    const data = JSON.parse(atob(file.content));
-                    S.users = data.usuarios || [];
-                } else {
-                    // Crear usuario root por defecto
-                    S.users = [{ username: 'root', password: 'admin123', name: 'Administrador', email: 'admin@meditech.com', role: 'admin' }];
-                    await guardarUsuarios();
-                }
-            } catch (e) {
-                showToast('⚠️ Error al cargar usuarios, usando datos locales', 'error');
-                S.users = [{ username: 'root', password: 'admin123', name: 'Administrador', email: 'admin@meditech.com', role: 'admin' }];
+                const res = await fetch(`${API_BASE}/contents/${path}`, { headers: HEADERS() });
+                if (!res.ok) return null;
+                const data = await res.json();
+                const content = atob(data.content);
+                return JSON.parse(content);
+            } catch(e) {
+                return null;
             }
-            // Sesión
-            const session = localStorage.getItem('session');
-            if (session) {
+        }
+
+        // ============================================================
+        // EXPORTAR / IMPORTAR DATOS
+        // ============================================================
+        function exportData() {
+            const data = {
+                productos: STATE.productos,
+                usuarios: STATE.usuarios,
+                carrusel: STATE.carrusel,
+                textos: STATE.textos,
+                categorias: STATE.categorias
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'meditech_backup.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotif('📦 Datos exportados', 'success');
+        }
+
+        function importData() {
+            document.getElementById('fileInput').click();
+        }
+
+        function importDataFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
                 try {
-                    const savedUser = JSON.parse(session);
-                    const userExists = S.users.find(u => u.username === savedUser.username);
-                    if (userExists) { S.currentUser = userExists; updateUIForLoggedUser(); }
-                    else localStorage.removeItem('session');
-                } catch(e) { localStorage.removeItem('session'); }
-            }
-            // Cargar token guardado en el input del panel
-            const savedToken = getGitHubToken();
-            document.getElementById('github-token-input').value = savedToken;
-            // Actualizar estado de GitHub
-            const statusText = document.getElementById('github-status-text');
-            if (savedToken && savedToken !== DEFAULT_TOKEN) {
-                statusText.textContent = 'Token configurado (prueba conexión)';
-                document.querySelector('#github-status i').className = 'fas fa-circle text-green-500';
-            } else if (savedToken === DEFAULT_TOKEN) {
-                statusText.textContent = 'Token por defecto configurado';
-                document.querySelector('#github-status i').className = 'fas fa-circle text-yellow-500';
-            } else {
-                statusText.textContent = 'No configurado';
-                document.querySelector('#github-status i').className = 'fas fa-circle text-gray-400';
-            }
-        }
-
-        // ========================= FUNCIONES DE USUARIOS (Admin) =========================
-        function loadUserData() {
-            const selector = document.getElementById('user-selector');
-            const selected = selector.value;
-            const user = S.users.find(u => u.username === selected);
-            if (user) {
-                document.getElementById('new-password-input').value = '';
-                document.getElementById('user-status').innerHTML = `Usuario: <strong>${user.username}</strong> (${user.role})`;
-            }
-        }
-
-        function populateUserSelector() {
-            const selector = document.getElementById('user-selector');
-            selector.innerHTML = '';
-            S.users.forEach(u => {
-                const opt = document.createElement('option');
-                opt.value = u.username;
-                opt.textContent = `${u.username} (${u.role})`;
-                selector.appendChild(opt);
-            });
-            if (S.users.length > 0) loadUserData();
-        }
-
-        async function updateUserPassword() {
-            const selector = document.getElementById('user-selector');
-            const username = selector.value;
-            const newPass = document.getElementById('new-password-input').value.trim();
-            if (!newPass || newPass.length < 6) {
-                showToast('❌ La contraseña debe tener al menos 6 caracteres', 'error');
-                return;
-            }
-            const user = S.users.find(u => u.username === username);
-            if (!user) {
-                showToast('❌ Usuario no encontrado', 'error');
-                return;
-            }
-            user.password = newPass;
-            const success = await guardarUsuarios();
-            if (success) {
-                showToast(`✅ Contraseña actualizada para ${username}`, 'success');
-                document.getElementById('new-password-input').value = '';
-                // Si el usuario actual es el mismo, actualizar sesión
-                if (S.currentUser && S.currentUser.username === username) {
-                    S.currentUser.password = newPass;
-                    localStorage.setItem('session', JSON.stringify(S.currentUser));
+                    const data = JSON.parse(e.target.result);
+                    if (data.productos) STATE.productos = data.productos;
+                    if (data.usuarios) STATE.usuarios = data.usuarios;
+                    if (data.carrusel) STATE.carrusel = data.carrusel;
+                    if (data.textos) STATE.textos = data.textos;
+                    if (data.categorias) STATE.categorias = data.categorias;
+                    saveProducts();
+                    saveUsers();
+                    saveState();
+                    renderAll();
+                    showNotif('✅ Datos importados correctamente', 'success');
+                    syncAllToGitHub();
+                } catch(err) {
+                    showNotif('❌ Error al leer el archivo', 'error');
                 }
-            } else {
-                showToast('❌ Error al guardar cambios', 'error');
-            }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
         }
 
-        // ========================= LOGIN / REGISTRO =========================
+        // ============================================================
+        // AUTH (LOGIN, REGISTER, LOGOUT)
+        // ============================================================
         function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); closeUserMenu(); }
         function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
         function openRegisterModal() { document.getElementById('register-modal').classList.remove('hidden'); closeUserMenu(); }
         function closeRegisterModal() { document.getElementById('register-modal').classList.add('hidden'); }
 
-        async function handleLogin(e) {
+        function handleLogin(e) {
             e.preventDefault();
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
-            const user = S.users.find(u => u.username === username && u.password === password);
+            const user = STATE.usuarios.find(u => u.username === username && u.password === password);
             if (user) {
-                S.currentUser = user;
+                currentUser = user;
                 localStorage.setItem('session', JSON.stringify(user));
                 updateUIForLoggedUser();
                 closeLoginModal();
-                showToast(`✅ Bienvenido, ${user.name}`, 'success');
+                showNotif(`✅ Bienvenido, ${user.name}`, 'success');
                 document.getElementById('login-form').reset();
             } else {
-                showToast('❌ Usuario o contraseña incorrectos', 'error');
+                showNotif('❌ Usuario o contraseña incorrectos', 'error');
             }
         }
 
-        async function handleRegister(e) {
+        function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('register-name').value;
             const username = document.getElementById('register-username').value;
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
-            if (S.users.find(u => u.username === username)) {
-                showToast('❌ El usuario ya existe', 'error');
+            if (STATE.usuarios.find(u => u.username === username)) {
+                showNotif('❌ El usuario ya existe', 'error');
                 return;
             }
             const newUser = { username, password, name, email, role: 'user' };
-            S.users.push(newUser);
-            const success = await guardarUsuarios();
-            if (success) {
-                S.currentUser = newUser;
-                localStorage.setItem('session', JSON.stringify(newUser));
-                updateUIForLoggedUser();
-                closeRegisterModal();
-                showToast(`✅ Cuenta creada. Bienvenido, ${name}`, 'success');
-                document.getElementById('register-form').reset();
-                populateUserSelector();
-            } else {
-                S.users.pop(); // revertir
-                showToast('❌ Error al guardar usuario en GitHub', 'error');
-            }
+            STATE.usuarios.push(newUser);
+            saveUsers();
+            currentUser = newUser;
+            localStorage.setItem('session', JSON.stringify(newUser));
+            updateUIForLoggedUser();
+            closeRegisterModal();
+            showNotif(`✅ Cuenta creada. Bienvenido, ${name}`, 'success');
+            document.getElementById('register-form').reset();
+            syncAllToGitHub();
         }
 
         function logout() {
-            S.currentUser = null;
+            currentUser = null;
             localStorage.removeItem('session');
             updateUIForLoggedOut();
             closeUserMenu();
-            showToast('👋 Sesión cerrada', 'info');
+            showNotif('👋 Sesión cerrada', 'info');
         }
 
         function updateUIForLoggedUser() {
-            document.getElementById('user-name-display').textContent = S.currentUser.name;
-            document.getElementById('user-menu-name').textContent = S.currentUser.name;
+            document.getElementById('user-name-display').textContent = currentUser.name;
+            document.getElementById('user-menu-name').textContent = currentUser.name;
             const badge = document.getElementById('user-role-badge');
-            if (S.currentUser.role === 'admin') {
+            if (currentUser.role === 'admin') {
                 badge.textContent = '🔒 Administrador';
                 badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800';
                 document.getElementById('admin-menu-btn').classList.remove('hidden');
@@ -854,234 +1326,72 @@
         function closeUserMenu() { document.getElementById('user-menu').classList.add('hidden'); }
         document.addEventListener('click', (e) => { if (!e.target.closest('#user-section')) closeUserMenu(); });
 
-        // ========================= FUNCIONES DE IMAGEN =========================
-        function selectImageOption(mode) {
-            currentImageMode = mode;
-            document.getElementById('option-url').classList.add('hidden');
-            document.getElementById('option-existing').classList.add('hidden');
-            document.getElementById('option-none').classList.add('hidden');
-            document.querySelectorAll('.image-option').forEach(t => t.classList.remove('active'));
-            document.getElementById('option-' + mode).classList.remove('hidden');
-            document.getElementById('tab-' + mode).classList.add('active');
-            updateImageStatus();
-            if (mode !== 'url' && mode !== 'existing') clearImageSelection();
-        }
-
-        function updateImageStatus() {
-            const status = document.getElementById('image-status');
-            const messages = {
-                'none': '<i class="fas fa-image text-gray-400"></i> <span>Sin imagen (placeholder)</span>',
-                'url': '<i class="fas fa-link text-blue-500"></i> <span>Pega una URL de imagen</span>',
-                'existing': '<i class="fas fa-folder-open text-purple-500"></i> <span>Elige una imagen de ejemplo</span>'
-            };
-            status.innerHTML = messages[currentImageMode] || messages['none'];
-        }
-
-        function previewUrlImage() {
-            const url = document.getElementById('prod-image-url').value.trim();
-            const preview = document.getElementById('image-preview');
-            const wrapper = document.getElementById('image-preview-wrapper');
-            if (url) {
-                preview.src = url;
-                preview.onload = function() {
-                    wrapper.classList.remove('hidden');
-                    currentImageUrl = url;
-                    document.getElementById('image-status').innerHTML = '<i class="fas fa-check-circle text-green-500"></i> <span class="text-green-600 font-medium">Imagen cargada</span>';
-                };
-                preview.onerror = function() {
-                    wrapper.classList.add('hidden');
-                    currentImageUrl = '';
-                    document.getElementById('image-status').innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> <span class="text-red-600">URL inválida</span>';
-                };
-            } else {
-                wrapper.classList.add('hidden');
-                currentImageUrl = '';
-            }
-        }
-
-        function onSelectExistingImage() {
-            const val = document.getElementById('image-selector').value;
-            const preview = document.getElementById('image-preview');
-            const wrapper = document.getElementById('image-preview-wrapper');
-            if (val) {
-                preview.src = val;
-                wrapper.classList.remove('hidden');
-                currentImageUrl = val;
-                document.getElementById('image-status').innerHTML = '<i class="fas fa-check-circle text-green-500"></i> <span class="text-green-600 font-medium">Imagen seleccionada</span>';
-            } else {
-                wrapper.classList.add('hidden');
-                currentImageUrl = '';
-            }
-        }
-
-        function clearImageSelection() {
-            currentImageMode = 'none';
-            currentImageUrl = '';
-            document.getElementById('image-preview-wrapper').classList.add('hidden');
-            document.getElementById('image-preview').src = '';
-            document.getElementById('prod-image-url').value = '';
-            document.getElementById('image-selector').value = '';
-            document.querySelectorAll('.image-option').forEach(t => t.classList.remove('active'));
-            document.getElementById('option-url').classList.add('hidden');
-            document.getElementById('option-existing').classList.add('hidden');
-            document.getElementById('option-none').classList.remove('hidden');
-            updateImageStatus();
-        }
-
-        // ========================= PRODUCTOS =========================
-        function renderProducts() {
-            const grid = document.getElementById('portada-productos');
-            if (S.pr.length === 0) {
-                grid.innerHTML = `<p class="col-span-full text-center py-16 text-gray-400"><i class="fas fa-box-open text-5xl mb-4 block opacity-50"></i>Aún no hay productos.</p>`;
-                return;
-            }
-            grid.innerHTML = S.pr.map(p => {
-                const imageHtml = p.image 
-                    ? `<img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
-                    : `<div class="no-image-placeholder w-full h-full">
-                           <div class="text-center">
-                               <i class="fas fa-image text-4xl mb-2"></i>
-                               <p class="text-xs">Sin imagen</p>
-                           </div>
-                       </div>`;
-                return `
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover-lift fade-in group">
-                    <div class="h-56 overflow-hidden bg-gray-100 relative">
-                        ${imageHtml}
-                        ${p.feat ? '<span class="badge-new"><i class="fas fa-star mr-1"></i>Destacado</span>' : ''}
-                        <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium">
-                            ${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}
-                        </div>
-                    </div>
-                    <div class="p-5">
-                        <h4 class="font-bold text-gray-900 text-lg mb-2 truncate">${p.name}</h4>
-                        <p class="text-sm text-gray-500 mb-4 line-clamp-2 h-10">${p.desc}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-2xl font-bold gradient-text">$${parseFloat(p.price).toFixed(2)}</span>
-                            <button onclick="addToCart('${p.id}')" class="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-teal-600 hover:to-cyan-600 text-white w-11 h-11 rounded-full flex items-center justify-center transition shadow-lg">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
-            document.getElementById('product-total-label').textContent = `${S.pr.length} productos`;
-        }
-
-        function renderAdminList() {
-            const list = document.getElementById('admin-list');
-            document.getElementById('admin-count').textContent = S.pr.length;
-            if (!list) return;
-            if (S.pr.length === 0) { list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin productos</p>'; return; }
-            list.innerHTML = S.pr.map(p => {
-                const imgHtml = p.image 
-                    ? `<img src="${p.image}" class="w-16 h-16 object-cover rounded-lg bg-white shadow-sm" onerror="this.outerHTML='<div class=\\'w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400\\'><i class=\\'fas fa-image\\'></i></div>'">`
-                    : `<div class="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-image"></i></div>`;
-                return `
-                <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200 hover:shadow-md transition">
-                    ${imgHtml}
-                    <div class="flex-1 min-w-0">
-                        <p class="font-bold text-gray-900 truncate">${p.name}</p>
-                        <p class="text-sm text-gray-500">$${p.price} | Stock: ${p.stock}</p>
-                    </div>
-                    <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:bg-red-50 p-3 rounded-lg transition"><i class="fas fa-trash text-lg"></i></button>
-                </div>
-            `}).join('');
-        }
-
-        function updateUI() { document.getElementById('cart-count').textContent = S.cart; }
-
+        // ============================================================
+        // ADMIN PANEL - PESTAÑAS
+        // ============================================================
         function toggleAdminPanel() {
-            if (!S.currentUser || S.currentUser.role !== 'admin') {
-                showToast('❌ Solo administradores pueden acceder', 'error');
+            if (!currentUser || currentUser.role !== 'admin') {
+                showNotif('❌ Solo administradores pueden acceder', 'error');
                 return;
             }
-            const p = document.getElementById('admin-panel');
-            p.classList.toggle('hidden');
-            if (!p.classList.contains('hidden')) {
-                selectImageOption('none');
-                populateUserSelector();
-                // Cargar token en el campo
-                document.getElementById('github-token-input').value = getGitHubToken();
+            const panel = document.getElementById('admin-panel');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                // Cargar datos actuales
+                fillTextsEditor();
+                fillCarouselEditor();
+                document.getElementById('github-token-input').value = GITHUB_TOKEN;
+                checkGitHubStatus();
+                // Activar pestaña de productos
+                switchTab('productos');
             }
             closeUserMenu();
         }
 
-        async function saveProduct(e) {
-            e.preventDefault();
-            if (!S.currentUser || S.currentUser.role !== 'admin') {
-                showToast('❌ Solo administradores', 'error');
-                return;
-            }
-            
-            const name = document.getElementById('prod-name').value;
-            const cat = document.getElementById('prod-category').value;
-            const price = document.getElementById('prod-price').value;
-            const desc = document.getElementById('prod-desc').value;
-            const stock = document.getElementById('prod-stock').value;
-            const feat = document.getElementById('prod-feat').checked;
-            const sel = document.getElementById('image-selector').value;
-            const url = document.getElementById('prod-image-url').value.trim();
-            
-            let img = "";
-            if (currentImageMode === 'url' && url) img = url;
-            else if (currentImageMode === 'existing' && sel) img = sel;
-            else if (currentImageUrl) img = currentImageUrl;
-            
-            S.pr.push({ 
-                id: 'p'+Date.now(), 
-                name, 
-                category: cat, 
-                price: parseFloat(price), 
-                desc, 
-                stock: parseInt(stock), 
-                image: img,
-                feat 
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-teal-500', 'text-teal-600');
+                btn.classList.add('text-gray-600');
+                if (btn.dataset.tab === tabName) {
+                    btn.classList.add('border-teal-500', 'text-teal-600');
+                    btn.classList.remove('text-gray-600');
+                }
             });
-            
-            const success = await guardarProductos();
-            if (success) {
-                renderProducts();
-                renderAdminList();
-                e.target.reset();
-                clearImageSelection();
-                showToast("✅ Producto guardado correctamente", "success");
-            } else {
-                S.pr.pop(); // revertir
-                showToast("❌ Error al guardar producto en GitHub", "error");
-            }
         }
 
-        async function deleteProduct(id) {
-            if (!S.currentUser || S.currentUser.role !== 'admin') {
-                showToast('❌ Solo administradores', 'error');
-                return;
-            }
-            if (!confirm("¿Eliminar producto?")) return;
-            S.pr = S.pr.filter(p => p.id !== id);
-            const success = await guardarProductos();
-            if (success) {
-                renderProducts();
-                renderAdminList();
-                showToast("✅ Producto eliminado", "success");
-            } else {
-                // Revertir
-                await cargarProductos();
-                showToast("❌ Error al eliminar", "error");
-            }
+        // ============================================================
+        // CARRITO
+        // ============================================================
+        function addToCart(id) {
+            cartCount++;
+            updateUI();
+            showNotif('✅ Agregado al carrito', 'success');
         }
 
-        function addToCart(id) { S.cart++; updateUI(); showToast("✅ Agregado al carrito", "success"); }
-
-        // ========================= CHATBOT =========================
+        // ============================================================
+        // CHATBOT
+        // ============================================================
         const KB = {
-            "paracetamol": "El Paracetamol es un analgésico y antipirético. Sirve para dolores leves y fiebre.",
-            "ibuprofeno": "El Ibuprofeno es un antiinflamatorio. Reduce dolor, inflamación y fiebre.",
-            "ram": "La RAM es la memoria de corto plazo de la PC. Más RAM = más programas abiertos.",
-            "gpu": "La GPU procesa imágenes y video. Esencial para gaming y diseño.",
-            "cpu": "El CPU es el cerebro del PC. Ejecuta instrucciones y cálculos.",
-            "ssd": "Un SSD es almacenamiento rápido. Tu PC prende en segundos.",
-            "default": "No tengo info específica. Consulta el catálogo o contacta soporte."
+            "paracetamol": "El Paracetamol con Diclofenaco es un analgésico y antiinflamatorio para dolores moderados.",
+            "ibuprofeno": "El Ibuprofeno 800 mg es un antiinflamatorio potente.",
+            "nifedipino": "Nifedipino se usa para presión arterial alta.",
+            "alodipino": "Alodipino es un antihipertensivo.",
+            "captopril": "Captopril es un inhibidor de la ECA.",
+            "enalapril": "Enalapril es para la presión arterial.",
+            "sulfaprim": "Sulfaprim es un antibiótico.",
+            "metronidazol": "Metronidazol es un antibiótico para infecciones.",
+            "amoxicilina": "Amoxicilina es un antibiótico de amplio espectro.",
+            "omeprazol": "Omeprazol es para el reflujo y úlceras.",
+            "metoclopramida": "Metoclopramida es antiemético.",
+            "domozaol": "Domozaol combina omeprazol y domperidona para reflujo con náuseas.",
+            "furosemide": "Furosemide es un diurético.",
+            "hidroclorotiazida": "Hidroclorotiazida es un diurético.",
+            "loratadina": "Loratadina es un antihistamínico.",
+            "benadrilina": "Benadrilina es un antihistamínico sedante.",
+            "alprazolam": "Alprazolam es un ansiolítico.",
+            "default": "Pregunta por nuestros medicamentos o visita el catálogo."
         };
 
         function toggleChat() { document.getElementById('chatbot-window').classList.toggle('hidden'); }
@@ -1096,63 +1406,36 @@
             setTimeout(() => {
                 let res = KB["default"];
                 const low = txt.toLowerCase();
-                for (let k in KB) if (low.includes(k)) { res = KB[k]; break; }
-                const prod = S.pr.find(p => low.includes(p.name.toLowerCase()));
-                if (prod && res === KB["default"]) res = `Sobre <b>${prod.name}</b>: ${prod.desc}`;
+                for (let k in KB) {
+                    if (low.includes(k)) {
+                        res = KB[k];
+                        break;
+                    }
+                }
+                // Buscar en productos
+                const prod = STATE.productos.find(p => low.includes(p.name.toLowerCase()));
+                if (prod && res === KB["default"]) {
+                    res = `Sobre <b>${prod.name}</b>: ${prod.desc}`;
+                }
                 msgs.innerHTML += `<div class="bg-white p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm border border-gray-100 fade-in">${res}</div>`;
                 msgs.scrollTop = msgs.scrollHeight;
             }, 600);
         }
 
-        // ========================= TOAST =========================
-        function showToast(msg, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 4000);
+        // ============================================================
+        // NOTIFICACIONES
+        // ============================================================
+        function showNotif(msg, type) {
+            const n = document.createElement('div');
+            n.className = `fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full text-sm font-semibold shadow-2xl fade-in ${type==='success'?'bg-green-100 text-green-800 border-2 border-green-200':type==='error'?'bg-red-100 text-red-800 border-2 border-red-200':type==='warning'?'bg-yellow-100 text-yellow-800 border-2 border-yellow-200':'bg-blue-100 text-blue-800 border-2 border-blue-200'}`;
+            n.innerHTML = msg;
+            document.body.appendChild(n);
+            setTimeout(() => n.remove(), 3000);
         }
 
-        // ========================= CARRUSEL =========================
-        let currentSlide = 0;
-        const totalSlides = 3;
-        function moveCarousel(direction) {
-            currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
-            updateCarousel();
-        }
-        function updateCarousel() {
-            document.getElementById('carousel-inner').style.transform = `translateX(-${currentSlide * 100}%)`;
-            document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
-                dot.classList.toggle('active', i === currentSlide);
-            });
-        }
-        function initCarousel() {
-            const dotsContainer = document.getElementById('carousel-dots');
-            for (let i = 0; i < totalSlides; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-                dot.onclick = () => { currentSlide = i; updateCarousel(); };
-                dotsContainer.appendChild(dot);
-            }
-            setInterval(() => moveCarousel(1), 5000);
-        }
-
-        // ========================= INICIALIZACIÓN =========================
-        document.getElementById('year').textContent = new Date().getFullYear();
-        initCarousel();
-        (async function init() {
-            await initAuth();
-            await cargarProductos();
-            renderProducts();
-            renderAdminList();
-            updateUI();
-            populateUserSelector();
-            // Mostrar mensaje de bienvenida
-            if (S.currentUser) {
-                showToast(`Bienvenido de nuevo, ${S.currentUser.name}`, 'info');
-            }
-        })();
-
+        // ============================================================
+        // ANCLA SUAVE
+        // ============================================================
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -1160,6 +1443,11 @@
                 if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
+
+        // ============================================================
+        // INICIO
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
