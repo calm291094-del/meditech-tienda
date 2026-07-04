@@ -40,6 +40,53 @@
         .modal-overlay { animation: fadeIn 0.3s ease; }
         .modal-content { animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* NUEVO: Estilos para las opciones de imagen */
+        .image-option {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .image-option:hover {
+            background: #f0fdfa;
+            border-color: #0d9488;
+        }
+        .image-option.active {
+            background: #f0fdfa;
+            border-color: #0d9488;
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+        }
+        .image-preview-container {
+            position: relative;
+            display: inline-block;
+        }
+        .image-preview-container .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .image-preview-container .remove-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+        .no-image-placeholder {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -68,7 +115,6 @@
                         <i class="fas fa-shopping-cart text-xl"></i>
                         <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
                     </button>
-                    <!-- BOTÓN DE USUARIO -->
                     <div id="user-section" class="relative">
                         <button id="user-btn" onclick="toggleUserMenu()" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full transition">
                             <i class="fas fa-user-circle text-xl text-gray-600"></i>
@@ -294,8 +340,8 @@
                 <p class="text-center text-sm text-gray-600">¿No tienes cuenta? <button type="button" onclick="closeLoginModal(); openRegisterModal();" class="text-teal-600 font-semibold hover:underline">Regístrate aquí</button></p>
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
                     <p class="font-semibold text-blue-900 mb-1">💡 Usuario Root:</p>
-                    <p class="text-blue-700">Usuario: <code class="bg-blue-100 px-2 py-1 rounded">----</code></p>
-                    <p class="text-blue-700">Contraseña: <code class="bg-blue-100 px-2 py-1 rounded">--------</code></p>
+                    <p class="text-blue-700">Usuario: <code class="bg-blue-100 px-2 py-1 rounded">root</code></p>
+                    <p class="text-blue-700">Contraseña: <code class="bg-blue-100 px-2 py-1 rounded">admin123</code></p>
                 </div>
             </form>
         </div>
@@ -333,7 +379,7 @@
         </div>
     </div>
 
-    <!-- PANEL ADMIN -->
+    <!-- PANEL ADMIN - CON NUEVAS OPCIONES DE IMAGEN -->
     <div id="admin-panel" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-y-auto p-4">
         <div class="bg-white rounded-3xl max-w-3xl w-full mx-auto mt-10 shadow-2xl overflow-hidden fade-in">
             <div class="bg-gradient-to-r from-orange-500 to-red-600 p-6 flex justify-between items-center text-white">
@@ -371,23 +417,90 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
                         <textarea id="prod-desc" required rows="4" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none resize-none" placeholder="¿Para qué sirve?"></textarea>
                     </div>
+                    
+                    <!-- ============================================ -->
+                    <!-- 🆕 NUEVO: SELECCIÓN DE IMAGEN (3 OPCIONES) -->
+                    <!-- ============================================ -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">📸 Imagen</label>
-                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center relative hover:bg-gray-50 transition cursor-pointer">
-                            <input type="file" id="prod-image" accept="image/*" capture="environment" onchange="previewImage(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                            <div id="upload-placeholder" class="pointer-events-none">
-                                <i class="fas fa-cloud-upload-alt text-4xl text-teal-500 mb-3"></i>
-                                <p class="text-gray-600 font-medium">Haz clic o arrastra una imagen</p>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">
+                            🖼️ Imagen del Producto <span class="text-gray-400 font-normal">(Opcional)</span>
+                        </label>
+                        
+                        <!-- Tabs de opciones -->
+                        <div class="grid grid-cols-3 gap-2 mb-4">
+                            <button type="button" onclick="selectImageOption('url')" id="tab-url" class="image-option border-2 border-gray-200 rounded-xl p-3 text-center">
+                                <i class="fas fa-link text-teal-600 text-xl mb-1"></i>
+                                <p class="text-xs font-semibold">URL/Link</p>
+                            </button>
+                            <button type="button" onclick="selectImageOption('upload')" id="tab-upload" class="image-option border-2 border-gray-200 rounded-xl p-3 text-center">
+                                <i class="fas fa-upload text-teal-600 text-xl mb-1"></i>
+                                <p class="text-xs font-semibold">Subir Foto</p>
+                            </button>
+                            <button type="button" onclick="selectImageOption('existing')" id="tab-existing" class="image-option border-2 border-gray-200 rounded-xl p-3 text-center">
+                                <i class="fas fa-folder-open text-teal-600 text-xl mb-1"></i>
+                                <p class="text-xs font-semibold">Existente</p>
+                            </button>
+                        </div>
+                        
+                        <!-- OPCIÓN 1: URL de imagen -->
+                        <div id="option-url" class="hidden">
+                            <label class="block text-sm text-gray-600 mb-2">
+                                <i class="fas fa-info-circle text-blue-500"></i> 
+                                Pega el link de una imagen (ej: de Google Images, Imgur, etc.)
+                            </label>
+                            <input type="url" id="prod-image-url" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" 
+                                   placeholder="https://ejemplo.com/imagen.jpg" oninput="previewUrlImage()">
+                            <p class="text-xs text-gray-500 mt-2">
+                                💡 Tip: Puedes usar imágenes de Unsplash, Pexels, o cualquier URL pública
+                            </p>
+                        </div>
+                        
+                        <!-- OPCIÓN 2: Subir archivo -->
+                        <div id="option-upload" class="hidden">
+                            <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center relative hover:bg-gray-50 transition cursor-pointer">
+                                <input type="file" id="prod-image" accept="image/*" capture="environment" onchange="previewImage(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                                <div id="upload-placeholder" class="pointer-events-none">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-teal-500 mb-3"></i>
+                                    <p class="text-gray-600 font-medium">Haz clic o arrastra una imagen</p>
+                                    <p class="text-xs text-gray-400 mt-1">Desde PC o Móvil</p>
+                                </div>
                             </div>
-                            <img id="image-preview" class="hidden mx-auto max-h-40 rounded-lg shadow-md" alt="Preview">
+                        </div>
+                        
+                        <!-- OPCIÓN 3: Imagen existente -->
+                        <div id="option-existing" class="hidden">
+                            <select id="image-selector" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-gray-50" onchange="onSelectExistingImage()">
+                                <option value="">-- Selecciona una imagen --</option>
+                            </select>
+                        </div>
+                        
+                        <!-- OPCIÓN 4: Sin imagen (por defecto) -->
+                        <div id="option-none" class="hidden">
+                            <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
+                                <i class="fas fa-image text-4xl text-gray-300 mb-2"></i>
+                                <p class="text-gray-500 text-sm">El producto se guardará sin imagen</p>
+                                <p class="text-xs text-gray-400 mt-1">Se mostrará un placeholder genérico</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Vista previa de la imagen seleccionada -->
+                        <div id="image-preview-wrapper" class="hidden mt-4">
+                            <label class="block text-sm text-gray-600 mb-2">Vista previa:</label>
+                            <div class="image-preview-container">
+                                <img id="image-preview" class="max-h-40 rounded-lg shadow-md border-2 border-gray-200" alt="Preview">
+                                <button type="button" onclick="clearImageSelection()" class="remove-btn" title="Quitar imagen">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Estado actual -->
+                        <div id="image-status" class="mt-3 text-sm text-gray-500 flex items-center gap-2">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Selecciona una opción arriba (o déjalo vacío para guardar sin imagen)</span>
                         </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">🖼️ O selecciona una foto ya subida</label>
-                        <select id="image-selector" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-gray-50" onchange="onSelectExistingImage()">
-                            <option value="">-- Ninguna --</option>
-                        </select>
-                    </div>
+                    
                     <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
                         <input type="checkbox" id="prod-feat" class="w-5 h-5 text-teal-600 rounded cursor-pointer">
                         <label for="prod-feat" class="text-sm font-medium text-gray-700 cursor-pointer">Marcar como destacado</label>
@@ -434,13 +547,146 @@
 
     <script>
         // CONFIG GITHUB
-        const GITHUB_TOKEN = "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";
+        const GITHUB_TOKEN = "ghp_PEGA_AQUI_TU_NUEVO_TOKEN";
         const GITHUB_USER = "calm291094-del";
         const GITHUB_REPO = "meditech-tienda";
         const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
         const HEADERS = { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" };
 
         let S = { pr: [], cart: 0, currentUser: null, users: [] };
+        let currentImageMode = 'none'; // 'none', 'url', 'upload', 'existing'
+        let currentImageUrl = ''; // URL actual de la imagen seleccionada
+
+        // ============================================
+        // 🆕 FUNCIONES DE SELECCIÓN DE IMAGEN
+        // ============================================
+        
+        function selectImageOption(mode) {
+            currentImageMode = mode;
+            
+            // Ocultar todas las opciones
+            document.getElementById('option-url').classList.add('hidden');
+            document.getElementById('option-upload').classList.add('hidden');
+            document.getElementById('option-existing').classList.add('hidden');
+            document.getElementById('option-none').classList.add('hidden');
+            
+            // Quitar active de todos los tabs
+            document.querySelectorAll('.image-option').forEach(t => t.classList.remove('active'));
+            
+            // Mostrar la opción seleccionada
+            document.getElementById('option-' + mode).classList.remove('hidden');
+            document.getElementById('tab-' + mode).classList.add('active');
+            
+            // Actualizar estado
+            updateImageStatus();
+            
+            // Si cambia de modo, limpiar la imagen actual
+            if (mode !== 'url' && mode !== 'upload' && mode !== 'existing') {
+                clearImageSelection();
+            }
+        }
+        
+        function updateImageStatus() {
+            const status = document.getElementById('image-status');
+            const messages = {
+                'none': '<i class="fas fa-image text-gray-400"></i> <span>Sin imagen (se usará placeholder)</span>',
+                'url': '<i class="fas fa-link text-blue-500"></i> <span>Modo URL: pega el link de una imagen</span>',
+                'upload': '<i class="fas fa-upload text-green-500"></i> <span>Modo Subir: selecciona una imagen desde tu dispositivo</span>',
+                'existing': '<i class="fas fa-folder-open text-purple-500"></i> <span>Modo Existente: elige una imagen ya subida</span>'
+            };
+            status.innerHTML = messages[currentImageMode] || messages['none'];
+        }
+        
+        function previewUrlImage() {
+            const url = document.getElementById('prod-image-url').value.trim();
+            const preview = document.getElementById('image-preview');
+            const wrapper = document.getElementById('image-preview-wrapper');
+            
+            if (url) {
+                // Validar que sea una URL de imagen
+                preview.src = url;
+                preview.onload = function() {
+                    wrapper.classList.remove('hidden');
+                    currentImageUrl = url;
+                    updateImageStatus();
+                    const status = document.getElementById('image-status');
+                    status.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> <span class="text-green-600 font-medium">Imagen cargada correctamente</span>';
+                };
+                preview.onerror = function() {
+                    wrapper.classList.add('hidden');
+                    currentImageUrl = '';
+                    const status = document.getElementById('image-status');
+                    status.innerHTML = '<i class="fas fa-exclamation-triangle text-red-500"></i> <span class="text-red-600">URL inválida o imagen no accesible</span>';
+                };
+            } else {
+                wrapper.classList.add('hidden');
+                currentImageUrl = '';
+            }
+        }
+        
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('image-preview');
+                const wrapper = document.getElementById('image-preview-wrapper');
+                preview.src = e.target.result;
+                wrapper.classList.remove('hidden');
+                currentImageUrl = e.target.result; // Base64
+                document.getElementById('upload-placeholder').classList.add('hidden');
+                
+                const status = document.getElementById('image-status');
+                status.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> <span class="text-green-600 font-medium">Imagen lista para subir a GitHub</span>';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function onSelectExistingImage() {
+            const val = document.getElementById('image-selector').value;
+            const preview = document.getElementById('image-preview');
+            const wrapper = document.getElementById('image-preview-wrapper');
+            
+            if (val) {
+                preview.src = val;
+                wrapper.classList.remove('hidden');
+                currentImageUrl = val;
+                document.getElementById('prod-image').value = '';
+                
+                const status = document.getElementById('image-status');
+                status.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> <span class="text-green-600 font-medium">Imagen existente seleccionada</span>';
+            } else {
+                wrapper.classList.add('hidden');
+                currentImageUrl = '';
+            }
+        }
+        
+        function clearImageSelection() {
+            currentImageMode = 'none';
+            currentImageUrl = '';
+            
+            // Ocultar preview
+            document.getElementById('image-preview-wrapper').classList.add('hidden');
+            document.getElementById('image-preview').src = '';
+            
+            // Limpiar todos los inputs
+            document.getElementById('prod-image-url').value = '';
+            document.getElementById('prod-image').value = '';
+            document.getElementById('image-selector').value = '';
+            document.getElementById('upload-placeholder').classList.remove('hidden');
+            
+            // Quitar active de tabs
+            document.querySelectorAll('.image-option').forEach(t => t.classList.remove('active'));
+            
+            // Ocultar todas las opciones
+            document.getElementById('option-url').classList.add('hidden');
+            document.getElementById('option-upload').classList.add('hidden');
+            document.getElementById('option-existing').classList.add('hidden');
+            document.getElementById('option-none').classList.remove('hidden');
+            
+            updateImageStatus();
+        }
 
         // CARRUSEL
         let currentSlide = 0;
@@ -620,7 +866,7 @@
         async function cargarImagenesExistentes() {
             const files = await fetchGitHub('imagenes');
             const sel = document.getElementById('image-selector');
-            sel.innerHTML = '<option value="">-- Ninguna --</option>';
+            sel.innerHTML = '<option value="">-- Selecciona una imagen --</option>';
             if (files && Array.isArray(files)) {
                 files.filter(f => /\.(jpg|jpeg|png|webp|gif)$/i.test(f.name)).forEach(f => {
                     sel.innerHTML += `<option value="${f.download_url}">${f.name}</option>`;
@@ -628,16 +874,34 @@
             }
         }
 
+        // 🆕 FUNCIÓN MODIFICADA: Mostrar placeholder si no hay imagen
         function renderProducts() {
             const grid = document.getElementById('portada-productos');
             if (S.pr.length === 0) {
                 grid.innerHTML = `<p class="col-span-full text-center py-16 text-gray-400"><i class="fas fa-box-open text-5xl mb-4 block opacity-50"></i>Aún no hay productos.</p>`;
                 return;
             }
-            grid.innerHTML = S.pr.map(p => `
+            grid.innerHTML = S.pr.map(p => {
+                // Si no hay imagen, mostrar placeholder
+                const imageHtml = p.image 
+                    ? `<img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                       <div class="no-image-placeholder w-full h-full absolute inset-0" style="display:none;">
+                           <div class="text-center">
+                               <i class="fas fa-image text-4xl mb-2"></i>
+                               <p class="text-xs">Sin imagen</p>
+                           </div>
+                       </div>`
+                    : `<div class="no-image-placeholder w-full h-full">
+                           <div class="text-center">
+                               <i class="fas fa-image text-4xl mb-2"></i>
+                               <p class="text-xs">Sin imagen</p>
+                           </div>
+                       </div>`;
+                
+                return `
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover-lift fade-in group">
                     <div class="h-56 overflow-hidden bg-gray-100 relative">
-                        <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                        ${imageHtml}
                         ${p.feat ? '<span class="badge-new"><i class="fas fa-star mr-1"></i>Destacado</span>' : ''}
                         <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium">
                             ${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}
@@ -654,7 +918,7 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
             document.getElementById('product-total-label').textContent = `${S.pr.length} productos`;
         }
 
@@ -663,16 +927,21 @@
             document.getElementById('admin-count').textContent = S.pr.length;
             if (!list) return;
             if (S.pr.length === 0) { list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin productos</p>'; return; }
-            list.innerHTML = S.pr.map(p => `
+            list.innerHTML = S.pr.map(p => {
+                const imgHtml = p.image 
+                    ? `<img src="${p.image}" class="w-16 h-16 object-cover rounded-lg bg-white shadow-sm" onerror="this.outerHTML='<div class=\\'w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400\\'><i class=\\'fas fa-image\\'></i></div>'">`
+                    : `<div class="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-image"></i></div>`;
+                
+                return `
                 <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200 hover:shadow-md transition">
-                    <img src="${p.image}" class="w-16 h-16 object-cover rounded-lg bg-white shadow-sm">
+                    ${imgHtml}
                     <div class="flex-1 min-w-0">
                         <p class="font-bold text-gray-900 truncate">${p.name}</p>
                         <p class="text-sm text-gray-500">$${p.price} | Stock: ${p.stock}</p>
                     </div>
                     <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:bg-red-50 p-3 rounded-lg transition"><i class="fas fa-trash text-lg"></i></button>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function updateUI() { document.getElementById('cart-count').textContent = S.cart; }
@@ -681,37 +950,19 @@
             if (!S.currentUser || S.currentUser.role !== 'admin') { showNotif('❌ Solo admin puede acceder', 'error'); return; }
             const p = document.getElementById('admin-panel');
             p.classList.toggle('hidden');
-            if (!p.classList.contains('hidden')) cargarImagenesExistentes();
+            if (!p.classList.contains('hidden')) {
+                cargarImagenesExistentes();
+                // Inicializar en modo "sin imagen"
+                selectImageOption('none');
+            }
             closeUserMenu();
         }
 
-        function previewImage(e) {
-            const f = e.target.files[0];
-            if (!f) return;
-            const r = new FileReader();
-            r.onload = ev => {
-                document.getElementById('image-preview').src = ev.target.result;
-                document.getElementById('image-preview').classList.remove('hidden');
-                document.getElementById('upload-placeholder').classList.add('hidden');
-                document.getElementById('image-selector').value = "";
-            };
-            r.readAsDataURL(f);
-        }
-
-        function onSelectExistingImage() {
-            const val = document.getElementById('image-selector').value;
-            const prev = document.getElementById('image-preview');
-            if (val) {
-                prev.src = val;
-                prev.classList.remove('hidden');
-                document.getElementById('upload-placeholder').classList.add('hidden');
-                document.getElementById('prod-image').value = "";
-            }
-        }
-
+        // 🆕 FUNCIÓN MODIFICADA: Guardar producto con imagen opcional
         async function saveProduct(e) {
             e.preventDefault();
             if (!S.currentUser || S.currentUser.role !== 'admin') { showNotif('❌ Solo admin', 'error'); return; }
+            
             const name = document.getElementById('prod-name').value;
             const cat = document.getElementById('prod-category').value;
             const price = document.getElementById('prod-price').value;
@@ -720,17 +971,58 @@
             const feat = document.getElementById('prod-feat').checked;
             const file = document.getElementById('prod-image').files[0];
             const sel = document.getElementById('image-selector').value;
+            const url = document.getElementById('prod-image-url').value.trim();
+            
             let img = "";
-            if (file) { showNotif("📤 Subiendo imagen...", "info"); img = await subirImagen(file); }
-            else if (sel) img = sel;
-            else { showNotif("⚠️ Selecciona una imagen", "warning"); return; }
-            S.pr.push({ id: 'p'+Date.now(), name, category: cat, price: parseFloat(price), desc, stock: parseInt(stock), image: img, feat });
+            
+            // Determinar la imagen según el modo seleccionado
+            if (currentImageMode === 'url' && url) {
+                // Usar URL directamente
+                img = url;
+                showNotif("🔗 Usando imagen desde URL", "info");
+            } 
+            else if (currentImageMode === 'upload' && file) {
+                // Subir archivo a GitHub
+                showNotif("📤 Subiendo imagen a GitHub...", "info");
+                try {
+                    img = await subirImagen(file);
+                } catch (err) {
+                    showNotif("❌ Error al subir imagen: " + err.message, "error");
+                    return;
+                }
+            } 
+            else if (currentImageMode === 'existing' && sel) {
+                // Usar imagen existente
+                img = sel;
+                showNotif("📁 Usando imagen existente", "info");
+            } 
+            else if (currentImageUrl) {
+                // Fallback: usar la URL actual si existe
+                img = currentImageUrl;
+            }
+            // Si no hay imagen, img queda vacío (producto sin imagen)
+            
+            // Crear el producto
+            S.pr.push({ 
+                id: 'p'+Date.now(), 
+                name, 
+                category: cat, 
+                price: parseFloat(price), 
+                desc, 
+                stock: parseInt(stock), 
+                image: img,  // Puede estar vacío
+                feat 
+            });
+            
             renderProducts();
             renderAdminList();
             await guardarProductos();
+            
+            // Resetear formulario
             e.target.reset();
-            document.getElementById('image-preview').classList.add('hidden');
-            document.getElementById('upload-placeholder').classList.remove('hidden');
+            clearImageSelection();
+            
+            showNotif("✅ Producto guardado correctamente", "success");
         }
 
         function deleteProduct(id) {
@@ -795,121 +1087,5 @@
             });
         });
     </script>
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-// ============================================
-// 🔍 DIAGNÓSTICO DETALLADO DE GITHUB
-// ============================================
-async function diagnosticarGitHubDetallado() {
-    console.log('%c🔍 === DIAGNÓSTICO DETALLADO ===', 'background: #0d9488; color: white; padding: 10px; font-size: 16px;');
-    
-    // 1. Verificar token
-    console.log('📋 Token completo:', GITHUB_TOKEN);
-    console.log('📋 Tipo de token:', GITHUB_TOKEN.startsWith('ghp_') ? 'CLASSIC' : GITHUB_TOKEN.startsWith('github_pat_') ? 'FINE-GRAINED' : 'DESCONOCIDO');
-    console.log('📋 Longitud:', GITHUB_TOKEN.length, 'caracteres');
-    
-    if (!GITHUB_TOKEN || GITHUB_TOKEN.includes('PEGA_AQUI')) {
-        console.error('❌ TOKEN NO CONFIGURADO');
-        alert('❌ El token no está configurado');
-        return;
-    }
-    
-    // 2. Probar conexión básica al repo
-    console.log('\n📡 Probando conexión al repo...');
-    try {
-        const res = await fetch(API, { 
-            headers: HEADERS,
-            method: 'GET'
-        });
-        
-        console.log('📊 Status:', res.status);
-        console.log('📊 Status Text:', res.statusText);
-        
-        if (res.status === 401) {
-            console.error('%c❌ ERROR 401: Token inválido o sin permisos', 'color: red; font-weight: bold; font-size: 14px;');
-            console.error('\n📌 POSIBLES CAUSAS:');
-            console.error('1. El token NO tiene el scope "repo" completo');
-            console.error('2. El token expiró');
-            console.error('3. El token fue revocado');
-            console.error('4. El token pertenece a otra cuenta');
-            console.error('\n🔧 SOLUCIÓN:');
-            console.error('Ve a: https://github.com/settings/tokens');
-            console.error('Crea un token NUEVO con scope "repo" COMPLETO');
-            
-            alert('❌ ERROR 401\n\nTu token es rechazado por GitHub.\n\nVe a GitHub → Settings → Developer Settings → Personal Access Tokens\n\nCrea un token NUEVO con:\n- Scope: ✅ repo (COMPLETO, no solo sub-items)\n- Expiration: No expiration (o 90 días)\n\nLuego reemplázalo en el código.');
-            return;
-        }
-        
-        if (res.status === 403) {
-            console.error('❌ ERROR 403: Acceso prohibido (rate limit o permisos)');
-            const data = await res.json();
-            console.error('Detalles:', data);
-            return;
-        }
-        
-        if (res.status === 404) {
-            console.error('❌ ERROR 404: Repo no existe o sin acceso');
-            console.error('Verifica que el usuario y repo sean correctos:');
-            console.error('Usuario:', GITHUB_USER);
-            console.error('Repo:', GITHUB_REPO);
-            return;
-        }
-        
-        if (!res.ok) {
-            console.error('❌ ERROR:', res.status, res.statusText);
-            return;
-        }
-        
-        const data = await res.json();
-        console.log('%c✅ CONEXIÓN EXITOSA', 'color: green; font-weight: bold; font-size: 14px;');
-        console.log('📦 Repo:', data.full_name);
-        console.log('🔒 Privado:', data.private);
-        console.log('👤 Propietario:', data.owner.login);
-        
-    } catch (e) {
-        console.error('❌ ERROR DE RED:', e);
-        return;
-    }
-    
-    // 3. Probar acceso a productos.json
-    console.log('\n📄 Probando acceso a productos.json...');
-    const productos = await fetchGitHub('productos.json');
-    if (!productos) {
-        console.error('❌ productos.json no existe o no accesible');
-    } else {
-        console.log('✅ productos.json accesible');
-    }
-    
-    // 4. Probar acceso a carpeta imagenes/
-    console.log('\n📁 Probando acceso a carpeta imagenes/...');
-    const imagenes = await fetchGitHub('imagenes');
-    if (!imagenes) {
-        console.error('❌ Carpeta imagenes/ no existe o no accesible');
-    } else {
-        console.log('✅ Carpeta imagenes/ accesible');
-    }
-    
-    console.log('%c🎉 === DIAGNÓSTICO COMPLETADO ===', 'background: #10b981; color: white; padding: 10px; font-size: 16px;');
-}
-
-// Ejecutar al cargar
-setTimeout(diagnosticarGitHubDetallado, 1500);
-</script>
-
-
-
-
-
 </body>
 </html>
