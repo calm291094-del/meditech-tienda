@@ -21,6 +21,17 @@
       "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5Wh7UKpaaDLngEKKXXU6PbLCL7V8NRcut5ybcKJ44Qh8YtBBmFy3W1CwZ&s=10",
       "feat": true,
       "available": true
+    },
+    {
+      "id": "p1783352625224",
+      "name": "Cable de corriente de PC",
+      "category": "medicamento",
+      "price": 1000,
+      "desc": "El cable de poder para PC es un componente esencial que permite conectar la computadora, el monitor y otros dispositivos electrónicos a la corriente eléctrica, proporcionándoles la energía necesaria para su funcionamiento. Es una parte fundamental del ensamblaje de una computadora y se utiliza en una amplia variedad de dispositivos electrónicos.",
+      "stock": 1,
+      "image": "https://cyberdigitaltecnologia.com/wp-content/uploads/2024/06/1711574493_PRO2020404.jpg",
+      "feat": true,
+      "available": true
     }
   ]
 }
