@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediTech | Medicamentos</title>
+    <title>MediTech | Medicamentos y Tecnología</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- EmailJS para enviar correos desde el frontend -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * { font-family: 'Poppins', sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -17,7 +19,10 @@
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .gradient-text { background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .pulse-dot { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
+        /* CARRUSEL */
         .carousel { position: relative; overflow: hidden; border-radius: 20px; }
         .carousel-inner { display: flex; transition: transform 0.5s ease-in-out; }
         .carousel-item { min-width: 100%; position: relative; }
@@ -32,70 +37,20 @@
         .carousel-dot.active { background: white; width: 30px; border-radius: 6px; }
         
         .badge-new { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
-        .category-card { transition: all 0.3s ease; cursor: default; }
+        .category-card { transition: all 0.3s ease; }
         .category-card:hover { transform: scale(1.05); }
         .modal-overlay { animation: fadeIn 0.3s ease; }
         .modal-content { animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         
-        .image-option {
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .image-option:hover {
-            background: #f0fdfa;
-            border-color: #0d9488;
-        }
-        .image-option.active {
-            background: #f0fdfa;
-            border-color: #0d9488;
-            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
-        }
-        .image-preview-container {
-            position: relative;
-            display: inline-block;
-        }
-        .image-preview-container .remove-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(239, 68, 68, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            transition: all 0.2s;
-        }
-        .image-preview-container .remove-btn:hover {
-            background: #dc2626;
-            transform: scale(1.1);
-        }
-        .no-image-placeholder {
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #9ca3af;
-        }
-        .stock-badge {
-            position: absolute;
-            bottom: 12px;
-            left: 12px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .stock-badge.available { background: rgba(34,197,94,0.9); color: white; }
-        .stock-badge.agotado { background: rgba(239,68,68,0.9); color: white; }
+        /* PANEL ADMIN MEJORADO */
+        .admin-tab { transition: all 0.2s; cursor: pointer; }
+        .admin-tab.active { background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); color: white; }
+        .admin-tab:not(.active):hover { background: #f0fdfa; }
+        
+        /* CARRITO */
+        .cart-item { transition: all 0.2s; }
+        .cart-item:hover { background: #f9fafb; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -120,10 +75,13 @@
                     <a href="#ofertas" class="hover:text-teal-600 transition">Ofertas</a>
                 </nav>
                 <div class="flex items-center gap-4">
-                    <button class="relative p-2 text-gray-600 hover:text-teal-600 transition">
+                    <!-- CARRITO (Solo visible si está logueado) -->
+                    <button id="cart-btn" onclick="openCart()" class="relative p-2 text-gray-600 hover:text-teal-600 transition hidden">
                         <i class="fas fa-shopping-cart text-xl"></i>
                         <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
                     </button>
+                    
+                    <!-- BOTÓN USUARIO -->
                     <div id="user-section" class="relative">
                         <button id="user-btn" onclick="toggleUserMenu()" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full transition">
                             <i class="fas fa-user-circle text-xl text-gray-600"></i>
@@ -147,7 +105,7 @@
                                     <p id="user-menu-name" class="font-bold text-gray-900"></p>
                                     <span id="user-role-badge" class="inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full"></span>
                                 </div>
-                                <button id="admin-menu-btn" onclick="toggleAdminPanel()" class="hidden w-full text-left px-4 py-3 hover:bg-gray-50 transition flex items-center gap-3">
+                                <button id="admin-menu-btn" onclick="openAdminPanel()" class="hidden w-full text-left px-4 py-3 hover:bg-gray-50 transition flex items-center gap-3">
                                     <i class="fas fa-cog text-orange-600"></i>
                                     <span>Panel Admin</span>
                                 </button>
@@ -166,7 +124,29 @@
     <!-- CARRUSEL HERO -->
     <section id="inicio" class="max-w-7xl mx-auto px-4 py-8">
         <div class="carousel">
-            <div class="carousel-inner" id="carousel-inner"></div>
+            <div class="carousel-inner" id="carousel-inner">
+                <div class="carousel-item">
+                    <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop" alt="Medicamentos">
+                    <div class="carousel-caption">
+                        <h3 class="text-2xl font-bold mb-2">Medicamentos de Calidad</h3>
+                        <p class="text-sm opacity-90">Los mejores precios en productos farmacéuticos certificados</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1200&h=400&fit=crop" alt="Tecnología">
+                    <div class="carousel-caption">
+                        <h3 class="text-2xl font-bold mb-2">Tecnología de Última Generación</h3>
+                        <p class="text-sm opacity-90">Componentes de PC y hardware gaming al mejor precio</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=400&fit=crop" alt="Ofertas">
+                    <div class="carousel-caption">
+                        <h3 class="text-2xl font-bold mb-2">Ofertas Especiales</h3>
+                        <p class="text-sm opacity-90">Descuentos exclusivos por tiempo limitado</p>
+                    </div>
+                </div>
+            </div>
             <button class="carousel-btn prev" onclick="moveCarousel(-1)"><i class="fas fa-chevron-left"></i></button>
             <button class="carousel-btn next" onclick="moveCarousel(1)"><i class="fas fa-chevron-right"></i></button>
             <div class="carousel-dots" id="carousel-dots"></div>
@@ -177,10 +157,39 @@
     <section id="categorias" class="py-16 px-4 bg-white">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-12">
-                <h3 id="cat-title" class="text-4xl font-bold text-gray-900 mb-3">Explora por Categoría</h3>
-                <p id="cat-sub" class="text-gray-600">Encuentra exactamente lo que necesitas</p>
+                <h3 class="text-4xl font-bold text-gray-900 mb-3">Explora por Categoría</h3>
+                <p class="text-gray-600">Encuentra exactamente lo que necesitas</p>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6" id="category-grid"></div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="category-card bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
+                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-pills text-4xl"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Medicamentos</h4>
+                    <p class="text-sm opacity-90">+200 productos</p>
+                </div>
+                <div class="category-card bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
+                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-laptop text-4xl"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Tecnología</h4>
+                    <p class="text-sm opacity-90">+150 productos</p>
+                </div>
+                <div class="category-card bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
+                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-heart-pulse text-4xl"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Salud</h4>
+                    <p class="text-sm opacity-90">+100 productos</p>
+                </div>
+                <div class="category-card bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
+                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-gamepad text-4xl"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">Gaming</h4>
+                    <p class="text-sm opacity-90">+80 productos</p>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -189,12 +198,17 @@
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-end mb-10">
                 <div>
-                    <h3 class="text-4xl font-bold text-gray-900 mb-2">🌟 Productos</h3>
-                    <p class="text-gray-600">Nuestro catálogo de medicamentos</p>
+                    <h3 class="text-4xl font-bold text-gray-900 mb-2">🌟 Productos Destacados</h3>
+                    <p class="text-gray-600">Los más populares entre nuestros clientes</p>
                 </div>
                 <span class="text-sm text-gray-500 font-medium bg-white px-4 py-2 rounded-full shadow-sm" id="product-total-label">Cargando...</span>
             </div>
-            <div id="portada-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+            <div id="portada-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <p class="col-span-full text-center py-16 text-gray-400">
+                    <i class="fas fa-spinner fa-spin text-3xl mb-4 block"></i>
+                    Sincronizando catálogo...
+                </p>
+            </div>
         </div>
     </section>
 
@@ -202,10 +216,29 @@
     <section id="ofertas" class="py-16 px-4 bg-gradient-to-br from-orange-500 to-red-600 text-white">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-12">
-                <h3 id="offer-title" class="text-4xl font-bold mb-3">🔥 Ofertas Especiales</h3>
-                <p id="offer-sub" class="opacity-90">Aprovecha estos descuentos exclusivos</p>
+                <h3 class="text-4xl font-bold mb-3">🔥 Ofertas Especiales</h3>
+                <p class="opacity-90">Aprovecha estos descuentos exclusivos</p>
             </div>
-            <div class="grid md:grid-cols-3 gap-6" id="offers-grid"></div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
+                    <div class="text-5xl font-bold mb-2">20%</div>
+                    <p class="text-lg font-semibold mb-2">Medicamentos</p>
+                    <p class="text-sm opacity-80 mb-4">En toda la línea de analgésicos</p>
+                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Ver productos</button>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
+                    <div class="text-5xl font-bold mb-2">15%</div>
+                    <p class="text-lg font-semibold mb-2">Hardware PC</p>
+                    <p class="text-sm opacity-80 mb-4">Componentes seleccionados</p>
+                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Ver productos</button>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
+                    <div class="text-5xl font-bold mb-2">ENVÍO</div>
+                    <p class="text-lg font-semibold mb-2">Gratis</p>
+                    <p class="text-sm opacity-80 mb-4">En compras mayores a $50</p>
+                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Comprar ahora</button>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -220,7 +253,7 @@
                         </div>
                         <h4 class="text-xl font-bold text-white">MediTech</h4>
                     </div>
-                    <p class="text-sm opacity-70 leading-relaxed">Tu farmacia de confianza.</p>
+                    <p class="text-sm opacity-70 leading-relaxed">Tu tienda confiable para medicamentos y hardware de última generación.</p>
                 </div>
                 <div>
                     <h5 class="font-semibold text-white mb-4">Enlaces</h5>
@@ -244,9 +277,6 @@
                         <a href="#" class="hover:text-teal-400 transition"><i class="fab fa-instagram"></i></a>
                         <a href="#" class="hover:text-teal-400 transition"><i class="fab fa-twitter"></i></a>
                     </div>
-                    <button onclick="exportData()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs py-1 px-3 rounded-full">Exportar datos</button>
-                    <button onclick="importData()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs py-1 px-3 rounded-full ml-2">Importar datos</button>
-                    <input type="file" id="fileInput" accept=".json" class="hidden" onchange="importDataFile(event)">
                 </div>
             </div>
             <div class="text-center text-sm opacity-50 pt-8 border-t border-gray-800">
@@ -275,6 +305,11 @@
                 </div>
                 <button type="submit" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-3 rounded-xl transition shadow-lg">Iniciar Sesión</button>
                 <p class="text-center text-sm text-gray-600">¿No tienes cuenta? <button type="button" onclick="closeLoginModal(); openRegisterModal();" class="text-teal-600 font-semibold hover:underline">Regístrate aquí</button></p>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
+                    <p class="font-semibold text-blue-900 mb-1">💡 Usuario Root:</p>
+                    <p class="text-blue-700">Usuario: <code class="bg-blue-100 px-2 py-1 rounded">root</code></p>
+                    <p class="text-blue-700">Contraseña: <code class="bg-blue-100 px-2 py-1 rounded">Root*4815162342+-</code></p>
+                </div>
             </form>
         </div>
     </div>
@@ -311,135 +346,168 @@
         </div>
     </div>
 
-    <!-- PANEL ADMIN -->
-    <div id="admin-panel" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-y-auto p-4">
-        <div class="bg-white rounded-3xl max-w-5xl w-full mx-auto mt-10 shadow-2xl overflow-hidden fade-in">
-            <div class="bg-gradient-to-r from-orange-500 to-red-600 p-6 flex justify-between items-center text-white">
-                <h2 class="text-2xl font-bold"><i class="fas fa-cog mr-2"></i>Panel Admin</h2>
-                <button onclick="toggleAdminPanel()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center"><i class="fas fa-times text-xl"></i></button>
+    <!-- MODAL CARRITO -->
+    <div id="cart-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl modal-content overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-6 text-white flex justify-between items-center">
+                <h2 class="text-2xl font-bold"><i class="fas fa-shopping-cart mr-2"></i>Tu Carrito</h2>
+                <button onclick="closeCart()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
+            <div class="flex-1 overflow-y-auto p-6">
+                <div id="cart-items"></div>
+            </div>
+            <div class="border-t border-gray-200 p-6 bg-gray-50">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xl font-semibold">Total:</span>
+                    <span id="cart-total" class="text-3xl font-bold gradient-text">$0.00</span>
+                </div>
+                <button onclick="enviarPedidoPorCorreo()" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-3 shadow-lg">
+                    <i class="fas fa-envelope text-xl"></i>
+                    <span class="text-lg">Solicitar Pedido por Correo</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANEL ADMIN PROFESIONAL -->
+    <div id="admin-panel" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-y-auto p-4">
+        <div class="bg-white rounded-3xl max-w-6xl w-full mx-auto mt-10 shadow-2xl overflow-hidden fade-in">
+            <div class="bg-gradient-to-r from-orange-500 to-red-600 p-6 flex justify-between items-center text-white">
+                <h2 class="text-2xl font-bold"><i class="fas fa-cog mr-2"></i>Panel de Administración</h2>
+                <button onclick="closeAdminPanel()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            
+            <!-- TABS -->
+            <div class="border-b border-gray-200 px-6 pt-4 flex gap-2 overflow-x-auto">
+                <button onclick="showAdminTab('productos')" class="admin-tab active px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap" data-tab="productos">
+                    <i class="fas fa-box mr-2"></i>Productos
+                </button>
+                <button onclick="showAdminTab('usuarios')" class="admin-tab px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap" data-tab="usuarios">
+                    <i class="fas fa-users mr-2"></i>Usuarios
+                </button>
+                <button onclick="showAdminTab('historial')" class="admin-tab px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap" data-tab="historial">
+                    <i class="fas fa-history mr-2"></i>Historial
+                </button>
+                <button onclick="showAdminTab('pedidos')" class="admin-tab px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap" data-tab="pedidos">
+                    <i class="fas fa-receipt mr-2"></i>Pedidos
+                </button>
+                <button onclick="showAdminTab('estadisticas')" class="admin-tab px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap" data-tab="estadisticas">
+                    <i class="fas fa-chart-line mr-2"></i>Estadísticas
+                </button>
+            </div>
+            
             <div class="p-6">
-                <!-- Pestañas -->
-                <div class="flex flex-wrap gap-2 border-b border-gray-200 mb-6">
-                    <button onclick="switchTab('productos')" class="tab-btn px-4 py-2 font-semibold text-sm rounded-t-lg border-b-2 border-transparent hover:border-teal-500 text-gray-600" data-tab="productos">📦 Productos</button>
-                    <button onclick="switchTab('carrusel')" class="tab-btn px-4 py-2 font-semibold text-sm rounded-t-lg border-b-2 border-transparent hover:border-teal-500 text-gray-600" data-tab="carrusel">🖼️ Carrusel</button>
-                    <button onclick="switchTab('textos')" class="tab-btn px-4 py-2 font-semibold text-sm rounded-t-lg border-b-2 border-transparent hover:border-teal-500 text-gray-600" data-tab="textos">✏️ Textos</button>
-                    <button onclick="switchTab('config')" class="tab-btn px-4 py-2 font-semibold text-sm rounded-t-lg border-b-2 border-transparent hover:border-teal-500 text-gray-600" data-tab="config">⚙️ Configuración</button>
-                </div>
-
-                <!-- Contenido pestañas -->
-                <div id="tab-productos" class="tab-content">
-                    <form id="product-form" class="space-y-5" onsubmit="saveProduct(event)">
-                        <h3 class="font-bold text-xl text-gray-800 mb-4">Agregar / Editar Producto</h3>
-                        <input type="hidden" id="edit-product-id" value="">
-                        <div class="grid md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre</label>
-                                <input type="text" id="prod-name" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Nombre del producto">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Categoría</label>
-                                <select id="prod-category" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white">
-                                    <option value="medicamento">💊 Medicamento</option>
-                                    <option value="tecnologia">💻 Tecnología</option>
-                                    <option value="salud">🩺 Salud</option>
-                                    <option value="gaming">🎮 Gaming</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="grid md:grid-cols-3 gap-5">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Precio ($)</label>
-                                <input type="number" id="prod-price" required step="0.01" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="0.00">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Stock</label>
-                                <input type="number" id="prod-stock" required min="0" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="0">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
-                                <select id="prod-status" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white">
-                                    <option value="disponible">✅ Disponible</option>
-                                    <option value="agotado">❌ Agotado</option>
-                                </select>
-                            </div>
+                <!-- TAB PRODUCTOS -->
+                <div id="tab-productos" class="admin-tab-content">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">Agregar/Editar Producto</h3>
+                            <form id="product-form" class="space-y-4" onsubmit="saveProduct(event)">
+                                <input type="hidden" id="edit-product-id" value="">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre</label>
+                                    <input type="text" id="prod-name" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Categoría</label>
+                                        <select id="prod-category" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white">
+                                            <option value="medicamento">💊 Medicamento</option>
+                                            <option value="tecnologia">💻 Tecnología</option>
+                                            <option value="salud">🩺 Salud</option>
+                                            <option value="gaming">🎮 Gaming</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Precio</label>
+                                        <input type="number" id="prod-price" required step="0.01" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Stock</label>
+                                    <input type="number" id="prod-stock" required min="0" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
+                                    <textarea id="prod-desc" required rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none resize-none"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Imagen (URL o subir)</label>
+                                    <input type="url" id="prod-image-url" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none mb-2" placeholder="https://...">
+                                    <input type="file" id="prod-image-file" accept="image/*" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" id="prod-feat" class="w-5 h-5">
+                                    <label for="prod-feat" class="text-sm font-medium">Producto destacado</label>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="submit" class="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-3 rounded-xl transition">
+                                        <i class="fas fa-save mr-2"></i>Guardar
+                                    </button>
+                                    <button type="button" onclick="resetProductForm()" class="px-6 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
-                            <textarea id="prod-desc" required rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none resize-none" placeholder="Descripción del producto"></textarea>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Imagen URL (opcional)</label>
-                            <input type="url" id="prod-image" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="https://ejemplo.com/imagen.jpg">
-                            <div id="image-preview-wrapper" class="hidden mt-2">
-                                <img id="image-preview" class="max-h-32 rounded-lg shadow-md border-2 border-gray-200" alt="Preview">
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                            <input type="checkbox" id="prod-feat" class="w-5 h-5 text-teal-600 rounded cursor-pointer">
-                            <label for="prod-feat" class="text-sm font-medium text-gray-700 cursor-pointer">Marcar como destacado</label>
-                        </div>
-                        <div class="flex gap-3">
-                            <button type="submit" class="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-3 rounded-xl transition shadow-lg">
-                                <i class="fas fa-save mr-2"></i> Guardar Producto
-                            </button>
-                            <button type="button" onclick="cancelEdit()" class="bg-gray-300 text-gray-700 font-bold py-3 px-6 rounded-xl hover:bg-gray-400 transition">Cancelar</button>
-                        </div>
-                    </form>
-                    <hr class="my-6 border-gray-200">
-                    <div>
-                        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 text-lg">
-                            <i class="fas fa-box text-teal-600"></i>
-                            Inventario (<span id="admin-count" class="text-teal-600">0</span>)
-                        </h3>
-                        <div id="admin-list" class="space-y-3 max-h-96 overflow-y-auto pr-2 scrollbar-hide"></div>
-                    </div>
-                </div>
-
-                <div id="tab-carrusel" class="tab-content hidden">
-                    <h3 class="font-bold text-xl text-gray-800 mb-4">Editar Carrusel</h3>
-                    <div id="carousel-editor" class="space-y-4"></div>
-                    <button onclick="saveCarouselData()" class="mt-4 bg-teal-600 text-white font-bold py-2 px-6 rounded-xl hover:bg-teal-700 transition">Guardar Carrusel</button>
-                </div>
-
-                <div id="tab-textos" class="tab-content hidden">
-                    <h3 class="font-bold text-xl text-gray-800 mb-4">Editar Textos</h3>
-                    <div class="space-y-4">
-                        <div><label class="block font-semibold">Título Categorías</label><input type="text" id="edit-cat-title" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none"></div>
-                        <div><label class="block font-semibold">Subtítulo Categorías</label><input type="text" id="edit-cat-sub" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none"></div>
-                        <div><label class="block font-semibold">Título Ofertas</label><input type="text" id="edit-offer-title" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none"></div>
-                        <div><label class="block font-semibold">Subtítulo Ofertas</label><input type="text" id="edit-offer-sub" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none"></div>
-                        <div class="grid md:grid-cols-3 gap-4">
-                            <div><label class="block font-semibold">Oferta 1</label><input type="text" id="offer1-title" placeholder="Título" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none"><input type="text" id="offer1-desc" placeholder="Descripción" class="w-full mt-1 px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none"></div>
-                            <div><label class="block font-semibold">Oferta 2</label><input type="text" id="offer2-title" placeholder="Título" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none"><input type="text" id="offer2-desc" placeholder="Descripción" class="w-full mt-1 px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none"></div>
-                            <div><label class="block font-semibold">Oferta 3</label><input type="text" id="offer3-title" placeholder="Título" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none"><input type="text" id="offer3-desc" placeholder="Descripción" class="w-full mt-1 px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none"></div>
+                            <h3 class="text-xl font-bold mb-4">Inventario (<span id="admin-count">0</span>)</h3>
+                            <div id="admin-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></div>
                         </div>
                     </div>
-                    <button onclick="saveTextsData()" class="mt-4 bg-teal-600 text-white font-bold py-2 px-6 rounded-xl hover:bg-teal-700 transition">Guardar Textos</button>
                 </div>
-
-                <div id="tab-config" class="tab-content hidden">
-                    <h3 class="font-bold text-xl text-gray-800 mb-4">Configuración</h3>
-                    <div class="space-y-6">
-                        <div class="bg-gray-50 p-4 rounded-xl">
-                            <h4 class="font-bold text-gray-700">🔑 Token de GitHub</h4>
-                            <div class="flex gap-2 mt-2">
-                                <input type="text" id="github-token-input" class="flex-1 px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="ghp_...">
-                                <button onclick="updateGitHubToken()" class="bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition">Actualizar</button>
-                            </div>
-                            <div class="mt-2 text-sm">Estado: <span id="github-status" class="font-semibold">Verificando...</span></div>
+                
+                <!-- TAB USUARIOS -->
+                <div id="tab-usuarios" class="admin-tab-content hidden">
+                    <h3 class="text-xl font-bold mb-4">Usuarios Registrados</h3>
+                    <div id="users-list" class="space-y-3"></div>
+                </div>
+                
+                <!-- TAB HISTORIAL -->
+                <div id="tab-historial" class="admin-tab-content hidden">
+                    <h3 class="text-xl font-bold mb-4">Historial de Vistas</h3>
+                    <div id="history-list" class="space-y-3 max-h-[600px] overflow-y-auto"></div>
+                </div>
+                
+                <!-- TAB PEDIDOS -->
+                <div id="tab-pedidos" class="admin-tab-content hidden">
+                    <h3 class="text-xl font-bold mb-4">Pedidos Recibidos</h3>
+                    <div id="orders-list" class="space-y-3"></div>
+                </div>
+                
+                <!-- TAB ESTADÍSTICAS -->
+                <div id="tab-estadisticas" class="admin-tab-content hidden">
+                    <h3 class="text-xl font-bold mb-4">Estadísticas del Sistema</h3>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="bg-gradient-to-br from-teal-500 to-cyan-600 text-white p-6 rounded-2xl">
+                            <i class="fas fa-box text-4xl mb-2 opacity-80"></i>
+                            <p class="text-3xl font-bold" id="stat-products">0</p>
+                            <p class="text-sm opacity-90">Productos</p>
                         </div>
-                        <div class="bg-gray-50 p-4 rounded-xl">
-                            <h4 class="font-bold text-gray-700">🔒 Cambiar contraseña de root</h4>
-                            <div class="flex gap-2 mt-2">
-                                <input type="password" id="new-root-password" class="flex-1 px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Nueva contraseña">
-                                <button onclick="updateRootPassword()" class="bg-orange-600 text-white px-4 py-2 rounded-xl hover:bg-orange-700 transition">Cambiar</button>
-                            </div>
+                        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-6 rounded-2xl">
+                            <i class="fas fa-users text-4xl mb-2 opacity-80"></i>
+                            <p class="text-3xl font-bold" id="stat-users">0</p>
+                            <p class="text-sm opacity-90">Usuarios</p>
                         </div>
-                        <div class="bg-gray-50 p-4 rounded-xl">
-                            <h4 class="font-bold text-gray-700">💾 Sincronización con GitHub</h4>
-                            <button onclick="syncAllToGitHub()" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">Sincronizar ahora</button>
-                            <span id="sync-status" class="ml-3 text-sm text-gray-500"></span>
+                        <div class="bg-gradient-to-br from-green-500 to-emerald-600 text-white p-6 rounded-2xl">
+                            <i class="fas fa-eye text-4xl mb-2 opacity-80"></i>
+                            <p class="text-3xl font-bold" id="stat-views">0</p>
+                            <p class="text-sm opacity-90">Vistas Totales</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-500 to-red-600 text-white p-6 rounded-2xl">
+                            <i class="fas fa-receipt text-4xl mb-2 opacity-80"></i>
+                            <p class="text-3xl font-bold" id="stat-orders">0</p>
+                            <p class="text-sm opacity-90">Pedidos</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white p-6 rounded-2xl">
+                            <i class="fas fa-dollar-sign text-4xl mb-2 opacity-80"></i>
+                            <p class="text-3xl font-bold" id="stat-revenue">$0</p>
+                            <p class="text-sm opacity-90">Ingresos Totales</p>
+                        </div>
+                        <div class="bg-gradient-to-br from-gray-700 to-gray-900 text-white p-6 rounded-2xl">
+                            <i class="fas fa-calendar text-4xl mb-2 opacity-80"></i>
+                            <p class="text-3xl font-bold" id="stat-today">0</p>
+                            <p class="text-sm opacity-90">Vistas Hoy</p>
                         </div>
                     </div>
                 </div>
@@ -449,15 +517,15 @@
 
     <!-- CHATBOT -->
     <div id="chatbot-container" class="fixed bottom-6 right-6 z-40">
-        <div id="chatbot-window" class="hidden w-80 sm:w-96 bg-white rounded-3xl shadow-2xl overflow-hidden mb-4 border border-gray-200">
+        <div id="chatbot-window" class="hidden w-80 sm:w-96 bg-white rounded-3xl shadow-2xl overflow-hidden mb-4 origin-bottom-right border border-gray-200">
             <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-4 text-white flex justify-between items-center">
-                <span class="font-bold flex items-center gap-2"><i class="fas fa-robot"></i>Asistente</span>
+                <span class="font-bold flex items-center gap-2 text-lg"><i class="fas fa-robot"></i>Asistente MediTech</span>
                 <button onclick="toggleChat()" class="hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             <div id="chat-messages" class="h-80 p-4 overflow-y-auto bg-gray-50 space-y-3 text-sm">
                 <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm max-w-[85%] border border-gray-100">
-                    <p class="font-semibold text-gray-800">¡Hola! 👋</p>
-                    <p class="text-gray-600">Pregunta por nuestros productos.</p>
+                    <p class="font-semibold text-gray-800 mb-1">¡Hola! 👋</p>
+                    <p class="text-gray-600">Pregúntame sobre <b>medicamentos</b> o <b>piezas de PC</b>.</p>
                 </div>
             </div>
             <div class="p-4 bg-white border-t border-gray-100 flex gap-2">
@@ -471,642 +539,110 @@
     </div>
 
     <script>
-        // ============================================================
-        // ESTADO GLOBAL
-        // ============================================================
-        let STATE = {
-            productos: [],
-            usuarios: [],
-            carrusel: [],
-            textos: {
-                catTitulo: 'Explora por Categoría',
-                catSubtitulo: 'Encuentra exactamente lo que necesitas',
-                offerTitulo: '🔥 Ofertas Especiales',
-                offerSubtitulo: 'Aprovecha estos descuentos exclusivos',
-                ofertas: [
-                    { titulo: '20%', desc: 'En toda la línea de analgésicos' },
-                    { titulo: '15%', desc: 'Componentes seleccionados' },
-                    { titulo: 'ENVÍO', desc: 'Gratis en compras mayores a $50' }
-                ]
-            },
-            categorias: [
-                { icono: 'fa-pills', nombre: 'Medicamentos', bg: 'from-teal-500 to-cyan-600' },
-                { icono: 'fa-laptop', nombre: 'Tecnología', bg: 'from-blue-500 to-indigo-600' },
-                { icono: 'fa-heart-pulse', nombre: 'Salud', bg: 'from-green-500 to-emerald-600' },
-                { icono: 'fa-gamepad', nombre: 'Gaming', bg: 'from-purple-500 to-pink-600' }
-            ]
-        };
-
-        let currentUser = null;
-        let cartCount = 0;
-        let currentSlide = 0;
-        let editingProductId = null;
-        let GITHUB_TOKEN = "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";
+        // ============================================
+        // CONFIGURACIÓN GITHUB
+        // ============================================
+        const GITHUB_TOKEN = "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";
         const GITHUB_USER = "calm291094-del";
         const GITHUB_REPO = "meditech-tienda";
-        const API_BASE = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
-        const HEADERS = () => ({
-            "Authorization": `token ${GITHUB_TOKEN}`,
-            "Accept": "application/vnd.github.v3+json"
-        });
+        const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
+        const HEADERS = { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" };
+        
+        // EmailJS (Configura esto en https://www.emailjs.com/)
+        const EMAILJS_PUBLIC_KEY = "Gmail";
+        const EMAILJS_SERVICE_ID = "service_v1tiylh";
+        const EMAILJS_TEMPLATE_ID = "template_edjk1yg";
+        
+        // Estado global
+        let S = { 
+            pr: [],           // Productos
+            cart: [],         // Carrito [{producto, cantidad}]
+            currentUser: null,
+            users: [],        // Usuarios
+            history: [],      // Historial de vistas
+            orders: []        // Pedidos
+        };
 
-        // ============================================================
-        // DATOS INICIALES
-        // ============================================================
-        function getInitialProducts() {
-            return [
-                { id: 'p1', name: 'Paracetamol con Diclofenaco 550 mg', category: 'medicamento', price: 260, desc: 'Analgésico y antiinflamatorio para dolores moderados.', stock: 50, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: true, status: 'disponible' },
-                { id: 'p2', name: 'Ibuprofeno 800 mg', category: 'medicamento', price: 300, desc: 'Antiinflamatorio potente para dolores intensos.', stock: 40, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: true, status: 'disponible' },
-                { id: 'p3', name: 'Nifedipino 20 mg', category: 'medicamento', price: 250, desc: 'Para la presión arterial alta.', stock: 30, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p4', name: 'Alodipino 10 mg', category: 'medicamento', price: 250, desc: 'Antihipertensivo, relaja los vasos sanguíneos.', stock: 25, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p5', name: 'Captopril 25 mg', category: 'medicamento', price: 250, desc: 'Inhibidor de la ECA para hipertensión.', stock: 20, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p6', name: 'Enalapril 10 mg (largo)', category: 'medicamento', price: 280, desc: 'Para el tratamiento de la presión arterial.', stock: 15, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p7', name: 'Sulfaprim 200/40 mg', category: 'medicamento', price: 280, desc: 'Antibiótico para infecciones bacterianas.', stock: 35, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p8', name: 'Metronidazol 250 mg', category: 'medicamento', price: 280, desc: 'Antibiótico para infecciones parasitarias y bacterianas.', stock: 40, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p9', name: 'Amoxicilina 500 mg', category: 'medicamento', price: 350, desc: 'Antibiótico de amplio espectro.', stock: 45, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p10', name: 'Omeprazol 20 mg', category: 'medicamento', price: 250, desc: 'Inhibidor de la bomba de protones para reflujo y úlceras.', stock: 60, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p11', name: 'Metoclopramida 10 mg', category: 'medicamento', price: 230, desc: 'Antiemético, estimula el vaciamiento gástrico.', stock: 30, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p12', name: 'Domozaol (Omeprazol + Domperidona)', category: 'medicamento', price: 300, desc: 'Para reflujo con náuseas y vómitos.', stock: 20, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p13', name: 'Furosemide 40 mg', category: 'medicamento', price: 230, desc: 'Diurético para edemas e hipertensión.', stock: 25, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p14', name: 'Hidroclorotiazida 50 mg', category: 'medicamento', price: 230, desc: 'Diurético para presión arterial alta.', stock: 30, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p15', name: 'Loratadina 10 mg', category: 'medicamento', price: 230, desc: 'Antihistamínico para alergias.', stock: 40, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p16', name: 'Benadrilina 25 mg', category: 'medicamento', price: 250, desc: 'Antihistamínico sedante, para reacciones alérgicas.', stock: 20, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' },
-                { id: 'p17', name: 'Alprazolam 1 mg', category: 'medicamento', price: 550, desc: 'Ansiolítico, control de ansiedad y pánico.', stock: 10, image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&h=300&fit=crop', feat: false, status: 'disponible' }
-            ];
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
+        async function init() {
+            await initAuth();
+            await cargarProductos();
+            await cargarHistorial();
+            await cargarPedidos();
+            initCarousel();
+            updateCartUI();
+            registrarVista();
         }
 
-        // ============================================================
-        // GUARDADO EN LOCALSTORAGE
-        // ============================================================
-        function saveProducts() { localStorage.setItem('productos', JSON.stringify(STATE.productos)); saveState(); }
-        function saveUsers() { localStorage.setItem('usuarios', JSON.stringify(STATE.usuarios)); saveState(); }
-        function saveState() { localStorage.setItem('meditech_state', JSON.stringify(STATE)); }
-        function saveCarousel() { saveState(); }
-        function saveTexts() { saveState(); }
+        // ============================================
+        // GITHUB API
+        // ============================================
+        async function fetchGitHub(path) {
+            const res = await fetch(`${API}/contents/${path}`, { headers: HEADERS });
+            return res.ok ? res.json() : null;
+        }
 
-        // ============================================================
-        // INICIALIZACIÓN
-        // ============================================================
-        function init() {
-            const saved = localStorage.getItem('meditech_state');
-            if (saved) { try { const parsed = JSON.parse(saved); STATE = parsed; } catch(e) {} }
-
-            const users = localStorage.getItem('usuarios');
-            if (users) { try { STATE.usuarios = JSON.parse(users); } catch(e) {} }
-
-            // 🔥 Asegurar que root existe
-            const rootExists = STATE.usuarios.find(u => u.username === 'root');
-            if (!rootExists) {
-                STATE.usuarios.push({
-                    username: 'root',
-                    password: 'root123',
-                    name: 'Administrador',
-                    email: 'admin@meditech.com',
-                    role: 'admin'
+        async function saveToGitHub(path, data, message) {
+            try {
+                const file = await fetchGitHub(path);
+                const sha = file ? file.sha : null;
+                await fetch(`${API}/contents/${path}`, {
+                    method: "PUT",
+                    headers: HEADERS,
+                    body: JSON.stringify({
+                        message: message,
+                        content: btoa(JSON.stringify(data, null, 2)),
+                        sha: sha
+                    })
                 });
-                saveUsers();
-                console.log('✅ Usuario root creado con contraseña: root123');
+                return true;
+            } catch (e) {
+                console.error("Error guardando en GitHub:", e);
+                return false;
+            }
+        }
+
+        // ============================================
+        // AUTENTICACIÓN
+        // ============================================
+        async function initAuth() {
+            const usersFile = await fetchGitHub('usuarios.json');
+            if (usersFile) {
+                const data = JSON.parse(atob(usersFile.content));
+                S.users = data.usuarios || [];
             } else {
-                const root = STATE.usuarios.find(u => u.username === 'root');
-                if (root.role !== 'admin') {
-                    root.role = 'admin';
-                    saveUsers();
-                }
+                S.users = [{ username: 'root', password: 'Root*4815162342+-', name: 'Administrador', email: 'admin@meditech.com', role: 'admin' }];
+                await saveToGitHub('usuarios.json', { usuarios: S.users }, 'Inicializar usuarios');
             }
-
-            if (!STATE.productos || STATE.productos.length === 0) {
-                STATE.productos = getInitialProducts();
-                saveProducts();
-            }
-
-            if (!STATE.carrusel || STATE.carrusel.length === 0) {
-                STATE.carrusel = [
-                    { img: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop', titulo: 'Medicamentos de Calidad', subtitulo: 'Los mejores precios en productos farmacéuticos certificados' },
-                    { img: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1200&h=400&fit=crop', titulo: 'Tecnología de Última Generación', subtitulo: 'Componentes de PC y hardware gaming al mejor precio' },
-                    { img: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=400&fit=crop', titulo: 'Ofertas Especiales', subtitulo: 'Descuentos exclusivos por tiempo limitado' }
-                ];
-                saveState();
-            }
-
+            
             const session = localStorage.getItem('session');
             if (session) {
-                try {
-                    const user = JSON.parse(session);
-                    const found = STATE.usuarios.find(u => u.username === user.username);
-                    if (found) { currentUser = found; updateUIForLoggedUser(); }
-                    else localStorage.removeItem('session');
-                } catch(e) { localStorage.removeItem('session'); }
-            }
-
-            renderAll();
-            initCarousel();
-            document.getElementById('year').textContent = new Date().getFullYear();
-
-            const savedToken = localStorage.getItem('github_token');
-            if (savedToken) GITHUB_TOKEN = savedToken;
-            document.getElementById('github-token-input').value = GITHUB_TOKEN;
-            checkGitHubStatus();
-
-            setTimeout(() => {
-                syncAllFromGitHub().then(() => {
-                    renderAll();
-                    // Verificar root después de sync
-                    const rootAfterSync = STATE.usuarios.find(u => u.username === 'root');
-                    if (!rootAfterSync) {
-                        STATE.usuarios.push({
-                            username: 'root',
-                            password: 'root123',
-                            name: 'Administrador',
-                            email: 'admin@meditech.com',
-                            role: 'admin'
-                        });
-                        saveUsers();
-                        console.log('✅ Usuario root recreado después de sync');
-                    }
-                });
-            }, 1000);
-
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('border-teal-500', 'text-teal-600'));
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.add('text-gray-600'));
-                    this.classList.add('border-teal-500', 'text-teal-600');
-                    this.classList.remove('text-gray-600');
-                });
-            });
-            document.querySelector('.tab-btn[data-tab="productos"]')?.click();
-
-            console.log('🔑 Usuario: root');
-            console.log('🔑 Contraseña: root123');
-        }
-
-        // ============================================================
-        // RENDERIZADO (resumido)
-        // ============================================================
-        function renderAll() {
-            renderProducts();
-            renderAdminList();
-            renderCarousel();
-            renderCategories();
-            renderOffers();
-            updateUI();
-            fillTextsEditor();
-            fillCarouselEditor();
-            document.getElementById('product-total-label').textContent = `${STATE.productos.length} productos`;
-            document.getElementById('admin-count').textContent = STATE.productos.length;
-        }
-
-        function renderProducts() {
-            const grid = document.getElementById('portada-productos');
-            if (STATE.productos.length === 0) {
-                grid.innerHTML = `<p class="col-span-full text-center py-16 text-gray-400"><i class="fas fa-box-open text-5xl mb-4 block opacity-50"></i>Aún no hay productos.</p>`;
-                return;
-            }
-            grid.innerHTML = STATE.productos.map(p => {
-                const statusClass = p.status === 'disponible' ? 'available' : 'agotado';
-                const statusText = p.status === 'disponible' ? '✅ Disponible' : '❌ Agotado';
-                const imageHtml = p.image 
-                    ? `<img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`
-                    : `<div class="no-image-placeholder w-full h-full"><div class="text-center"><i class="fas fa-image text-4xl mb-2"></i><p class="text-xs">Sin imagen</p></div></div>`;
-                return `
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover-lift fade-in group">
-                    <div class="h-56 overflow-hidden bg-gray-100 relative">
-                        ${imageHtml}
-                        ${p.feat ? '<span class="badge-new"><i class="fas fa-star mr-1"></i>Destacado</span>' : ''}
-                        <span class="stock-badge ${statusClass}">${statusText}</span>
-                        <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium">
-                            ${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}
-                        </div>
-                    </div>
-                    <div class="p-5">
-                        <h4 class="font-bold text-gray-900 text-lg mb-2 truncate">${p.name}</h4>
-                        <p class="text-sm text-gray-500 mb-4 line-clamp-2 h-10">${p.desc}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-2xl font-bold gradient-text">$${parseFloat(p.price).toFixed(2)}</span>
-                            <button onclick="addToCart('${p.id}')" class="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-teal-600 hover:to-cyan-600 text-white w-11 h-11 rounded-full flex items-center justify-center transition shadow-lg">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
-        }
-
-        function renderAdminList() {
-            const list = document.getElementById('admin-list');
-            if (!list) return;
-            if (STATE.productos.length === 0) { list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin productos</p>'; return; }
-            list.innerHTML = STATE.productos.map(p => {
-                const statusText = p.status === 'disponible' ? '✅ Disponible' : '❌ Agotado';
-                const imgHtml = p.image 
-                    ? `<img src="${p.image}" class="w-16 h-16 object-cover rounded-lg bg-white shadow-sm" onerror="this.outerHTML='<div class=\\'w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400\\'><i class=\\'fas fa-image\\'></i></div>'">`
-                    : `<div class="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-image"></i></div>`;
-                return `
-                <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200 hover:shadow-md transition">
-                    ${imgHtml}
-                    <div class="flex-1 min-w-0">
-                        <p class="font-bold text-gray-900 truncate">${p.name}</p>
-                        <p class="text-sm text-gray-500">$${p.price} | Stock: ${p.stock} | ${statusText}</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="editProduct('${p.id}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-            `}).join('');
-        }
-
-        function renderCarousel() {
-            const inner = document.getElementById('carousel-inner');
-            inner.innerHTML = STATE.carrusel.map((slide, idx) => `
-                <div class="carousel-item">
-                    <img src="${slide.img}" alt="${slide.titulo}" onerror="this.src='https://via.placeholder.com/1200x400?text=MediTech'">
-                    <div class="carousel-caption">
-                        <h3 class="text-2xl font-bold mb-2">${slide.titulo}</h3>
-                        <p class="text-sm opacity-90">${slide.subtitulo}</p>
-                    </div>
-                </div>
-            `).join('');
-            const dotsContainer = document.getElementById('carousel-dots');
-            dotsContainer.innerHTML = '';
-            STATE.carrusel.forEach((_, i) => {
-                const dot = document.createElement('div');
-                dot.className = 'carousel-dot' + (i === currentSlide ? ' active' : '');
-                dot.onclick = () => { currentSlide = i; updateCarousel(); };
-                dotsContainer.appendChild(dot);
-            });
-            updateCarousel();
-        }
-
-        function renderCategories() {
-            const grid = document.getElementById('category-grid');
-            grid.innerHTML = STATE.categorias.map(c => `
-                <div class="category-card bg-gradient-to-br ${c.bg} rounded-2xl p-8 text-white text-center shadow-lg">
-                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas ${c.icono} text-4xl"></i>
-                    </div>
-                    <h4 class="text-xl font-bold mb-2">${c.nombre}</h4>
-                    <p class="text-sm opacity-90">+${Math.floor(Math.random()*100)+50} productos</p>
-                </div>
-            `).join('');
-            document.getElementById('cat-title').textContent = STATE.textos.catTitulo;
-            document.getElementById('cat-sub').textContent = STATE.textos.catSubtitulo;
-        }
-
-        function renderOffers() {
-            const grid = document.getElementById('offers-grid');
-            grid.innerHTML = STATE.textos.ofertas.map(o => `
-                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
-                    <div class="text-5xl font-bold mb-2">${o.titulo}</div>
-                    <p class="text-lg font-semibold mb-2">${o.desc}</p>
-                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Ver productos</button>
-                </div>
-            `).join('');
-            document.getElementById('offer-title').textContent = STATE.textos.offerTitulo;
-            document.getElementById('offer-sub').textContent = STATE.textos.offerSubtitulo;
-        }
-
-        function updateUI() { document.getElementById('cart-count').textContent = cartCount; }
-
-        // ============================================================
-        // CARRUSEL
-        // ============================================================
-        function updateCarousel() {
-            const inner = document.getElementById('carousel-inner');
-            if (inner) inner.style.transform = `translateX(-${currentSlide * 100}%)`;
-            document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
-                dot.classList.toggle('active', i === currentSlide);
-            });
-        }
-
-        function moveCarousel(direction) {
-            const total = STATE.carrusel.length;
-            currentSlide = (currentSlide + direction + total) % total;
-            updateCarousel();
-        }
-
-        function initCarousel() {
-            if (STATE.carrusel.length > 0) {
-                renderCarousel();
-                setInterval(() => moveCarousel(1), 5000);
-            }
-        }
-
-        // ============================================================
-        // ADMIN: PRODUCTOS
-        // ============================================================
-        function editProduct(id) {
-            const p = STATE.productos.find(prod => prod.id === id);
-            if (!p) return;
-            editingProductId = id;
-            document.getElementById('edit-product-id').value = id;
-            document.getElementById('prod-name').value = p.name;
-            document.getElementById('prod-category').value = p.category;
-            document.getElementById('prod-price').value = p.price;
-            document.getElementById('prod-stock').value = p.stock;
-            document.getElementById('prod-status').value = p.status || 'disponible';
-            document.getElementById('prod-desc').value = p.desc;
-            document.getElementById('prod-image').value = p.image || '';
-            document.getElementById('prod-feat').checked = p.feat || false;
-            const preview = document.getElementById('image-preview');
-            const wrapper = document.getElementById('image-preview-wrapper');
-            if (p.image) { preview.src = p.image; wrapper.classList.remove('hidden'); }
-            else { wrapper.classList.add('hidden'); }
-            document.querySelector('#product-form button[type="submit"] span').textContent = 'Actualizar Producto';
-            document.getElementById('product-form').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function cancelEdit() {
-            editingProductId = null;
-            document.getElementById('edit-product-id').value = '';
-            document.getElementById('product-form').reset();
-            document.getElementById('image-preview-wrapper').classList.add('hidden');
-            document.querySelector('#product-form button[type="submit"] span').textContent = 'Guardar Producto';
-        }
-
-        function saveProduct(e) {
-            e.preventDefault();
-            if (!currentUser || currentUser.role !== 'admin') {
-                showNotif('❌ Solo administradores pueden guardar productos', 'error');
-                return;
-            }
-            const id = document.getElementById('edit-product-id').value;
-            const name = document.getElementById('prod-name').value;
-            const category = document.getElementById('prod-category').value;
-            const price = parseFloat(document.getElementById('prod-price').value);
-            const stock = parseInt(document.getElementById('prod-stock').value);
-            const status = document.getElementById('prod-status').value;
-            const desc = document.getElementById('prod-desc').value;
-            const image = document.getElementById('prod-image').value.trim();
-            const feat = document.getElementById('prod-feat').checked;
-
-            if (id) {
-                const idx = STATE.productos.findIndex(p => p.id === id);
-                if (idx !== -1) {
-                    STATE.productos[idx] = { ...STATE.productos[idx], name, category, price, stock, status, desc, image, feat };
-                }
-                showNotif('✅ Producto actualizado', 'success');
-            } else {
-                const newProduct = { id: 'p' + Date.now(), name, category, price, stock, status, desc, image, feat };
-                STATE.productos.push(newProduct);
-                showNotif('✅ Producto agregado', 'success');
-            }
-            saveProducts();
-            renderAll();
-            cancelEdit();
-            syncAllToGitHub();
-        }
-
-        function deleteProduct(id) {
-            if (!currentUser || currentUser.role !== 'admin') {
-                showNotif('❌ Solo administradores pueden eliminar', 'error');
-                return;
-            }
-            if (!confirm('¿Eliminar este producto?')) return;
-            STATE.productos = STATE.productos.filter(p => p.id !== id);
-            saveProducts();
-            renderAll();
-            syncAllToGitHub();
-            showNotif('🗑️ Producto eliminado', 'info');
-        }
-
-        // ============================================================
-        // ADMIN: CARRUSEL Y TEXTOS (resumido)
-        // ============================================================
-        function fillCarouselEditor() {
-            const container = document.getElementById('carousel-editor');
-            container.innerHTML = STATE.carrusel.map((slide, i) => `
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <h4 class="font-bold text-gray-700">Slide ${i+1}</h4>
-                    <div class="grid md:grid-cols-2 gap-3 mt-2">
-                        <div><label class="block text-sm font-medium">Imagen URL</label><input type="text" class="slide-img w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-teal-500 outline-none" value="${slide.img}" data-index="${i}"></div>
-                        <div><label class="block text-sm font-medium">Título</label><input type="text" class="slide-title w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-teal-500 outline-none" value="${slide.titulo}" data-index="${i}"></div>
-                        <div class="md:col-span-2"><label class="block text-sm font-medium">Subtítulo</label><input type="text" class="slide-sub w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-teal-500 outline-none" value="${slide.subtitulo}" data-index="${i}"></div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function saveCarouselData() {
-            const imgs = document.querySelectorAll('.slide-img');
-            const titles = document.querySelectorAll('.slide-title');
-            const subs = document.querySelectorAll('.slide-sub');
-            const newCarousel = [];
-            imgs.forEach((img, idx) => {
-                newCarousel.push({ img: img.value, titulo: titles[idx].value, subtitulo: subs[idx].value });
-            });
-            STATE.carrusel = newCarousel;
-            saveCarousel();
-            renderCarousel();
-            showNotif('✅ Carrusel actualizado', 'success');
-            syncAllToGitHub();
-        }
-
-        function fillTextsEditor() {
-            document.getElementById('edit-cat-title').value = STATE.textos.catTitulo;
-            document.getElementById('edit-cat-sub').value = STATE.textos.catSubtitulo;
-            document.getElementById('edit-offer-title').value = STATE.textos.offerTitulo;
-            document.getElementById('edit-offer-sub').value = STATE.textos.offerSubtitulo;
-            const ofertas = STATE.textos.ofertas;
-            document.getElementById('offer1-title').value = ofertas[0]?.titulo || '';
-            document.getElementById('offer1-desc').value = ofertas[0]?.desc || '';
-            document.getElementById('offer2-title').value = ofertas[1]?.titulo || '';
-            document.getElementById('offer2-desc').value = ofertas[1]?.desc || '';
-            document.getElementById('offer3-title').value = ofertas[2]?.titulo || '';
-            document.getElementById('offer3-desc').value = ofertas[2]?.desc || '';
-        }
-
-        function saveTextsData() {
-            STATE.textos.catTitulo = document.getElementById('edit-cat-title').value;
-            STATE.textos.catSubtitulo = document.getElementById('edit-cat-sub').value;
-            STATE.textos.offerTitulo = document.getElementById('edit-offer-title').value;
-            STATE.textos.offerSubtitulo = document.getElementById('edit-offer-sub').value;
-            STATE.textos.ofertas = [
-                { titulo: document.getElementById('offer1-title').value, desc: document.getElementById('offer1-desc').value },
-                { titulo: document.getElementById('offer2-title').value, desc: document.getElementById('offer2-desc').value },
-                { titulo: document.getElementById('offer3-title').value, desc: document.getElementById('offer3-desc').value }
-            ];
-            saveTexts();
-            renderAll();
-            showNotif('✅ Textos actualizados', 'success');
-            syncAllToGitHub();
-        }
-
-        // ============================================================
-        // ADMIN: CONFIGURACIÓN
-        // ============================================================
-        function updateGitHubToken() {
-            const newToken = document.getElementById('github-token-input').value.trim();
-            if (!newToken) { showNotif('❌ Ingresa un token válido', 'error'); return; }
-            GITHUB_TOKEN = newToken;
-            localStorage.setItem('github_token', newToken);
-            showNotif('✅ Token actualizado', 'success');
-            checkGitHubStatus();
-        }
-
-        async function checkGitHubStatus() {
-            const statusEl = document.getElementById('github-status');
-            statusEl.textContent = 'Verificando...';
-            try {
-                const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`, {
-                    headers: { "Authorization": `token ${GITHUB_TOKEN}` }
-                });
-                if (res.ok) {
-                    statusEl.textContent = '✅ Conectado';
-                    statusEl.className = 'text-green-600';
+                const savedUser = JSON.parse(session);
+                const userExists = S.users.find(u => u.username === savedUser.username);
+                if (userExists) {
+                    S.currentUser = userExists;
+                    updateUIForLoggedUser();
                 } else {
-                    statusEl.textContent = '❌ Error de conexión';
-                    statusEl.className = 'text-red-600';
+                    localStorage.removeItem('session');
                 }
-            } catch(e) {
-                statusEl.textContent = '⚠️ No se pudo verificar';
-                statusEl.className = 'text-yellow-600';
             }
         }
 
-        function updateRootPassword() {
-            const newPass = document.getElementById('new-root-password').value.trim();
-            if (!newPass) { showNotif('❌ Ingresa una nueva contraseña', 'error'); return; }
-            const rootUser = STATE.usuarios.find(u => u.username === 'root');
-            if (rootUser) {
-                rootUser.password = newPass;
-                saveUsers();
-                showNotif('✅ Contraseña de root actualizada', 'success');
-                document.getElementById('new-root-password').value = '';
-                if (currentUser && currentUser.username === 'root') {
-                    currentUser.password = newPass;
-                    localStorage.setItem('session', JSON.stringify(currentUser));
-                }
-                syncAllToGitHub();
-            } else {
-                showNotif('❌ Usuario root no encontrado', 'error');
-            }
-        }
-
-        // ============================================================
-        // GITHUB SYNC
-        // ============================================================
-        async function syncAllToGitHub() {
-            const statusEl = document.getElementById('sync-status');
-            statusEl.textContent = '⏳ Sincronizando...';
-            try {
-                await guardarArchivo('productos.json', { productos: STATE.productos }, 'Sync productos');
-                await guardarArchivo('usuarios.json', { usuarios: STATE.usuarios }, 'Sync usuarios');
-                await guardarArchivo('estado.json', STATE, 'Sync estado');
-                statusEl.textContent = '✅ Sincronizado correctamente';
-                showNotif('✅ Datos sincronizados con GitHub', 'success');
-            } catch(e) {
-                statusEl.textContent = '❌ Error al sincronizar: ' + e.message;
-                showNotif('❌ Error al sincronizar con GitHub', 'error');
-            }
-        }
-
-        async function guardarArchivo(path, contenido, mensaje) {
-            try {
-                let sha = null;
-                try {
-                    const res = await fetch(`${API_BASE}/contents/${path}`, { headers: HEADERS() });
-                    if (res.ok) { const data = await res.json(); sha = data.sha; }
-                } catch(e) {}
-                const body = {
-                    message: mensaje || `Actualización ${path}`,
-                    content: btoa(unescape(encodeURIComponent(JSON.stringify(contenido, null, 2)))),
-                    sha: sha || undefined
-                };
-                const res = await fetch(`${API_BASE}/contents/${path}`, {
-                    method: "PUT",
-                    headers: HEADERS(),
-                    body: JSON.stringify(body)
-                });
-                if (!res.ok) {
-                    const err = await res.json();
-                    throw new Error(err.message || 'Error al guardar');
-                }
-                return true;
-            } catch(e) {
-                console.error('Error guardando en GitHub:', e);
-                throw e;
-            }
-        }
-
-        async function syncAllFromGitHub() {
-            try {
-                const prod = await obtenerArchivo('productos.json');
-                if (prod && prod.productos) { STATE.productos = prod.productos; saveProducts(); }
-                const users = await obtenerArchivo('usuarios.json');
-                if (users && users.usuarios) { STATE.usuarios = users.usuarios; saveUsers(); }
-                const est = await obtenerArchivo('estado.json');
-                if (est && est.carrusel && est.textos) { STATE.carrusel = est.carrusel; STATE.textos = est.textos; saveState(); }
-                renderAll();
-            } catch(e) {
-                console.warn('No se pudo sincronizar desde GitHub, usando datos locales');
-            }
-        }
-
-        async function obtenerArchivo(path) {
-            try {
-                const res = await fetch(`${API_BASE}/contents/${path}`, { headers: HEADERS() });
-                if (!res.ok) return null;
-                const data = await res.json();
-                const content = atob(data.content);
-                return JSON.parse(content);
-            } catch(e) { return null; }
-        }
-
-        // ============================================================
-        // EXPORTAR / IMPORTAR
-        // ============================================================
-        function exportData() {
-            const data = { productos: STATE.productos, usuarios: STATE.usuarios, carrusel: STATE.carrusel, textos: STATE.textos, categorias: STATE.categorias };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'meditech_backup.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            showNotif('📦 Datos exportados', 'success');
-        }
-
-        function importData() { document.getElementById('fileInput').click(); }
-
-        function importDataFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data.productos) STATE.productos = data.productos;
-                    if (data.usuarios) STATE.usuarios = data.usuarios;
-                    if (data.carrusel) STATE.carrusel = data.carrusel;
-                    if (data.textos) STATE.textos = data.textos;
-                    if (data.categorias) STATE.categorias = data.categorias;
-                    saveProducts(); saveUsers(); saveState();
-                    renderAll();
-                    showNotif('✅ Datos importados correctamente', 'success');
-                    syncAllToGitHub();
-                } catch(err) { showNotif('❌ Error al leer el archivo', 'error'); }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        }
-
-        // ============================================================
-        // AUTH
-        // ============================================================
         function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); closeUserMenu(); }
         function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
         function openRegisterModal() { document.getElementById('register-modal').classList.remove('hidden'); closeUserMenu(); }
         function closeRegisterModal() { document.getElementById('register-modal').classList.add('hidden'); }
 
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             const username = document.getElementById('login-username').value;
             const password = document.getElementById('login-password').value;
-            const user = STATE.usuarios.find(u => u.username === username && u.password === password);
+            const user = S.users.find(u => u.username === username && u.password === password);
+            
             if (user) {
-                currentUser = user;
+                S.currentUser = user;
                 localStorage.setItem('session', JSON.stringify(user));
                 updateUIForLoggedUser();
                 closeLoginModal();
@@ -1117,41 +653,53 @@
             }
         }
 
-        function handleRegister(e) {
+        async function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('register-name').value;
             const username = document.getElementById('register-username').value;
             const email = document.getElementById('register-email').value;
             const password = document.getElementById('register-password').value;
-            if (STATE.usuarios.find(u => u.username === username)) {
+            
+            if (S.users.find(u => u.username === username)) {
                 showNotif('❌ El usuario ya existe', 'error');
                 return;
             }
-            const newUser = { username, password, name, email, role: 'user' };
-            STATE.usuarios.push(newUser);
-            saveUsers();
-            currentUser = newUser;
-            localStorage.setItem('session', JSON.stringify(newUser));
-            updateUIForLoggedUser();
-            closeRegisterModal();
-            showNotif(`✅ Cuenta creada. Bienvenido, ${name}`, 'success');
-            document.getElementById('register-form').reset();
-            syncAllToGitHub();
+            
+            const newUser = { username, password, name, email, role: 'user', fecha: new Date().toISOString() };
+            S.users.push(newUser);
+            
+            showNotif("📤 Creando cuenta...", "info");
+            const success = await saveToGitHub('usuarios.json', { usuarios: S.users }, `Nuevo usuario: ${username}`);
+            
+            if (success) {
+                S.currentUser = newUser;
+                localStorage.setItem('session', JSON.stringify(newUser));
+                updateUIForLoggedUser();
+                closeRegisterModal();
+                showNotif(`✅ Cuenta creada. Bienvenido, ${name}`, 'success');
+                document.getElementById('register-form').reset();
+            } else {
+                S.users.pop();
+                showNotif("❌ Error al crear cuenta", "error");
+            }
         }
 
         function logout() {
-            currentUser = null;
+            S.currentUser = null;
+            S.cart = [];
             localStorage.removeItem('session');
             updateUIForLoggedOut();
             closeUserMenu();
+            updateCartUI();
             showNotif('👋 Sesión cerrada', 'info');
         }
 
         function updateUIForLoggedUser() {
-            document.getElementById('user-name-display').textContent = currentUser.name;
-            document.getElementById('user-menu-name').textContent = currentUser.name;
+            document.getElementById('user-name-display').textContent = S.currentUser.name;
+            document.getElementById('user-menu-name').textContent = S.currentUser.name;
+            
             const badge = document.getElementById('user-role-badge');
-            if (currentUser.role === 'admin') {
+            if (S.currentUser.role === 'admin') {
                 badge.textContent = '🔒 Administrador';
                 badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800';
                 document.getElementById('admin-menu-btn').classList.remove('hidden');
@@ -1160,80 +708,552 @@
                 badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800';
                 document.getElementById('admin-menu-btn').classList.add('hidden');
             }
+            
             document.getElementById('menu-logged-out').classList.add('hidden');
             document.getElementById('menu-logged-in').classList.remove('hidden');
+            document.getElementById('cart-btn').classList.remove('hidden');
         }
 
         function updateUIForLoggedOut() {
             document.getElementById('user-name-display').textContent = 'Iniciar Sesión';
             document.getElementById('menu-logged-out').classList.remove('hidden');
             document.getElementById('menu-logged-in').classList.add('hidden');
+            document.getElementById('cart-btn').classList.add('hidden');
         }
 
         function toggleUserMenu() { document.getElementById('user-menu').classList.toggle('hidden'); }
         function closeUserMenu() { document.getElementById('user-menu').classList.add('hidden'); }
         document.addEventListener('click', (e) => { if (!e.target.closest('#user-section')) closeUserMenu(); });
 
-        // ============================================================
-        // ADMIN PANEL - PESTAÑAS
-        // ============================================================
-        function toggleAdminPanel() {
-            if (!currentUser || currentUser.role !== 'admin') {
-                showNotif('❌ Solo administradores pueden acceder', 'error');
-                return;
+        // ============================================
+        // PRODUCTOS
+        // ============================================
+        async function cargarProductos() {
+            const file = await fetchGitHub('productos.json');
+            if (file) {
+                const data = JSON.parse(atob(file.content));
+                S.pr = data.productos || [];
+            } else {
+                S.pr = [];
             }
-            const panel = document.getElementById('admin-panel');
-            panel.classList.toggle('hidden');
-            if (!panel.classList.contains('hidden')) {
-                fillTextsEditor();
-                fillCarouselEditor();
-                document.getElementById('github-token-input').value = GITHUB_TOKEN;
-                checkGitHubStatus();
-                switchTab('productos');
-            }
-            closeUserMenu();
+            renderProducts();
+            renderAdminList();
         }
 
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-teal-500', 'text-teal-600');
-                btn.classList.add('text-gray-600');
-                if (btn.dataset.tab === tabName) {
-                    btn.classList.add('border-teal-500', 'text-teal-600');
-                    btn.classList.remove('text-gray-600');
+        function renderProducts() {
+            const grid = document.getElementById('portada-productos');
+            if (S.pr.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-center py-16 text-gray-400"><i class="fas fa-box-open text-5xl mb-4 block opacity-50"></i>Aún no hay productos.</p>`;
+                return;
+            }
+            grid.innerHTML = S.pr.map(p => `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover-lift fade-in group">
+                    <div class="h-56 overflow-hidden bg-gray-100 relative">
+                        <img src="${p.image || 'https://via.placeholder.com/300x200?text=Sin+Imagen'}" alt="${p.name}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                        ${p.feat ? '<span class="badge-new"><i class="fas fa-star mr-1"></i>Destacado</span>' : ''}
+                        <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                            ${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <h4 class="font-bold text-gray-900 text-lg mb-2 truncate">${p.name}</h4>
+                        <p class="text-sm text-gray-500 mb-4 line-clamp-2 h-10">${p.desc}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-2xl font-bold gradient-text">$${parseFloat(p.price).toFixed(2)}</span>
+                            ${S.currentUser ? 
+                                `<button onclick="addToCart('${p.id}')" class="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-teal-600 hover:to-cyan-600 text-white w-11 h-11 rounded-full flex items-center justify-center transition shadow-lg">
+                                    <i class="fas fa-plus"></i>
+                                </button>` :
+                                `<a href="#" onclick="openLoginModal(); return false;" class="bg-gradient-to-r from-gray-900 to-gray-800 text-white w-11 h-11 rounded-full flex items-center justify-center transition shadow-lg" title="Inicia sesión">
+                                    <i class="fas fa-lock"></i>
+                                </a>`
+                            }
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('product-total-label').textContent = `${S.pr.length} productos`;
+        }
+
+        function renderAdminList() {
+            const list = document.getElementById('admin-list');
+            document.getElementById('admin-count').textContent = S.pr.length;
+            if (!list) return;
+            if (S.pr.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin productos</p>';
+                return;
+            }
+            list.innerHTML = S.pr.map(p => `
+                <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-200 hover:shadow-md transition">
+                    <img src="${p.image || 'https://via.placeholder.com/60'}" class="w-16 h-16 object-cover rounded-lg bg-white shadow-sm">
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-gray-900 truncate">${p.name}</p>
+                        <p class="text-sm text-gray-500">$${p.price} | Stock: ${p.stock}</p>
+                    </div>
+                    <button onclick="editProduct('${p.id}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition"><i class="fas fa-edit"></i></button>
+                    <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fas fa-trash"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function editProduct(id) {
+            const p = S.pr.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('edit-product-id').value = p.id;
+            document.getElementById('prod-name').value = p.name;
+            document.getElementById('prod-category').value = p.category;
+            document.getElementById('prod-price').value = p.price;
+            document.getElementById('prod-stock').value = p.stock;
+            document.getElementById('prod-desc').value = p.desc;
+            document.getElementById('prod-image-url').value = p.image || '';
+            document.getElementById('prod-feat').checked = p.feat || false;
+        }
+
+        function resetProductForm() {
+            document.getElementById('product-form').reset();
+            document.getElementById('edit-product-id').value = '';
+        }
+
+        async function saveProduct(e) {
+            e.preventDefault();
+            if (!S.currentUser || S.currentUser.role !== 'admin') {
+                showNotif('❌ Solo admin', 'error');
+                return;
+            }
+            
+            const editId = document.getElementById('edit-product-id').value;
+            const name = document.getElementById('prod-name').value;
+            const cat = document.getElementById('prod-category').value;
+            const price = document.getElementById('prod-price').value;
+            const desc = document.getElementById('prod-desc').value;
+            const stock = document.getElementById('prod-stock').value;
+            const feat = document.getElementById('prod-feat').checked;
+            const imageUrl = document.getElementById('prod-image-url').value;
+            const fileInput = document.getElementById('prod-image-file');
+            
+            let img = imageUrl;
+            
+            if (fileInput.files[0]) {
+                showNotif("📤 Subiendo imagen...", "info");
+                try {
+                    img = await subirImagen(fileInput.files[0]);
+                } catch (err) {
+                    showNotif("❌ Error al subir imagen", "error");
+                    return;
                 }
+            }
+            
+            const productData = {
+                id: editId || 'p' + Date.now(),
+                name,
+                category: cat,
+                price: parseFloat(price),
+                desc,
+                stock: parseInt(stock),
+                image: img,
+                feat
+            };
+            
+            if (editId) {
+                const index = S.pr.findIndex(p => p.id === editId);
+                if (index >= 0) S.pr[index] = productData;
+            } else {
+                S.pr.push(productData);
+            }
+            
+            showNotif("📤 Guardando...", "info");
+            const success = await saveToGitHub('productos.json', { productos: S.pr }, editId ? `Editar: ${name}` : `Nuevo: ${name}`);
+            
+            if (success) {
+                showNotif("✅ Producto guardado", "success");
+                resetProductForm();
+                renderProducts();
+                renderAdminList();
+            } else {
+                showNotif("❌ Error al guardar", "error");
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm("¿Eliminar?")) return;
+            S.pr = S.pr.filter(p => p.id !== id);
+            await saveToGitHub('productos.json', { productos: S.pr }, 'Eliminar producto');
+            renderProducts();
+            renderAdminList();
+            showNotif("✅ Eliminado", "success");
+        }
+
+        async function subirImagen(file) {
+            return new Promise((res, rej) => {
+                const r = new FileReader();
+                r.onload = async e => {
+                    const b64 = e.target.result.split(',')[1];
+                    const name = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                    const path = `imagenes/${Date.now()}_${name}`;
+                    try {
+                        const r2 = await fetch(`${API}/contents/${path}`, {
+                            method: "PUT", headers: HEADERS,
+                            body: JSON.stringify({ message: `Upload ${name}`, content: b64 })
+                        });
+                        const d = await r2.json();
+                        res(d.content.download_url);
+                    } catch(err) { rej(err); }
+                };
+                r.readAsDataURL(file);
             });
         }
 
-        // ============================================================
+        // ============================================
         // CARRITO
-        // ============================================================
-        function addToCart(id) { cartCount++; updateUI(); showNotif('✅ Agregado al carrito', 'success'); }
+        // ============================================
+        function addToCart(productId) {
+            if (!S.currentUser) {
+                showNotif('⚠️ Inicia sesión para comprar', 'warning');
+                openLoginModal();
+                return;
+            }
+            
+            const producto = S.pr.find(p => p.id === productId);
+            if (!producto) return;
+            
+            const item = S.cart.find(i => i.producto.id === productId);
+            if (item) {
+                item.cantidad++;
+            } else {
+                S.cart.push({ producto, cantidad: 1 });
+            }
+            
+            updateCartUI();
+            showNotif(`✅ ${producto.name} agregado`, 'success');
+        }
 
-        // ============================================================
+        function removeFromCart(productId) {
+            S.cart = S.cart.filter(i => i.producto.id !== productId);
+            updateCartUI();
+            renderCartItems();
+        }
+
+        function updateCartUI() {
+            const count = S.cart.reduce((sum, i) => sum + i.cantidad, 0);
+            document.getElementById('cart-count').textContent = count;
+        }
+
+        function openCart() {
+            if (!S.currentUser) {
+                showNotif('⚠️ Inicia sesión para ver tu carrito', 'warning');
+                openLoginModal();
+                return;
+            }
+            renderCartItems();
+            document.getElementById('cart-modal').classList.remove('hidden');
+        }
+
+        function closeCart() {
+            document.getElementById('cart-modal').classList.add('hidden');
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cart-items');
+            if (S.cart.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-400 py-8">Tu carrito está vacío</p>';
+                document.getElementById('cart-total').textContent = '$0.00';
+                return;
+            }
+            
+            let total = 0;
+            container.innerHTML = S.cart.map(item => {
+                const subtotal = item.producto.price * item.cantidad;
+                total += subtotal;
+                return `
+                    <div class="cart-item flex items-center gap-4 p-4 border-b border-gray-200">
+                        <img src="${item.producto.image || 'https://via.placeholder.com/80'}" class="w-20 h-20 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <h4 class="font-bold">${item.producto.name}</h4>
+                            <p class="text-sm text-gray-500">$${item.producto.price} x ${item.cantidad}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-lg">$${subtotal.toFixed(2)}</p>
+                            <button onclick="removeFromCart('${item.producto.id}')" class="text-red-500 text-sm mt-1">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('cart-total').textContent = `$${total.toFixed(2)}`;
+        }
+
+async function enviarPedidoPorCorreo() {
+    if (S.cart.length === 0) {
+        showNotif('⚠️ Tu carrito está vacío', 'warning');
+        return;
+    }
+    
+    // Calcular totales
+    const subtotal = S.cart.reduce((sum, i) => sum + (i.producto.price * i.cantidad), 0);
+    const shipping = subtotal >= 50 ? 0 : 5; // Envío gratis si es mayor a $50
+    const total = subtotal + shipping;
+    
+    // Generar ID de pedido
+    const orderId = 'MT-' + Date.now().toString().slice(-8);
+    const orderDate = new Date().toLocaleString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    // Preparar items para EmailJS
+    const items = S.cart.map(item => ({
+        name: item.producto.name,
+        category: item.producto.category === 'medicamento' ? '💊 Medicamento' : 
+                  item.producto.category === 'tecnologia' ? '💻 Tecnología' : 
+                  item.producto.category === 'salud' ? '🩺 Salud' : '🎮 Gaming',
+        quantity: item.cantidad,
+        price: item.producto.price.toFixed(2),
+        subtotal: (item.producto.price * item.cantidad).toFixed(2),
+        image: item.producto.image || ''
+    }));
+    
+    // Crear objeto de pedido
+    const pedido = {
+        id: orderId,
+        usuario: S.currentUser.username,
+        email: S.currentUser.email,
+        fecha: new Date().toISOString(),
+        items: items,
+        subtotal: subtotal,
+        shipping: shipping,
+        total: total,
+        notas: document.getElementById('order-notes')?.value || ''
+    };
+    
+    // Guardar pedido en GitHub
+    S.orders.push(pedido);
+    await saveToGitHub('pedidos.json', { pedidos: S.orders }, `Nuevo pedido: ${orderId}`);
+    
+    // Preparar parámetros para EmailJS
+    const templateParams = {
+        user_name: S.currentUser.name,
+        user_email: S.currentUser.email,
+        order_id: orderId,
+        order_date: orderDate,
+        items: items,
+        subtotal: subtotal.toFixed(2),
+        shipping: shipping.toFixed(2),
+        total: total.toFixed(2),
+        notes: pedido.notas || null
+    };
+    
+    // Enviar correo con EmailJS
+    try {
+        showNotif('📧 Enviando correo...', 'info');
+        
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+        
+        await emailjs.send(
+            EMAILJS_SERVICE_ID, 
+            EMAILJS_TEMPLATE_ID, 
+            templateParams
+        );
+        
+        showNotif('✅ Pedido enviado por correo exitosamente', 'success');
+        
+        // Limpiar carrito
+        S.cart = [];
+        updateCartUI();
+        closeCart();
+        
+    } catch (error) {
+        console.error('Error EmailJS:', error);
+        showNotif('⚠️ Pedido guardado pero error al enviar correo: ' + error.text, 'warning');
+    }
+}
+
+        // ============================================
+        // HISTORIAL
+        // ============================================
+        async function cargarHistorial() {
+            const file = await fetchGitHub('historial.json');
+            if (file) {
+                const data = JSON.parse(atob(file.content));
+                S.history = data.historial || [];
+            } else {
+                S.history = [];
+            }
+        }
+
+        async function registrarVista() {
+            const vista = {
+                usuario: S.currentUser ? S.currentUser.username : 'Anónimo',
+                pagina: window.location.pathname,
+                fecha: new Date().toISOString(),
+                ip: 'N/A'
+            };
+            
+            S.history.unshift(vista);
+            if (S.history.length > 1000) S.history = S.history.slice(0, 1000);
+            
+            await saveToGitHub('historial.json', { historial: S.history }, 'Registrar vista');
+        }
+
+        function renderHistorial() {
+            const list = document.getElementById('history-list');
+            if (S.history.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin historial</p>';
+                return;
+            }
+            list.innerHTML = S.history.slice(0, 100).map(h => `
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold"><i class="fas fa-user text-teal-600 mr-2"></i>${h.usuario}</p>
+                            <p class="text-sm text-gray-600"><i class="fas fa-page text-gray-400 mr-2"></i>${h.pagina}</p>
+                        </div>
+                        <p class="text-xs text-gray-500">${new Date(h.fecha).toLocaleString('es-ES')}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // PEDIDOS
+        // ============================================
+        async function cargarPedidos() {
+            const file = await fetchGitHub('pedidos.json');
+            if (file) {
+                const data = JSON.parse(atob(file.content));
+                S.orders = data.pedidos || [];
+            } else {
+                S.orders = [];
+            }
+        }
+
+        function renderPedidos() {
+            const list = document.getElementById('orders-list');
+            if (S.orders.length === 0) {
+                list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin pedidos</p>';
+                return;
+            }
+            list.innerHTML = S.orders.map(o => `
+                <div class="p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg border border-teal-200">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <p class="font-bold text-lg">${o.id}</p>
+                            <p class="text-sm text-gray-600"><i class="fas fa-user mr-1"></i>${o.usuario} (${o.email})</p>
+                        </div>
+                        <p class="text-xs text-gray-500">${new Date(o.fecha).toLocaleString('es-ES')}</p>
+                    </div>
+                    <div class="mt-3 space-y-1">
+                        ${o.items.map(i => `<p class="text-sm">${i.nombre} x${i.cantidad} - $${i.subtotal.toFixed(2)}</p>`).join('')}
+                    </div>
+                    <p class="mt-3 font-bold text-xl gradient-text">Total: $${o.total.toFixed(2)}</p>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // PANEL ADMIN
+        // ============================================
+        function openAdminPanel() {
+            if (!S.currentUser || S.currentUser.role !== 'admin') {
+                showNotif('❌ Solo admin', 'error');
+                return;
+            }
+            document.getElementById('admin-panel').classList.remove('hidden');
+            renderAdminList();
+            renderUsers();
+            renderHistorial();
+            renderPedidos();
+            renderEstadisticas();
+            closeUserMenu();
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        function showAdminTab(tabName) {
+            document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        }
+
+        function renderUsers() {
+            const list = document.getElementById('users-list');
+            list.innerHTML = S.users.map(u => `
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white font-bold">
+                        ${u.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold">${u.name}</p>
+                        <p class="text-sm text-gray-600">@${u.username} | ${u.email}</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${u.role === 'admin' ? 'bg-orange-100 text-orange-800' : 'bg-teal-100 text-teal-800'}">
+                        ${u.role === 'admin' ? '🔒 Admin' : '👤 Cliente'}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function renderEstadisticas() {
+            document.getElementById('stat-products').textContent = S.pr.length;
+            document.getElementById('stat-users').textContent = S.users.length;
+            document.getElementById('stat-views').textContent = S.history.length;
+            document.getElementById('stat-orders').textContent = S.orders.length;
+            
+            const revenue = S.orders.reduce((sum, o) => sum + o.total, 0);
+            document.getElementById('stat-revenue').textContent = `$${revenue.toFixed(2)}`;
+            
+            const today = new Date().toDateString();
+            const todayViews = S.history.filter(h => new Date(h.fecha).toDateString() === today).length;
+            document.getElementById('stat-today').textContent = todayViews;
+        }
+
+        // ============================================
+        // CARRUSEL
+        // ============================================
+        let currentSlide = 0;
+        const totalSlides = 3;
+        
+        function moveCarousel(direction) {
+            currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+            updateCarousel();
+        }
+        
+        function updateCarousel() {
+            document.getElementById('carousel-inner').style.transform = `translateX(-${currentSlide * 100}%)`;
+            document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+        
+        function initCarousel() {
+            const dotsContainer = document.getElementById('carousel-dots');
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => { currentSlide = i; updateCarousel(); };
+                dotsContainer.appendChild(dot);
+            }
+            setInterval(() => moveCarousel(1), 5000);
+        }
+
+        // ============================================
         // CHATBOT
-        // ============================================================
+        // ============================================
         const KB = {
-            "paracetamol": "El Paracetamol con Diclofenaco es un analgésico y antiinflamatorio para dolores moderados.",
-            "ibuprofeno": "El Ibuprofeno 800 mg es un antiinflamatorio potente.",
-            "nifedipino": "Nifedipino se usa para presión arterial alta.",
-            "alodipino": "Alodipino es un antihipertensivo.",
-            "captopril": "Captopril es un inhibidor de la ECA.",
-            "enalapril": "Enalapril es para la presión arterial.",
-            "sulfaprim": "Sulfaprim es un antibiótico.",
-            "metronidazol": "Metronidazol es un antibiótico para infecciones.",
-            "amoxicilina": "Amoxicilina es un antibiótico de amplio espectro.",
-            "omeprazol": "Omeprazol es para el reflujo y úlceras.",
-            "metoclopramida": "Metoclopramida es antiemético.",
-            "domozaol": "Domozaol combina omeprazol y domperidona para reflujo con náuseas.",
-            "furosemide": "Furosemide es un diurético.",
-            "hidroclorotiazida": "Hidroclorotiazida es un diurético.",
-            "loratadina": "Loratadina es un antihistamínico.",
-            "benadrilina": "Benadrilina es un antihistamínico sedante.",
-            "alprazolam": "Alprazolam es un ansiolítico.",
-            "default": "Pregunta por nuestros medicamentos o visita el catálogo."
+            "paracetamol": "El Paracetamol es un analgésico y antipirético. Sirve para dolores leves y fiebre.",
+            "ibuprofeno": "El Ibuprofeno es un antiinflamatorio. Reduce dolor, inflamación y fiebre.",
+            "ram": "La RAM es la memoria de corto plazo de la PC. Más RAM = más programas abiertos.",
+            "gpu": "La GPU procesa imágenes y video. Esencial para gaming y diseño.",
+            "cpu": "El CPU es el cerebro del PC. Ejecuta instrucciones y cálculos.",
+            "ssd": "Un SSD es almacenamiento rápido. Tu PC prende en segundos.",
+            "default": "No tengo info específica. Consulta el catálogo o contacta soporte."
         };
 
         function toggleChat() { document.getElementById('chatbot-window').classList.toggle('hidden'); }
@@ -1243,22 +1263,25 @@
             const msgs = document.getElementById('chat-messages');
             const txt = inp.value.trim();
             if (!txt) return;
+            
             msgs.innerHTML += `<div class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] ml-auto fade-in shadow-md">${txt}</div>`;
             inp.value = '';
+            
             setTimeout(() => {
                 let res = KB["default"];
                 const low = txt.toLowerCase();
-                for (let k in KB) { if (low.includes(k)) { res = KB[k]; break; } }
-                const prod = STATE.productos.find(p => low.includes(p.name.toLowerCase()));
+                for (let k in KB) if (low.includes(k)) { res = KB[k]; break; }
+                const prod = S.pr.find(p => low.includes(p.name.toLowerCase()));
                 if (prod && res === KB["default"]) res = `Sobre <b>${prod.name}</b>: ${prod.desc}`;
+                
                 msgs.innerHTML += `<div class="bg-white p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm border border-gray-100 fade-in">${res}</div>`;
                 msgs.scrollTop = msgs.scrollHeight;
             }, 600);
         }
 
-        // ============================================================
-        // NOTIFICACIONES
-        // ============================================================
+        // ============================================
+        // UTILIDADES
+        // ============================================
         function showNotif(msg, type) {
             const n = document.createElement('div');
             n.className = `fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full text-sm font-semibold shadow-2xl fade-in ${type==='success'?'bg-green-100 text-green-800 border-2 border-green-200':type==='error'?'bg-red-100 text-red-800 border-2 border-red-200':type==='warning'?'bg-yellow-100 text-yellow-800 border-2 border-yellow-200':'bg-blue-100 text-blue-800 border-2 border-blue-200'}`;
@@ -1267,9 +1290,10 @@
             setTimeout(() => n.remove(), 3000);
         }
 
-        // ============================================================
-        // ANCLA SUAVE
-        // ============================================================
+        // INICIAR
+        document.getElementById('year').textContent = new Date().getFullYear();
+        init();
+
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -1277,11 +1301,6 @@
                 if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         });
-
-        // ============================================================
-        // INICIO
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
