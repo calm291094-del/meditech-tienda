@@ -674,6 +674,146 @@
     .bg-gradient-subtle {
         background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     }
+
+/* ============================================
+   FIX: PANTALLA COMPLETA EN MÓVIL
+   ============================================ */
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    min-height: 100dvh; /* Para móviles modernos */
+    width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+}
+
+/* Contenedor principal - ocupa toda la altura */
+body > * {
+    flex-shrink: 0;
+}
+
+/* Asegurar que las secciones ocupen espacio */
+section {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* FIX: El footer siempre al final */
+footer {
+    margin-top: auto !important;
+}
+
+/* FIX: El contenedor del chatbot no debe ocupar espacio extra */
+#chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+    pointer-events: none;
+}
+
+#chatbot-container > * {
+    pointer-events: auto;
+}
+
+/* ============================================
+   FIX: ELIMINAR ESPACIO EN BLANCO
+   ============================================ */
+.max-w-7xl {
+    max-width: 80rem;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    box-sizing: border-box;
+}
+
+/* Asegurar que el contenedor de productos ocupe espacio */
+#portada-productos {
+    min-height: 200px;
+}
+
+/* FIX: El mensaje de "Sincronizando catálogo" ocupa espacio */
+#portada-productos .col-span-full {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ============================================
+   FIX: ELIMINAR ESPACIO EN BLANCO EN MÓVIL
+   ============================================ */
+
+/* Asegurar que el body ocupe toda la pantalla */
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: #f8fafc;
+}
+
+/* El contenedor principal debe ocupar todo el espacio */
+#root, .app-container, main {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Cada sección debe ocupar su espacio */
+section {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* El footer siempre al final */
+footer {
+    margin-top: auto;
+}
+
+/* Forzar que el contenido de productos ocupe espacio */
+#portada-productos {
+    min-height: 300px;
+    width: 100%;
+}
+
+/* Asegurar que las tarjetas de productos ocupen el espacio completo */
+#portada-productos > div {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#portada-productos > div .h-56 {
+    flex-shrink: 0;
+}
+
+#portada-productos > div .p-5 {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#portada-productos > div .p-5 .flex.justify-between {
+    margin-top: auto;
+}
+</style>
+
+<!-- CSS complementario (agrégalo a tu bloque <style>) -->
+<style>
+.no-copy {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+}
 </style>
 
 </head>
@@ -1436,12 +1576,7 @@ async function forzarRecarga() {
 // FETCH GITHUB - UNIFICADA
 // ============================================
 async function fetchGitHub(path) {
-    // Si hay token válido, usar API (para obtener SHA)
-    if (GITHUB_TOKEN && GITHUB_TOKEN !== 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
-        return await fetchGitHubAPI(path);
-    }
-    
-    // Si no hay token, usar lectura pública
+    // Para lectura: usar público (sin token)
     const data = await fetchGitHubPublic(path);
     if (data) {
         return { content: btoa(JSON.stringify(data)) };
@@ -1484,7 +1619,7 @@ async function fetchGitHubAPI(path) {
         }
         
         if (res.status === 404) {
-            console.warn(`⚠️ Archivo no encontrado: ${path}`);
+            console.warn(`⚠️ Archivo no encontrado en API: ${path}`);
             return null;
         }
         
@@ -1521,7 +1656,7 @@ async function saveToGitHub(path, data, message) {
         if (path === 'productos.json') {
             localStorage.setItem('productos_backup', JSON.stringify(data.productos || []));
         }
-        showNotif('⚠️ Cambios guardados solo en local (sin token)', 'warning');
+        showNotif('⚠️ Cambios guardados solo en local (sin token). Configura tu token en Panel Admin → Configuración.', 'warning');
         return false;
     }
     
@@ -1540,7 +1675,7 @@ async function saveToGitHub(path, data, message) {
             console.log('ℹ️ Archivo no existe, se creará uno nuevo');
         }
         
-        // 2. Preparar el contenido
+        // 2. Preparar el contenido (asegurar encoding correcto)
         const content = JSON.stringify(data, null, 2);
         const contentBase64 = btoa(unescape(encodeURIComponent(content)));
         
@@ -1560,7 +1695,7 @@ async function saveToGitHub(path, data, message) {
             console.log(`✅ ${path} guardado en GitHub (commit: ${result.commit?.sha?.substring(0, 7)})`);
             showNotif(`✅ ${path} guardado en GitHub`, 'success');
             
-            // También guardar en localStorage
+            // También guardar en localStorage como respaldo
             if (path === 'productos.json') {
                 localStorage.setItem('productos_backup', JSON.stringify(data.productos || []));
             }
@@ -1572,7 +1707,9 @@ async function saveToGitHub(path, data, message) {
             
             // Si es error 401, el token expiró
             if (response.status === 401) {
-                showNotif('❌ Token expirado. Actualízalo en el Panel Admin.', 'error');
+                showNotif('❌ Token expirado. Actualízalo en el Panel Admin → Configuración.', 'error');
+            } else if (response.status === 404) {
+                showNotif('❌ Repositorio no encontrado. Verifica que existe.', 'error');
             } else {
                 showNotif(`❌ Error al guardar: ${errorData.message}`, 'error');
             }
@@ -1854,7 +1991,11 @@ async function fetchGitHubPublic(path) {
         });
         
         if (!res.ok) {
-            console.warn(`⚠️ No se pudo leer ${path}: ${res.status}`);
+            if (res.status === 404) {
+                console.warn(`⚠️ Archivo no encontrado: ${path}`);
+            } else {
+                console.warn(`⚠️ Error ${res.status} al leer ${path}`);
+            }
             return null;
         }
         
@@ -2736,18 +2877,26 @@ function initCarousel() {
         }
 
 // ============================================
-// CHATBOT - FUNCIÓN PARA ABRIR/CERRAR
+// CHATBOT - FUNCIÓN PARA ABRIR/CERRAR (CORREGIDA)
 // ============================================
 function toggleChat() {
     const window = document.getElementById('chatbot-window');
-    const btn = document.querySelector('#chatbot-container button:last-child');
+    const btn = document.querySelector('#chatbot-container > button:last-child');
+    
+    // Verificar que los elementos existan
+    if (!window || !btn) {
+        console.error('❌ Elementos del chatbot no encontrados');
+        return;
+    }
     
     if (window.classList.contains('hidden')) {
         window.classList.remove('hidden');
         btn.innerHTML = '<i class="fas fa-times"></i>';
+        btn.style.transform = 'rotate(90deg)';
     } else {
         window.classList.add('hidden');
         btn.innerHTML = '<i class="fas fa-comment-dots"></i>';
+        btn.style.transform = 'rotate(0deg)';
     }
 }
 
@@ -3557,17 +3706,6 @@ Función: Bloquea Ctrl+C y selección de texto
     });
 })();
 </script>
-
-<!-- CSS complementario (agrégalo a tu bloque <style>) -->
-<style>
-.no-copy {
-    -webkit-user-select: none !important;
-    -moz-user-select: none !important;
-    -ms-user-select: none !important;
-    user-select: none !important;
-}
-</style>
-
 
 <!-- ============================================
 🛡️ PROTECCIÓN: WATERMARK DINÁMICO CON USUARIO
