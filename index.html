@@ -7,107 +7,675 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * { font-family: 'Poppins', sans-serif; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); }
-        .hover-lift { transition: all 0.3s ease; }
-        .hover-lift:hover { transform: translateY(-8px); box-shadow: 0 15px 35px rgba(0,0,0,0.12); }
-        .fade-in { animation: fadeIn 0.5s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .gradient-text { background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .pulse-dot { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
-        /* CARRUSEL */
-        .carousel { position: relative; overflow: hidden; border-radius: 20px; }
-        .carousel-inner { display: flex; transition: transform 0.5s ease-in-out; }
-        .carousel-item { min-width: 100%; position: relative; }
-        .carousel-item img { width: 100%; height: 400px; object-fit: cover; }
-        .carousel-caption { position: absolute; bottom: 30px; left: 30px; right: 30px; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); padding: 20px; border-radius: 15px; color: white; }
-        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; font-size: 20px; color: #0d9488; transition: all 0.3s; z-index: 10; }
-        .carousel-btn:hover { background: white; transform: translateY(-50%) scale(1.1); }
-        .carousel-btn.prev { left: 20px; }
-        .carousel-btn.next { right: 20px; }
-        .carousel-dots { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 10; }
-        .carousel-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s; }
-        .carousel-dot.active { background: white; width: 30px; border-radius: 6px; }
-        
-        .badge-new { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
-        .badge-soldout { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.8); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
-        .category-card { transition: all 0.3s ease; }
-        .category-card:hover { transform: scale(1.05); }
-        .modal-overlay { animation: fadeIn 0.3s ease; }
-        .modal-content { animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* EDIT BUTTONS */
-        .edit-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(245, 158, 11, 0.9);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: all 0.3s;
-            z-index: 20;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+
+<style>
+    /* ============================================
+       BASE Y FUENTES
+    ============================================ */
+    * { 
+        font-family: 'Poppins', sans-serif; 
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .glass { 
+        background: rgba(255,255,255,0.95); 
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .hover-lift { 
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    }
+    .hover-lift:hover { 
+        transform: translateY(-8px); 
+        box-shadow: 0 15px 35px rgba(0,0,0,0.12); 
+    }
+    
+    .fade-in { 
+        animation: fadeIn 0.5s ease-in-out; 
+    }
+    @keyframes fadeIn { 
+        from { opacity: 0; transform: translateY(20px); } 
+        to { opacity: 1; transform: translateY(0); } 
+    }
+    
+    .gradient-text { 
+        background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); 
+        -webkit-background-clip: text; 
+        -webkit-text-fill-color: transparent; 
+        background-clip: text; 
+    }
+    
+    .pulse-dot { 
+        animation: pulse 2s infinite; 
+    }
+    @keyframes pulse { 
+        0%, 100% { opacity: 1; } 
+        50% { opacity: 0.5; } 
+    }
+
+    /* ============================================
+       CARRUSEL - MODERNO Y RESPONSIVE
+    ============================================ */
+    .carousel { 
+        position: relative; 
+        overflow: hidden; 
+        border-radius: 20px;
+        margin: 0 4px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+    
+    .carousel-inner { 
+        display: flex; 
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+    }
+    
+    .carousel-item { 
+        min-width: 100%; 
+        position: relative; 
+    }
+    
+    .carousel-item img { 
+        width: 100%; 
+        height: 400px; 
+        object-fit: cover; 
+    }
+    
+    .carousel-caption { 
+        position: absolute; 
+        bottom: 30px; 
+        left: 30px; 
+        right: 30px; 
+        background: rgba(0,0,0,0.6); 
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 20px 24px; 
+        border-radius: 16px; 
+        color: white;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .carousel-caption h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+        letter-spacing: -0.5px;
+    }
+    
+    .carousel-caption p {
+        font-size: 0.9rem;
+        opacity: 0.85;
+        margin: 0;
+    }
+    
+    .carousel-btn { 
+        position: absolute; 
+        top: 50%; 
+        transform: translateY(-50%); 
+        background: rgba(255,255,255,0.92); 
+        border: none; 
+        width: 48px; 
+        height: 48px; 
+        border-radius: 50%; 
+        cursor: pointer; 
+        font-size: 18px; 
+        color: #0d9488; 
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        z-index: 10;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .carousel-btn:hover { 
+        background: white; 
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    
+    .carousel-btn:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+    
+    .carousel-btn.prev { left: 16px; }
+    .carousel-btn.next { right: 16px; }
+    
+    .carousel-dots { 
+        position: absolute; 
+        bottom: 16px; 
+        left: 50%; 
+        transform: translateX(-50%); 
+        display: flex; 
+        gap: 10px; 
+        z-index: 10; 
+    }
+    
+    .carousel-dot { 
+        width: 10px; 
+        height: 10px; 
+        border-radius: 50%; 
+        background: rgba(255,255,255,0.4); 
+        cursor: pointer; 
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        min-width: 10px;
+        min-height: 10px;
+    }
+    
+    .carousel-dot.active { 
+        background: white; 
+        width: 28px; 
+        border-radius: 6px; 
+    }
+
+    /* ============================================
+       BADGES
+    ============================================ */
+    .badge-new { 
+        position: absolute; 
+        top: 12px; 
+        right: 12px; 
+        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); 
+        color: white; 
+        padding: 4px 14px; 
+        border-radius: 20px; 
+        font-size: 0.65rem; 
+        font-weight: 700; 
+        box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+    }
+    
+    .badge-soldout { 
+        position: absolute; 
+        top: 12px; 
+        left: 12px; 
+        background: rgba(0,0,0,0.8); 
+        color: white; 
+        padding: 4px 14px; 
+        border-radius: 20px; 
+        font-size: 0.65rem; 
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        backdrop-filter: blur(4px);
+    }
+
+    /* ============================================
+       CATEGORÍAS
+    ============================================ */
+    .category-card { 
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .category-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.2) 100%);
+        pointer-events: none;
+    }
+    
+    .category-card:hover { 
+        transform: scale(1.05); 
+        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    }
+    
+    .category-card:active {
+        transform: scale(0.95);
+    }
+
+    /* ============================================
+       MODALES
+    ============================================ */
+    .modal-overlay { 
+        animation: fadeIn 0.3s ease; 
+    }
+    
+    .modal-content { 
+        animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        max-height: 95vh;
+        overflow-y: auto;
+    }
+    
+    @keyframes slideUp { 
+        from { opacity: 0; transform: translateY(40px) scale(0.98); } 
+        to { opacity: 1; transform: translateY(0) scale(1); } 
+    }
+
+    /* ============================================
+       EDIT BUTTONS (solo admin)
+    ============================================ */
+    .edit-btn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: rgba(245, 158, 11, 0.92);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 20;
+        box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        backdrop-filter: blur(4px);
+    }
+    
+    .edit-btn:hover { 
+        background: #d97706; 
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
+    
+    .edit-btn:active {
+        transform: scale(0.9);
+    }
+    
+    body.admin-mode .edit-btn { display: flex; }
+
+    /* ============================================
+       ADMIN TABS
+    ============================================ */
+    .admin-tab { 
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        cursor: pointer;
+        border-radius: 10px 10px 0 0;
+        font-weight: 600;
+    }
+    
+    .admin-tab.active { 
+        background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); 
+        color: white;
+        box-shadow: 0 -4px 15px rgba(13, 148, 136, 0.2);
+    }
+    
+    .admin-tab:not(.active):hover { 
+        background: #f0fdfa; 
+        transform: translateY(-2px);
+    }
+    
+    .admin-tab:active {
+        transform: scale(0.95);
+    }
+
+    /* ============================================
+       CHATBOT
+    ============================================ */
+    .typing-indicator { 
+        display: flex; 
+        gap: 5px; 
+        padding: 8px 12px;
+    }
+    
+    .typing-dot { 
+        width: 8px; 
+        height: 8px; 
+        border-radius: 50%; 
+        background: #0d9488; 
+        animation: typing 1.4s infinite;
+    }
+    
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes typing { 
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 
+        30% { transform: translateY(-12px); opacity: 1; } 
+    }
+
+    /* ============================================
+       QUICK VIEW OVERLAY
+    ============================================ */
+    .quick-view-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.75);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .quick-view-overlay.active { display: flex; }
+    
+    .quick-view-overlay .modal-content {
+        max-width: 700px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        border-radius: 24px;
+        background: white;
+        animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================================
+       SEARCH BAR
+    ============================================ */
+    .search-container { 
+        position: relative; 
+    }
+    
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        max-height: 400px;
+        overflow-y: auto;
+        display: none;
+        z-index: 50;
+        border: 1px solid rgba(0,0,0,0.05);
+        margin-top: 8px;
+    }
+    
+    .search-results.active { display: block; }
+    
+    .search-results::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .search-results::-webkit-scrollbar-thumb {
+        background: #0d9488;
+        border-radius: 4px;
+    }
+
+    /* ============================================
+       RESPONSIVE - DISEÑO MODERNO PARA MÓVIL
+    ============================================ */
+
+    /* 📱 MÓVILES PEQUEÑOS (hasta 400px) */
+    @media (max-width: 400px) {
+        .carousel-item img {
+            height: 180px !important;
         }
-        .edit-btn:hover { background: #d97706; transform: scale(1.1); }
-        body.admin-mode .edit-btn { display: flex; }
         
-        /* ADMIN TABS */
-        .admin-tab { transition: all 0.2s; cursor: pointer; }
-        .admin-tab.active { background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); color: white; }
-        .admin-tab:not(.active):hover { background: #f0fdfa; }
-        
-        /* CHATBOT */
-        .typing-indicator { display: flex; gap: 4px; padding: 8px; }
-        .typing-dot { width: 8px; height: 8px; border-radius: 50%; background: #0d9488; animation: typing 1.4s infinite; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.7; } 30% { transform: translateY(-10px); opacity: 1; } }
-        
-        /* QUICK VIEW MODAL */
-        .quick-view-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(5px);
-            z-index: 100;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+        .carousel-caption {
+            bottom: 12px !important;
+            left: 12px !important;
+            right: 12px !important;
+            padding: 12px 16px !important;
         }
-        .quick-view-overlay.active { display: flex; }
         
-        /* SEARCH BAR */
-        .search-container { position: relative; }
-        .search-results {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-height: 400px;
-            overflow-y: auto;
-            display: none;
-            z-index: 50;
+        .carousel-caption h3 {
+            font-size: 0.9rem !important;
         }
-        .search-results.active { display: block; }
-    </style>
+        
+        .carousel-caption p {
+            font-size: 0.65rem !important;
+        }
+        
+        .carousel-btn {
+            width: 32px !important;
+            height: 32px !important;
+            font-size: 12px !important;
+        }
+        
+        .carousel-btn.prev { left: 8px !important; }
+        .carousel-btn.next { right: 8px !important; }
+        
+        .carousel-dot {
+            width: 8px !important;
+            height: 8px !important;
+            min-width: 8px !important;
+            min-height: 8px !important;
+        }
+        
+        .carousel-dot.active {
+            width: 18px !important;
+        }
+        
+        #portada-productos {
+            gap: 8px !important;
+        }
+        
+        #portada-productos .h-56 {
+            height: 130px !important;
+        }
+        
+        #portada-productos .p-5 {
+            padding: 8px !important;
+        }
+        
+        #portada-productos .text-lg {
+            font-size: 0.7rem !important;
+        }
+        
+        #portada-productos .text-2xl {
+            font-size: 0.9rem !important;
+        }
+        
+        #portada-productos .w-11.h-11 {
+            width: 32px !important;
+            height: 32px !important;
+            font-size: 0.7rem !important;
+        }
+        
+        .badge-new, .badge-soldout {
+            font-size: 0.5rem !important;
+            padding: 2px 8px !important;
+        }
+    }
+
+    /* 📱 MÓVILES (401px - 640px) */
+    @media (min-width: 401px) and (max-width: 640px) {
+        .carousel-item img {
+            height: 220px !important;
+        }
+        
+        .carousel-caption {
+            bottom: 16px !important;
+            left: 16px !important;
+            right: 16px !important;
+            padding: 14px 18px !important;
+        }
+        
+        .carousel-caption h3 {
+            font-size: 1.1rem !important;
+        }
+        
+        .carousel-caption p {
+            font-size: 0.75rem !important;
+        }
+        
+        .carousel-btn {
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 14px !important;
+        }
+        
+        #portada-productos {
+            gap: 10px !important;
+        }
+        
+        #portada-productos .h-56 {
+            height: 150px !important;
+        }
+        
+        #portada-productos .p-5 {
+            padding: 10px !important;
+        }
+    }
+
+    /* 📱 TABLETS PEQUEÑAS (641px - 768px) */
+    @media (min-width: 641px) and (max-width: 768px) {
+        .carousel-item img {
+            height: 300px !important;
+        }
+        
+        #portada-productos {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+        
+        #categorias-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+
+    /* ============================================
+       MEJORAS TÁCTILES PARA MÓVIL
+    ============================================ */
+    
+    /* Todos los elementos clickeables deben tener área táctil adecuada */
+    button, 
+    a[role="button"],
+    [onclick],
+    .clickable {
+        min-height: 44px !important;
+        min-width: 44px !important;
+        cursor: pointer;
+        touch-action: manipulation;
+    }
+    
+    /* Feedback táctil en móvil */
+    button:active, 
+    [onclick]:active,
+    .clickable:active {
+        transform: scale(0.96);
+        transition: transform 0.1s ease;
+    }
+    
+    /* Ajuste de inputs en móvil (evita zoom en iOS) */
+    input, 
+    select, 
+    textarea {
+        font-size: 16px !important;
+        border-radius: 12px !important;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    
+    /* Scroll suave en toda la página */
+    html {
+        scroll-behavior: smooth;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Mejora de contraste y accesibilidad */
+    .text-gray-600 {
+        color: #4b5563 !important;
+    }
+    
+    .text-gray-500 {
+        color: #6b7280 !important;
+    }
+
+    /* ============================================
+       ANIMACIONES Y TRANSICIONES
+    ============================================ */
+    
+    /* Transición suave para todos los elementos interactivos */
+    .transition-smooth {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Efecto de shimmer para carga */
+    .shimmer {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* ============================================
+       CHATBOT - MEJORAS PARA MÓVIL
+    ============================================ */
+    #chatbot-container {
+        z-index: 999;
+    }
+    
+    #chatbot-container .w-16.h-16 {
+        width: 56px !important;
+        height: 56px !important;
+        font-size: 1.5rem !important;
+        box-shadow: 0 8px 30px rgba(13, 148, 136, 0.35) !important;
+    }
+    
+    #chatbot-container .w-16.h-16:active {
+        transform: scale(0.9);
+    }
+    
+    #chatbot-window {
+        border-radius: 20px !important;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+    }
+    
+    #chatbot-window .h-96 {
+        max-height: 400px !important;
+    }
+
+    /* ============================================
+       SCROLLBAR PERSONALIZADO
+    ============================================ */
+    ::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #0d9488;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #0f766e;
+    }
+
+    /* ============================================
+       UTILIDADES ADICIONALES
+    ============================================ */
+    
+    /* Texto truncado con 2 líneas */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    /* Sombra suave para tarjetas */
+    .shadow-soft {
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    
+    /* Borde sutil */
+    .border-subtle {
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+    
+    /* Fondo con gradiente sutil */
+    .bg-gradient-subtle {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+</style>
+
 </head>
 <body class="bg-gray-50 text-gray-800">
 
@@ -865,41 +1433,20 @@ async function forzarRecarga() {
 }
 
 // ============================================
-// FETCH GITHUB - VERSIÓN CON CACHE-BUSTING
+// FETCH GITHUB - UNIFICADA
 // ============================================
 async function fetchGitHub(path) {
-    try {
-        // 🔥 URL PÚBLICA - NO NECESITA TOKEN
-        const timestamp = new Date().getTime();
-        const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${path}?t=${timestamp}`;
-        
-        console.log(`📡 Fetching público: ${path}`);
-        
-        const res = await fetch(url, {
-            cache: 'no-cache',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        
-        if (res.status === 404) {
-            console.warn(`⚠️ Archivo no encontrado: ${path}`);
-            return null;
-        }
-        
-        if (!res.ok) {
-            console.error(`❌ Error ${res.status}: ${res.statusText}`);
-            return null;
-        }
-        
-        const data = await res.json();
-        console.log(`✅ ${path} cargado (${data ? Object.keys(data).length : 0} keys)`);
-        return { content: btoa(JSON.stringify(data)) };
-        
-    } catch (error) {
-        console.error(`❌ Error al cargar ${path}:`, error);
-        return null;
+    // Si hay token válido, usar API (para obtener SHA)
+    if (GITHUB_TOKEN && GITHUB_TOKEN !== 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
+        return await fetchGitHubAPI(path);
     }
+    
+    // Si no hay token, usar lectura pública
+    const data = await fetchGitHubPublic(path);
+    if (data) {
+        return { content: btoa(JSON.stringify(data)) };
+    }
+    return null;
 }
 
 // Función para crear archivo si no existe
@@ -918,7 +1465,46 @@ async function crearArchivoSiNoExiste(path) {
 }
 
 // ============================================
-// GUARDAR EN GITHUB - SOLO PARA ADMIN
+// FETCH GITHUB API - CON TOKEN (PARA ESCRIBIR)
+// ============================================
+async function fetchGitHubAPI(path) {
+    try {
+        const url = `${API}/contents/${path}`;
+        console.log(`📡 Fetching API: ${path}`);
+        
+        const res = await fetch(url, { 
+            headers: HEADERS,
+            cache: 'no-cache'
+        });
+        
+        if (res.status === 401) {
+            console.error('❌ Token inválido o expirado');
+            showNotif('❌ Token de GitHub inválido. Actualízalo en el Panel Admin.', 'error');
+            return null;
+        }
+        
+        if (res.status === 404) {
+            console.warn(`⚠️ Archivo no encontrado: ${path}`);
+            return null;
+        }
+        
+        if (!res.ok) {
+            console.error(`❌ Error ${res.status}: ${res.statusText}`);
+            return null;
+        }
+        
+        const data = await res.json();
+        console.log(`✅ API ${path} cargado (SHA: ${data.sha?.substring(0, 7)})`);
+        return data;
+        
+    } catch (error) {
+        console.error(`❌ Error de red al cargar ${path}:`, error);
+        return null;
+    }
+}
+
+// ============================================
+// GUARDAR EN GITHUB - CORREGIDA
 // ============================================
 async function saveToGitHub(path, data, message) {
     // Verificar que el usuario es admin
@@ -928,7 +1514,7 @@ async function saveToGitHub(path, data, message) {
         return false;
     }
     
-    // Verificar que hay token
+    // Verificar que hay token válido
     if (!GITHUB_TOKEN || GITHUB_TOKEN === 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
         console.warn('⚠️ No hay token válido. Guardando solo en local.');
         // Guardar en localStorage como respaldo
@@ -941,27 +1527,55 @@ async function saveToGitHub(path, data, message) {
     
     try {
         console.log(`💾 Guardando ${path} en GitHub...`);
-        const file = await fetchGitHub(path);
-        const sha = file ? file.sha : null;
         
+        // 1. Obtener el SHA actual (necesario para actualizar)
+        let sha = null;
+        try {
+            const file = await fetchGitHubAPI(path);
+            if (file && file.sha) {
+                sha = file.sha;
+                console.log(`📌 SHA actual: ${sha.substring(0, 7)}`);
+            }
+        } catch (e) {
+            console.log('ℹ️ Archivo no existe, se creará uno nuevo');
+        }
+        
+        // 2. Preparar el contenido
+        const content = JSON.stringify(data, null, 2);
+        const contentBase64 = btoa(unescape(encodeURIComponent(content)));
+        
+        // 3. Hacer PUT a GitHub
         const response = await fetch(`${API}/contents/${path}`, {
             method: "PUT",
             headers: HEADERS,
             body: JSON.stringify({
-                message: message || `Actualizar ${path}`,
-                content: btoa(JSON.stringify(data, null, 2)),
+                message: message || `Actualizar ${path} desde MediTech`,
+                content: contentBase64,
                 sha: sha
             })
         });
         
         if (response.ok) {
-            console.log(`✅ ${path} guardado en GitHub`);
+            const result = await response.json();
+            console.log(`✅ ${path} guardado en GitHub (commit: ${result.commit?.sha?.substring(0, 7)})`);
             showNotif(`✅ ${path} guardado en GitHub`, 'success');
+            
+            // También guardar en localStorage
+            if (path === 'productos.json') {
+                localStorage.setItem('productos_backup', JSON.stringify(data.productos || []));
+            }
+            
             return true;
         } else {
             const errorData = await response.json();
             console.error(`❌ Error al guardar ${path}:`, errorData.message);
-            showNotif(`❌ Error al guardar: ${errorData.message}`, 'error');
+            
+            // Si es error 401, el token expiró
+            if (response.status === 401) {
+                showNotif('❌ Token expirado. Actualízalo en el Panel Admin.', 'error');
+            } else {
+                showNotif(`❌ Error al guardar: ${errorData.message}`, 'error');
+            }
             return false;
         }
     } catch (error) {
@@ -1184,13 +1798,13 @@ async function initAuth() {
         document.addEventListener('click', (e) => { if (!e.target.closest('#user-section')) closeUserMenu(); });
 
 // ============================================
-// CARGAR PRODUCTOS - VERSIÓN PÚBLICA
+// CARGAR PRODUCTOS - CORREGIDA
 // ============================================
 async function cargarProductos() {
-    console.log('📦 Cargando productos desde GitHub (público)...');
+    console.log('📦 Cargando productos...');
     
     try {
-        // 1. Intentar cargar desde GitHub (público, SIN TOKEN)
+        // 1. Intentar cargar desde GitHub (público)
         const data = await fetchGitHubPublic('productos.json');
         
         if (data && data.productos && data.productos.length > 0) {
@@ -1209,8 +1823,6 @@ async function cargarProductos() {
                 S.pr = getProductosPorDefecto();
                 console.log(`📝 Productos por defecto: ${S.pr.length}`);
                 localStorage.setItem('productos_backup', JSON.stringify(S.pr));
-                // Intentar guardar en GitHub (solo si el admin tiene token)
-                tryGuardarEnGitHub('productos.json', { productos: S.pr });
             }
         }
         
@@ -1219,7 +1831,6 @@ async function cargarProductos() {
         
     } catch (error) {
         console.error('❌ Error cargando productos:', error);
-        // Usar productos por defecto
         S.pr = getProductosPorDefecto();
         renderProducts();
         renderAdminList();
@@ -1227,13 +1838,15 @@ async function cargarProductos() {
     }
 }
 
-// Función para leer desde GitHub público (SIN TOKEN)
+// ============================================
+// FETCH GITHUB - LECTURA PÚBLICA (SIN TOKEN)
+// ============================================
 async function fetchGitHubPublic(path) {
     try {
         const timestamp = new Date().getTime();
         const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${path}?t=${timestamp}`;
         
-        console.log(`📡 Leyendo: ${url}`);
+        console.log(`📡 Leyendo público: ${path}`);
         
         const res = await fetch(url, {
             cache: 'no-cache',
@@ -1246,7 +1859,7 @@ async function fetchGitHubPublic(path) {
         }
         
         const data = await res.json();
-        console.log(`✅ ${path} leído correctamente`);
+        console.log(`✅ ${path} leído correctamente (${Object.keys(data).length} keys)`);
         return data;
         
     } catch (error) {
@@ -2380,13 +2993,11 @@ async function sendMessage() {
 
 <script> 
 // ============================================
-// GESTIÓN DE TOKEN DINÁMICO
+// GESTIÓN DE TOKEN
 // ============================================
-
-// Cargar token desde localStorage (prioridad sobre el hardcodeado)
 function loadToken() {
     const savedToken = localStorage.getItem('github_token');
-    if (savedToken && savedToken !== 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
+    if (savedToken && savedToken !== 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN' && savedToken !== '') {
         // Actualizar las constantes globales
         window.GITHUB_TOKEN = savedToken;
         // Actualizar HEADERS
