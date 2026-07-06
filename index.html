@@ -731,11 +731,14 @@
         // CONFIGURACIÓN GITHUB
         // ============================================
         // Token por defecto (se puede cambiar desde el panel admin)
-        let GITHUB_TOKEN = localStorage.getItem('github_token') || "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";
+        let GITHUB_TOKEN = localStorage.getItem('github_token') || "ghp_PEGA_AQUI_TU_NUEVO_TOKEN";
         const GITHUB_USER = "calm291094-del";
         const GITHUB_REPO = "meditech-tienda";
         const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
-        let HEADERS = { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" };
+        let HEADERS = { 
+            "Authorization": `token ${GITHUB_TOKEN}`, 
+            "Accept": "application/vnd.github.v3+json" 
+        };
         
         // Estado global
         let S = { 
@@ -778,73 +781,198 @@
                     { nombre: "Gaming", icono: "fa-gamepad", color: "from-purple-500 to-pink-600", count: "+80 productos" }
                 ],
                 ofertas: [
-                    { titulo: "20%", descripcion: "Medicamentos", detalle: "En toda la línea de analgésicos" },
-                    { titulo: "15%", descripcion: "Hardware PC", detalle: "Componentes seleccionados" },
-                    { titulo: "ENVÍO", descripcion: "Gratis", detalle: "En compras mayores a $50" }
+                    { titulo: "--%", descripcion: "Medicamentos", detalle: "En toda la línea de analgésicos" },
+                    { titulo: "--%", descripcion: "Hardware PC", detalle: "Componentes seleccionados" },
+                    { titulo: "ENVÍO", descripcion: "Con domicilio por costo adicional.", detalle: "Segun zona de residencia." }
                 ]
             }
         };
 
-        // ============================================
-        // INICIALIZACIÓN
-        // ============================================
-        async function init() {
-            await initAuth();
-            await cargarConfig();
-            await cargarProductos();
-            await cargarHistorial();
-            await cargarPedidos();
+// ============================================
+// INICIALIZACIÓN MEJORADA
+// ============================================
+async function init() {
+    console.log('🚀 Iniciando MediTech...');
+    
+    try {
+        // 1. Cargar token guardado (si existe)
+        loadToken();
+        console.log('✅ Token cargado');
+        
+        // 2. Inicializar autenticación
+        await initAuth();
+        console.log('✅ Autenticación inicializada');
+        
+        // 3. Cargar configuración
+        await cargarConfig();
+        console.log('✅ Configuración cargada');
+        
+        // 4. Cargar productos
+        await cargarProductos();
+        console.log('✅ Productos cargados');
+        
+        // 5. Cargar historial y pedidos
+        await cargarHistorial();
+        await cargarPedidos();
+        console.log('✅ Historial y pedidos cargados');
+        
+        // 6. Renderizar carrusel (CRÍTICO)
+        renderCarousel();
+        console.log('✅ Carrusel renderizado');
+        
+        // 7. Renderizar categorías y ofertas
+        renderCategorias();
+        renderOfertas();
+        console.log('✅ Categorías y ofertas renderizadas');
+        
+        // 8. Aplicar textos
+        applyTexts();
+        console.log('✅ Textos aplicados');
+        
+        // 9. Inicializar carrusel (autoplay)
+        initCarousel();
+        console.log('✅ Carrusel inicializado con autoplay');
+        
+        // 10. Actualizar UI
+        updateCartUI();
+        console.log('✅ UI actualizada');
+        
+        // 11. Registrar vista
+        registrarVista();
+        console.log('✅ Vista registrada');
+        
+        console.log('🎉 MediTech iniciado correctamente');
+        
+    } catch (error) {
+        console.error('❌ Error al iniciar MediTech:', error);
+        showNotif('❌ Error al cargar la página. Verifica la consola (F12).', 'error');
+        
+        // Intentar renderizar carrusel con datos por defecto
+        try {
             renderCarousel();
             renderCategorias();
             renderOfertas();
             applyTexts();
             initCarousel();
-            updateCartUI();
-            registrarVista();
+            console.log('⚠️ Renderizado con datos por defecto');
+        } catch (e) {
+            console.error('❌ Error en renderizado de respaldo:', e);
         }
+    }
+}
 
-        // ============================================
-        // GITHUB API
-        // ============================================
-        async function fetchGitHub(path) {
-            const res = await fetch(`${API}/contents/${path}`, { headers: HEADERS });
-            return res.ok ? res.json() : null;
+
+// ============================================
+// GITHUB API - VERSIÓN MEJORADA
+// ============================================
+async function fetchGitHub(path) {
+    try {
+        const url = `${API}/contents/${path}`;
+        console.log(`📡 Fetching: ${path}`);
+        
+        const res = await fetch(url, { 
+            headers: HEADERS,
+            cache: 'no-cache'
+        });
+        
+        if (res.status === 401) {
+            console.error('❌ Token inválido o expirado');
+            showNotif('❌ Token de GitHub inválido. Actualízalo en el Panel Admin.', 'error');
+            return null;
         }
+        
+        if (res.status === 404) {
+            console.warn(`⚠️ Archivo no encontrado: ${path}`);
+            return null;
+        }
+        
+        if (res.status === 403) {
+            console.error('❌ Límite de peticiones alcanzado o permisos insuficientes');
+            showNotif('❌ Error de permisos en GitHub', 'error');
+            return null;
+        }
+        
+        if (!res.ok) {
+            console.error(`❌ Error ${res.status}: ${res.statusText}`);
+            return null;
+        }
+        
+        const data = await res.json();
+        console.log(`✅ ${path} cargado correctamente`);
+        return data;
+        
+    } catch (error) {
+        console.error(`❌ Error de red al cargar ${path}:`, error);
+        return null;
+    }
+}
 
-        async function saveToGitHub(path, data, message) {
+// ============================================
+// GUARDAR EN GITHUB
+// ============================================
+async function saveToGitHub(path, data, message) {
+    try {
+        console.log(`💾 Guardando ${path}...`);
+        
+        // 1. Obtener el archivo actual para tener el SHA
+        const file = await fetchGitHub(path);
+        const sha = file ? file.sha : null;
+        
+        // 2. Hacer PUT para actualizar/crear el archivo
+        const response = await fetch(`${API}/contents/${path}`, {
+            method: "PUT",
+            headers: HEADERS,
+            body: JSON.stringify({
+                message: message || `Actualizar ${path}`,
+                content: btoa(JSON.stringify(data, null, 2)),
+                sha: sha
+            })
+        });
+        
+        if (response.ok) {
+            console.log(`✅ ${path} guardado correctamente`);
+            return true;
+        } else {
+            const errorData = await response.json();
+            console.error(`❌ Error al guardar ${path}:`, errorData.message);
+            return false;
+        }
+    } catch (error) {
+        console.error(`❌ Excepción al guardar ${path}:`, error);
+        return false;
+    }
+}
+
+// ============================================
+// CONFIGURACIÓN - VERSIÓN MEJORADA
+// ============================================
+async function cargarConfig() {
+    console.log('📄 Cargando configuración...');
+    
+    try {
+        const file = await fetchGitHub('config.json');
+        
+        if (file) {
             try {
-                const file = await fetchGitHub(path);
-                const sha = file ? file.sha : null;
-                await fetch(`${API}/contents/${path}`, {
-                    method: "PUT",
-                    headers: HEADERS,
-                    body: JSON.stringify({
-                        message: message,
-                        content: btoa(JSON.stringify(data, null, 2)),
-                        sha: sha
-                    })
-                });
-                return true;
-            } catch (e) {
-                console.error("Error guardando en GitHub:", e);
-                return false;
+                const data = JSON.parse(atob(file.content));
+                // Merge con configuración por defecto
+                S.config = { ...S.config, ...data };
+                console.log('✅ Configuración cargada desde GitHub');
+            } catch (parseError) {
+                console.error('❌ Error al parsear config.json:', parseError);
+                console.warn('⚠️ Usando configuración por defecto');
             }
+        } else {
+            console.warn('⚠️ config.json no existe en GitHub, creando uno por defecto...');
+            // Crear config.json con valores por defecto
+            await saveToGitHub('config.json', S.config, 'Crear configuración inicial');
+            console.log('✅ config.json creado en GitHub');
         }
-
-        // ============================================
-        // CONFIGURACIÓN
-        // ============================================
-        async function cargarConfig() {
-            const file = await fetchGitHub('config.json');
-            if (file) {
-                try {
-                    const data = JSON.parse(atob(file.content));
-                    S.config = { ...S.config, ...data };
-                } catch (e) {
-                    console.error("Error parsing config:", e);
-                }
-            }
-        }
+    } catch (error) {
+        console.error('❌ Error al cargar configuración:', error);
+        console.warn('⚠️ Usando configuración por defecto');
+    }
+}
 
         function applyTexts() {
             document.getElementById('header-subtitle').textContent = S.config.headerSubtitle;
@@ -860,28 +988,74 @@
         // ============================================
         // AUTENTICACIÓN
         // ============================================
-        async function initAuth() {
-            const usersFile = await fetchGitHub('usuarios.json');
-            if (usersFile) {
+async function initAuth() {
+    console.log('🔐 Inicializando autenticación...');
+    
+    try {
+        const usersFile = await fetchGitHub('usuarios.json');
+        
+        if (usersFile) {
+            try {
                 const data = JSON.parse(atob(usersFile.content));
                 S.users = data.usuarios || [];
-            } else {
-                S.users = [{ username: '----', password: '------------', name: 'Administrador', email: 'admin@meditech.com', role: 'admin' }];
-                await saveToGitHub('usuarios.json', { usuarios: S.users }, 'Inicializar usuarios');
+                console.log(`✅ ${S.users.length} usuarios cargados desde GitHub`);
+            } catch (parseError) {
+                console.error('❌ Error al parsear usuarios.json:', parseError);
+                S.users = [];
             }
+        } else {
+            console.warn('⚠️ usuarios.json no existe, creando por defecto...');
+            S.users = [{ 
+                username: 'root', 
+                password: 'Root*4815162342+-', 
+                name: 'Administrador', 
+                email: 'admin@meditech.com', 
+                role: 'admin',
+                fecha: new Date().toISOString()
+            }];
             
-            const session = localStorage.getItem('session');
-            if (session) {
+            // Intentar guardar en GitHub (si falla, continuamos igual)
+            const saved = await saveToGitHub('usuarios.json', { usuarios: S.users }, 'Inicializar usuarios');
+            if (!saved) {
+                console.warn('⚠️ No se pudo crear usuarios.json en GitHub. Usando usuarios locales.');
+            }
+        }
+        
+        // Restaurar sesión del localStorage
+        const session = localStorage.getItem('session');
+        if (session) {
+            try {
                 const savedUser = JSON.parse(session);
                 const userExists = S.users.find(u => u.username === savedUser.username);
                 if (userExists) {
                     S.currentUser = userExists;
                     updateUIForLoggedUser();
+                    console.log(`✅ Sesión restaurada: ${userExists.name}`);
                 } else {
                     localStorage.removeItem('session');
+                    console.log('ℹ️ Usuario de sesión ya no existe');
                 }
+            } catch (e) {
+                localStorage.removeItem('session');
+                console.log('ℹ️ Sesión inválida, eliminada');
             }
         }
+        
+    } catch (error) {
+        console.error('❌ Error crítico en initAuth:', error);
+        // Fallback: usar usuarios por defecto si todo falla
+        if (S.users.length === 0) {
+            S.users = [{ 
+                username: 'root', 
+                password: 'Root*4815162342+-', 
+                name: 'Administrador', 
+                email: 'admin@meditech.com', 
+                role: 'admin'
+            }];
+            console.warn('⚠️ Usando usuarios por defecto (offline)');
+        }
+    }
+}
 
         function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); closeUserMenu(); }
         function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
@@ -1289,97 +1463,126 @@
             document.getElementById('quick-view').classList.remove('active');
         }
 
-        // ============================================
-        // CARRUSEL
-        // ============================================
-        let currentSlide = 0;
-        
-        function renderCarousel() {
-            const inner = document.getElementById('carousel-inner');
-            inner.innerHTML = S.config.carousel.map(slide => `
+
+// ============================================
+// CARRUSEL - VERSIÓN MEJORADA
+// ============================================
+let currentSlide = 0;
+
+function renderCarousel() {
+    console.log('🎠 Renderizando carrusel...');
+    
+    const inner = document.getElementById('carousel-inner');
+    if (!inner) {
+        console.error('❌ Elemento carousel-inner no encontrado');
+        return;
+    }
+    
+    // Verificar que haya slides
+    if (!S.config.carousel || S.config.carousel.length === 0) {
+        console.warn('⚠️ No hay slides en la configuración, usando valores por defecto');
+        S.config.carousel = [
+            {
+                image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop",
+                title: "Medicamentos de Calidad",
+                subtitle: "Los mejores precios en productos farmacéuticos certificados"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1200&h=400&fit=crop",
+                title: "Tecnología de Última Generación",
+                subtitle: "Componentes de PC y hardware gaming al mejor precio"
+            },
+            {
+                image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=400&fit=crop",
+                title: "Ofertas Especiales",
+                subtitle: "Descuentos exclusivos por tiempo limitado"
+            }
+        ];
+    }
+    
+    // Renderizar slides
+    try {
+        inner.innerHTML = S.config.carousel.map((slide, index) => {
+            // Validar que el slide tenga los campos necesarios
+            const image = slide.image || 'https://via.placeholder.com/1200x400?text=Sin+Imagen';
+            const title = slide.title || 'Slide ' + (index + 1);
+            const subtitle = slide.subtitle || '';
+            
+            return `
                 <div class="carousel-item">
-                    <img src="${slide.image}" alt="${slide.title}">
+                    <img src="${image}" alt="${title}" onerror="this.src='https://via.placeholder.com/1200x400?text=Error+al+cargar'">
                     <div class="carousel-caption">
-                        <h3 class="text-2xl font-bold mb-2">${slide.title}</h3>
-                        <p class="text-sm opacity-90">${slide.subtitle}</p>
+                        <h3 class="text-2xl font-bold mb-2">${title}</h3>
+                        <p class="text-sm opacity-90">${subtitle}</p>
                     </div>
                 </div>
-            `).join('');
-            
-            const dotsContainer = document.getElementById('carousel-dots');
+            `;
+        }).join('');
+        
+        console.log(`✅ ${S.config.carousel.length} slides renderizados`);
+        
+        // Renderizar dots
+        const dotsContainer = document.getElementById('carousel-dots');
+        if (dotsContainer) {
             dotsContainer.innerHTML = '';
             for (let i = 0; i < S.config.carousel.length; i++) {
                 const dot = document.createElement('div');
                 dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-                dot.onclick = () => { currentSlide = i; updateCarousel(); };
+                dot.onclick = () => { 
+                    currentSlide = i; 
+                    updateCarousel(); 
+                };
                 dotsContainer.appendChild(dot);
             }
+            console.log('✅ Dots del carrusel renderizados');
         }
-
-        function moveCarousel(direction) {
-            currentSlide = (currentSlide + direction + S.config.carousel.length) % S.config.carousel.length;
-            updateCarousel();
-        }
-
-        function updateCarousel() {
-            document.getElementById('carousel-inner').style.transform = `translateX(-${currentSlide * 100}%)`;
-            document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
-                dot.classList.toggle('active', i === currentSlide);
-            });
-        }
-
-        function initCarousel() {
-            setInterval(() => moveCarousel(1), 5000);
-        }
-
-        function editCarousel() {
-            openAdminPanel();
-            showAdminTab('carrusel');
-            renderCarouselEditor();
-        }
-
-        function renderCarouselEditor() {
-            const editor = document.getElementById('carousel-editor');
-            editor.innerHTML = S.config.carousel.map((slide, i) => `
-                <div class="bg-gray-50 p-4 rounded-xl border-2 border-gray-200">
-                    <div class="flex justify-between items-center mb-3">
-                        <h4 class="font-bold">Slide ${i + 1}</h4>
-                        <button onclick="removeCarouselSlide(${i})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                    <input type="url" value="${slide.image}" onchange="S.config.carousel[${i}].image=this.value" placeholder="URL de imagen" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
-                    <input type="text" value="${slide.title}" onchange="S.config.carousel[${i}].title=this.value" placeholder="Título" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
-                    <input type="text" value="${slide.subtitle}" onchange="S.config.carousel[${i}].subtitle=this.value" placeholder="Subtítulo" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg">
+        
+        // Resetear slide actual
+        currentSlide = 0;
+        updateCarousel();
+        
+    } catch (error) {
+        console.error('❌ Error al renderizar carrusel:', error);
+        inner.innerHTML = `
+            <div class="carousel-item">
+                <img src="https://via.placeholder.com/1200x400/0d9488/ffffff?text=Error+en+Carrusel" alt="Error">
+                <div class="carousel-caption">
+                    <h3 class="text-2xl font-bold mb-2">Error al cargar el carrusel</h3>
+                    <p class="text-sm opacity-90">Por favor, recarga la página</p>
                 </div>
-            `).join('');
-        }
+            </div>
+        `;
+    }
+}
 
-        function addCarouselSlide() {
-            S.config.carousel.push({ image: '', title: 'Nuevo Slide', subtitle: 'Descripción' });
-            renderCarouselEditor();
-        }
+function moveCarousel(direction) {
+    if (!S.config.carousel || S.config.carousel.length === 0) return;
+    currentSlide = (currentSlide + direction + S.config.carousel.length) % S.config.carousel.length;
+    updateCarousel();
+}
 
-        function removeCarouselSlide(index) {
-            if (S.config.carousel.length <= 1) {
-                showNotif('⚠️ Debe haber al menos un slide', 'warning');
-                return;
-            }
-            S.config.carousel.splice(index, 1);
-            renderCarouselEditor();
-        }
+function updateCarousel() {
+    const inner = document.getElementById('carousel-inner');
+    if (!inner) return;
+    
+    inner.style.transform = `translateX(-${currentSlide * 100}%)`;
+    
+    document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === currentSlide);
+    });
+}
 
-        async function saveCarousel() {
-            showNotif("📤 Guardando carrusel...", "info");
-            const success = await saveToGitHub('config.json', S.config, 'Actualizar carrusel');
-            if (success) {
-                renderCarousel();
-                currentSlide = 0;
-                showNotif("✅ Carrusel actualizado", "success");
-            } else {
-                showNotif("❌ Error al guardar", "error");
-            }
-        }
+function initCarousel() {
+    // Limpiar intervalo anterior si existe
+    if (window.carouselInterval) {
+        clearInterval(window.carouselInterval);
+    }
+    
+    // Iniciar autoplay cada 5 segundos
+    window.carouselInterval = setInterval(() => moveCarousel(1), 5000);
+    console.log('✅ Autoplay del carrusel iniciado');
+}
+
 
         // ============================================
         // CATEGORÍAS Y OFERTAS
@@ -1621,10 +1824,10 @@
             document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.remove('hidden');
             document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-// Si es el tab de config, cargar info
-if (tabName === 'config') {
-    loadConfigInfo();
-}
+            // Si es el tab de config, cargar info
+            if (tabName === 'config') {
+                loadConfigInfo();
+            }
         }
 
         function renderUsers() {
@@ -1735,120 +1938,124 @@ Siempre:
 - Mantén respuestas cortas (máximo 3-4 párrafos)
 - Usa emojis cuando sea apropiado`;
 
-        async function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const messages = document.getElementById('chat-messages');
-            const sendBtn = document.getElementById('chat-send-btn');
-            const txt = input.value.trim();
-            
-            if (!txt) return;
-            
-            // Deshabilitar input y botón
-            input.disabled = true;
-            sendBtn.disabled = true;
-            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
-            // Agregar mensaje del usuario
-            messages.innerHTML += `<div class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] ml-auto fade-in shadow-md">${txt}</div>`;
-            input.value = '';
-            
-            // Indicador de "escribiendo"
-            const typingId = 'typing-' + Date.now();
-            messages.innerHTML += `
-                <div id="${typingId}" class="bg-white p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm border border-gray-100 fade-in">
-                    <div class="typing-indicator">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
-                </div>
-            `;
-            messages.scrollTop = messages.scrollHeight;
-            
-            // Construir contexto con productos relevantes
-            const productosContexto = S.pr.slice(0, 10).map(p => `- ${p.name} ($${p.price}): ${p.desc}`).join('\n');
-            const fullPrompt = `${SYSTEM_PROMPT}\n\nProductos disponibles en la tienda:\n${productosContexto}\n\nPregunta del usuario: ${txt}`;
-            
-            let response = '';
-            let apiUsed = '';
-            
-            // Intentar con cada API hasta que una funcione
-            for (const api of AI_APIS) {
-                try {
-                    if (api.method === "POST") {
-                        const res = await fetch(api.url, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                messages: [
-                                    { role: 'system', content: SYSTEM_PROMPT },
-                                    { role: 'user', content: fullPrompt }
-                                ],
-                                model: 'openai',
-                                seed: Math.floor(Math.random() * 100000)
-                            })
-                        });
-                        
-                        if (res.ok) {
-                            response = await res.text();
-                            apiUsed = api.name;
-                            break;
-                        }
-                    } else if (api.method === "GET") {
-                        const res = await fetch(api.url(fullPrompt));
-                        if (res.ok) {
-                            response = await res.text();
-                            apiUsed = api.name;
-                            break;
-                        }
+async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const messages = document.getElementById('chat-messages');
+    const sendBtn = document.getElementById('chat-send-btn');
+    const txt = input.value.trim();
+    
+    if (!txt) return;
+    
+    // Deshabilitar input y botón
+    input.disabled = true;
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    // Agregar mensaje del usuario
+    messages.innerHTML += `<div class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] ml-auto fade-in shadow-md">${txt}</div>`;
+    input.value = '';
+    
+    // Indicador de "escribiendo"
+    const typingId = 'typing-' + Date.now();
+    messages.innerHTML += `
+        <div id="${typingId}" class="bg-white p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm border border-gray-100 fade-in">
+            <div class="typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+    `;
+    messages.scrollTop = messages.scrollHeight;
+    
+    // ============================================
+    // 🎯 TRY PRINCIPAL (FALTABA ESTE)
+    // ============================================
+    try {
+        // Construir contexto con productos relevantes
+        const productosContexto = S.pr.slice(0, 10).map(p => `- ${p.name} ($${p.price}): ${p.desc}`).join('\n');
+        const fullPrompt = `${SYSTEM_PROMPT}\n\nProductos disponibles en la tienda:\n${productosContexto}\n\nPregunta del usuario: ${txt}`;
+        
+        let response = '';
+        let apiUsed = '';
+        
+        // Intentar con cada API hasta que una funcione
+        for (const api of AI_APIS) {
+            try {
+                if (api.method === "POST") {
+                    const res = await fetch(api.url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            messages: [
+                                { role: 'system', content: SYSTEM_PROMPT },
+                                { role: 'user', content: fullPrompt }
+                            ],
+                            model: 'openai',
+                            seed: Math.floor(Math.random() * 100000)
+                        })
+                    });
+                    
+                    if (res.ok) {
+                        response = await res.text();
+                        apiUsed = api.name;
+                        break;
                     }
-                } catch (error) {
-                    console.log(`❌ ${api.name} falló:`, error.message);
-                    continue;
+                } else if (api.method === "GET") {
+                    const res = await fetch(api.url(fullPrompt));
+                    if (res.ok) {
+                        response = await res.text();
+                        apiUsed = api.name;
+                        break;
+                    }
                 }
+            } catch (error) {
+                console.log(`❌ ${api.name} falló:`, error.message);
+                continue;
             }
-            
-            // Si ninguna API funcionó, usar respuesta local
-            if (!response) {
-                response = getLocalResponse(txt);
-                apiUsed = 'Local';
-            }
-            
-            // Limpiar respuesta (quitar markdown si existe)
-            response = response.replace(/```[\s\S]*?```/g, '').trim();
-            response = response.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            // Remover indicador de "escribiendo"
-            const typingElement = document.getElementById(typingId);
-            if (typingElement) typingElement.remove();
-            
-            // Agregar respuesta del bot
-            messages.innerHTML += `
-                <div class="bg-white p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm border border-gray-100 fade-in">
-                    <p class="text-gray-700">${response}</p>
-                    <p class="text-xs text-gray-400 mt-2 italic">🤖 Respuesta de ${apiUsed}</p>
-                </div>
-            `;
-            messages.scrollTop = messages.scrollHeight;
-            
-        } catch (error) {
-            console.error('Error en chatbot:', error);
-            const typingElement = document.getElementById(typingId);
-            if (typingElement) typingElement.remove();
-            
-            messages.innerHTML += `
-                <div class="bg-red-50 p-3 rounded-2xl rounded-tl-none max-w-[85%] border border-red-200 fade-in">
-                    <p class="text-red-700">❌ Error de conexión. Por favor intenta de nuevo.</p>
-                </div>
-            `;
-        } finally {
-            // Rehabilitar input y botón
-            input.disabled = false;
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
-            input.focus();
         }
+        
+        // Si ninguna API funcionó, usar respuesta local
+        if (!response) {
+            response = getLocalResponse(txt);
+            apiUsed = 'Local';
+        }
+        
+        // Limpiar respuesta (quitar markdown si existe)
+        response = response.replace(/```[\s\S]*?```/g, '').trim();
+        response = response.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        
+        // Remover indicador de "escribiendo"
+        const typingElement = document.getElementById(typingId);
+        if (typingElement) typingElement.remove();
+        
+        // Agregar respuesta del bot
+        messages.innerHTML += `
+            <div class="bg-white p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm border border-gray-100 fade-in">
+                <p class="text-gray-700">${response}</p>
+                <p class="text-xs text-gray-400 mt-2 italic">🤖 Respuesta de ${apiUsed}</p>
+            </div>
+        `;
+        messages.scrollTop = messages.scrollHeight;
+        
+    } catch (error) {
+        console.error('Error en chatbot:', error);
+        const typingElement = document.getElementById(typingId);
+        if (typingElement) typingElement.remove();
+        
+        messages.innerHTML += `
+            <div class="bg-red-50 p-3 rounded-2xl rounded-tl-none max-w-[85%] border border-red-200 fade-in">
+                <p class="text-red-700">❌ Error de conexión. Por favor intenta de nuevo.</p>
+            </div>
+        `;
+    } finally {
+        // Rehabilitar input y botón
+        input.disabled = false;
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        input.focus();
     }
+}
 
     // Respuestas locales de respaldo
     function getLocalResponse(txt) {
@@ -1893,12 +2100,19 @@ Siempre:
     // ============================================
     // INICIALIZACIÓN FINAL
     // ============================================
-    document.getElementById('year').textContent = new Date().getFullYear();
-    
-    // Esperar a que todo esté listo
-    window.addEventListener('DOMContentLoaded', () => {
+    // Esperar a que el DOM esté completamente cargado
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('✅ DOM cargado');
+        document.getElementById('year').textContent = new Date().getFullYear();
         init();
     });
+
+    // Fallback: si el DOM ya está cargado, ejecutar inmediatamente
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        console.log('✅ DOM ya estaba cargado');
+        document.getElementById('year').textContent = new Date().getFullYear();
+        init();
+    }
 
     // Smooth scroll para enlaces internos
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1946,8 +2160,10 @@ function loadToken() {
             "Authorization": `token ${savedToken}`, 
             "Accept": "application/vnd.github.v3+json" 
         };
+        console.log('✅ Token cargado desde localStorage');
         return true;
     }
+    console.log('ℹ️ Usando token por defecto del código');
     return false;
 }
 
@@ -1960,6 +2176,7 @@ function saveToken(token) {
         "Authorization": `token ${token}`, 
         "Accept": "application/vnd.github.v3+json" 
     };
+    console.log('✅ Token guardado en localStorage');
 }
 
 // Mostrar/ocultar token
