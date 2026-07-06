@@ -886,19 +886,13 @@ async function fetchGitHub(path) {
             return null;
         }
         
-        if (res.status === 403) {
-            console.error('❌ Límite de peticiones alcanzado o permisos insuficientes');
-            showNotif('❌ Error de permisos en GitHub', 'error');
-            return null;
-        }
-        
         if (!res.ok) {
             console.error(`❌ Error ${res.status}: ${res.statusText}`);
             return null;
         }
         
         const data = await res.json();
-        console.log(`✅ ${path} cargado correctamente`);
+        console.log(`✅ ${path} cargado correctamente (${data.content ? data.content.length : 0} bytes)`);
         return data;
         
     } catch (error) {
@@ -1158,17 +1152,33 @@ async function initAuth() {
         // ============================================
         // PRODUCTOS
         // ============================================
-        async function cargarProductos() {
-            const file = await fetchGitHub('productos.json');
-            if (file) {
+async function cargarProductos() {
+    try {
+        const file = await fetchGitHub('productos.json');
+        if (file && file.content) {
+            try {
                 const data = JSON.parse(atob(file.content));
                 S.pr = data.productos || [];
-            } else {
+                console.log(`✅ ${S.pr.length} productos cargados`);
+            } catch (parseError) {
+                console.error('❌ Error parseando productos:', parseError);
                 S.pr = [];
             }
-            renderProducts();
-            renderAdminList();
+        } else {
+            console.warn('⚠️ No se encontró productos.json, creando...');
+            S.pr = [];
+            // Crear archivo de productos vacío
+            await saveToGitHub('productos.json', { productos: [] }, 'Crear productos.json');
         }
+        renderProducts();
+        renderAdminList();
+    } catch (error) {
+        console.error('❌ Error en cargarProductos:', error);
+        S.pr = [];
+        renderProducts();
+        renderAdminList();
+    }
+}
 
         function renderProducts() {
             const grid = document.getElementById('portada-productos');
@@ -2054,6 +2064,22 @@ async function sendMessage() {
         sendBtn.disabled = false;
         sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
         input.focus();
+    }
+}
+
+// ============================================
+// CHATBOT - FUNCIÓN PARA ABRIR/CERRAR
+// ============================================
+function toggleChat() {
+    const window = document.getElementById('chatbot-window');
+    const btn = document.querySelector('#chatbot-container button:last-child');
+    
+    if (window.classList.contains('hidden')) {
+        window.classList.remove('hidden');
+        btn.innerHTML = '<i class="fas fa-times"></i>';
+    } else {
+        window.classList.add('hidden');
+        btn.innerHTML = '<i class="fas fa-comment-dots"></i>';
     }
 }
 
