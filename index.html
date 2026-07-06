@@ -1469,6 +1469,7 @@ footer {
                 ofertasTitle: "🔥 Ofertas Especiales",
                 ofertasSubtitle: "Aprovecha estos descuentos exclusivos",
                 footerDescription: "Tu tienda confiable para medicamentos y hardware de última generación.",
+
                 carousel: [
                     {
                         image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop",
@@ -1500,6 +1501,7 @@ footer {
             }
         };
 
+        
 // ============================================
 // INICIALIZACIÓN MEJORADA
 // ============================================
@@ -2555,6 +2557,177 @@ function initCarousel() {
     console.log('✅ Autoplay del carrusel iniciado');
 }
 
+// ============================================
+// EDITOR DE CARRUSEL - FUNCIONES FALTANTES
+// ============================================
+
+// Abrir el editor de carrusel en el panel admin
+function editCarousel() {
+    openAdminPanel();
+    showAdminTab('carrusel');
+    renderCarouselEditor();
+}
+
+// Renderizar el editor de carrusel
+function renderCarouselEditor() {
+    const container = document.getElementById('carousel-editor');
+    if (!container) return;
+    
+    if (!S.config.carousel || S.config.carousel.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-400 py-4">No hay slides en el carrusel</p>';
+        return;
+    }
+    
+    container.innerHTML = S.config.carousel.map((slide, index) => `
+        <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <div class="w-24 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                <img src="${slide.image || 'https://via.placeholder.com/120x80'}" class="w-full h-full object-cover" alt="Slide ${index + 1}">
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-sm truncate">${slide.title || 'Sin título'}</p>
+                <p class="text-xs text-gray-500 truncate">${slide.subtitle || ''}</p>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+                <button onclick="editCarouselSlide(${index})" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition" title="Editar">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button onclick="deleteCarouselSlide(${index})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition" title="Eliminar">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button onclick="moveCarouselSlide(${index}, 'up')" class="text-gray-500 hover:bg-gray-200 p-2 rounded-lg transition" title="Subir" ${index === 0 ? 'disabled' : ''}>
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button onclick="moveCarouselSlide(${index}, 'down')" class="text-gray-500 hover:bg-gray-200 p-2 rounded-lg transition" title="Bajar" ${index === S.config.carousel.length - 1 ? 'disabled' : ''}>
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Agregar un nuevo slide al carrusel
+function addCarouselSlide() {
+    // Crear un slide por defecto
+    const newSlide = {
+        image: 'https://via.placeholder.com/1200x400/0d9488/ffffff?text=Nuevo+Slide',
+        title: 'Nuevo Slide',
+        subtitle: 'Descripción del nuevo slide'
+    };
+    
+    S.config.carousel.push(newSlide);
+    renderCarouselEditor();
+    showNotif('📤 Slide agregado. Guarda los cambios para aplicarlos.', 'info');
+}
+
+// Editar un slide existente
+function editCarouselSlide(index) {
+    const slide = S.config.carousel[index];
+    if (!slide) return;
+    
+    // Crear un modal simple para editar
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 modal-overlay';
+    modal.id = 'edit-slide-modal';
+    modal.innerHTML = `
+        <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl modal-content p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Editar Slide</h3>
+                <button onclick="document.getElementById('edit-slide-modal').remove()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Título</label>
+                    <input type="text" id="edit-slide-title" value="${slide.title || ''}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Subtítulo</label>
+                    <input type="text" id="edit-slide-subtitle" value="${slide.subtitle || ''}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">URL de la Imagen</label>
+                    <input type="url" id="edit-slide-image" value="${slide.image || ''}" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="https://...">
+                    <div class="mt-2">
+                        <img src="${slide.image || 'https://via.placeholder.com/400x200'}" class="w-full h-32 object-cover rounded-lg" id="edit-slide-preview" onerror="this.src='https://via.placeholder.com/400x200?text=Error+de+imagen'">
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="saveCarouselSlide(${index})" class="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-3 rounded-xl transition">
+                        <i class="fas fa-save mr-2"></i>Guardar
+                    </button>
+                    <button onclick="document.getElementById('edit-slide-modal').remove()" class="px-6 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // Previsualización en tiempo real
+    document.getElementById('edit-slide-image').addEventListener('input', function() {
+        const preview = document.getElementById('edit-slide-preview');
+        if (this.value) {
+            preview.src = this.value;
+        } else {
+            preview.src = 'https://via.placeholder.com/400x200?text=Sin+imagen';
+        }
+    });
+}
+
+// Guardar los cambios de un slide
+function saveCarouselSlide(index) {
+    const title = document.getElementById('edit-slide-title').value;
+    const subtitle = document.getElementById('edit-slide-subtitle').value;
+    const image = document.getElementById('edit-slide-image').value || 'https://via.placeholder.com/1200x400/0d9488/ffffff?text=Slide';
+    
+    if (S.config.carousel[index]) {
+        S.config.carousel[index] = { title, subtitle, image };
+    }
+    
+    document.getElementById('edit-slide-modal').remove();
+    renderCarouselEditor();
+    showNotif('✅ Slide actualizado. Guarda los cambios para aplicarlos.', 'success');
+}
+
+// Eliminar un slide
+function deleteCarouselSlide(index) {
+    if (!confirm(`¿Eliminar el slide "${S.config.carousel[index].title}"?`)) return;
+    
+    S.config.carousel.splice(index, 1);
+    renderCarouselEditor();
+    showNotif('🗑️ Slide eliminado. Guarda los cambios para aplicarlos.', 'info');
+}
+
+// Mover un slide (arriba/abajo)
+function moveCarouselSlide(index, direction) {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    if (newIndex < 0 || newIndex >= S.config.carousel.length) return;
+    
+    // Intercambiar elementos
+    const temp = S.config.carousel[index];
+    S.config.carousel[index] = S.config.carousel[newIndex];
+    S.config.carousel[newIndex] = temp;
+    
+    renderCarouselEditor();
+    showNotif('🔄 Orden actualizado. Guarda los cambios para aplicarlos.', 'info');
+}
+
+// Guardar el carrusel en GitHub
+async function saveCarousel() {
+    showNotif("📤 Guardando carrusel...", "info");
+    
+    const success = await saveToGitHub('config.json', S.config, 'Actualizar carrusel');
+    
+    if (success) {
+        renderCarousel();
+        showNotif("✅ Carrusel guardado correctamente", "success");
+    } else {
+        showNotif("❌ Error al guardar el carrusel", "error");
+    }
+}
 
         // ============================================
         // CATEGORÍAS Y OFERTAS
