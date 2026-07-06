@@ -799,68 +799,38 @@ async function init() {
     console.log('🚀 Iniciando MediTech...');
     
     try {
-        // 1. Cargar token guardado (si existe)
+        // 1. Cargar token (solo para admin)
         loadToken();
-        console.log('✅ Token cargado');
         
-        // 2. Inicializar autenticación
+        // 2. Cargar usuarios (con respaldo local)
         await initAuth();
-        console.log('✅ Autenticación inicializada');
         
-        // 3. Cargar configuración
+        // 3. Cargar configuración (con respaldo local)
         await cargarConfig();
-        console.log('✅ Configuración cargada');
         
-        // 4. Cargar productos
-        await cargarProductos();
-        console.log('✅ Productos cargados');
+        // 4. Cargar productos (SIEMPRE funcionará)
+        await cargarProductos(); // ✅ Esta función NUNCA falla
         
         // 5. Cargar historial y pedidos
         await cargarHistorial();
         await cargarPedidos();
-        console.log('✅ Historial y pedidos cargados');
         
-        // 6. Renderizar carrusel (CRÍTICO)
+        // 6. Renderizar todo
         renderCarousel();
-        console.log('✅ Carrusel renderizado');
-        
-        // 7. Renderizar categorías y ofertas
         renderCategorias();
         renderOfertas();
-        console.log('✅ Categorías y ofertas renderizadas');
-        
-        // 8. Aplicar textos
         applyTexts();
-        console.log('✅ Textos aplicados');
-        
-        // 9. Inicializar carrusel (autoplay)
         initCarousel();
-        console.log('✅ Carrusel inicializado con autoplay');
-        
-        // 10. Actualizar UI
         updateCartUI();
-        console.log('✅ UI actualizada');
-        
-        // 11. Registrar vista
-        registrarVista();
-        console.log('✅ Vista registrada');
         
         console.log('🎉 MediTech iniciado correctamente');
         
     } catch (error) {
-        console.error('❌ Error al iniciar MediTech:', error);
-        showNotif('❌ Error al cargar la página. Verifica la consola (F12).', 'error');
-        
-        // Intentar renderizar carrusel con datos por defecto
-        try {
-            renderCarousel();
-            renderCategorias();
-            renderOfertas();
-            applyTexts();
-            initCarousel();
-            console.log('⚠️ Renderizado con datos por defecto');
-        } catch (e) {
-            console.error('❌ Error en renderizado de respaldo:', e);
+        console.error('❌ Error al iniciar:', error);
+        // Siempre mostrar productos, incluso si hay error
+        if (S.pr.length === 0) {
+            S.pr = getProductosPorDefecto();
+            renderProducts();
         }
     }
 }
@@ -899,31 +869,21 @@ async function forzarRecarga() {
 // ============================================
 async function fetchGitHub(path) {
     try {
-        // Agregar timestamp para evitar caché
+        // 🔥 URL PÚBLICA - NO NECESITA TOKEN
         const timestamp = new Date().getTime();
-        const url = `${API}/contents/${path}?t=${timestamp}`;
+        const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${path}?t=${timestamp}`;
         
-        console.log(`📡 Fetching: ${path} (${new Date().toLocaleTimeString()})`);
+        console.log(`📡 Fetching público: ${path}`);
         
-        const res = await fetch(url, { 
-            headers: HEADERS,
-            cache: 'no-cache',  // Importante: no usar caché
-            'Cache-Control': 'no-cache'
+        const res = await fetch(url, {
+            cache: 'no-cache',
+            headers: {
+                'Accept': 'application/json'
+            }
         });
-        
-        // Log detallado del estado
-        console.log(`📊 Status: ${res.status} ${res.statusText}`);
-        
-        if (res.status === 401) {
-            console.error('❌ Token inválido o expirado');
-            showNotif('❌ Token de GitHub inválido. Actualízalo en el Panel Admin.', 'error');
-            return null;
-        }
         
         if (res.status === 404) {
             console.warn(`⚠️ Archivo no encontrado: ${path}`);
-            // Intentar crear el archivo si no existe
-            await crearArchivoSiNoExiste(path);
             return null;
         }
         
@@ -933,24 +893,11 @@ async function fetchGitHub(path) {
         }
         
         const data = await res.json();
-        console.log(`✅ ${path} cargado (${data.content ? Math.round(data.content.length/1024) : 0} KB)`);
-        
-        // Verificar que el contenido es válido
-        if (data.content) {
-            try {
-                const decoded = atob(data.content);
-                JSON.parse(decoded); // Validar que es JSON válido
-                console.log(`✅ ${path} es JSON válido`);
-            } catch (e) {
-                console.error(`❌ ${path} no es JSON válido:`, e);
-                return null;
-            }
-        }
-        
-        return data;
+        console.log(`✅ ${path} cargado (${data ? Object.keys(data).length : 0} keys)`);
+        return { content: btoa(JSON.stringify(data)) };
         
     } catch (error) {
-        console.error(`❌ Error de red al cargar ${path}:`, error);
+        console.error(`❌ Error al cargar ${path}:`, error);
         return null;
     }
 }
@@ -971,17 +918,32 @@ async function crearArchivoSiNoExiste(path) {
 }
 
 // ============================================
-// GUARDAR EN GITHUB
+// GUARDAR EN GITHUB - SOLO PARA ADMIN
 // ============================================
 async function saveToGitHub(path, data, message) {
+    // Verificar que el usuario es admin
+    if (!S.currentUser || S.currentUser.role !== 'admin') {
+        console.warn('⚠️ Solo administradores pueden guardar en GitHub');
+        showNotif('⚠️ Solo administradores pueden guardar cambios', 'warning');
+        return false;
+    }
+    
+    // Verificar que hay token
+    if (!GITHUB_TOKEN || GITHUB_TOKEN === 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
+        console.warn('⚠️ No hay token válido. Guardando solo en local.');
+        // Guardar en localStorage como respaldo
+        if (path === 'productos.json') {
+            localStorage.setItem('productos_backup', JSON.stringify(data.productos || []));
+        }
+        showNotif('⚠️ Cambios guardados solo en local (sin token)', 'warning');
+        return false;
+    }
+    
     try {
-        console.log(`💾 Guardando ${path}...`);
-        
-        // 1. Obtener el archivo actual para tener el SHA
+        console.log(`💾 Guardando ${path} en GitHub...`);
         const file = await fetchGitHub(path);
         const sha = file ? file.sha : null;
         
-        // 2. Hacer PUT para actualizar/crear el archivo
         const response = await fetch(`${API}/contents/${path}`, {
             method: "PUT",
             headers: HEADERS,
@@ -993,15 +955,18 @@ async function saveToGitHub(path, data, message) {
         });
         
         if (response.ok) {
-            console.log(`✅ ${path} guardado correctamente`);
+            console.log(`✅ ${path} guardado en GitHub`);
+            showNotif(`✅ ${path} guardado en GitHub`, 'success');
             return true;
         } else {
             const errorData = await response.json();
             console.error(`❌ Error al guardar ${path}:`, errorData.message);
+            showNotif(`❌ Error al guardar: ${errorData.message}`, 'error');
             return false;
         }
     } catch (error) {
         console.error(`❌ Excepción al guardar ${path}:`, error);
+        showNotif('❌ Error de red al guardar', 'error');
         return false;
     }
 }
@@ -1218,49 +1183,34 @@ async function initAuth() {
         function closeUserMenu() { document.getElementById('user-menu').classList.add('hidden'); }
         document.addEventListener('click', (e) => { if (!e.target.closest('#user-section')) closeUserMenu(); });
 
-        // ============================================
-        // PRODUCTOS
-        // ============================================
+// ============================================
+// CARGAR PRODUCTOS - VERSIÓN PÚBLICA
+// ============================================
 async function cargarProductos() {
-    console.log('📦 Cargando productos desde GitHub...');
+    console.log('📦 Cargando productos desde GitHub (público)...');
     
     try {
-        const file = await fetchGitHub('productos.json');
+        // 1. Intentar cargar desde GitHub (público, SIN TOKEN)
+        const data = await fetchGitHubPublic('productos.json');
         
-        if (file && file.content) {
-            try {
-                // Decodificar y parsear
-                const decoded = atob(file.content);
-                const data = JSON.parse(decoded);
-                S.pr = data.productos || [];
-                console.log(`✅ ${S.pr.length} productos cargados desde GitHub`);
-                
-                // Guardar en localStorage como backup
-                localStorage.setItem('backup_productos', JSON.stringify(S.pr));
-                
-            } catch (parseError) {
-                console.error('❌ Error parseando productos.json:', parseError);
-                // Intentar recuperar del localStorage
-                const backup = localStorage.getItem('backup_productos');
-                if (backup) {
-                    S.pr = JSON.parse(backup);
-                    console.log(`⚠️ Usando backup local: ${S.pr.length} productos`);
-                    showNotif('⚠️ Usando copia local de productos', 'warning');
-                } else {
-                    S.pr = [];
-                }
-            }
+        if (data && data.productos && data.productos.length > 0) {
+            S.pr = data.productos;
+            console.log(`✅ ${S.pr.length} productos cargados desde GitHub público`);
+            localStorage.setItem('productos_backup', JSON.stringify(S.pr));
         } else {
-            console.warn('⚠️ No se encontró productos.json');
-            // Intentar recuperar del localStorage
-            const backup = localStorage.getItem('backup_productos');
+            // 2. Si no hay productos en GitHub, usar backup local
+            const backup = localStorage.getItem('productos_backup');
             if (backup) {
                 S.pr = JSON.parse(backup);
                 console.log(`⚠️ Usando backup local: ${S.pr.length} productos`);
+                showNotif('⚠️ Usando productos guardados localmente', 'warning');
             } else {
-                S.pr = [];
-                // Crear productos de ejemplo si no hay nada
-                await crearProductosEjemplo();
+                // 3. Si no hay nada, usar productos por defecto
+                S.pr = getProductosPorDefecto();
+                console.log(`📝 Productos por defecto: ${S.pr.length}`);
+                localStorage.setItem('productos_backup', JSON.stringify(S.pr));
+                // Intentar guardar en GitHub (solo si el admin tiene token)
+                tryGuardarEnGitHub('productos.json', { productos: S.pr });
             }
         }
         
@@ -1268,10 +1218,40 @@ async function cargarProductos() {
         renderAdminList();
         
     } catch (error) {
-        console.error('❌ Error crítico en cargarProductos:', error);
-        S.pr = [];
+        console.error('❌ Error cargando productos:', error);
+        // Usar productos por defecto
+        S.pr = getProductosPorDefecto();
         renderProducts();
         renderAdminList();
+        showNotif('⚠️ Usando productos de ejemplo', 'warning');
+    }
+}
+
+// Función para leer desde GitHub público (SIN TOKEN)
+async function fetchGitHubPublic(path) {
+    try {
+        const timestamp = new Date().getTime();
+        const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${path}?t=${timestamp}`;
+        
+        console.log(`📡 Leyendo: ${url}`);
+        
+        const res = await fetch(url, {
+            cache: 'no-cache',
+            headers: { 'Accept': 'application/json' }
+        });
+        
+        if (!res.ok) {
+            console.warn(`⚠️ No se pudo leer ${path}: ${res.status}`);
+            return null;
+        }
+        
+        const data = await res.json();
+        console.log(`✅ ${path} leído correctamente`);
+        return data;
+        
+    } catch (error) {
+        console.error(`❌ Error leyendo ${path}:`, error);
+        return null;
     }
 }
 
@@ -2010,6 +1990,22 @@ function initCarousel() {
             document.getElementById('stat-today').textContent = todayViews;
         }
 
+// ============================================
+// CHATBOT - FUNCIÓN PARA ABRIR/CERRAR
+// ============================================
+function toggleChat() {
+    const window = document.getElementById('chatbot-window');
+    const btn = document.querySelector('#chatbot-container button:last-child');
+    
+    if (window.classList.contains('hidden')) {
+        window.classList.remove('hidden');
+        btn.innerHTML = '<i class="fas fa-times"></i>';
+    } else {
+        window.classList.add('hidden');
+        btn.innerHTML = '<i class="fas fa-comment-dots"></i>';
+    }
+}
+
         // ============================================
         // CHATBOT CON IA (Pollinations AI - Gratis, sin API key)
         // ============================================
@@ -2160,22 +2156,6 @@ async function sendMessage() {
         sendBtn.disabled = false;
         sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
         input.focus();
-    }
-}
-
-// ============================================
-// CHATBOT - FUNCIÓN PARA ABRIR/CERRAR
-// ============================================
-function toggleChat() {
-    const window = document.getElementById('chatbot-window');
-    const btn = document.querySelector('#chatbot-container button:last-child');
-    
-    if (window.classList.contains('hidden')) {
-        window.classList.remove('hidden');
-        btn.innerHTML = '<i class="fas fa-times"></i>';
-    } else {
-        window.classList.add('hidden');
-        btn.innerHTML = '<i class="fas fa-comment-dots"></i>';
     }
 }
 
