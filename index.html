@@ -389,7 +389,7 @@
                 <h2 class="text-2xl font-bold"><i class="fas fa-cog mr-2"></i>Panel de Administración</h2>
                 <button onclick="closeAdminPanel()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center"><i class="fas fa-times text-xl"></i></button>
             </div>
-            
+
             <!-- TABS -->
             <div class="border-b border-gray-200 px-6 pt-4 flex gap-2 overflow-x-auto">
                 <button onclick="showAdminTab('productos')" class="admin-tab active px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap" data-tab="productos">
@@ -596,6 +596,7 @@
                         </div>
                     </div>
                 </div>
+
 <!-- TAB CONFIGURACIÓN -->
 <div id="tab-config" class="admin-tab-content hidden">
     <h3 class="text-xl font-bold mb-4">⚙️ Configuración del Sistema</h3>
@@ -684,6 +685,9 @@
                 <i class="fas fa-upload mr-2"></i>Importar Backup
                 <input type="file" accept=".json" onchange="importBackup(event)" class="hidden">
             </label>
+            <button onclick="forzarRecarga()" class="mt-4 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-semibold transition">
+                <i class="fas fa-sync mr-2"></i>Forzar Recarga de Datos
+            </button>
         </div>
     </div>
 </div>
@@ -861,19 +865,54 @@ async function init() {
     }
 }
 
+// ============================================
+// FORZAR RECARGA DE DATOS DESDE GITHUB
+// ============================================
+async function forzarRecarga() {
+    console.log('🔄 Forzando recarga desde GitHub...');
+    showNotif('🔄 Recargando datos desde GitHub...', 'info');
+    
+    // Limpiar caché del navegador para las peticiones
+    const cache = await caches.keys();
+    cache.forEach(key => caches.delete(key));
+    
+    // Recargar cada archivo
+    await cargarConfig();
+    await cargarProductos();
+    await cargarHistorial();
+    await cargarPedidos();
+    
+    renderProducts();
+    renderAdminList();
+    renderCarousel();
+    renderCategorias();
+    renderOfertas();
+    applyTexts();
+    updateCartUI();
+    
+    showNotif('✅ Datos recargados desde GitHub', 'success');
+    console.log('✅ Recarga completada');
+}
 
 // ============================================
-// GITHUB API - VERSIÓN MEJORADA
+// FETCH GITHUB - VERSIÓN CON CACHE-BUSTING
 // ============================================
 async function fetchGitHub(path) {
     try {
-        const url = `${API}/contents/${path}`;
-        console.log(`📡 Fetching: ${path}`);
+        // Agregar timestamp para evitar caché
+        const timestamp = new Date().getTime();
+        const url = `${API}/contents/${path}?t=${timestamp}`;
+        
+        console.log(`📡 Fetching: ${path} (${new Date().toLocaleTimeString()})`);
         
         const res = await fetch(url, { 
             headers: HEADERS,
-            cache: 'no-cache'
+            cache: 'no-cache',  // Importante: no usar caché
+            'Cache-Control': 'no-cache'
         });
+        
+        // Log detallado del estado
+        console.log(`📊 Status: ${res.status} ${res.statusText}`);
         
         if (res.status === 401) {
             console.error('❌ Token inválido o expirado');
@@ -883,6 +922,8 @@ async function fetchGitHub(path) {
         
         if (res.status === 404) {
             console.warn(`⚠️ Archivo no encontrado: ${path}`);
+            // Intentar crear el archivo si no existe
+            await crearArchivoSiNoExiste(path);
             return null;
         }
         
@@ -892,13 +933,41 @@ async function fetchGitHub(path) {
         }
         
         const data = await res.json();
-        console.log(`✅ ${path} cargado correctamente (${data.content ? data.content.length : 0} bytes)`);
+        console.log(`✅ ${path} cargado (${data.content ? Math.round(data.content.length/1024) : 0} KB)`);
+        
+        // Verificar que el contenido es válido
+        if (data.content) {
+            try {
+                const decoded = atob(data.content);
+                JSON.parse(decoded); // Validar que es JSON válido
+                console.log(`✅ ${path} es JSON válido`);
+            } catch (e) {
+                console.error(`❌ ${path} no es JSON válido:`, e);
+                return null;
+            }
+        }
+        
         return data;
         
     } catch (error) {
         console.error(`❌ Error de red al cargar ${path}:`, error);
         return null;
     }
+}
+
+// Función para crear archivo si no existe
+async function crearArchivoSiNoExiste(path) {
+    console.log(`📝 Creando archivo: ${path}`);
+    
+    let contenido = {};
+    if (path === 'productos.json') contenido = { productos: [] };
+    else if (path === 'config.json') contenido = S.config;
+    else if (path === 'usuarios.json') contenido = { usuarios: [] };
+    else if (path === 'pedidos.json') contenido = { pedidos: [] };
+    else if (path === 'historial.json') contenido = { historial: [] };
+    else return;
+    
+    await saveToGitHub(path, contenido, `Crear ${path} automáticamente`);
 }
 
 // ============================================
@@ -1153,32 +1222,59 @@ async function initAuth() {
         // PRODUCTOS
         // ============================================
 async function cargarProductos() {
+    console.log('📦 Cargando productos desde GitHub...');
+    
     try {
         const file = await fetchGitHub('productos.json');
+        
         if (file && file.content) {
             try {
-                const data = JSON.parse(atob(file.content));
+                // Decodificar y parsear
+                const decoded = atob(file.content);
+                const data = JSON.parse(decoded);
                 S.pr = data.productos || [];
-                console.log(`✅ ${S.pr.length} productos cargados`);
+                console.log(`✅ ${S.pr.length} productos cargados desde GitHub`);
+                
+                // Guardar en localStorage como backup
+                localStorage.setItem('backup_productos', JSON.stringify(S.pr));
+                
             } catch (parseError) {
-                console.error('❌ Error parseando productos:', parseError);
-                S.pr = [];
+                console.error('❌ Error parseando productos.json:', parseError);
+                // Intentar recuperar del localStorage
+                const backup = localStorage.getItem('backup_productos');
+                if (backup) {
+                    S.pr = JSON.parse(backup);
+                    console.log(`⚠️ Usando backup local: ${S.pr.length} productos`);
+                    showNotif('⚠️ Usando copia local de productos', 'warning');
+                } else {
+                    S.pr = [];
+                }
             }
         } else {
-            console.warn('⚠️ No se encontró productos.json, creando...');
-            S.pr = [];
-            // Crear archivo de productos vacío
-            await saveToGitHub('productos.json', { productos: [] }, 'Crear productos.json');
+            console.warn('⚠️ No se encontró productos.json');
+            // Intentar recuperar del localStorage
+            const backup = localStorage.getItem('backup_productos');
+            if (backup) {
+                S.pr = JSON.parse(backup);
+                console.log(`⚠️ Usando backup local: ${S.pr.length} productos`);
+            } else {
+                S.pr = [];
+                // Crear productos de ejemplo si no hay nada
+                await crearProductosEjemplo();
+            }
         }
+        
         renderProducts();
         renderAdminList();
+        
     } catch (error) {
-        console.error('❌ Error en cargarProductos:', error);
+        console.error('❌ Error crítico en cargarProductos:', error);
         S.pr = [];
         renderProducts();
         renderAdminList();
     }
 }
+
 
         function renderProducts() {
             const grid = document.getElementById('portada-productos');
