@@ -732,11 +732,10 @@
         // ============================================
         // Token por defecto (se puede cambiar desde el panel admin)
         let GITHUB_TOKEN = localStorage.getItem('github_token') || "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";
-        let HEADERS = { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" };
         const GITHUB_USER = "calm291094-del";
         const GITHUB_REPO = "meditech-tienda";
         const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
-        const HEADERS = { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" };
+        let HEADERS = { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" };
         
         // Estado global
         let S = { 
