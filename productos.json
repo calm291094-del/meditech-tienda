@@ -1,24 +1,3 @@
 {
-  "productos": [
-    {
-      "id": "p1783133897791",
-      "name": "Enalapril ",
-      "category": "medicamento",
-      "price": 280,
-      "desc": "Cuida tÃº presiÃ³n ",
-      "stock": 10,
-      "image": "",
-      "feat": true
-    },
-    {
-      "id": "p1783134018521",
-      "name": "Loratadina",
-      "category": "medicamento",
-      "price": 230,
-      "desc": "Cuidarte",
-      "stock": 10,
-      "image": "",
-      "feat": true
-    }
-  ]
+  "productos": []
 }
