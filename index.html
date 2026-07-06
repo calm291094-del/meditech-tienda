@@ -2715,17 +2715,41 @@ function moveCarouselSlide(index, direction) {
     showNotif('🔄 Orden actualizado. Guarda los cambios para aplicarlos.', 'info');
 }
 
-// Guardar el carrusel en GitHub
+// ============================================
+// GUARDAR CARRUSEL - CORREGIDA
+// ============================================
 async function saveCarousel() {
+    // Verificar que el usuario es admin
+    if (!S.currentUser || S.currentUser.role !== 'admin') {
+        showNotif('❌ Solo administradores pueden guardar cambios', 'error');
+        return;
+    }
+    
     showNotif("📤 Guardando carrusel...", "info");
     
-    const success = await saveToGitHub('config.json', S.config, 'Actualizar carrusel');
-    
-    if (success) {
-        renderCarousel();
-        showNotif("✅ Carrusel guardado correctamente", "success");
-    } else {
-        showNotif("❌ Error al guardar el carrusel", "error");
+    try {
+        // 1. Guardar en localStorage como respaldo
+        localStorage.setItem('config_backup', JSON.stringify(S.config));
+        
+        // 2. Intentar guardar en GitHub
+        const success = await saveToGitHub('config.json', S.config, 'Actualizar carrusel desde MediTech');
+        
+        if (success) {
+            // 3. Recargar el carrusel en la página
+            renderCarousel();
+            // 4. Reiniciar el autoplay
+            initCarousel();
+            showNotif("✅ Carrusel guardado correctamente en GitHub", "success");
+        } else {
+            // Si falla GitHub, al menos guardamos en local
+            showNotif("⚠️ Cambios guardados solo localmente (sin token)", "warning");
+            // Aún así actualizamos la vista
+            renderCarousel();
+            initCarousel();
+        }
+    } catch (error) {
+        console.error('❌ Error guardando carrusel:', error);
+        showNotif('❌ Error al guardar: ' + error.message, 'error');
     }
 }
 
