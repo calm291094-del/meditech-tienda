@@ -5,9 +5,9 @@
       "name": "Enalapril",
       "category": "medicamento",
       "price": 280,
-      "desc": "Cuida tÃº presiÃ³n",
+      "desc": "El enalapril es un medicamento que sirve para tratar la hipertensión, es decir, la tensión alta de la sangre.\nEl enalapril también puede sirve para tratar el fallo cardíaco. El fallo cardíaco es un problema del corazón. El corazón no trabaja con fuerza suficiente para impulsar la sangre a todo el cuerpo. Las personas con fallo cardíaco se sienten cansadas cuando hacen un pequeño esfuerzo o les cuesta respirar.",
       "stock": 10,
-      "image": "",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0i3E3vBS_rqo4GkMyjcp8L3dX1xmO_rN_Fz0FMOO49Q&s=10",
       "feat": true,
       "available": true
     },
