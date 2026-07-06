@@ -7,7 +7,64 @@
   "ofertasTitle": "🔥 Ofertas Especiales",
   "ofertasSubtitle": "Aprovecha estos descuentos exclusivos",
   "footerDescription": "Tu tienda confiable para medicamentos y hardware de última generación.",
-  "carousel": [...],
-  "categorias": [...],
-  "ofertas": [...]
+  "carousel": [
+    {
+      "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop",
+      "title": "Medicamentos de Calidad",
+      "subtitle": "Los mejores precios en productos farmacéuticos certificados"
+    },
+    {
+      "image": "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1200&h=400&fit=crop",
+      "title": "Tecnología de Última Generación",
+      "subtitle": "Componentes de PC y hardware gaming al mejor precio"
+    },
+    {
+      "image": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=400&fit=crop",
+      "title": "Ofertas Especiales",
+      "subtitle": "Descuentos exclusivos por tiempo limitado"
+    }
+  ],
+  "categorias": [
+    {
+      "nombre": "Medicamentos",
+      "icono": "fa-pills",
+      "color": "from-teal-500 to-cyan-600",
+      "count": "+200 productos"
+    },
+    {
+      "nombre": "Tecnología",
+      "icono": "fa-laptop",
+      "color": "from-blue-500 to-indigo-600",
+      "count": "+150 productos"
+    },
+    {
+      "nombre": "Salud",
+      "icono": "fa-heart-pulse",
+      "color": "from-green-500 to-emerald-600",
+      "count": "+100 productos"
+    },
+    {
+      "nombre": "Gaming",
+      "icono": "fa-gamepad",
+      "color": "from-purple-500 to-pink-600",
+      "count": "+80 productos"
+    }
+  ],
+  "ofertas": [
+    {
+      "titulo": "--%",
+      "descripcion": "Medicamentos",
+      "detalle": "En toda la línea de analgésicos"
+    },
+    {
+      "titulo": "--%",
+      "descripcion": "Hardware PC",
+      "detalle": "Componentes seleccionados"
+    },
+    {
+      "titulo": "ENVÍO",
+      "descripcion": "Con domicilio por costo adicional.",
+      "detalle": "Segun zona de residencia."
+    }
+  ]
 }
