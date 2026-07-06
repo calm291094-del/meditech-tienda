@@ -7,8 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- EmailJS para enviar correos desde el frontend -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * { font-family: 'Poppins', sans-serif; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -37,20 +35,78 @@
         .carousel-dot.active { background: white; width: 30px; border-radius: 6px; }
         
         .badge-new { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+        .badge-soldout { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.8); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
         .category-card { transition: all 0.3s ease; }
         .category-card:hover { transform: scale(1.05); }
         .modal-overlay { animation: fadeIn 0.3s ease; }
         .modal-content { animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* PANEL ADMIN MEJORADO */
+        /* EDIT BUTTONS */
+        .edit-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(245, 158, 11, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s;
+            z-index: 20;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .edit-btn:hover { background: #d97706; transform: scale(1.1); }
+        body.admin-mode .edit-btn { display: flex; }
+        
+        /* ADMIN TABS */
         .admin-tab { transition: all 0.2s; cursor: pointer; }
         .admin-tab.active { background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); color: white; }
         .admin-tab:not(.active):hover { background: #f0fdfa; }
         
-        /* CARRITO */
-        .cart-item { transition: all 0.2s; }
-        .cart-item:hover { background: #f9fafb; }
+        /* CHATBOT */
+        .typing-indicator { display: flex; gap: 4px; padding: 8px; }
+        .typing-dot { width: 8px; height: 8px; border-radius: 50%; background: #0d9488; animation: typing 1.4s infinite; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.7; } 30% { transform: translateY(-10px); opacity: 1; } }
+        
+        /* QUICK VIEW MODAL */
+        .quick-view-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .quick-view-overlay.active { display: flex; }
+        
+        /* SEARCH BAR */
+        .search-container { position: relative; }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            z-index: 50;
+        }
+        .search-results.active { display: block; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -65,23 +121,28 @@
                     </div>
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900 tracking-tight">Medi<span class="gradient-text">Tech</span></h1>
-                        <p class="text-xs text-gray-500 -mt-1">Salud & Tecnología</p>
+                        <p class="text-xs text-gray-500 -mt-1" id="header-subtitle">Salud & Tecnología</p>
                     </div>
                 </div>
-                <nav class="hidden md:flex gap-8 font-medium text-gray-600">
+                
+                <!-- BARRA DE BÚSQUEDA -->
+                <div class="hidden md:flex flex-1 max-w-md mx-8 search-container">
+                    <input type="text" id="search-input" placeholder="Buscar productos..." class="w-full px-4 py-2 border-2 border-gray-200 rounded-full focus:border-teal-500 outline-none transition" oninput="searchProducts(this.value)">
+                    <i class="fas fa-search absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <div id="search-results" class="search-results"></div>
+                </div>
+                
+                <nav class="hidden md:flex gap-6 font-medium text-gray-600">
                     <a href="#inicio" class="hover:text-teal-600 transition">Inicio</a>
                     <a href="#productos" class="hover:text-teal-600 transition">Productos</a>
                     <a href="#categorias" class="hover:text-teal-600 transition">Categorías</a>
                     <a href="#ofertas" class="hover:text-teal-600 transition">Ofertas</a>
                 </nav>
                 <div class="flex items-center gap-4">
-                    <!-- CARRITO (Solo visible si está logueado) -->
                     <button id="cart-btn" onclick="openCart()" class="relative p-2 text-gray-600 hover:text-teal-600 transition hidden">
                         <i class="fas fa-shopping-cart text-xl"></i>
                         <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
                     </button>
-                    
-                    <!-- BOTÓN USUARIO -->
                     <div id="user-section" class="relative">
                         <button id="user-btn" onclick="toggleUserMenu()" class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full transition">
                             <i class="fas fa-user-circle text-xl text-gray-600"></i>
@@ -122,31 +183,10 @@
     </header>
 
     <!-- CARRUSEL HERO -->
-    <section id="inicio" class="max-w-7xl mx-auto px-4 py-8">
+    <section id="inicio" class="max-w-7xl mx-auto px-4 py-8 relative">
+        <button class="edit-btn" onclick="editCarousel()" title="Editar carrusel"><i class="fas fa-edit"></i></button>
         <div class="carousel">
-            <div class="carousel-inner" id="carousel-inner">
-                <div class="carousel-item">
-                    <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop" alt="Medicamentos">
-                    <div class="carousel-caption">
-                        <h3 class="text-2xl font-bold mb-2">Medicamentos de Calidad</h3>
-                        <p class="text-sm opacity-90">Los mejores precios en productos farmacéuticos certificados</p>
-                    </div>
-                </div>
-                <div class="carousel-item">
-                    <img src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1200&h=400&fit=crop" alt="Tecnología">
-                    <div class="carousel-caption">
-                        <h3 class="text-2xl font-bold mb-2">Tecnología de Última Generación</h3>
-                        <p class="text-sm opacity-90">Componentes de PC y hardware gaming al mejor precio</p>
-                    </div>
-                </div>
-                <div class="carousel-item">
-                    <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=400&fit=crop" alt="Ofertas">
-                    <div class="carousel-caption">
-                        <h3 class="text-2xl font-bold mb-2">Ofertas Especiales</h3>
-                        <p class="text-sm opacity-90">Descuentos exclusivos por tiempo limitado</p>
-                    </div>
-                </div>
-            </div>
+            <div class="carousel-inner" id="carousel-inner"></div>
             <button class="carousel-btn prev" onclick="moveCarousel(-1)"><i class="fas fa-chevron-left"></i></button>
             <button class="carousel-btn next" onclick="moveCarousel(1)"><i class="fas fa-chevron-right"></i></button>
             <div class="carousel-dots" id="carousel-dots"></div>
@@ -154,54 +194,42 @@
     </section>
 
     <!-- CATEGORÍAS -->
-    <section id="categorias" class="py-16 px-4 bg-white">
+    <section id="categorias" class="py-16 px-4 bg-white relative">
+        <button class="edit-btn" onclick="editSection('categorias')" title="Editar categoría"><i class="fas fa-edit"></i></button>
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-12">
-                <h3 class="text-4xl font-bold text-gray-900 mb-3">Explora por Categoría</h3>
-                <p class="text-gray-600">Encuentra exactamente lo que necesitas</p>
+                <h3 class="text-4xl font-bold text-gray-900 mb-3" id="categorias-title">Explora por Categoría</h3>
+                <p class="text-gray-600" id="categorias-subtitle">Encuentra exactamente lo que necesitas</p>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div class="category-card bg-gradient-to-br from-teal-500 to-cyan-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
-                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-pills text-4xl"></i>
-                    </div>
-                    <h4 class="text-xl font-bold mb-2">Medicamentos</h4>
-                    <p class="text-sm opacity-90">+200 productos</p>
-                </div>
-                <div class="category-card bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
-                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-laptop text-4xl"></i>
-                    </div>
-                    <h4 class="text-xl font-bold mb-2">Tecnología</h4>
-                    <p class="text-sm opacity-90">+150 productos</p>
-                </div>
-                <div class="category-card bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
-                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-heart-pulse text-4xl"></i>
-                    </div>
-                    <h4 class="text-xl font-bold mb-2">Salud</h4>
-                    <p class="text-sm opacity-90">+100 productos</p>
-                </div>
-                <div class="category-card bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
-                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-gamepad text-4xl"></i>
-                    </div>
-                    <h4 class="text-xl font-bold mb-2">Gaming</h4>
-                    <p class="text-sm opacity-90">+80 productos</p>
-                </div>
-            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6" id="categorias-grid"></div>
         </div>
     </section>
 
     <!-- PRODUCTOS -->
-    <section id="productos" class="py-16 px-4 bg-gray-50">
+    <section id="productos" class="py-16 px-4 bg-gray-50 relative">
+        <button class="edit-btn" onclick="editSection('productos')" title="Editar productos"><i class="fas fa-edit"></i></button>
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-end mb-10">
                 <div>
-                    <h3 class="text-4xl font-bold text-gray-900 mb-2">🌟 Productos Destacados</h3>
-                    <p class="text-gray-600">Los más populares entre nuestros clientes</p>
+                    <h3 class="text-4xl font-bold text-gray-900 mb-2" id="productos-title">🌟 Productos Destacados</h3>
+                    <p class="text-gray-600" id="productos-subtitle">Los más populares entre nuestros clientes</p>
                 </div>
-                <span class="text-sm text-gray-500 font-medium bg-white px-4 py-2 rounded-full shadow-sm" id="product-total-label">Cargando...</span>
+                <div class="flex items-center gap-3">
+                    <select id="filter-category" onchange="filterProducts()" class="px-4 py-2 border-2 border-gray-200 rounded-full focus:border-teal-500 outline-none">
+                        <option value="">Todas las categorías</option>
+                        <option value="medicamento">💊 Medicamentos</option>
+                        <option value="tecnologia">💻 Tecnología</option>
+                        <option value="salud">🩺 Salud</option>
+                        <option value="gaming">🎮 Gaming</option>
+                    </select>
+                    <select id="sort-by" onchange="filterProducts()" class="px-4 py-2 border-2 border-gray-200 rounded-full focus:border-teal-500 outline-none">
+                        <option value="default">Ordenar por</option>
+                        <option value="price-asc">Precio: Menor a Mayor</option>
+                        <option value="price-desc">Precio: Mayor a Menor</option>
+                        <option value="name">Nombre A-Z</option>
+                    </select>
+                    <span class="text-sm text-gray-500 font-medium bg-white px-4 py-2 rounded-full shadow-sm" id="product-total-label">Cargando...</span>
+                </div>
             </div>
             <div id="portada-productos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <p class="col-span-full text-center py-16 text-gray-400">
@@ -213,37 +241,20 @@
     </section>
 
     <!-- OFERTAS -->
-    <section id="ofertas" class="py-16 px-4 bg-gradient-to-br from-orange-500 to-red-600 text-white">
+    <section id="ofertas" class="py-16 px-4 bg-gradient-to-br from-orange-500 to-red-600 text-white relative">
+        <button class="edit-btn" onclick="editSection('ofertas')" title="Editar ofertas" style="background: rgba(255,255,255,0.9); color: #f59e0b;"><i class="fas fa-edit"></i></button>
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-12">
-                <h3 class="text-4xl font-bold mb-3">🔥 Ofertas Especiales</h3>
-                <p class="opacity-90">Aprovecha estos descuentos exclusivos</p>
+                <h3 class="text-4xl font-bold mb-3" id="ofertas-title">🔥 Ofertas Especiales</h3>
+                <p class="opacity-90" id="ofertas-subtitle">Aprovecha estos descuentos exclusivos</p>
             </div>
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
-                    <div class="text-5xl font-bold mb-2">20%</div>
-                    <p class="text-lg font-semibold mb-2">Medicamentos</p>
-                    <p class="text-sm opacity-80 mb-4">En toda la línea de analgésicos</p>
-                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Ver productos</button>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
-                    <div class="text-5xl font-bold mb-2">15%</div>
-                    <p class="text-lg font-semibold mb-2">Hardware PC</p>
-                    <p class="text-sm opacity-80 mb-4">Componentes seleccionados</p>
-                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Ver productos</button>
-                </div>
-                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
-                    <div class="text-5xl font-bold mb-2">ENVÍO</div>
-                    <p class="text-lg font-semibold mb-2">Gratis</p>
-                    <p class="text-sm opacity-80 mb-4">En compras mayores a $50</p>
-                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Comprar ahora</button>
-                </div>
-            </div>
+            <div class="grid md:grid-cols-3 gap-6" id="ofertas-grid"></div>
         </div>
     </section>
 
     <!-- FOOTER -->
-    <footer class="bg-gray-900 text-gray-300 py-12 mt-12">
+    <footer class="bg-gray-900 text-gray-300 py-12 mt-12 relative">
+        <button class="edit-btn" onclick="editSection('footer')" title="Editar footer" style="background: rgba(255,255,255,0.9); color: #f59e0b;"><i class="fas fa-edit"></i></button>
         <div class="max-w-7xl mx-auto px-4">
             <div class="grid md:grid-cols-4 gap-8 mb-8">
                 <div>
@@ -253,7 +264,7 @@
                         </div>
                         <h4 class="text-xl font-bold text-white">MediTech</h4>
                     </div>
-                    <p class="text-sm opacity-70 leading-relaxed">Tu tienda confiable para medicamentos y hardware de última generación.</p>
+                    <p class="text-sm opacity-70 leading-relaxed" id="footer-description">Tu tienda confiable para medicamentos y hardware de última generación.</p>
                 </div>
                 <div>
                     <h5 class="font-semibold text-white mb-4">Enlaces</h5>
@@ -305,11 +316,6 @@
                 </div>
                 <button type="submit" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-3 rounded-xl transition shadow-lg">Iniciar Sesión</button>
                 <p class="text-center text-sm text-gray-600">¿No tienes cuenta? <button type="button" onclick="closeLoginModal(); openRegisterModal();" class="text-teal-600 font-semibold hover:underline">Regístrate aquí</button></p>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-                    <p class="font-semibold text-blue-900 mb-1">💡 Usuario Root:</p>
-                    <p class="text-blue-700">Usuario: <code class="bg-blue-100 px-2 py-1 rounded">root</code></p>
-                    <p class="text-blue-700">Contraseña: <code class="bg-blue-100 px-2 py-1 rounded">Root*4815162342+-</code></p>
-                </div>
             </form>
         </div>
     </div>
@@ -369,6 +375,13 @@
         </div>
     </div>
 
+    <!-- QUICK VIEW MODAL -->
+    <div id="quick-view" class="quick-view-overlay" onclick="if(event.target===this) closeQuickView()">
+        <div class="bg-white rounded-3xl max-w-3xl w-full shadow-2xl overflow-hidden max-h-[90vh] flex flex-col modal-content">
+            <div id="quick-view-content"></div>
+        </div>
+    </div>
+
     <!-- PANEL ADMIN PROFESIONAL -->
     <div id="admin-panel" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm overflow-y-auto p-4">
         <div class="bg-white rounded-3xl max-w-6xl w-full mx-auto mt-10 shadow-2xl overflow-hidden fade-in">
@@ -382,6 +395,12 @@
                 <button onclick="showAdminTab('productos')" class="admin-tab active px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap" data-tab="productos">
                     <i class="fas fa-box mr-2"></i>Productos
                 </button>
+                <button onclick="showAdminTab('carrusel')" class="admin-tab px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap" data-tab="carrusel">
+                    <i class="fas fa-images mr-2"></i>Carrusel
+                </button>
+                <button onclick="showAdminTab('textos')" class="admin-tab px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap" data-tab="textos">
+                    <i class="fas fa-font mr-2"></i>Textos
+                </button>
                 <button onclick="showAdminTab('usuarios')" class="admin-tab px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap" data-tab="usuarios">
                     <i class="fas fa-users mr-2"></i>Usuarios
                 </button>
@@ -393,6 +412,9 @@
                 </button>
                 <button onclick="showAdminTab('estadisticas')" class="admin-tab px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap" data-tab="estadisticas">
                     <i class="fas fa-chart-line mr-2"></i>Estadísticas
+                </button>
+                <button onclick="showAdminTab('config')" class="admin-tab px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap" data-tab="config">
+                    <i class="fas fa-key mr-2"></i>Configuración
                 </button>
             </div>
             
@@ -423,9 +445,18 @@
                                         <input type="number" id="prod-price" required step="0.01" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
                                     </div>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Stock</label>
-                                    <input type="number" id="prod-stock" required min="0" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Stock</label>
+                                        <input type="number" id="prod-stock" required min="0" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
+                                        <select id="prod-available" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white">
+                                            <option value="true">✅ Disponible</option>
+                                            <option value="false">❌ Agotado</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción</label>
@@ -454,6 +485,60 @@
                             <h3 class="text-xl font-bold mb-4">Inventario (<span id="admin-count">0</span>)</h3>
                             <div id="admin-list" class="space-y-3 max-h-[600px] overflow-y-auto pr-2"></div>
                         </div>
+                    </div>
+                </div>
+                
+                <!-- TAB CARRUSEL -->
+                <div id="tab-carrusel" class="admin-tab-content hidden">
+                    <h3 class="text-xl font-bold mb-4">Editar Carrusel</h3>
+                    <div id="carousel-editor" class="space-y-4"></div>
+                    <button onclick="addCarouselSlide()" class="mt-4 bg-teal-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-teal-700 transition">
+                        <i class="fas fa-plus mr-2"></i>Agregar Slide
+                    </button>
+                    <button onclick="saveCarousel()" class="mt-4 bg-gradient-to-r from-teal-600 to-cyan-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-teal-700 hover:to-cyan-700 transition">
+                        <i class="fas fa-save mr-2"></i>Guardar Carrusel
+                    </button>
+                </div>
+                
+                <!-- TAB TEXTOS -->
+                <div id="tab-textos" class="admin-tab-content hidden">
+                    <h3 class="text-xl font-bold mb-4">Editar Textos de la Página</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Subtítulo del Header</label>
+                            <input type="text" id="edit-header-subtitle" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Título de Categorías</label>
+                            <input type="text" id="edit-categorias-title" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Subtítulo de Categorías</label>
+                            <input type="text" id="edit-categorias-subtitle" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Título de Productos</label>
+                            <input type="text" id="edit-productos-title" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Subtítulo de Productos</label>
+                            <input type="text" id="edit-productos-subtitle" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Título de Ofertas</label>
+                            <input type="text" id="edit-ofertas-title" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Subtítulo de Ofertas</label>
+                            <input type="text" id="edit-ofertas-subtitle" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Descripción del Footer</label>
+                            <textarea id="edit-footer-description" rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none resize-none"></textarea>
+                        </div>
+                        <button onclick="saveTexts()" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-bold py-3 rounded-xl transition">
+                            <i class="fas fa-save mr-2"></i>Guardar Textos
+                        </button>
                     </div>
                 </div>
                 
@@ -511,26 +596,129 @@
                         </div>
                     </div>
                 </div>
+<!-- TAB CONFIGURACIÓN -->
+<div id="tab-config" class="admin-tab-content hidden">
+    <h3 class="text-xl font-bold mb-4">⚙️ Configuración del Sistema</h3>
+    
+    <!-- Token de GitHub -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200 mb-6">
+        <h4 class="font-bold text-lg mb-3 flex items-center gap-2">
+            <i class="fas fa-key text-blue-600"></i>
+            Token de GitHub
+        </h4>
+        <p class="text-sm text-gray-600 mb-3">
+            Si tu token deja de funcionar, puedes cambiarlo aquí sin necesidad de editar el código HTML.
+        </p>
+        <div class="space-y-3">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Token actual</label>
+                <div class="flex gap-2">
+                    <input type="password" id="current-token-display" readonly 
+                           class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 font-mono text-sm"
+                           value="">
+                    <button onclick="toggleTokenVisibility()" class="px-4 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl transition">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Nuevo token</label>
+                <input type="text" id="new-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none font-mono text-sm">
+                <p class="text-xs text-gray-500 mt-2">
+                    💡 Crea uno nuevo en: <a href="https://github.com/settings/tokens/new" target="_blank" class="text-teal-600 hover:underline">github.com/settings/tokens/new</a>
+                </p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="updateToken()" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3 rounded-xl transition">
+                    <i class="fas fa-save mr-2"></i>Actualizar Token
+                </button>
+                <button onclick="testToken()" class="px-6 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition">
+                    <i class="fas fa-vial mr-2"></i>Probar
+                </button>
+            </div>
+            <div id="token-status" class="hidden p-3 rounded-lg text-sm"></div>
+        </div>
+    </div>
+    
+    <!-- Información del sistema -->
+    <div class="bg-gradient-to-r from-gray-50 to-slate-50 p-6 rounded-xl border-2 border-gray-200">
+        <h4 class="font-bold text-lg mb-3 flex items-center gap-2">
+            <i class="fas fa-info-circle text-gray-600"></i>
+            Información del Sistema
+        </h4>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+            <div class="bg-white p-4 rounded-lg border border-gray-200">
+                <p class="text-gray-500">Repositorio</p>
+                <p class="font-mono font-semibold" id="info-repo">-</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-gray-200">
+                <p class="text-gray-500">Tipo de Token</p>
+                <p class="font-mono font-semibold" id="info-token-type">-</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-gray-200">
+                <p class="text-gray-500">Última sincronización</p>
+                <p class="font-mono font-semibold" id="info-last-sync">-</p>
+            </div>
+            <div class="bg-white p-4 rounded-lg border border-gray-200">
+                <p class="text-gray-500">Estado</p>
+                <p class="font-semibold" id="info-status">-</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Backup/Restaurar -->
+    <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-6 rounded-xl border-2 border-amber-200 mt-6">
+        <h4 class="font-bold text-lg mb-3 flex items-center gap-2">
+            <i class="fas fa-database text-amber-600"></i>
+            Backup y Restauración
+        </h4>
+        <p class="text-sm text-gray-600 mb-3">
+            Exporta todos tus datos (productos, usuarios, pedidos) como respaldo de seguridad.
+        </p>
+        <div class="flex gap-2 flex-wrap">
+            <button onclick="exportAllData()" class="px-6 bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl transition">
+                <i class="fas fa-download mr-2"></i>Exportar Todo
+            </button>
+            <label class="px-6 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl transition cursor-pointer">
+                <i class="fas fa-upload mr-2"></i>Importar Backup
+                <input type="file" accept=".json" onchange="importBackup(event)" class="hidden">
+            </label>
+        </div>
+    </div>
+</div>
             </div>
         </div>
     </div>
 
-    <!-- CHATBOT -->
+    <!-- CHATBOT CON IA -->
     <div id="chatbot-container" class="fixed bottom-6 right-6 z-40">
         <div id="chatbot-window" class="hidden w-80 sm:w-96 bg-white rounded-3xl shadow-2xl overflow-hidden mb-4 origin-bottom-right border border-gray-200">
             <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-4 text-white flex justify-between items-center">
-                <span class="font-bold flex items-center gap-2 text-lg"><i class="fas fa-robot"></i>Asistente MediTech</span>
+                <span class="font-bold flex items-center gap-2 text-lg">
+                    <i class="fas fa-robot"></i>
+                    Asistente IA MediTech
+                    <span class="text-xs bg-white/20 px-2 py-1 rounded-full">Powered by AI</span>
+                </span>
                 <button onclick="toggleChat()" class="hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
-            <div id="chat-messages" class="h-80 p-4 overflow-y-auto bg-gray-50 space-y-3 text-sm">
+            <div id="chat-messages" class="h-96 p-4 overflow-y-auto bg-gray-50 space-y-3 text-sm">
                 <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm max-w-[85%] border border-gray-100">
                     <p class="font-semibold text-gray-800 mb-1">¡Hola! 👋</p>
-                    <p class="text-gray-600">Pregúntame sobre <b>medicamentos</b> o <b>piezas de PC</b>.</p>
+                    <p class="text-gray-600">Soy tu asistente con <b>Inteligencia Artificial</b>. Pregúntame sobre:</p>
+                    <ul class="text-gray-600 mt-2 space-y-1 text-xs">
+                        <li>💊 Medicamentos y sus usos</li>
+                        <li>💻 Piezas de PC y componentes</li>
+                        <li>🛒 Información de productos</li>
+                        <li>❓ Cualquier duda general</li>
+                    </ul>
                 </div>
             </div>
             <div class="p-4 bg-white border-t border-gray-100 flex gap-2">
                 <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-full text-sm outline-none focus:border-teal-500" onkeypress="if(event.key==='Enter') sendMessage()">
-                <button onclick="sendMessage()" class="w-12 h-12 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane"></i></button>
+                <button onclick="sendMessage()" id="chat-send-btn" class="w-12 h-12 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-full flex items-center justify-center shadow-lg hover:from-teal-700 hover:to-cyan-700 transition">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
             </div>
         </div>
         <button onclick="toggleChat()" class="w-16 h-16 bg-gradient-to-br from-teal-600 to-cyan-600 text-white rounded-full shadow-2xl flex items-center justify-center text-3xl transition hover:scale-110">
@@ -542,25 +730,60 @@
         // ============================================
         // CONFIGURACIÓN GITHUB
         // ============================================
-        const GITHUB_TOKEN = "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";
+        // Token por defecto (se puede cambiar desde el panel admin)
+        let GITHUB_TOKEN = localStorage.getItem('github_token') || "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";
+        let HEADERS = { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" };
         const GITHUB_USER = "calm291094-del";
         const GITHUB_REPO = "meditech-tienda";
         const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
         const HEADERS = { "Authorization": `token ${GITHUB_TOKEN}`, "Accept": "application/vnd.github.v3+json" };
         
-        // EmailJS (Configura esto en https://www.emailjs.com/)
-        const EMAILJS_PUBLIC_KEY = "Gmail";
-        const EMAILJS_SERVICE_ID = "service_v1tiylh";
-        const EMAILJS_TEMPLATE_ID = "template_edjk1yg";
-        
         // Estado global
         let S = { 
             pr: [],           // Productos
-            cart: [],         // Carrito [{producto, cantidad}]
+            cart: [],         // Carrito
             currentUser: null,
             users: [],        // Usuarios
-            history: [],      // Historial de vistas
-            orders: []        // Pedidos
+            history: [],      // Historial
+            orders: [],       // Pedidos
+            config: {         // Configuración editable
+                headerSubtitle: "Salud & Tecnología",
+                categoriasTitle: "Explora por Categoría",
+                categoriasSubtitle: "Encuentra exactamente lo que necesitas",
+                productosTitle: "🌟 Productos Destacados",
+                productosSubtitle: "Los más populares entre nuestros clientes",
+                ofertasTitle: "🔥 Ofertas Especiales",
+                ofertasSubtitle: "Aprovecha estos descuentos exclusivos",
+                footerDescription: "Tu tienda confiable para medicamentos y hardware de última generación.",
+                carousel: [
+                    {
+                        image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop",
+                        title: "Medicamentos de Calidad",
+                        subtitle: "Los mejores precios en productos farmacéuticos certificados"
+                    },
+                    {
+                        image: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1200&h=400&fit=crop",
+                        title: "Tecnología de Última Generación",
+                        subtitle: "Componentes de PC y hardware gaming al mejor precio"
+                    },
+                    {
+                        image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=400&fit=crop",
+                        title: "Ofertas Especiales",
+                        subtitle: "Descuentos exclusivos por tiempo limitado"
+                    }
+                ],
+                categorias: [
+                    { nombre: "Medicamentos", icono: "fa-pills", color: "from-teal-500 to-cyan-600", count: "+200 productos" },
+                    { nombre: "Tecnología", icono: "fa-laptop", color: "from-blue-500 to-indigo-600", count: "+150 productos" },
+                    { nombre: "Salud", icono: "fa-heart-pulse", color: "from-green-500 to-emerald-600", count: "+100 productos" },
+                    { nombre: "Gaming", icono: "fa-gamepad", color: "from-purple-500 to-pink-600", count: "+80 productos" }
+                ],
+                ofertas: [
+                    { titulo: "20%", descripcion: "Medicamentos", detalle: "En toda la línea de analgésicos" },
+                    { titulo: "15%", descripcion: "Hardware PC", detalle: "Componentes seleccionados" },
+                    { titulo: "ENVÍO", descripcion: "Gratis", detalle: "En compras mayores a $50" }
+                ]
+            }
         };
 
         // ============================================
@@ -568,9 +791,14 @@
         // ============================================
         async function init() {
             await initAuth();
+            await cargarConfig();
             await cargarProductos();
             await cargarHistorial();
             await cargarPedidos();
+            renderCarousel();
+            renderCategorias();
+            renderOfertas();
+            applyTexts();
             initCarousel();
             updateCartUI();
             registrarVista();
@@ -605,6 +833,32 @@
         }
 
         // ============================================
+        // CONFIGURACIÓN
+        // ============================================
+        async function cargarConfig() {
+            const file = await fetchGitHub('config.json');
+            if (file) {
+                try {
+                    const data = JSON.parse(atob(file.content));
+                    S.config = { ...S.config, ...data };
+                } catch (e) {
+                    console.error("Error parsing config:", e);
+                }
+            }
+        }
+
+        function applyTexts() {
+            document.getElementById('header-subtitle').textContent = S.config.headerSubtitle;
+            document.getElementById('categorias-title').textContent = S.config.categoriasTitle;
+            document.getElementById('categorias-subtitle').textContent = S.config.categoriasSubtitle;
+            document.getElementById('productos-title').textContent = S.config.productosTitle;
+            document.getElementById('productos-subtitle').textContent = S.config.productosSubtitle;
+            document.getElementById('ofertas-title').textContent = S.config.ofertasTitle;
+            document.getElementById('ofertas-subtitle').textContent = S.config.ofertasSubtitle;
+            document.getElementById('footer-description').textContent = S.config.footerDescription;
+        }
+
+        // ============================================
         // AUTENTICACIÓN
         // ============================================
         async function initAuth() {
@@ -613,7 +867,7 @@
                 const data = JSON.parse(atob(usersFile.content));
                 S.users = data.usuarios || [];
             } else {
-                S.users = [{ username: 'root', password: 'Root*4815162342+-', name: 'Administrador', email: 'admin@meditech.com', role: 'admin' }];
+                S.users = [{ username: '----', password: '------------', name: 'Administrador', email: 'admin@meditech.com', role: 'admin' }];
                 await saveToGitHub('usuarios.json', { usuarios: S.users }, 'Inicializar usuarios');
             }
             
@@ -688,6 +942,7 @@
             S.currentUser = null;
             S.cart = [];
             localStorage.removeItem('session');
+            document.body.classList.remove('admin-mode');
             updateUIForLoggedOut();
             closeUserMenu();
             updateCartUI();
@@ -703,10 +958,12 @@
                 badge.textContent = '🔒 Administrador';
                 badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800';
                 document.getElementById('admin-menu-btn').classList.remove('hidden');
+                document.body.classList.add('admin-mode');
             } else {
                 badge.textContent = '👤 Cliente';
                 badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800';
                 document.getElementById('admin-menu-btn').classList.add('hidden');
+                document.body.classList.remove('admin-mode');
             }
             
             document.getElementById('menu-logged-out').classList.add('hidden');
@@ -742,15 +999,35 @@
 
         function renderProducts() {
             const grid = document.getElementById('portada-productos');
-            if (S.pr.length === 0) {
-                grid.innerHTML = `<p class="col-span-full text-center py-16 text-gray-400"><i class="fas fa-box-open text-5xl mb-4 block opacity-50"></i>Aún no hay productos.</p>`;
+            const category = document.getElementById('filter-category').value;
+            const sort = document.getElementById('sort-by').value;
+            
+            let filtered = [...S.pr];
+            
+            if (category) {
+                filtered = filtered.filter(p => p.category === category);
+            }
+            
+            if (sort === 'price-asc') filtered.sort((a, b) => a.price - b.price);
+            else if (sort === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+            else if (sort === 'name') filtered.sort((a, b) => a.name.localeCompare(b.name));
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-center py-16 text-gray-400"><i class="fas fa-box-open text-5xl mb-4 block opacity-50"></i>No hay productos disponibles.</p>`;
+                document.getElementById('product-total-label').textContent = '0 productos';
                 return;
             }
-            grid.innerHTML = S.pr.map(p => `
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover-lift fade-in group">
-                    <div class="h-56 overflow-hidden bg-gray-100 relative">
+            
+            grid.innerHTML = filtered.map(p => {
+                const isAvailable = p.available !== false;
+                const isSoldOut = !isAvailable || p.stock <= 0;
+                
+                return `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover-lift fade-in group relative">
+                    <div class="h-56 overflow-hidden bg-gray-100 relative cursor-pointer" onclick="openQuickView('${p.id}')">
                         <img src="${p.image || 'https://via.placeholder.com/300x200?text=Sin+Imagen'}" alt="${p.name}" class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
                         ${p.feat ? '<span class="badge-new"><i class="fas fa-star mr-1"></i>Destacado</span>' : ''}
+                        ${isSoldOut ? '<span class="badge-soldout">❌ Agotado</span>' : ''}
                         <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium">
                             ${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}
                         </div>
@@ -761,9 +1038,13 @@
                         <div class="flex justify-between items-center">
                             <span class="text-2xl font-bold gradient-text">$${parseFloat(p.price).toFixed(2)}</span>
                             ${S.currentUser ? 
-                                `<button onclick="addToCart('${p.id}')" class="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-teal-600 hover:to-cyan-600 text-white w-11 h-11 rounded-full flex items-center justify-center transition shadow-lg">
-                                    <i class="fas fa-plus"></i>
-                                </button>` :
+                                (isSoldOut ? 
+                                    `<button disabled class="bg-gray-300 text-gray-500 w-11 h-11 rounded-full flex items-center justify-center cursor-not-allowed">
+                                        <i class="fas fa-ban"></i>
+                                    </button>` :
+                                    `<button onclick="addToCart('${p.id}')" class="bg-gradient-to-r from-gray-900 to-gray-800 hover:from-teal-600 hover:to-cyan-600 text-white w-11 h-11 rounded-full flex items-center justify-center transition shadow-lg">
+                                        <i class="fas fa-plus"></i>
+                                    </button>`) :
                                 `<a href="#" onclick="openLoginModal(); return false;" class="bg-gradient-to-r from-gray-900 to-gray-800 text-white w-11 h-11 rounded-full flex items-center justify-center transition shadow-lg" title="Inicia sesión">
                                     <i class="fas fa-lock"></i>
                                 </a>`
@@ -771,9 +1052,48 @@
                         </div>
                     </div>
                 </div>
-            `).join('');
-            document.getElementById('product-total-label').textContent = `${S.pr.length} productos`;
+            `}).join('');
+            document.getElementById('product-total-label').textContent = `${filtered.length} productos`;
         }
+
+        function filterProducts() {
+            renderProducts();
+        }
+
+        function searchProducts(query) {
+            const results = document.getElementById('search-results');
+            if (!query.trim()) {
+                results.classList.remove('active');
+                return;
+            }
+            
+            const filtered = S.pr.filter(p => 
+                p.name.toLowerCase().includes(query.toLowerCase()) ||
+                p.desc.toLowerCase().includes(query.toLowerCase())
+            ).slice(0, 5);
+            
+            if (filtered.length === 0) {
+                results.innerHTML = '<p class="p-4 text-center text-gray-400">No se encontraron resultados</p>';
+            } else {
+                results.innerHTML = filtered.map(p => `
+                    <div class="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 flex items-center gap-3" onclick="openQuickView('${p.id}'); document.getElementById('search-results').classList.remove('active'); document.getElementById('search-input').value='';">
+                        <img src="${p.image || 'https://via.placeholder.com/50'}" class="w-12 h-12 object-cover rounded-lg">
+                        <div class="flex-1">
+                            <p class="font-semibold text-sm">${p.name}</p>
+                            <p class="text-xs text-gray-500">$${p.price}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            results.classList.add('active');
+        }
+
+        // Cerrar búsqueda al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                document.getElementById('search-results').classList.remove('active');
+            }
+        });
 
         function renderAdminList() {
             const list = document.getElementById('admin-list');
@@ -788,12 +1108,25 @@
                     <img src="${p.image || 'https://via.placeholder.com/60'}" class="w-16 h-16 object-cover rounded-lg bg-white shadow-sm">
                     <div class="flex-1 min-w-0">
                         <p class="font-bold text-gray-900 truncate">${p.name}</p>
-                        <p class="text-sm text-gray-500">$${p.price} | Stock: ${p.stock}</p>
+                        <p class="text-sm text-gray-500">$${p.price} | Stock: ${p.stock} | ${p.available !== false ? '✅ Disponible' : '❌ Agotado'}</p>
                     </div>
+                    <button onclick="toggleProductAvailability('${p.id}')" class="${p.available !== false ? 'text-green-500 hover:bg-green-50' : 'text-red-500 hover:bg-red-50'} p-2 rounded-lg transition" title="${p.available !== false ? 'Marcar como agotado' : 'Marcar como disponible'}">
+                        <i class="fas ${p.available !== false ? 'fa-toggle-on' : 'fa-toggle-off'} text-xl"></i>
+                    </button>
                     <button onclick="editProduct('${p.id}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition"><i class="fas fa-edit"></i></button>
                     <button onclick="deleteProduct('${p.id}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fas fa-trash"></i></button>
                 </div>
             `).join('');
+        }
+
+        async function toggleProductAvailability(id) {
+            const p = S.pr.find(x => x.id === id);
+            if (!p) return;
+            p.available = p.available === false ? true : false;
+            await saveToGitHub('productos.json', { productos: S.pr }, `Cambiar estado: ${p.name}`);
+            renderProducts();
+            renderAdminList();
+            showNotif(`✅ Estado cambiado: ${p.available ? 'Disponible' : 'Agotado'}`, 'success');
         }
 
         function editProduct(id) {
@@ -807,6 +1140,7 @@
             document.getElementById('prod-desc').value = p.desc;
             document.getElementById('prod-image-url').value = p.image || '';
             document.getElementById('prod-feat').checked = p.feat || false;
+            document.getElementById('prod-available').value = p.available !== false ? 'true' : 'false';
         }
 
         function resetProductForm() {
@@ -828,6 +1162,7 @@
             const desc = document.getElementById('prod-desc').value;
             const stock = document.getElementById('prod-stock').value;
             const feat = document.getElementById('prod-feat').checked;
+            const available = document.getElementById('prod-available').value === 'true';
             const imageUrl = document.getElementById('prod-image-url').value;
             const fileInput = document.getElementById('prod-image-file');
             
@@ -851,7 +1186,8 @@
                 desc,
                 stock: parseInt(stock),
                 image: img,
-                feat
+                feat,
+                available
             };
             
             if (editId) {
@@ -901,6 +1237,214 @@
                 };
                 r.readAsDataURL(file);
             });
+        }
+
+        // ============================================
+        // QUICK VIEW
+        // ============================================
+        function openQuickView(id) {
+            const p = S.pr.find(x => x.id === id);
+            if (!p) return;
+            
+            const isAvailable = p.available !== false && p.stock > 0;
+            
+            document.getElementById('quick-view-content').innerHTML = `
+                <div class="grid md:grid-cols-2 gap-6 p-6">
+                    <div>
+                        <img src="${p.image || 'https://via.placeholder.com/400'}" alt="${p.name}" class="w-full h-96 object-cover rounded-2xl">
+                    </div>
+                    <div>
+                        <button onclick="closeQuickView()" class="float-right w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <span class="inline-block bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-sm font-semibold mb-3">
+                            ${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}
+                        </span>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-3">${p.name}</h2>
+                        <p class="text-gray-600 mb-4">${p.desc}</p>
+                        <div class="flex items-center gap-4 mb-6">
+                            <span class="text-4xl font-bold gradient-text">$${parseFloat(p.price).toFixed(2)}</span>
+                            ${!isAvailable ? '<span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">❌ Agotado</span>' : `<span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">✅ En stock (${p.stock})</span>`}
+                        </div>
+                        ${S.currentUser && isAvailable ? `
+                            <button onclick="addToCart('${p.id}'); closeQuickView();" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-3 shadow-lg">
+                                <i class="fas fa-cart-plus text-xl"></i>
+                                <span class="text-lg">Agregar al Carrito</span>
+                            </button>
+                        ` : !S.currentUser ? `
+                            <button onclick="openLoginModal(); closeQuickView();" class="w-full bg-gray-200 text-gray-700 font-bold py-4 rounded-xl transition">
+                                <i class="fas fa-lock mr-2"></i>Inicia sesión para comprar
+                            </button>
+                        ` : `
+                            <button disabled class="w-full bg-gray-300 text-gray-500 font-bold py-4 rounded-xl cursor-not-allowed">
+                                Producto Agotado
+                            </button>
+                        `}
+                    </div>
+                </div>
+            `;
+            document.getElementById('quick-view').classList.add('active');
+        }
+
+        function closeQuickView() {
+            document.getElementById('quick-view').classList.remove('active');
+        }
+
+        // ============================================
+        // CARRUSEL
+        // ============================================
+        let currentSlide = 0;
+        
+        function renderCarousel() {
+            const inner = document.getElementById('carousel-inner');
+            inner.innerHTML = S.config.carousel.map(slide => `
+                <div class="carousel-item">
+                    <img src="${slide.image}" alt="${slide.title}">
+                    <div class="carousel-caption">
+                        <h3 class="text-2xl font-bold mb-2">${slide.title}</h3>
+                        <p class="text-sm opacity-90">${slide.subtitle}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            const dotsContainer = document.getElementById('carousel-dots');
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < S.config.carousel.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => { currentSlide = i; updateCarousel(); };
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function moveCarousel(direction) {
+            currentSlide = (currentSlide + direction + S.config.carousel.length) % S.config.carousel.length;
+            updateCarousel();
+        }
+
+        function updateCarousel() {
+            document.getElementById('carousel-inner').style.transform = `translateX(-${currentSlide * 100}%)`;
+            document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        function initCarousel() {
+            setInterval(() => moveCarousel(1), 5000);
+        }
+
+        function editCarousel() {
+            openAdminPanel();
+            showAdminTab('carrusel');
+            renderCarouselEditor();
+        }
+
+        function renderCarouselEditor() {
+            const editor = document.getElementById('carousel-editor');
+            editor.innerHTML = S.config.carousel.map((slide, i) => `
+                <div class="bg-gray-50 p-4 rounded-xl border-2 border-gray-200">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-bold">Slide ${i + 1}</h4>
+                        <button onclick="removeCarouselSlide(${i})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <input type="url" value="${slide.image}" onchange="S.config.carousel[${i}].image=this.value" placeholder="URL de imagen" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
+                    <input type="text" value="${slide.title}" onchange="S.config.carousel[${i}].title=this.value" placeholder="Título" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
+                    <input type="text" value="${slide.subtitle}" onchange="S.config.carousel[${i}].subtitle=this.value" placeholder="Subtítulo" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg">
+                </div>
+            `).join('');
+        }
+
+        function addCarouselSlide() {
+            S.config.carousel.push({ image: '', title: 'Nuevo Slide', subtitle: 'Descripción' });
+            renderCarouselEditor();
+        }
+
+        function removeCarouselSlide(index) {
+            if (S.config.carousel.length <= 1) {
+                showNotif('⚠️ Debe haber al menos un slide', 'warning');
+                return;
+            }
+            S.config.carousel.splice(index, 1);
+            renderCarouselEditor();
+        }
+
+        async function saveCarousel() {
+            showNotif("📤 Guardando carrusel...", "info");
+            const success = await saveToGitHub('config.json', S.config, 'Actualizar carrusel');
+            if (success) {
+                renderCarousel();
+                currentSlide = 0;
+                showNotif("✅ Carrusel actualizado", "success");
+            } else {
+                showNotif("❌ Error al guardar", "error");
+            }
+        }
+
+        // ============================================
+        // CATEGORÍAS Y OFERTAS
+        // ============================================
+        function renderCategorias() {
+            const grid = document.getElementById('categorias-grid');
+            grid.innerHTML = S.config.categorias.map(cat => `
+                <div class="category-card bg-gradient-to-br ${cat.color} rounded-2xl p-8 text-white text-center cursor-pointer shadow-lg">
+                    <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas ${cat.icono} text-4xl"></i>
+                    </div>
+                    <h4 class="text-xl font-bold mb-2">${cat.nombre}</h4>
+                    <p class="text-sm opacity-90">${cat.count}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderOfertas() {
+            const grid = document.getElementById('ofertas-grid');
+            grid.innerHTML = S.config.ofertas.map(oferta => `
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition">
+                    <div class="text-5xl font-bold mb-2">${oferta.titulo}</div>
+                    <p class="text-lg font-semibold mb-2">${oferta.descripcion}</p>
+                    <p class="text-sm opacity-80 mb-4">${oferta.detalle}</p>
+                    <button class="w-full bg-white text-orange-600 font-bold py-2 rounded-lg hover:bg-gray-100 transition">Ver productos</button>
+                </div>
+            `).join('');
+        }
+
+        function editSection(section) {
+            openAdminPanel();
+            showAdminTab('textos');
+            loadTextsToEditor();
+        }
+
+        function loadTextsToEditor() {
+            document.getElementById('edit-header-subtitle').value = S.config.headerSubtitle;
+            document.getElementById('edit-categorias-title').value = S.config.categoriasTitle;
+            document.getElementById('edit-categorias-subtitle').value = S.config.categoriasSubtitle;
+            document.getElementById('edit-productos-title').value = S.config.productosTitle;
+            document.getElementById('edit-productos-subtitle').value = S.config.productosSubtitle;
+            document.getElementById('edit-ofertas-title').value = S.config.ofertasTitle;
+            document.getElementById('edit-ofertas-subtitle').value = S.config.ofertasSubtitle;
+            document.getElementById('edit-footer-description').value = S.config.footerDescription;
+        }
+
+        async function saveTexts() {
+            S.config.headerSubtitle = document.getElementById('edit-header-subtitle').value;
+            S.config.categoriasTitle = document.getElementById('edit-categorias-title').value;
+            S.config.categoriasSubtitle = document.getElementById('edit-categorias-subtitle').value;
+            S.config.productosTitle = document.getElementById('edit-productos-title').value;
+            S.config.productosSubtitle = document.getElementById('edit-productos-subtitle').value;
+            S.config.ofertasTitle = document.getElementById('edit-ofertas-title').value;
+            S.config.ofertasSubtitle = document.getElementById('edit-ofertas-subtitle').value;
+            S.config.footerDescription = document.getElementById('edit-footer-description').value;
+            
+            showNotif("📤 Guardando textos...", "info");
+            const success = await saveToGitHub('config.json', S.config, 'Actualizar textos');
+            if (success) {
+                applyTexts();
+                showNotif("✅ Textos actualizados", "success");
+            } else {
+                showNotif("❌ Error al guardar", "error");
+            }
         }
 
         // ============================================
@@ -965,7 +1509,7 @@
                 const subtotal = item.producto.price * item.cantidad;
                 total += subtotal;
                 return `
-                    <div class="cart-item flex items-center gap-4 p-4 border-b border-gray-200">
+                    <div class="flex items-center gap-4 p-4 border-b border-gray-200">
                         <img src="${item.producto.image || 'https://via.placeholder.com/80'}" class="w-20 h-20 object-cover rounded-lg">
                         <div class="flex-1">
                             <h4 class="font-bold">${item.producto.name}</h4>
@@ -984,96 +1528,38 @@
             document.getElementById('cart-total').textContent = `$${total.toFixed(2)}`;
         }
 
-async function enviarPedidoPorCorreo() {
-    if (S.cart.length === 0) {
-        showNotif('⚠️ Tu carrito está vacío', 'warning');
-        return;
-    }
-    
-    // Calcular totales
-    const subtotal = S.cart.reduce((sum, i) => sum + (i.producto.price * i.cantidad), 0);
-    const shipping = subtotal >= 50 ? 0 : 5; // Envío gratis si es mayor a $50
-    const total = subtotal + shipping;
-    
-    // Generar ID de pedido
-    const orderId = 'MT-' + Date.now().toString().slice(-8);
-    const orderDate = new Date().toLocaleString('es-ES', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    
-    // Preparar items para EmailJS
-    const items = S.cart.map(item => ({
-        name: item.producto.name,
-        category: item.producto.category === 'medicamento' ? '💊 Medicamento' : 
-                  item.producto.category === 'tecnologia' ? '💻 Tecnología' : 
-                  item.producto.category === 'salud' ? '🩺 Salud' : '🎮 Gaming',
-        quantity: item.cantidad,
-        price: item.producto.price.toFixed(2),
-        subtotal: (item.producto.price * item.cantidad).toFixed(2),
-        image: item.producto.image || ''
-    }));
-    
-    // Crear objeto de pedido
-    const pedido = {
-        id: orderId,
-        usuario: S.currentUser.username,
-        email: S.currentUser.email,
-        fecha: new Date().toISOString(),
-        items: items,
-        subtotal: subtotal,
-        shipping: shipping,
-        total: total,
-        notas: document.getElementById('order-notes')?.value || ''
-    };
-    
-    // Guardar pedido en GitHub
-    S.orders.push(pedido);
-    await saveToGitHub('pedidos.json', { pedidos: S.orders }, `Nuevo pedido: ${orderId}`);
-    
-    // Preparar parámetros para EmailJS
-    const templateParams = {
-        user_name: S.currentUser.name,
-        user_email: S.currentUser.email,
-        order_id: orderId,
-        order_date: orderDate,
-        items: items,
-        subtotal: subtotal.toFixed(2),
-        shipping: shipping.toFixed(2),
-        total: total.toFixed(2),
-        notes: pedido.notas || null
-    };
-    
-    // Enviar correo con EmailJS
-    try {
-        showNotif('📧 Enviando correo...', 'info');
-        
-        emailjs.init(EMAILJS_PUBLIC_KEY);
-        
-        await emailjs.send(
-            EMAILJS_SERVICE_ID, 
-            EMAILJS_TEMPLATE_ID, 
-            templateParams
-        );
-        
-        showNotif('✅ Pedido enviado por correo exitosamente', 'success');
-        
-        // Limpiar carrito
-        S.cart = [];
-        updateCartUI();
-        closeCart();
-        
-    } catch (error) {
-        console.error('Error EmailJS:', error);
-        showNotif('⚠️ Pedido guardado pero error al enviar correo: ' + error.text, 'warning');
-    }
-}
+        async function enviarPedidoPorCorreo() {
+            if (S.cart.length === 0) {
+                showNotif('⚠️ Tu carrito está vacío', 'warning');
+                return;
+            }
+            
+            const total = S.cart.reduce((sum, i) => sum + (i.producto.price * i.cantidad), 0);
+            const pedido = {
+                id: 'PED-' + Date.now(),
+                usuario: S.currentUser.username,
+                email: S.currentUser.email,
+                fecha: new Date().toISOString(),
+                items: S.cart.map(i => ({
+                    nombre: i.producto.name,
+                    cantidad: i.cantidad,
+                    precio: i.producto.price,
+                    subtotal: i.producto.price * i.cantidad
+                })),
+                total: total
+            };
+            
+            S.orders.push(pedido);
+            await saveToGitHub('pedidos.json', { pedidos: S.orders }, `Nuevo pedido: ${pedido.id}`);
+            
+            S.cart = [];
+            updateCartUI();
+            closeCart();
+            showNotif('🎉 ¡Pedido procesado! Te contactaremos pronto.', 'success');
+        }
 
         // ============================================
-        // HISTORIAL
+        // HISTORIAL Y PEDIDOS
         // ============================================
         async function cargarHistorial() {
             const file = await fetchGitHub('historial.json');
@@ -1089,14 +1575,75 @@ async function enviarPedidoPorCorreo() {
             const vista = {
                 usuario: S.currentUser ? S.currentUser.username : 'Anónimo',
                 pagina: window.location.pathname,
-                fecha: new Date().toISOString(),
-                ip: 'N/A'
+                fecha: new Date().toISOString()
             };
             
             S.history.unshift(vista);
             if (S.history.length > 1000) S.history = S.history.slice(0, 1000);
             
             await saveToGitHub('historial.json', { historial: S.history }, 'Registrar vista');
+        }
+
+        async function cargarPedidos() {
+            const file = await fetchGitHub('pedidos.json');
+            if (file) {
+                const data = JSON.parse(atob(file.content));
+                S.orders = data.pedidos || [];
+            } else {
+                S.orders = [];
+            }
+        }
+
+        // ============================================
+        // PANEL ADMIN
+        // ============================================
+        function openAdminPanel() {
+            if (!S.currentUser || S.currentUser.role !== 'admin') {
+                showNotif('❌ Solo admin', 'error');
+                return;
+            }
+            document.getElementById('admin-panel').classList.remove('hidden');
+            renderAdminList();
+            renderUsers();
+            renderHistorial();
+            renderPedidos();
+            renderEstadisticas();
+            renderCarouselEditor();
+            loadTextsToEditor();
+            closeUserMenu();
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        function showAdminTab(tabName) {
+            document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+// Si es el tab de config, cargar info
+if (tabName === 'config') {
+    loadConfigInfo();
+}
+        }
+
+        function renderUsers() {
+            const list = document.getElementById('users-list');
+            list.innerHTML = S.users.map(u => `
+                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white font-bold">
+                        ${u.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold">${u.name}</p>
+                        <p class="text-sm text-gray-600">@${u.username} | ${u.email}</p>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${u.role === 'admin' ? 'bg-orange-100 text-orange-800' : 'bg-teal-100 text-teal-800'}">
+                        ${u.role === 'admin' ? '🔒 Admin' : '👤 Cliente'}
+                    </span>
+                </div>
+            `).join('');
         }
 
         function renderHistorial() {
@@ -1116,19 +1663,6 @@ async function enviarPedidoPorCorreo() {
                     </div>
                 </div>
             `).join('');
-        }
-
-        // ============================================
-        // PEDIDOS
-        // ============================================
-        async function cargarPedidos() {
-            const file = await fetchGitHub('pedidos.json');
-            if (file) {
-                const data = JSON.parse(atob(file.content));
-                S.orders = data.pedidos || [];
-            } else {
-                S.orders = [];
-            }
         }
 
         function renderPedidos() {
@@ -1154,52 +1688,6 @@ async function enviarPedidoPorCorreo() {
             `).join('');
         }
 
-        // ============================================
-        // PANEL ADMIN
-        // ============================================
-        function openAdminPanel() {
-            if (!S.currentUser || S.currentUser.role !== 'admin') {
-                showNotif('❌ Solo admin', 'error');
-                return;
-            }
-            document.getElementById('admin-panel').classList.remove('hidden');
-            renderAdminList();
-            renderUsers();
-            renderHistorial();
-            renderPedidos();
-            renderEstadisticas();
-            closeUserMenu();
-        }
-
-        function closeAdminPanel() {
-            document.getElementById('admin-panel').classList.add('hidden');
-        }
-
-        function showAdminTab(tabName) {
-            document.querySelectorAll('.admin-tab-content').forEach(t => t.classList.add('hidden'));
-            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-        }
-
-        function renderUsers() {
-            const list = document.getElementById('users-list');
-            list.innerHTML = S.users.map(u => `
-                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white font-bold">
-                        ${u.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div class="flex-1">
-                        <p class="font-bold">${u.name}</p>
-                        <p class="text-sm text-gray-600">@${u.username} | ${u.email}</p>
-                    </div>
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${u.role === 'admin' ? 'bg-orange-100 text-orange-800' : 'bg-teal-100 text-teal-800'}">
-                        ${u.role === 'admin' ? '🔒 Admin' : '👤 Cliente'}
-                    </span>
-                </div>
-            `).join('');
-        }
-
         function renderEstadisticas() {
             document.getElementById('stat-products').textContent = S.pr.length;
             document.getElementById('stat-users').textContent = S.users.length;
@@ -1215,92 +1703,1035 @@ async function enviarPedidoPorCorreo() {
         }
 
         // ============================================
-        // CARRUSEL
+        // CHATBOT CON IA (Pollinations AI - Gratis, sin API key)
         // ============================================
-        let currentSlide = 0;
-        const totalSlides = 3;
         
-        function moveCarousel(direction) {
-            currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
-            updateCarousel();
-        }
-        
-        function updateCarousel() {
-            document.getElementById('carousel-inner').style.transform = `translateX(-${currentSlide * 100}%)`;
-            document.querySelectorAll('.carousel-dot').forEach((dot, i) => {
-                dot.classList.toggle('active', i === currentSlide);
-            });
-        }
-        
-        function initCarousel() {
-            const dotsContainer = document.getElementById('carousel-dots');
-            for (let i = 0; i < totalSlides; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
-                dot.onclick = () => { currentSlide = i; updateCarousel(); };
-                dotsContainer.appendChild(dot);
+        // Múltiples APIs de respaldo
+        const AI_APIS = [
+            {
+                name: "Pollinations AI",
+                url: "https://text.pollinations.ai/",
+                method: "POST",
+                formatResponse: (data) => data
+            },
+            {
+                name: "Pollinations GET",
+                url: (prompt) => `https://text.pollinations.ai/${encodeURIComponent(prompt)}`,
+                method: "GET",
+                formatResponse: (data) => data
             }
-            setInterval(() => moveCarousel(1), 5000);
-        }
+        ];
 
-        // ============================================
-        // CHATBOT
-        // ============================================
-        const KB = {
-            "paracetamol": "El Paracetamol es un analgésico y antipirético. Sirve para dolores leves y fiebre.",
-            "ibuprofeno": "El Ibuprofeno es un antiinflamatorio. Reduce dolor, inflamación y fiebre.",
-            "ram": "La RAM es la memoria de corto plazo de la PC. Más RAM = más programas abiertos.",
-            "gpu": "La GPU procesa imágenes y video. Esencial para gaming y diseño.",
-            "cpu": "El CPU es el cerebro del PC. Ejecuta instrucciones y cálculos.",
-            "ssd": "Un SSD es almacenamiento rápido. Tu PC prende en segundos.",
-            "default": "No tengo info específica. Consulta el catálogo o contacta soporte."
-        };
+        const SYSTEM_PROMPT = `Eres el asistente virtual de MediTech, una tienda de medicamentos y tecnología. Responde de forma amigable, profesional y concisa en español. 
 
-        function toggleChat() { document.getElementById('chatbot-window').classList.toggle('hidden'); }
+Tus conocimientos:
+- Medicamentos: puedes explicar para qué sirven, dosis generales (siempre recomendando consultar al médico)
+- Tecnología: puedes explicar componentes de PC (RAM, GPU, CPU, SSD, etc.)
+- Productos: puedes dar información sobre los productos disponibles
+- Compras: puedes explicar el proceso de compra
 
-        function sendMessage() {
-            const inp = document.getElementById('chat-input');
-            const msgs = document.getElementById('chat-messages');
-            const txt = inp.value.trim();
+Siempre:
+- Sé útil y amigable
+- Si preguntan sobre salud grave, recomienda consultar al médico
+- Mantén respuestas cortas (máximo 3-4 párrafos)
+- Usa emojis cuando sea apropiado`;
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const messages = document.getElementById('chat-messages');
+            const sendBtn = document.getElementById('chat-send-btn');
+            const txt = input.value.trim();
+            
             if (!txt) return;
             
-            msgs.innerHTML += `<div class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] ml-auto fade-in shadow-md">${txt}</div>`;
-            inp.value = '';
+            // Deshabilitar input y botón
+            input.disabled = true;
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             
-            setTimeout(() => {
-                let res = KB["default"];
-                const low = txt.toLowerCase();
-                for (let k in KB) if (low.includes(k)) { res = KB[k]; break; }
-                const prod = S.pr.find(p => low.includes(p.name.toLowerCase()));
-                if (prod && res === KB["default"]) res = `Sobre <b>${prod.name}</b>: ${prod.desc}`;
-                
-                msgs.innerHTML += `<div class="bg-white p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm border border-gray-100 fade-in">${res}</div>`;
-                msgs.scrollTop = msgs.scrollHeight;
-            }, 600);
+            // Agregar mensaje del usuario
+            messages.innerHTML += `<div class="bg-gradient-to-r from-teal-600 to-cyan-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] ml-auto fade-in shadow-md">${txt}</div>`;
+            input.value = '';
+            
+            // Indicador de "escribiendo"
+            const typingId = 'typing-' + Date.now();
+            messages.innerHTML += `
+                <div id="${typingId}" class="bg-white p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm border border-gray-100 fade-in">
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            messages.scrollTop = messages.scrollHeight;
+            
+            // Construir contexto con productos relevantes
+            const productosContexto = S.pr.slice(0, 10).map(p => `- ${p.name} ($${p.price}): ${p.desc}`).join('\n');
+            const fullPrompt = `${SYSTEM_PROMPT}\n\nProductos disponibles en la tienda:\n${productosContexto}\n\nPregunta del usuario: ${txt}`;
+            
+            let response = '';
+            let apiUsed = '';
+            
+            // Intentar con cada API hasta que una funcione
+            for (const api of AI_APIS) {
+                try {
+                    if (api.method === "POST") {
+                        const res = await fetch(api.url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                messages: [
+                                    { role: 'system', content: SYSTEM_PROMPT },
+                                    { role: 'user', content: fullPrompt }
+                                ],
+                                model: 'openai',
+                                seed: Math.floor(Math.random() * 100000)
+                            })
+                        });
+                        
+                        if (res.ok) {
+                            response = await res.text();
+                            apiUsed = api.name;
+                            break;
+                        }
+                    } else if (api.method === "GET") {
+                        const res = await fetch(api.url(fullPrompt));
+                        if (res.ok) {
+                            response = await res.text();
+                            apiUsed = api.name;
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    console.log(`❌ ${api.name} falló:`, error.message);
+                    continue;
+                }
+            }
+            
+            // Si ninguna API funcionó, usar respuesta local
+            if (!response) {
+                response = getLocalResponse(txt);
+                apiUsed = 'Local';
+            }
+            
+            // Limpiar respuesta (quitar markdown si existe)
+            response = response.replace(/```[\s\S]*?```/g, '').trim();
+            response = response.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Remover indicador de "escribiendo"
+            const typingElement = document.getElementById(typingId);
+            if (typingElement) typingElement.remove();
+            
+            // Agregar respuesta del bot
+            messages.innerHTML += `
+                <div class="bg-white p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm border border-gray-100 fade-in">
+                    <p class="text-gray-700">${response}</p>
+                    <p class="text-xs text-gray-400 mt-2 italic">🤖 Respuesta de ${apiUsed}</p>
+                </div>
+            `;
+            messages.scrollTop = messages.scrollHeight;
+            
+        } catch (error) {
+            console.error('Error en chatbot:', error);
+            const typingElement = document.getElementById(typingId);
+            if (typingElement) typingElement.remove();
+            
+            messages.innerHTML += `
+                <div class="bg-red-50 p-3 rounded-2xl rounded-tl-none max-w-[85%] border border-red-200 fade-in">
+                    <p class="text-red-700">❌ Error de conexión. Por favor intenta de nuevo.</p>
+                </div>
+            `;
+        } finally {
+            // Rehabilitar input y botón
+            input.disabled = false;
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            input.focus();
         }
+    }
 
-        // ============================================
-        // UTILIDADES
-        // ============================================
-        function showNotif(msg, type) {
-            const n = document.createElement('div');
-            n.className = `fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full text-sm font-semibold shadow-2xl fade-in ${type==='success'?'bg-green-100 text-green-800 border-2 border-green-200':type==='error'?'bg-red-100 text-red-800 border-2 border-red-200':type==='warning'?'bg-yellow-100 text-yellow-800 border-2 border-yellow-200':'bg-blue-100 text-blue-800 border-2 border-blue-200'}`;
-            n.innerHTML = msg;
-            document.body.appendChild(n);
-            setTimeout(() => n.remove(), 3000);
+    // Respuestas locales de respaldo
+    function getLocalResponse(txt) {
+        const KB = {
+            "paracetamol": "El Paracetamol es un analgésico y antipirético. Sirve para dolores leves y fiebre. Dosis común: 500mg cada 6-8 horas.",
+            "ibuprofeno": "El Ibuprofeno es un antiinflamatorio. Reduce dolor, inflamación y fiebre. No usar con estómago vacío.",
+            "aspirina": "La Aspirina es analgésico y antiagregante plaquetario. No dar a niños por riesgo de Síndrome de Reye.",
+            "amoxicilina": "La Amoxicilina es un antibiótico. Requiere receta médica y completar el tratamiento.",
+            "loratadina": "La Loratadina es un antihistamínico que sirve para alergias, rinitis y urticaria. No causa somnolencia.",
+            "enalapril": "El Enalapril es un antihipertensivo IECA. Sirve para controlar la presión arterial y tratar la insuficiencia cardíaca.",
+            "ram": "La RAM es la memoria de corto plazo de la PC. Más RAM = más programas abiertos simultáneamente.",
+            "gpu": "La GPU procesa imágenes y video. Esencial para gaming y diseño. Ejemplos: NVIDIA RTX, AMD Radeon.",
+            "cpu": "El CPU es el cerebro del PC. Ejecuta instrucciones y cálculos. Ejemplos: Intel Core, AMD Ryzen.",
+            "ssd": "Un SSD es almacenamiento rápido sin partes móviles. Tu PC prende y carga programas en segundos.",
+            "hdd": "Un HDD es disco duro mecánico. Más lento que SSD pero más barato para grandes capacidades.",
+            "default": "No tengo información específica sobre eso en mi base de datos local. Estoy teniendo problemas de conexión con la IA. Por favor intenta de nuevo en unos segundos o consulta nuestro catálogo de productos."
+        };
+        
+        const low = txt.toLowerCase();
+        for (let k in KB) {
+            if (low.includes(k)) return KB[k];
         }
+        
+        // Buscar en productos
+        const prod = S.pr.find(p => low.includes(p.name.toLowerCase()));
+        if (prod) return `Sobre <b>${prod.name}</b>: ${prod.desc}. Precio: $${prod.price}`;
+        
+        return KB["default"];
+    }
 
-        // INICIAR
-        document.getElementById('year').textContent = new Date().getFullYear();
+    // ============================================
+    // UTILIDADES
+    // ============================================
+    function showNotif(msg, type) {
+        const n = document.createElement('div');
+        n.className = `fixed top-24 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full text-sm font-semibold shadow-2xl fade-in ${type==='success'?'bg-green-100 text-green-800 border-2 border-green-200':type==='error'?'bg-red-100 text-red-800 border-2 border-red-200':type==='warning'?'bg-yellow-100 text-yellow-800 border-2 border-yellow-200':'bg-blue-100 text-blue-800 border-2 border-blue-200'}`;
+        n.innerHTML = msg;
+        document.body.appendChild(n);
+        setTimeout(() => n.remove(), 3000);
+    }
+
+    // ============================================
+    // INICIALIZACIÓN FINAL
+    // ============================================
+    document.getElementById('year').textContent = new Date().getFullYear();
+    
+    // Esperar a que todo esté listo
+    window.addEventListener('DOMContentLoaded', () => {
         init();
+    });
 
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Smooth scroll para enlaces internos
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    // Cerrar modales con Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeLoginModal();
+            closeRegisterModal();
+            closeCart();
+            closeQuickView();
+            closeAdminPanel();
+        }
+    });
+
+    // Prevenir cierre accidental del formulario
+    window.addEventListener('beforeunload', (e) => {
+        const form = document.getElementById('product-form');
+        if (form && document.getElementById('edit-product-id').value && !form.classList.contains('submitted')) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+</script>
+
+<script> 
+// ============================================
+// GESTIÓN DE TOKEN DINÁMICO
+// ============================================
+
+// Cargar token desde localStorage (prioridad sobre el hardcodeado)
+function loadToken() {
+    const savedToken = localStorage.getItem('github_token');
+    if (savedToken && savedToken !== 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
+        // Actualizar las constantes globales
+        window.GITHUB_TOKEN = savedToken;
+        // Actualizar HEADERS
+        window.HEADERS = { 
+            "Authorization": `token ${savedToken}`, 
+            "Accept": "application/vnd.github.v3+json" 
+        };
+        return true;
+    }
+    return false;
+}
+
+// Guardar token en localStorage
+function saveToken(token) {
+    localStorage.setItem('github_token', token);
+    localStorage.setItem('github_token_date', new Date().toISOString());
+    window.GITHUB_TOKEN = token;
+    window.HEADERS = { 
+        "Authorization": `token ${token}`, 
+        "Accept": "application/vnd.github.v3+json" 
+    };
+}
+
+// Mostrar/ocultar token
+function toggleTokenVisibility() {
+    const input = document.getElementById('current-token-display');
+    const icon = event.target.closest('button').querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+// Actualizar token
+async function updateToken() {
+    const newToken = document.getElementById('new-token-input').value.trim();
+    const statusDiv = document.getElementById('token-status');
+    
+    if (!newToken) {
+        showTokenStatus('❌ Ingresa un token válido', 'error');
+        return;
+    }
+    
+    if (!newToken.startsWith('ghp_') && !newToken.startsWith('github_pat_')) {
+        showTokenStatus('❌ El token debe empezar con "ghp_" o "github_pat_"', 'error');
+        return;
+    }
+    
+    // Probar el token primero
+    showTokenStatus('🔄 Probando token...', 'info');
+    
+    try {
+        const testHeaders = { 
+            "Authorization": `token ${newToken}`, 
+            "Accept": "application/vnd.github.v3+json" 
+        };
+        
+        const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`, {
+            headers: testHeaders
+        });
+        
+        if (res.ok) {
+            // Token válido, guardarlo
+            saveToken(newToken);
+            showTokenStatus('✅ Token actualizado correctamente. Recarga la página para aplicar los cambios.', 'success');
+            document.getElementById('new-token-input').value = '';
+            loadConfigInfo();
+            
+            // Recargar después de 2 segundos
+            setTimeout(() => {
+                if (confirm('✅ Token actualizado. ¿Recargar la página ahora?')) {
+                    location.reload();
+                }
+            }, 2000);
+        } else {
+            showTokenStatus(`❌ Token inválido (Error ${res.status}). Verifica que tenga permisos "repo" y no haya expirado.`, 'error');
+        }
+    } catch (e) {
+        showTokenStatus('❌ Error de conexión: ' + e.message, 'error');
+    }
+}
+
+// Probar token actual
+async function testToken() {
+    const statusDiv = document.getElementById('token-status');
+    showTokenStatus('🔄 Probando conexión...', 'info');
+    
+    try {
+        const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`, {
+            headers: HEADERS
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            showTokenStatus(`✅ Token válido. Repo: ${data.full_name} (${data.private ? 'Privado' : 'Público'})`, 'success');
+        } else if (res.status === 401) {
+            showTokenStatus('❌ Token inválido o expirado. Actualízalo en el campo de arriba.', 'error');
+        } else if (res.status === 404) {
+            showTokenStatus('❌ Repositorio no encontrado o sin permisos.', 'error');
+        } else {
+            showTokenStatus(`❌ Error ${res.status}: ${res.statusText}`, 'error');
+        }
+    } catch (e) {
+        showTokenStatus('❌ Error de red: ' + e.message, 'error');
+    }
+}
+
+function showTokenStatus(message, type) {
+    const statusDiv = document.getElementById('token-status');
+    statusDiv.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-blue-100', 'text-blue-800');
+    
+    if (type === 'success') statusDiv.classList.add('bg-green-100', 'text-green-800');
+    else if (type === 'error') statusDiv.classList.add('bg-red-100', 'text-red-800');
+    else statusDiv.classList.add('bg-blue-100', 'text-blue-800');
+    
+    statusDiv.innerHTML = message;
+}
+
+// Cargar info de configuración
+function loadConfigInfo() {
+    // Token actual
+    const currentToken = localStorage.getItem('github_token') || GITHUB_TOKEN;
+    document.getElementById('current-token-display').value = currentToken;
+    
+    // Info del repo
+    document.getElementById('info-repo').textContent = `${GITHUB_USER}/${GITHUB_REPO}`;
+    
+    // Tipo de token
+    const tokenType = currentToken.startsWith('github_pat_') ? 'Fine-Grained (Beta)' : 
+                      currentToken.startsWith('ghp_') ? 'Classic' : 'Desconocido';
+    document.getElementById('info-token-type').textContent = tokenType;
+    
+    // Última sincronización
+    const lastSync = localStorage.getItem('github_token_date');
+    document.getElementById('info-last-sync').textContent = lastSync ? 
+        new Date(lastSync).toLocaleString('es-ES') : 'Nunca';
+    
+    // Estado
+    testTokenSilent().then(valid => {
+        const statusEl = document.getElementById('info-status');
+        if (valid) {
+            statusEl.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle"></i> Conectado</span>';
+        } else {
+            statusEl.innerHTML = '<span class="text-red-600"><i class="fas fa-times-circle"></i> Desconectado</span>';
+        }
+    });
+}
+
+async function testTokenSilent() {
+    try {
+        const res = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`, {
+            headers: HEADERS
+        });
+        return res.ok;
+    } catch (e) {
+        return false;
+    }
+}
+
+// Exportar todos los datos
+function exportAllData() {
+    const backup = {
+        version: '1.0',
+        fecha: new Date().toISOString(),
+        productos: S.pr,
+        usuarios: S.users,
+        pedidos: S.orders,
+        historial: S.history,
+        config: S.config
+    };
+    
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `meditech-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showNotif('✅ Backup descargado', 'success');
+}
+
+// Importar backup
+async function importBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const backup = JSON.parse(e.target.result);
+            
+            if (!confirm(`¿Importar backup del ${new Date(backup.fecha).toLocaleString('es-ES')}?\n\nEsto reemplazará:\n- ${backup.productos?.length || 0} productos\n- ${backup.usuarios?.length || 0} usuarios\n- ${backup.pedidos?.length || 0} pedidos\n\n¿Continuar?`)) {
+                return;
+            }
+            
+            showNotif('📤 Importando backup...', 'info');
+            
+            // Importar cada sección
+            if (backup.productos) {
+                S.pr = backup.productos;
+                await saveToGitHub('productos.json', { productos: S.pr }, 'Importar backup - productos');
+            }
+            if (backup.usuarios) {
+                S.users = backup.usuarios;
+                await saveToGitHub('usuarios.json', { usuarios: S.users }, 'Importar backup - usuarios');
+            }
+            if (backup.pedidos) {
+                S.orders = backup.pedidos;
+                await saveToGitHub('pedidos.json', { pedidos: S.orders }, 'Importar backup - pedidos');
+            }
+            if (backup.config) {
+                S.config = backup.config;
+                await saveToGitHub('config.json', S.config, 'Importar backup - config');
+            }
+            
+            showNotif('✅ Backup importado correctamente', 'success');
+            setTimeout(() => location.reload(), 1500);
+            
+        } catch (err) {
+            showNotif('❌ Error al importar: ' + err.message, 'error');
+        }
+    };
+    reader.readAsText(file);
+}
+</script>
+
+<!-- ============================================
+SCRIPTS ADICIONALES DE MEJORA
+============================================ -->
+<script>
+    // ============================================
+    // LAZY LOADING PARA IMÁGENES
+    // ============================================
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                        observer.unobserve(img);
+                    }
+                }
             });
         });
-    </script>
+
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+    }
+
+    // ============================================
+    // ANALYTICS BÁSICO (Tiempo en página)
+    // ============================================
+    let pageStartTime = Date.now();
+    
+    window.addEventListener('beforeunload', () => {
+        const timeSpent = Math.round((Date.now() - pageStartTime) / 1000);
+        if (timeSpent > 5) {
+            // Registrar tiempo en página (opcional)
+            console.log(`📊 Tiempo en página: ${timeSpent}s`);
+        }
+    });
+
+    // ============================================
+    // DETECCIÓN DE CONEXIÓN LENTA
+    // ============================================
+    if ('connection' in navigator) {
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        
+        if (connection) {
+            const checkConnection = () => {
+                if (connection.effectiveType === '2g' || connection.effectiveType === 'slow-2g') {
+                    showNotif('⚠️ Conexión lenta detectada. Algunas imágenes pueden tardar en cargar.', 'warning');
+                }
+            };
+            
+            checkConnection();
+            connection.addEventListener('change', checkConnection);
+        }
+    }
+
+    // ============================================
+    // MODO OSCURO AUTOMÁTICO (Según hora)
+    // ============================================
+    function checkAutoDarkMode() {
+        const hour = new Date().getHours();
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Activar modo oscuro automáticamente entre 7pm y 6am
+        if ((hour >= 19 || hour < 6) && prefersDark) {
+            document.body.classList.add('dark-mode');
+        }
+    }
+    
+    // Descomentar para activar modo oscuro automático
+    // checkAutoDarkMode();
+
+    // ============================================
+    // SERVICE WORKER (Para PWA - Opcional)
+    // ============================================
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            // navigator.serviceWorker.register('/sw.js')
+            //     .then(reg => console.log('✅ Service Worker registrado'))
+            //     .catch(err => console.log('❌ Service Worker error:', err));
+        });
+    }
+
+    // ============================================
+    // PREVENIR SPAM EN FORMULARIOS
+    // ============================================
+    let lastSubmitTime = 0;
+    
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', (e) => {
+            const now = Date.now();
+            if (now - lastSubmitTime < 2000) { // 2 segundos entre submits
+                e.preventDefault();
+                showNotif('⚠️ Por favor espera unos segundos antes de enviar de nuevo', 'warning');
+                return false;
+            }
+            lastSubmitTime = now;
+            form.classList.add('submitted');
+        });
+    });
+
+    // ============================================
+    // ACCESSIBILITY: NAVEGACIÓN CON TECLADO
+    // ============================================
+    document.addEventListener('keydown', (e) => {
+        // Alt + 1: Ir a inicio
+        if (e.altKey && e.key === '1') {
+            e.preventDefault();
+            document.querySelector('#inicio')?.scrollIntoView({ behavior: 'smooth' });
+        }
+        // Alt + 2: Ir a productos
+        if (e.altKey && e.key === '2') {
+            e.preventDefault();
+            document.querySelector('#productos')?.scrollIntoView({ behavior: 'smooth' });
+        }
+        // Alt + 3: Abrir chatbot
+        if (e.altKey && e.key === '3') {
+            e.preventDefault();
+            toggleChat();
+        }
+        // Alt + 4: Abrir carrito (si está logueado)
+        if (e.altKey && e.key === '4' && S.currentUser) {
+            e.preventDefault();
+            openCart();
+        }
+    });
+
+    // ============================================
+    // PERFORMANCE: PRELOAD DE IMÁGENES CRÍTICAS
+    // ============================================
+    function preloadCriticalImages() {
+        const criticalImages = [
+            'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop',
+            'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1200&h=400&fit=crop'
+        ];
+        
+        criticalImages.forEach(src => {
+            const img = new Image();
+            img.src = src;
+        });
+    }
+    
+    // Preload después de que la página cargue
+    window.addEventListener('load', () => {
+        setTimeout(preloadCriticalImages, 1000);
+    });
+
+    // ============================================
+    // CONSOLE MESSAGE PERSONALIZADO
+    // ============================================
+    console.log('%c🏪 MediTech', 'background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%); color: white; padding: 10px 20px; font-size: 20px; font-weight: bold; border-radius: 5px;');
+    console.log('%cSalud & Tecnología', 'color: #0d9488; font-size: 14px; font-weight: bold;');
+    console.log('%c© 2026 MediTech. Todos los derechos reservados.', 'color: #6b7280; font-size: 10px;');
+    console.log('%c⚠️ Advertencia: No pegues código aquí si no sabes lo que haces.', 'color: #ef4444; font-size: 12px; font-weight: bold;');
+</script>
+
+<!-- ============================================
+🛡️ PROTECCIÓN: BLOQUEO DE TECLAS PELIGROSAS
+Función: Bloquea F12, Ctrl+U, Ctrl+S, Ctrl+P, Ctrl+Shift+I/J/C
+============================================ -->
+<script>
+(function() {
+    'use strict';
+    
+    document.addEventListener('keydown', function(e) {
+        // F12 - Herramientas de desarrollador
+        if (e.key === 'F12') {
+            e.preventDefault();
+            mostrarAlertaSeguridad('⚠️ Las herramientas de desarrollador están deshabilitadas');
+            return false;
+        }
+        
+        // Ctrl+U - Ver código fuente
+        if (e.ctrlKey && e.key.toLowerCase() === 'u') {
+            e.preventDefault();
+            mostrarAlertaSeguridad('⚠️ La vista de código fuente está deshabilitada');
+            return false;
+        }
+        
+        // Ctrl+S - Guardar página
+        if (e.ctrlKey && e.key.toLowerCase() === 's') {
+            e.preventDefault();
+            mostrarAlertaSeguridad('⚠️ No se permite guardar esta página');
+            return false;
+        }
+        
+        // Ctrl+P - Imprimir
+        if (e.ctrlKey && e.key.toLowerCase() === 'p') {
+            e.preventDefault();
+            mostrarAlertaSeguridad('⚠️ La impresión está deshabilitada');
+            return false;
+        }
+        
+        // Ctrl+Shift+I / J / C - Abrir DevTools
+        if (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase())) {
+            e.preventDefault();
+            mostrarAlertaSeguridad('⚠️ Las herramientas de desarrollador están deshabilitadas');
+            return false;
+        }
+        
+        // Ctrl+Shift+K - Consola en Firefox
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+    function mostrarAlertaSeguridad(mensaje) {
+        // Usar el sistema de toast que ya tienes en tu página
+        if (typeof showToast === 'function') {
+            showToast(mensaje, 'warning', 3000);
+        } else {
+            alert(mensaje);
+        }
+    }
+})();
+</script>
+
+
+<!-- ============================================
+🛡️ PROTECCIÓN: DETECCIÓN DE DEVTOOLS ABIERTOS
+Función: Detecta si el usuario abrió F12/Inspeccionar
+         y muestra alerta o redirige
+============================================ -->
+<script>
+(function() {
+    'use strict';
+    
+    let devtoolsAbiertos = false;
+    let intervaloDeteccion;
+    
+    // Método 1: Detección por tamaño de ventana
+    function detectarPorTamano() {
+        const umbral = 160; // pixels de diferencia sospechosa
+        const diffWidth = window.outerWidth - window.innerWidth;
+        const diffHeight = window.outerHeight - window.innerHeight;
+        
+        if ((diffWidth > umbral || diffHeight > umbral) && !devtoolsAbiertos) {
+            devtoolsAbiertos = true;
+            onDevToolsAbiertos();
+        } else if (diffWidth <= umbral && diffHeight <= umbral && devtoolsAbiertos) {
+            devtoolsAbiertos = false;
+            onDevToolsCerrados();
+        }
+    }
+    
+    // Método 2: Detección con debugger (más agresivo)
+    function detectarConDebugger() {
+        const element = new Image();
+        Object.defineProperty(element, 'id', {
+            get: function() {
+                devtoolsAbiertos = true;
+                onDevToolsAbiertos();
+            }
+        });
+        console.log('%c', element);
+    }
+    
+    function onDevToolsAbiertos() {
+        console.clear();
+        console.log('%c⚠️ DEVTOOLS DETECTADOS', 
+            'background: red; color: white; font-size: 30px; padding: 10px;');
+        console.log('%cEsta acción está siendo monitoreada y registrada.', 
+            'color: orange; font-size: 16px;');
+        
+        if (typeof showToast === 'function') {
+            showToast('🔍 Se detectaron herramientas de desarrollador. Tu sesión está siendo monitoreada.', 'error', 5000);
+        }
+        
+        // Opcional: Desenfocar la página
+        document.body.style.filter = 'blur(5px)';
+        document.body.style.pointerEvents = 'none';
+    }
+    
+    function onDevToolsCerrados() {
+        document.body.style.filter = '';
+        document.body.style.pointerEvents = '';
+    }
+    
+    // Iniciar detección
+    intervaloDeteccion = setInterval(detectarPorTamano, 1000);
+    
+    // Ejecutar debugger cada 3 segundos
+    setInterval(detectarConDebugger, 3000);
+})();
+</script>
+
+
+<!-- ============================================
+🛡️ PROTECCIÓN: ANTI-COPIA DE TEXTO
+Función: Bloquea Ctrl+C y selección de texto
+         en áreas protegidas (o toda la página)
+============================================ -->
+<script>
+(function() {
+    'use strict';
+    
+    // Bloquear Ctrl+C globalmente
+    document.addEventListener('copy', function(e) {
+        e.preventDefault();
+        if (typeof showToast === 'function') {
+            showToast('📋 La copia de contenido está deshabilitada', 'warning', 2500);
+        }
+        return false;
+    });
+    
+    // Bloquear Ctrl+X (Cortar)
+    document.addEventListener('cut', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Opcional: Agregar clase 'no-copy' a elementos específicos
+    // En tu HTML: <div class="no-copy">Texto protegido</div>
+    document.addEventListener('DOMContentLoaded', function() {
+        const elementosProtegidos = document.querySelectorAll('.no-copy');
+        elementosProtegidos.forEach(el => {
+            el.style.userSelect = 'none';
+            el.style.webkitUserSelect = 'none';
+            el.style.mozUserSelect = 'none';
+            el.style.msUserSelect = 'none';
+        });
+    });
+})();
+</script>
+
+<!-- CSS complementario (agrégalo a tu bloque <style>) -->
+<style>
+.no-copy {
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+}
+</style>
+
+
+<!-- ============================================
+🛡️ PROTECCIÓN: WATERMARK DINÁMICO CON USUARIO
+Función: Muestra marca de agua con el usuario actual
+         Disuade capturas de pantalla y filtraciones
+============================================ -->
+<script>
+(function() {
+    'use strict';
+    
+    function crearWatermark() {
+        // Obtener datos del usuario (desde Django)
+        const usuario = "{{ user.username|default:'Invitado' }}";
+        const nombre = "{{ user.display_name|default:user.username|default:'Invitado' }}";
+        const fecha = new Date().toLocaleDateString('es-ES');
+        
+        // Crear canvas para el watermark
+        const canvas = document.createElement('canvas');
+        canvas.width = 300;
+        canvas.height = 150;
+        const ctx = canvas.getContext('2d');
+        
+        // Configurar texto
+        ctx.font = '14px Arial';
+        ctx.fillStyle = 'rgba(0, 80, 158, 0.08)'; // Azul UNE muy transparente
+        ctx.textAlign = 'center';
+        ctx.rotate(-25 * Math.PI / 180);
+        
+        // Dibujar texto en varias líneas
+        ctx.fillText('SIGERE - UNE Holguín', 150, 50);
+        ctx.fillText(`Usuario: ${usuario}`, 150, 75);
+        ctx.fillText(`Fecha: ${fecha}`, 150, 100);
+        
+        // Convertir a imagen
+        const watermarkURL = canvas.toDataURL('image/png');
+        
+        // Crear elemento overlay
+        const overlay = document.createElement('div');
+        overlay.id = 'watermark-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99999;
+            background-image: url(${watermarkURL});
+            background-repeat: repeat;
+            opacity: 0.6;
+        `;
+        
+        document.body.appendChild(overlay);
+    }
+    
+    // Solo aplicar a usuarios autenticados
+    if ("{{ user.is_authenticated|yesno:'true,false' }}" === "true") {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', crearWatermark);
+        } else {
+            crearWatermark();
+        }
+    }
+})();
+</script>
+
+
+<!-- ============================================
+🛡️ PROTECCIÓN: ANTI-CLICKJACKING (IFRAME)
+Función: Detecta si tu página está embebida en un iframe
+         y la rompe para evitar ataques
+============================================ -->
+<script>
+(function() {
+    'use strict';
+    
+    // Detectar si estamos dentro de un iframe
+    if (window.top !== window.self) {
+        try {
+            // Intentar acceder al padre
+            if (window.top.location.hostname !== window.self.location.hostname) {
+                // Diferente dominio = posible clickjacking
+                document.body.innerHTML = `
+                    <div style="display:flex;align-items:center;justify-content:center;
+                                height:100vh;background:#1a1d29;color:#fff;
+                                font-family:sans-serif;text-align:center;padding:20px;">
+                        <div>
+                            <h1 style="color:#ef4444;">⚠️ Acceso No Autorizado</h1>
+                            <p>Este sitio no puede ser cargado desde otro dominio.</p>
+                            <a href="${window.location.href}" 
+                               style="color:#38bdf8;text-decoration:underline;">
+                               Ir al sitio oficial →
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+        } catch (e) {
+            // Error de cross-origin = está embebido
+            document.body.innerHTML = '<h1>Acceso bloqueado</h1>';
+        }
+    }
+})();
+</script>
+
+
+<!-- ============================================
+🛡️ PROTECCIÓN: AUDITORÍA DE ACCIONES SOSPECHOSAS
+Función: Registra intentos de acciones prohibidas
+         y los envía al backend (opcional)
+============================================ -->
+<script>
+(function() {
+    'use strict';
+    
+    const auditLog = [];
+    const MAX_LOGS = 100;
+    
+    function registrarAccion(tipo, detalle) {
+        const registro = {
+            timestamp: new Date().toISOString(),
+            usuario: "{{ user.username|default:'anon' }}",
+            tipo: tipo,
+            detalle: detalle,
+            url: window.location.href,
+            userAgent: navigator.userAgent
+        };
+        
+        auditLog.push(registro);
+        
+        // Limitar tamaño del log
+        if (auditLog.length > MAX_LOGS) {
+            auditLog.shift();
+        }
+        
+        console.warn('🔍 [AUDIT]', registro);
+        
+        // Opcional: Enviar al backend vía AJAX
+        // enviarAlBackend(registro);
+    }
+    
+    // Monitorear eventos sospechosos
+    document.addEventListener('contextmenu', () => {
+        registrarAccion('CLICK_DERECHO', 'Intento de menú contextual');
+    });
+    
+    document.addEventListener('copy', () => {
+        registrarAccion('COPIA', 'Intento de copiar texto');
+    });
+    
+    document.addEventListener('print', () => {
+        registrarAccion('IMPRESION', 'Intento de imprimir');
+    });
+    
+    // Exponer función para otros scripts
+    window.registrarAccionSeguridad = registrarAccion;
+    
+    // Opcional: Función para enviar al backend
+    function enviarAlBackend(registro) {
+        fetch('/api/audit-log/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(registro)
+        }).catch(err => console.error('Error enviando audit log:', err));
+    }
+})();
+</script>
+
+
+<!-- ============================================
+🛡️ PROTECCIÓN: IMÁGENES BLINDADAS
+Función: Bloquea clic derecho, arrastre, guardado
+         y reemplaza imágenes por canvas (anti-salvar)
+============================================ -->
+<script>
+(function() {
+    'use strict';
+    
+    function protegerImagenes() {
+        const imagenes = document.querySelectorAll('img.protected-image, img[data-protected]');
+        
+        imagenes.forEach(img => {
+            // Bloquear eventos
+            img.addEventListener('contextmenu', e => e.preventDefault());
+            img.addEventListener('dragstart', e => e.preventDefault());
+            img.addEventListener('selectstart', e => e.preventDefault());
+            
+            // Agregar estilo de protección
+            img.style.pointerEvents = 'auto';
+            img.setAttribute('draggable', 'false');
+            
+            // Opcional: Reemplazar con canvas (hace más difícil guardar)
+            if (img.dataset.canvasProtect === 'true') {
+                reemplazarConCanvas(img);
+            }
+        });
+    }
+    
+    function reemplazarConCanvas(img) {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        canvas.className = img.className;
+        canvas.style.cssText = img.style.cssText;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        
+        img.parentNode.replaceChild(canvas, img);
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', protegerImagenes);
+    } else {
+        protegerImagenes();
+    }
+    
+    // Re-proteger cuando se carguen imágenes dinámicas
+    const observer = new MutationObserver(protegerImagenes);
+    observer.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+
 </body>
 </html>
