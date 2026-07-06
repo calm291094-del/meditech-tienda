@@ -701,7 +701,7 @@
             <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-4 text-white flex justify-between items-center">
                 <span class="font-bold flex items-center gap-2 text-lg">
                     <i class="fas fa-robot"></i>
-                    Asistente IA MediTech
+                    Asistente MediTech
                     <span class="text-xs bg-white/20 px-2 py-1 rounded-full">Powered by AI</span>
                 </span>
                 <button onclick="toggleChat()" class="hover:bg-white/20 rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
@@ -709,7 +709,7 @@
             <div id="chat-messages" class="h-96 p-4 overflow-y-auto bg-gray-50 space-y-3 text-sm">
                 <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm max-w-[85%] border border-gray-100">
                     <p class="font-semibold text-gray-800 mb-1">¡Hola! 👋</p>
-                    <p class="text-gray-600">Soy tu asistente con <b>Inteligencia Artificial</b>. Pregúntame sobre:</p>
+                    <p class="text-gray-600">Soy MediTech con <b>Inteligencia Artificial</b>. Pregúntame sobre:</p>
                     <ul class="text-gray-600 mt-2 space-y-1 text-xs">
                         <li>💊 Medicamentos y sus usos</li>
                         <li>💻 Piezas de PC y componentes</li>
@@ -1407,67 +1407,80 @@ async function fetchGitHubPublic(path) {
             document.getElementById('edit-product-id').value = '';
         }
 
-        async function saveProduct(e) {
-            e.preventDefault();
-            if (!S.currentUser || S.currentUser.role !== 'admin') {
-                showNotif('❌ Solo admin', 'error');
-                return;
-            }
-            
-            const editId = document.getElementById('edit-product-id').value;
-            const name = document.getElementById('prod-name').value;
-            const cat = document.getElementById('prod-category').value;
-            const price = document.getElementById('prod-price').value;
-            const desc = document.getElementById('prod-desc').value;
-            const stock = document.getElementById('prod-stock').value;
-            const feat = document.getElementById('prod-feat').checked;
-            const available = document.getElementById('prod-available').value === 'true';
-            const imageUrl = document.getElementById('prod-image-url').value;
-            const fileInput = document.getElementById('prod-image-file');
-            
-            let img = imageUrl;
-            
-            if (fileInput.files[0]) {
-                showNotif("📤 Subiendo imagen...", "info");
-                try {
-                    img = await subirImagen(fileInput.files[0]);
-                } catch (err) {
-                    showNotif("❌ Error al subir imagen", "error");
-                    return;
-                }
-            }
-            
-            const productData = {
-                id: editId || 'p' + Date.now(),
-                name,
-                category: cat,
-                price: parseFloat(price),
-                desc,
-                stock: parseInt(stock),
-                image: img,
-                feat,
-                available
-            };
-            
-            if (editId) {
-                const index = S.pr.findIndex(p => p.id === editId);
-                if (index >= 0) S.pr[index] = productData;
-            } else {
-                S.pr.push(productData);
-            }
-            
-            showNotif("📤 Guardando...", "info");
-            const success = await saveToGitHub('productos.json', { productos: S.pr }, editId ? `Editar: ${name}` : `Nuevo: ${name}`);
-            
-            if (success) {
-                showNotif("✅ Producto guardado", "success");
-                resetProductForm();
-                renderProducts();
-                renderAdminList();
-            } else {
-                showNotif("❌ Error al guardar", "error");
-            }
+async function saveProduct(e) {
+    e.preventDefault();
+    if (!S.currentUser || S.currentUser.role !== 'admin') {
+        showNotif('❌ Solo administradores pueden agregar productos', 'error');
+        return;
+    }
+    
+    const editId = document.getElementById('edit-product-id').value;
+    const name = document.getElementById('prod-name').value;
+    const cat = document.getElementById('prod-category').value;
+    const price = document.getElementById('prod-price').value;
+    const desc = document.getElementById('prod-desc').value;
+    const stock = document.getElementById('prod-stock').value;
+    const feat = document.getElementById('prod-feat').checked;
+    const available = document.getElementById('prod-available').value === 'true';
+    const imageUrl = document.getElementById('prod-image-url').value;
+    const fileInput = document.getElementById('prod-image-file');
+    
+    let img = imageUrl || 'https://via.placeholder.com/300x200';
+    
+    // Subir imagen si se seleccionó un archivo
+    if (fileInput.files[0]) {
+        showNotif("📤 Subiendo imagen...", "info");
+        try {
+            img = await subirImagen(fileInput.files[0]);
+        } catch (err) {
+            showNotif("❌ Error al subir imagen: " + err.message, "error");
+            return;
         }
+    }
+    
+    // Crear objeto producto
+    const productData = {
+        id: editId || 'p' + Date.now(),
+        name: name,
+        category: cat,
+        price: parseFloat(price),
+        desc: desc,
+        stock: parseInt(stock) || 0,
+        image: img,
+        feat: feat,
+        available: available
+    };
+    
+    // Actualizar o agregar producto
+    if (editId) {
+        const index = S.pr.findIndex(p => p.id === editId);
+        if (index >= 0) {
+            S.pr[index] = productData;
+        } else {
+            S.pr.push(productData);
+        }
+    } else {
+        S.pr.push(productData);
+    }
+    
+    // Guardar en localStorage siempre (backup)
+    localStorage.setItem('productos_backup', JSON.stringify(S.pr));
+    
+    // Intentar guardar en GitHub (solo si hay token)
+    showNotif("📤 Guardando producto...", "info");
+    const success = await saveToGitHub('productos.json', { productos: S.pr }, editId ? `Editar: ${name}` : `Nuevo: ${name}`);
+    
+    if (success) {
+        showNotif("✅ Producto guardado en GitHub y localmente", "success");
+    } else {
+        showNotif("⚠️ Producto guardado solo localmente (sin token)", "warning");
+    }
+    
+    // Actualizar UI
+    resetProductForm();
+    renderProducts();
+    renderAdminList();
+}
 
         async function deleteProduct(id) {
             if (!confirm("¿Eliminar?")) return;
@@ -1497,6 +1510,125 @@ async function fetchGitHubPublic(path) {
                 r.readAsDataURL(file);
             });
         }
+
+// ============================================
+// PRODUCTOS POR DEFECTO (SIEMPRE DISPONIBLES)
+// ============================================
+function getProductosPorDefecto() {
+    return [
+        {
+            id: 'p1',
+            name: '💊 Paracetamol 500mg',
+            category: 'medicamento',
+            price: 5.99,
+            desc: 'Analgésico y antipirético. Alivia dolores leves y reduce la fiebre.',
+            stock: 100,
+            image: 'https://via.placeholder.com/300x200/0d9488/ffffff?text=Paracetamol',
+            feat: true,
+            available: true
+        },
+        {
+            id: 'p2',
+            name: '💻 Laptop Gamer RTX 4060',
+            category: 'tecnologia',
+            price: 1299.99,
+            desc: 'Laptop gaming con Intel i7, 16GB RAM, 1TB SSD y RTX 4060.',
+            stock: 15,
+            image: 'https://via.placeholder.com/300x200/2563eb/ffffff?text=Laptop+Gamer',
+            feat: true,
+            available: true
+        },
+        {
+            id: 'p3',
+            name: '🩺 Vitamina C 1000mg',
+            category: 'salud',
+            price: 12.99,
+            desc: 'Refuerza el sistema inmunológico y combate el cansancio.',
+            stock: 50,
+            image: 'https://via.placeholder.com/300x200/10b981/ffffff?text=Vitamina+C',
+            feat: false,
+            available: true
+        },
+        {
+            id: 'p4',
+            name: '🎮 Monitor 4K 27"',
+            category: 'gaming',
+            price: 349.99,
+            desc: 'Monitor gaming 4K UHD, 144Hz, 1ms, compatible con HDR.',
+            stock: 8,
+            image: 'https://via.placeholder.com/300x200/8b5cf6/ffffff?text=Monitor+4K',
+            feat: true,
+            available: true
+        },
+        {
+            id: 'p5',
+            name: '💊 Ibuprofeno 600mg',
+            category: 'medicamento',
+            price: 7.99,
+            desc: 'Antiinflamatorio no esteroideo. Alivia dolor e inflamación.',
+            stock: 75,
+            image: 'https://via.placeholder.com/300x200/0d9488/ffffff?text=Ibuprofeno',
+            feat: false,
+            available: true
+        },
+        {
+            id: 'p6',
+            name: '💻 SSD 1TB NVMe',
+            category: 'tecnologia',
+            price: 89.99,
+            desc: 'Unidad SSD NVMe 1TB, velocidad de lectura 7000MB/s.',
+            stock: 30,
+            image: 'https://via.placeholder.com/300x200/2563eb/ffffff?text=SSD+1TB',
+            feat: false,
+            available: true
+        },
+        {
+            id: 'p7',
+            name: '🩺 Termómetro Digital',
+            category: 'salud',
+            price: 24.99,
+            desc: 'Termómetro digital de alta precisión. Lectura en 10 segundos.',
+            stock: 40,
+            image: 'https://via.placeholder.com/300x200/10b981/ffffff?text=Termometro',
+            feat: false,
+            available: true
+        },
+        {
+            id: 'p8',
+            name: '🎮 Auriculares Gamer 7.1',
+            category: 'gaming',
+            price: 59.99,
+            desc: 'Auriculares gaming con sonido envolvente 7.1 y micrófono.',
+            stock: 20,
+            image: 'https://via.placeholder.com/300x200/8b5cf6/ffffff?text=Auriculares',
+            feat: true,
+            available: true
+        }
+    ];
+}
+
+// ============================================
+// INTENTAR GUARDAR EN GITHUB (SOLO SI HAY TOKEN)
+// ============================================
+async function tryGuardarEnGitHub(path, data) {
+    // Verificar si hay token válido
+    if (!GITHUB_TOKEN || GITHUB_TOKEN === 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
+        console.warn('⚠️ No hay token válido, guardando solo en local');
+        // Guardar en localStorage
+        if (path === 'productos.json') {
+            localStorage.setItem('productos_backup', JSON.stringify(data.productos || []));
+        }
+        return false;
+    }
+    
+    // Si hay token, intentar guardar
+    try {
+        return await saveToGitHub(path, data, 'Guardar desde MediTech');
+    } catch (error) {
+        console.error('❌ Error guardando en GitHub:', error);
+        return false;
+    }
+}
 
         // ============================================
         // QUICK VIEW
@@ -2026,7 +2158,7 @@ function toggleChat() {
             }
         ];
 
-        const SYSTEM_PROMPT = `Eres el asistente virtual de MediTech, una tienda de medicamentos y tecnología. Responde de forma amigable, profesional y concisa en español. 
+        const SYSTEM_PROMPT = `Eres el asistente MediTech, una tienda de medicamentos y tecnología. Responde de forma amigable, profesional y concisa en español. 
 
 Tus conocimientos:
 - Medicamentos: puedes explicar para qué sirven, dosis generales (siempre recomendando consultar al médico)
