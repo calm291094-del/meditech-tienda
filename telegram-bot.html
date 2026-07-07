@@ -128,26 +128,39 @@ let startTime = Date.now();
 let lastResponse = Date.now();
 let reinicioIntentos = 0;
 
-    // ============================================================
-    // FUNCIÓN PARA LLAMAR AL WORKER DE CLOUDFLARE
-    // ============================================================
-    async function callWorker(method, data = {}) {
-        try {
-            const response = await fetch(WORKER_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    token: token,
-                    method: method,
-                    data: data
-                })
-            });
+// ============================================================
+// FUNCIÓN PARA LLAMAR AL WORKER DE CLOUDFLARE (MEJORADA)
+// ============================================================
+async function callWorker(method, data = {}) {
+    try {
+        const response = await fetch(WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                token: token,
+                method: method,
+                data: data
+            })
+        });
+
+        // Verificar si la respuesta es JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
             return await response.json();
-        } catch (error) {
-            console.error('Error en Worker:', error);
-            return { ok: false, error: error.message };
+        } else {
+            // Si no es JSON, leer como texto y devolver un error estructurado
+            const text = await response.text();
+            console.warn('Respuesta no JSON del Worker:', text);
+            return { 
+                ok: false, 
+                error: `Error del Worker (${response.status}): ${text.substring(0, 100)}` 
+            };
         }
+    } catch (error) {
+        console.error('Error en Worker:', error);
+        return { ok: false, error: error.message };
     }
+}
 
     // ============================================================
     // ENVIAR MENSAJE A TELEGRAM (USANDO WORKER)
