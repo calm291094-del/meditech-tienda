@@ -1,0 +1,12 @@
+{
+  "name": "meditech-bot",
+  "version": "1.0.0",
+  "description": "Bot de Telegram Ania para MediTech",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
