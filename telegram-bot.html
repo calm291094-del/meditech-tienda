@@ -143,12 +143,12 @@ async function callWorker(method, data = {}) {
             })
         });
 
-        // Verificar si la respuesta es JSON
+        // ✅ VERIFICAR SI LA RESPUESTA ES JSON
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
             return await response.json();
         } else {
-            // Si no es JSON, leer como texto y devolver un error estructurado
+            // Si no es JSON, leer como texto y devolver error estructurado
             const text = await response.text();
             console.warn('Respuesta no JSON del Worker:', text);
             return { 
