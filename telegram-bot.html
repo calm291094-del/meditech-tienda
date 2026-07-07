@@ -160,10 +160,11 @@
         return result.ok;
     }
 
-    // ============================================================
-    // OBTENER ACTUALIZACIONES (USANDO WORKER)
-    // ============================================================
-    async function getUpdates() {
+// ============================================================
+// OBTENER ACTUALIZACIONES (USANDO WORKER) - CON MONITOREO 24/7
+// ============================================================
+async function getUpdates() {
+    try {
         const result = await callWorker('getUpdates', {
             offset: lastUpdateId + 1,
             timeout: 30
@@ -184,6 +185,8 @@
                         const sent = await sendTelegramMessage(chatId, response);
                         if (sent) {
                             addLog(`Ania: ${response.substring(0, 50)}...`, 'bot');
+                            // ✅ ACTUALIZAR TIEMPO DE ÚLTIMA RESPUESTA EXITOSA
+                            lastResponse = Date.now();
                         } else {
                             addLog('❌ No se pudo enviar mensaje', 'error');
                         }
@@ -191,8 +194,16 @@
                 }
             }
         }
+        
+        // ✅ ACTUALIZAR TIEMPO DE ÚLTIMA PETICIÓN EXITOSA (incluso si no hay mensajes)
+        lastResponse = Date.now();
         return result.ok;
+        
+    } catch (error) {
+        addLog(`❌ Error en getUpdates: ${error.message}`, 'error');
+        return false;
     }
+}
 
     // ============================================================
     // PERSONALIDAD DE ANIA
@@ -426,7 +437,95 @@
     setInterval(() => {
         fetch(window.location.href).catch(() => {});
     }, 180000);
+
+// ============================================================
+// SISTEMA DE REINICIO AUTOMÁTICO - PARA RENDER
+// ============================================================
+
+// 1. Verificar cada 30 segundos si el bot está corriendo
+setInterval(() => {
+    if (!isRunning && token) {
+        console.log('🔄 Bot detenido, reiniciando...');
+        addLog('🔄 Bot detenido, reiniciando...', 'warning');
+        startBot();
+    }
+}, 30000);
+
+// 2. Recargar la página si el bot no responde después de 2 minutos
+let lastResponse = Date.now();
+setInterval(() => {
+    if (isRunning && (Date.now() - lastResponse > 120000)) {
+        console.log('🔄 Bot sin respuesta, recargando página...');
+        location.reload();
+    }
+}, 60000);
+
+// 3. Actualizar lastResponse cuando se recibe un mensaje
+// Agrega esto en la función getUpdates(), después de procesar un mensaje:
+// lastResponse = Date.now();
+
+    // ============================================================
+    // SISTEMA DE REINICIO AUTOMÁTICO - PARA RENDER
+    // ============================================================
+
+    // 1. Verificar cada 30 segundos si el bot está corriendo
+    setInterval(() => {
+        if (!isRunning && token) {
+            console.log('🔄 Bot detenido, reiniciando...');
+            addLog('🔄 Bot detenido, reiniciando...', 'warning');
+            startBot();
+        }
+    }, 30000);
+
+    // 2. Recargar la página si el bot no responde después de 2 minutos
+    let lastResponse = Date.now();
+    setInterval(() => {
+        if (isRunning && (Date.now() - lastResponse > 120000)) {
+            console.log('🔄 Bot sin respuesta, recargando página...');
+            location.reload();
+        }
+    }, 60000);
+
+    // 3. Actualizar lastResponse cuando se recibe un mensaje
+    // Agrega esto en la función getUpdates(), después de procesar un mensaje:
+    // lastResponse = Date.now();
+
+    // ============================================================
+    // 📌 REGISTRO DEL SERVICE WORKER (para mantener la página activa)
+    // ============================================================
+    
+    // Registrar service worker para mantener la página activa
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(() => console.log('✅ Service Worker registrado correctamente'))
+            .catch((err) => console.log('⚠️ Service Worker no disponible:', err));
+    }
+
+    // ============================================================
+    // 📌 GUARDAR ESTADO DEL BOT (para recuperar después de recargar)
+    // ============================================================
+    
+    // Guardar estado antes de recargar o cerrar
+    window.addEventListener('beforeunload', function() {
+        localStorage.setItem('bot_running', isRunning ? 'true' : 'false');
+        localStorage.setItem('bot_token', token || '');
+    });
+
+    // Recuperar estado después de recargar
+    document.addEventListener('DOMContentLoaded', function() {
+        const wasRunning = localStorage.getItem('bot_running');
+        const savedToken = localStorage.getItem('bot_token');
+        
+        if (wasRunning === 'true' && savedToken) {
+            addLog('🔄 Recuperando estado anterior del bot...', 'info');
+            // El token ya se cargará en el auto-inicio
+        }
+    });
+
+    console.log('🔥 Sistema 24/7 completamente activo');
+    console.log('📱 Bot funcionando con Cloudflare Worker + Service Worker');
 </script>
+
 
 </body>
 </html>
