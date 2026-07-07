@@ -1,0 +1,15 @@
+# render.yaml
+services:
+  - type: web
+    name: meditech-tienda
+    env: static
+    buildCommand: echo "No build needed"
+    staticPublishPath: .
+    headers:
+      - path: /telegram-bot.html
+        name: Cache-Control
+        value: no-cache, no-store, must-revalidate
+    routes:
+      - type: rewrite
+        source: /keep-alive
+        destination: /telegram-bot.html
