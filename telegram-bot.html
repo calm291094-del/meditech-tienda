@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🤖 Ania Bot - MediTech</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
         * { font-family: 'Poppins', sans-serif; }
         body {
@@ -35,7 +35,6 @@
         .status .label { color: rgba(255,255,255,0.4); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
         .status .value { color: #4ade80; font-size: 1.1rem; margin-top: 5px; font-family: 'Courier New', monospace; word-break: break-all; }
         .status .value.off { color: #f87171; }
-        .status .value.warning { color: #fbbf24; }
         .logs { background: rgba(0,0,0,0.3); border-radius: 15px; padding: 20px; max-height: 300px; overflow-y: auto; margin-bottom: 20px; font-family: 'Courier New', monospace; font-size: 0.8rem; color: #a5b4fc; }
         .logs::-webkit-scrollbar { width: 6px; }
         .logs::-webkit-scrollbar-thumb { background: #f5576c; border-radius: 10px; }
@@ -44,7 +43,6 @@
         .log-entry .user { color: #60a5fa; }
         .log-entry .bot { color: #f472b6; }
         .log-entry .error { color: #f87171; }
-        .log-entry .warning { color: #fbbf24; }
         .controls { display: flex; gap: 10px; flex-wrap: wrap; }
         .btn { padding: 12px 24px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s; flex: 1; min-width: 120px; font-size: 0.9rem; }
         .btn-start { background: linear-gradient(135deg, #4ade80, #22d3ee); color: #1a1a2e; }
@@ -64,11 +62,11 @@
         .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.6rem; font-weight: 600; margin-left: 8px; }
         .badge-on { background: #4ade80; color: #1a1a2e; }
         .badge-off { background: #f87171; color: white; }
-        .badge-warning { background: #fbbf24; color: #1a1a2e; }
         .volver { color: rgba(255,255,255,0.3); text-decoration: none; font-size: 0.8rem; display: inline-block; margin-bottom: 15px; }
         .volver:hover { color: rgba(255,255,255,0.6); }
-        .proxy-info { background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; border-radius: 10px; padding: 12px; margin-bottom: 15px; color: #fbbf24; font-size: 0.8rem; }
+        .proxy-info { background: rgba(74, 222, 128, 0.1); border: 1px solid #4ade80; border-radius: 10px; padding: 12px; margin-bottom: 15px; color: #4ade80; font-size: 0.8rem; }
         .proxy-info i { margin-right: 8px; }
+        .uptime { color: #60a5fa; font-family: 'Courier New', monospace; }
     </style>
 </head>
 <body>
@@ -80,13 +78,14 @@
     <p class="subtitle">Asistente virtual de MediTech en Telegram</p>
 
     <div class="proxy-info">
-        <i class="fas fa-shield-alt"></i> 
-        Bot activo 24/7 - Escribe a @AniaAsistenteBot en Telegram
+        <i class="fas fa-cloud"></i> 
+        Bot funcionando con Cloudflare Worker
+        <br /><span style="font-size: 0.7rem; opacity: 0.7;">Tiempo activo: <span id="uptimeDisplay" class="uptime">0h 0m 0s</span></span>
     </div>
 
     <div class="status">
         <div class="label">📌 TOKEN DE TELEGRAM</div>
-        <input type="text" class="token-input" id="tokenInput" placeholder="Pega aquí el token de @BotFather">
+        <input type="text" class="token-input" id="tokenInput" placeholder="8932505027:AAFkR4ZVC_hFcuc4YIhEmEIvGaIDr6yB7L0" />
     </div>
 
     <div class="status">
@@ -107,9 +106,7 @@
         </a>
     </div>
 
-    <div class="footer">
-        MediTech - Salud y Tecnología
-    </div>
+    <div class="footer">MediTech - Salud y Tecnología</div>
 </div>
 
 <script>
@@ -117,25 +114,84 @@
     // CONFIGURACIÓN
     // ============================================================
 
+    // ⚠️ REEMPLAZA CON LA URL DE TU CLOUDFLARE WORKER
+    const WORKER_URL = "https://telegram-proxy.calm291094.workers.dev";
+
     const GITHUB_USER = "calm291094-del";
     const GITHUB_REPO = "meditech-tienda";
-
-    // ============================================================
-    // PROXY QUE SÍ FUNCIONA (solo este para evitar errores)
-    // ============================================================
-    const PROXY = 'https://api.allorigins.win/raw?url=';
 
     let botInterval = null;
     let isRunning = false;
     let lastUpdateId = 0;
     let token = '';
+    let startTime = Date.now();
 
     // ============================================================
-    // FUNCIÓN PARA OBTENER URL CON PROXY
+    // FUNCIÓN PARA LLAMAR AL WORKER DE CLOUDFLARE
     // ============================================================
-    function getTelegramUrl(path) {
-        const baseUrl = `https://api.telegram.org/bot${token}${path}`;
-        return PROXY + encodeURIComponent(baseUrl);
+    async function callWorker(method, data = {}) {
+        try {
+            const response = await fetch(WORKER_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token: token,
+                    method: method,
+                    data: data
+                })
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error en Worker:', error);
+            return { ok: false, error: error.message };
+        }
+    }
+
+    // ============================================================
+    // ENVIAR MENSAJE A TELEGRAM (USANDO WORKER)
+    // ============================================================
+    async function sendTelegramMessage(chatId, text) {
+        const cleanText = text.replace(/<[^>]*>/g, '').trim();
+        const result = await callWorker('sendMessage', {
+            chat_id: chatId,
+            text: cleanText,
+            parse_mode: ''
+        });
+        return result.ok;
+    }
+
+    // ============================================================
+    // OBTENER ACTUALIZACIONES (USANDO WORKER)
+    // ============================================================
+    async function getUpdates() {
+        const result = await callWorker('getUpdates', {
+            offset: lastUpdateId + 1,
+            timeout: 30
+        });
+
+        if (result.ok && result.result.length > 0) {
+            for (let update of result.result) {
+                lastUpdateId = update.update_id;
+                if (update.message && update.message.text) {
+                    const chatId = update.message.chat.id;
+                    const userName = update.message.from.first_name || 'Usuario';
+                    const messageText = update.message.text;
+                    
+                    addLog(`${userName}: ${messageText}`, 'user');
+                    
+                    if (!messageText.startsWith('/')) {
+                        const response = await getAniaResponse(messageText);
+                        const sent = await sendTelegramMessage(chatId, response);
+                        if (sent) {
+                            addLog(`Ania: ${response.substring(0, 50)}...`, 'bot');
+                        } else {
+                            addLog('❌ No se pudo enviar mensaje', 'error');
+                        }
+                    }
+                }
+            }
+        }
+        return result.ok;
     }
 
     // ============================================================
@@ -148,14 +204,14 @@
     Tu personalidad:
     - Alegre, perceptiva y entusiasta
     - Te encanta el café ☕, el anime 🎌, los zombies 🧟 y la astronomía 🔭
-    - Usas frases como "sorbo de café pensativo", "waku waku", "pan y café solucionan el 80% de los problemas"
+    - Usas frases como "sorbo de café pensativo", "waku waku"
     - Hablas en español con calidez y emojis
 
-    Reglas IMPORTANTES:
-    - NUNCA uses etiquetas HTML en tus respuestas (como <b>, <a>, <br>)
+    Reglas:
+    - NUNCA uses etiquetas HTML en tus respuestas
     - Usa solo texto plano con emojis
-    - Si preguntan por precios: "Visita nuestra web para ver los precios actualizados: https://calm291094-del.github.io/meditech-tienda/"
-    - Si preguntan por medicamentos: "Siempre consulta a un médico antes de tomar cualquier medicamento"
+    - Si preguntan por precios: "Visita nuestra web: https://calm291094-del.github.io/meditech-tienda/"
+    - Si preguntan por medicamentos: "Siempre consulta a un médico"
     - Siempre terminas con calidez y positividad
     `;
 
@@ -171,13 +227,12 @@
             const data = await res.json();
             return data.productos || [];
         } catch (e) {
-            console.error('Error obteniendo productos:', e);
             return [];
         }
     }
 
     // ============================================================
-    // GENERAR RESPUESTA DE ANIA (SIN HTML)
+    // GENERAR RESPUESTA DE ANIA
     // ============================================================
 
     async function getAniaResponse(userMessage) {
@@ -210,7 +265,6 @@
 
             if (response.ok) {
                 let texto = await response.text();
-                // Eliminar cualquier etiqueta HTML
                 texto = texto.replace(/<[^>]*>/g, '');
                 texto = texto.replace(/```[\s\S]*?```/g, '').trim();
                 texto = texto.replace(/\*\*(.*?)\*\*/g, '$1');
@@ -224,75 +278,39 @@
     }
 
     // ============================================================
-    // RESPUESTAS LOCALES (SIN HTML)
+    // RESPUESTAS LOCALES
     // ============================================================
 
     function getLocalResponse(message) {
         const lower = message.toLowerCase();
 
-        // Buscar productos específicos por nombre
         if (lower.includes('enalapril')) {
-            return "💊 El Enalapril es un medicamento para la presión arterial. Siempre consulta a tu médico antes de tomarlo. Puedes ver más información en nuestra web: https://calm291094-del.github.io/meditech-tienda/ ¿Necesitas ayuda con algo más? ☕️";
+            return "💊 Enalapril: medicamento para presión arterial. Consulta a tu médico. Más info en nuestra web. ☕️";
         }
-
         if (lower.includes('paracetamol')) {
-            return "💊 El Paracetamol es un analgésico y antipirético. Dosis común: 500mg cada 6-8 horas. Siempre consulta a tu médico. ¿Quieres saber más sobre algún otro medicamento? ☕️";
+            return "💊 Paracetamol: analgésico y antipirético. Dosis: 500mg cada 6-8 horas. Consulta a tu médico. ☕️";
         }
-
-        if (lower.includes('ibuprofeno')) {
-            return "💊 El Ibuprofeno es un antiinflamatorio. Reduce dolor, inflamación y fiebre. No usar con estómago vacío. Consulta a tu médico. ¿Necesitas más información? 😊";
+        if (lower.includes('hola') || lower.includes('buenas')) {
+            return "¡Hola! ☕️ Soy Ania, tu asistente de MediTech. Visita nuestra web: https://calm291094-del.github.io/meditech-tienda/ ✨";
         }
-
-        if (lower.includes('loratadina')) {
-            return "💊 La Loratadina es un antihistamínico para alergias. No causa somnolencia. Recuerda consultar a tu médico. ¿Qué más necesitas saber? ✨";
+        if (lower.includes('precio') || lower.includes('cuesta')) {
+            return "💰 Precios actualizados en nuestra web: https://calm291094-del.github.io/meditech-tienda/ 😊";
         }
-
-        if (lower.includes('amoxicilina')) {
-            return "💊 La Amoxicilina es un antibiótico. Requiere receta médica y completar el tratamiento. Consulta a tu médico. ¿Necesitas más información? ☕️";
-        }
-
-        // Saludos
-        if (lower.includes('hola') || lower.includes('buenas') || lower.includes('hey')) {
-            return "¡Hola! ☕️ Soy Ania, tu asistente de MediTech. ¿En qué puedo ayudarte hoy? Visita nuestra web: https://calm291094-del.github.io/meditech-tienda/ ✨";
-        }
-
-        // Productos
-        if (lower.includes('producto') || lower.includes('qué venden') || lower.includes('tienen')) {
-            return "📦 ¡Claro! Tenemos medicamentos, tecnología, salud y gaming. Puedes ver todos en: https://calm291094-del.github.io/meditech-tienda/ ¿Algo en particular que te interese? ☕️";
-        }
-
-        // Precios
-        if (lower.includes('precio') || lower.includes('cuesta') || lower.includes('cuánto') || lower.includes('costo')) {
-            return "💰 Los precios los puedes consultar directamente en nuestra web: https://calm291094-del.github.io/meditech-tienda/ ¡Cada producto tiene su precio actualizado! 😊";
-        }
-
-        // Café
         if (lower.includes('café') || lower.includes('cafe')) {
-            return "☕ ¡El café es mi debilidad! Mi favorito es un Ethiopiano Yirgacheffe en pour-over. Tiene notas de jazmín y bergamota. ¿Te gusta el café?";
+            return "☕ ¡El café es mi debilidad! Mi favorito es un Ethiopiano Yirgacheffe en pour-over. ¿Te gusta el café?";
+        }
+        if (lower.includes('anime') || lower.includes('isekai')) {
+            return "🎌 ¡Waku waku! Me encanta el anime. Mi favorito es Tensei Slime. ¿Has visto alguna serie buena?";
+        }
+        if (lower.includes('adiós') || lower.includes('chao')) {
+            return "¡Hasta luego! ☕️ Recuerda: 'Sonríe, mañana será bonito'. ¡Cuídate! ✨";
         }
 
-        // Anime
-        if (lower.includes('anime') || lower.includes('isekai') || lower.includes('manga')) {
-            return "🎌 ¡Waku waku! Me encanta el anime. Mi favorito es Tensei Slime, Rimuru es un protagonista increíble. ¿Has visto alguna serie buena últimamente?";
-        }
-
-        // Ayuda
-        if (lower.includes('ayuda') || lower.includes('qué puedes')) {
-            return "🤖 ¡Claro! Puedo ayudarte con:\n• 📦 Consultar productos\n• 💰 Información de precios\n• 📱 Visitar nuestra web\n• ☕️ Hablar de café y anime\n\n¿Qué necesitas hoy? ✨";
-        }
-
-        // Despedidas
-        if (lower.includes('adiós') || lower.includes('chao') || lower.includes('bye') || lower.includes('hasta luego')) {
-            return "¡Hasta luego! ☕️ Recuerda: 'Sonríe, mañana será bonito'. Si necesitas algo más, aquí estaré. ¡Cuídate! ✨";
-        }
-
-        // Respuesta por defecto
         const defaults = [
-            "¡Interesante! ☕️ Déjame pensar... Como diría Rimuru: 'Cada problema tiene solución'. ¿Qué más necesitas saber?",
-            "Eso me recuerda a un buen café etíope: tiene capas de sabor. ¿Quieres que te ayude con algo de la tienda?",
-            "¡Waku waku! Me encanta este tema. ¿Podrías darme más detalles? 📝",
-            "Pan, café y anime solucionan el 80% de los problemas. 🍞☕️",
-            "Aplicando la regla de Zombieland número 6: 'Disfruta de las Pequeñas Cosas'. ¿En qué puedo ayudarte hoy? 😊"
+            "¡Interesante! ☕️ ¿Qué más necesitas saber de MediTech?",
+            "Eso me recuerda a un buen café. ¿Quieres que te ayude con algo de la tienda?",
+            "¡Waku waku! ¿Podrías darme más detalles? 📝",
+            "Pan, café y anime solucionan el 80% de los problemas. 🍞☕️"
         ];
         return defaults[Math.floor(Math.random() * defaults.length)];
     }
@@ -312,64 +330,6 @@
         container.scrollTop = container.scrollHeight;
     }
 
-    async function sendTelegramMessage(chatId, text) {
-        // Eliminar cualquier etiqueta HTML del texto
-        const cleanText = text.replace(/<[^>]*>/g, '').trim();
-        
-        const url = getTelegramUrl('/sendMessage');
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: cleanText,
-                    parse_mode: '' // Sin HTML
-                })
-            });
-            const data = await response.json();
-            if (data.ok) {
-                addLog(`✅ Mensaje enviado`, 'success');
-                return true;
-            } else {
-                addLog(`❌ Error: ${data.description}`, 'error');
-                return false;
-            }
-        } catch (error) {
-            addLog(`❌ Error de red: ${error.message}`, 'error');
-            return false;
-        }
-    }
-
-    async function getUpdates() {
-        const url = getTelegramUrl(`/getUpdates?offset=${lastUpdateId + 1}&timeout=30`);
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.ok && data.result.length > 0) {
-                for (let update of data.result) {
-                    lastUpdateId = update.update_id;
-                    if (update.message && update.message.text) {
-                        const chatId = update.message.chat.id;
-                        const userName = update.message.from.first_name || 'Usuario';
-                        const messageText = update.message.text;
-                        addLog(`${userName}: ${messageText}`, 'user');
-                        if (!messageText.startsWith('/')) {
-                            const response = await getAniaResponse(messageText);
-                            await sendTelegramMessage(chatId, response);
-                            addLog(`Ania: ${response.substring(0, 50)}...`, 'bot');
-                        }
-                    }
-                }
-            }
-            return true;
-        } catch (error) {
-            addLog(`❌ Error: ${error.message}`, 'error');
-            return false;
-        }
-    }
-
     async function testBot() {
         if (!token) {
             addLog('❌ Ingresa el token primero', 'error');
@@ -378,22 +338,13 @@
         }
 
         addLog('📤 Probando conexión...', 'info');
-        const url = getTelegramUrl('/getMe');
-
-        try {
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.ok) {
-                addLog(`✅ Bot @${data.result.username} está activo`, 'success');
-                alert(`✅ Bot @${data.result.username} está activo!\n\nAhora inicia el bot y escribe en Telegram para probarlo.`);
-            } else {
-                addLog(`❌ Token inválido: ${data.description}`, 'error');
-                alert('❌ Token inválido. Verifica que lo hayas copiado correctamente de @BotFather');
-            }
-        } catch (error) {
-            addLog(`❌ Error: ${error.message}`, 'error');
-            alert(`❌ Error de conexión: ${error.message}`);
+        const result = await callWorker('getMe');
+        if (result.ok) {
+            addLog(`✅ Bot @${result.result.username} está activo`, 'success');
+            alert(`✅ Bot @${result.result.username} está activo!`);
+        } else {
+            addLog(`❌ Error: ${result.error || 'Token inválido'}`, 'error');
+            alert('❌ No se pudo conectar');
         }
     }
 
@@ -412,31 +363,24 @@
 
         addLog('🚀 Iniciando bot...', 'info');
 
-        const url = getTelegramUrl('/getMe');
-        fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                if (data.ok) {
-                    isRunning = true;
-                    document.getElementById('statusValue').innerHTML = `✅ Conectado <span class="badge badge-on">ON</span>`;
-                    document.getElementById('btnStart').disabled = true;
-                    document.getElementById('btnStop').disabled = false;
-                    addLog(`✅ Bot @${data.result.username} iniciado`, 'success');
-                    addLog('📱 Escribe en Telegram para probarlo', 'info');
+        callWorker('getMe').then(result => {
+            if (result.ok) {
+                isRunning = true;
+                document.getElementById('statusValue').innerHTML = `✅ Conectado <span class="badge badge-on">ON</span>`;
+                document.getElementById('btnStart').disabled = true;
+                document.getElementById('btnStop').disabled = false;
+                addLog(`✅ Bot @${result.result.username} iniciado`, 'success');
+                addLog('📱 Escribe en Telegram para probarlo', 'info');
 
-                    lastUpdateId = 0;
-                    botInterval = setInterval(async () => {
-                        await getUpdates();
-                    }, 3000);
-                } else {
-                    addLog(`❌ Token inválido: ${data.description}`, 'error');
-                    alert('❌ Token inválido. Verifica que lo hayas copiado correctamente de @BotFather');
-                }
-            })
-            .catch(error => {
-                addLog(`❌ Error: ${error.message}`, 'error');
-                alert(`❌ Error de conexión: ${error.message}\n\nVerifica tu conexión a internet.`);
-            });
+                lastUpdateId = 0;
+                botInterval = setInterval(async () => {
+                    await getUpdates();
+                }, 5000);
+            } else {
+                addLog(`❌ Error: ${result.error || 'Token inválido'}`, 'error');
+                alert('❌ Token inválido o Worker no disponible');
+            }
+        });
     }
 
     function stopBot() {
@@ -452,28 +396,36 @@
     }
 
     // ============================================================
-    // INICIALIZACIÓN
+    // KEEP ALIVE Y AUTO-INICIO
     // ============================================================
 
-    document.addEventListener('DOMContentLoaded', function() {
-        addLog('📌 Bienvenida, soy Ania ☕️', 'info');
-        addLog('📌 Ingresa el token de @BotFather y haz clic en "Iniciar Bot"', 'info');
+    setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const hours = Math.floor(elapsed / 3600);
+        const minutes = Math.floor((elapsed % 3600) / 60);
+        const seconds = elapsed % 60;
+        const uptimeElement = document.getElementById('uptimeDisplay');
+        if (uptimeElement) {
+            uptimeElement.textContent = `${hours}h ${minutes}m ${seconds}s`;
+        }
+    }, 1000);
 
+    document.addEventListener('DOMContentLoaded', function() {
         const savedToken = localStorage.getItem('ania_telegram_token');
         if (savedToken) {
             document.getElementById('tokenInput').value = savedToken;
             addLog('📌 Token cargado automáticamente', 'info');
-        }
-
-        document.getElementById('tokenInput').addEventListener('change', function() {
-            localStorage.setItem('ania_telegram_token', this.value.trim());
-        });
-
-        // Auto-iniciar si hay token
-        if (savedToken) {
-            setTimeout(startBot, 1500);
+            setTimeout(startBot, 2000);
         }
     });
+
+    document.getElementById('tokenInput').addEventListener('change', function() {
+        localStorage.setItem('ania_telegram_token', this.value.trim());
+    });
+
+    setInterval(() => {
+        fetch(window.location.href).catch(() => {});
+    }, 180000);
 </script>
 
 </body>
