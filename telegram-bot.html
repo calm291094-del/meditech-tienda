@@ -35,6 +35,7 @@
         .status .label { color: rgba(255,255,255,0.4); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
         .status .value { color: #4ade80; font-size: 1.1rem; margin-top: 5px; font-family: 'Courier New', monospace; word-break: break-all; }
         .status .value.off { color: #f87171; }
+        .status .value.warning { color: #fbbf24; }
         .logs { background: rgba(0,0,0,0.3); border-radius: 15px; padding: 20px; max-height: 300px; overflow-y: auto; margin-bottom: 20px; font-family: 'Courier New', monospace; font-size: 0.8rem; color: #a5b4fc; }
         .logs::-webkit-scrollbar { width: 6px; }
         .logs::-webkit-scrollbar-thumb { background: #f5576c; border-radius: 10px; }
@@ -43,6 +44,7 @@
         .log-entry .user { color: #60a5fa; }
         .log-entry .bot { color: #f472b6; }
         .log-entry .error { color: #f87171; }
+        .log-entry .warning { color: #fbbf24; }
         .controls { display: flex; gap: 10px; flex-wrap: wrap; }
         .btn { padding: 12px 24px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s; flex: 1; min-width: 120px; font-size: 0.9rem; }
         .btn-start { background: linear-gradient(135deg, #4ade80, #22d3ee); color: #1a1a2e; }
@@ -53,7 +55,7 @@
         .btn-stop:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .btn-test { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
         .btn-test:hover { background: rgba(255,255,255,0.2); }
-        .btn-telegram { background: linear-gradient(135deg, #0088cc, #006699); color: white; }
+        .btn-telegram { background: linear-gradient(135deg, #0088cc, #006699); color: white; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-telegram:hover { transform: scale(1.02); box-shadow: 0 10px 30px rgba(0, 136, 204, 0.3); }
         .token-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 15px; color: white; width: 100%; font-family: 'Courier New', monospace; font-size: 0.8rem; margin-bottom: 10px; outline: none; }
         .token-input:focus { border-color: #f5576c; }
@@ -62,8 +64,11 @@
         .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.6rem; font-weight: 600; margin-left: 8px; }
         .badge-on { background: #4ade80; color: #1a1a2e; }
         .badge-off { background: #f87171; color: white; }
+        .badge-warning { background: #fbbf24; color: #1a1a2e; }
         .volver { color: rgba(255,255,255,0.3); text-decoration: none; font-size: 0.8rem; display: inline-block; margin-bottom: 15px; }
         .volver:hover { color: rgba(255,255,255,0.6); }
+        .proxy-info { background: rgba(251, 191, 36, 0.1); border: 1px solid #fbbf24; border-radius: 10px; padding: 12px; margin-bottom: 15px; color: #fbbf24; font-size: 0.8rem; }
+        .proxy-info i { margin-right: 8px; }
     </style>
 </head>
 <body>
@@ -74,9 +79,14 @@
     <h1>🤖 <span>Ania</span> Bot</h1>
     <p class="subtitle">Asistente virtual de MediTech en Telegram</p>
 
+    <div class="proxy-info">
+        <i class="fas fa-shield-alt"></i> 
+        Usando proxy para evitar bloqueos de red. Si el bot no responde, intenta con otro proxy.
+    </div>
+
     <div class="status">
         <div class="label">📌 TOKEN DE TELEGRAM</div>
-        <input type="text" class="token-input" id="tokenInput" placeholder="8932505027:AAFkR4ZVC_hFcuc4YIhEmEIvGaIDr6yB7L0">
+        <input type="text" class="token-input" id="tokenInput" placeholder="Pega aquí el token de @BotFather">
     </div>
 
     <div class="status">
@@ -92,7 +102,7 @@
         <button class="btn btn-start" id="btnStart" onclick="startBot()">▶️ Iniciar Bot</button>
         <button class="btn btn-stop" id="btnStop" onclick="stopBot()" disabled>⏹️ Detener</button>
         <button class="btn btn-test" onclick="testBot()">📤 Probar</button>
-        <a href="https://t.me/AniaAsistenteBot" target="_blank" class="btn btn-telegram" style="text-align:center; text-decoration:none; display:inline-block;">
+        <a href="https://t.me/AniaAsistenteBot" target="_blank" class="btn btn-telegram">
             <i class="fab fa-telegram"></i> Abrir en Telegram
         </a>
     </div>
@@ -110,10 +120,39 @@
     const GITHUB_USER = "calm291094-del";
     const GITHUB_REPO = "meditech-tienda";
 
+    // ============================================================
+    // PROXIES PARA TELEGRAM (si uno falla, usa el siguiente)
+    // ============================================================
+    const PROXIES = [
+        '', // Directo (sin proxy) - probar primero
+        'https://cors-anywhere.herokuapp.com/',
+        'https://api.allorigins.win/raw?url=',
+        'https://corsproxy.io/?',
+    ];
+
+    let proxyIndex = 0;
     let botInterval = null;
     let isRunning = false;
     let lastUpdateId = 0;
     let token = '';
+
+    // ============================================================
+    // FUNCIÓN PARA OBTENER URL CON PROXY
+    // ============================================================
+    function getTelegramUrl(path) {
+        const proxy = PROXIES[proxyIndex];
+        const baseUrl = `https://api.telegram.org/bot${token}${path}`;
+        return proxy ? proxy + encodeURIComponent(baseUrl) : baseUrl;
+    }
+
+    // ============================================================
+    // PROBAR SIGUIENTE PROXY
+    // ============================================================
+    function siguienteProxy() {
+        proxyIndex = (proxyIndex + 1) % PROXIES.length;
+        addLog(`🔄 Cambiando a proxy ${proxyIndex + 1}/${PROXIES.length}`, 'warning');
+        return PROXIES[proxyIndex];
+    }
 
     // ============================================================
     // PERSONALIDAD DE ANIA
@@ -242,7 +281,7 @@
     function addLog(message, type = 'info') {
         const container = document.getElementById('logsContainer');
         const time = new Date().toLocaleTimeString();
-        const emoji = { info: '📌', user: '👤', bot: '🤖', error: '❌', success: '✅' };
+        const emoji = { info: '📌', user: '👤', bot: '🤖', error: '❌', success: '✅', warning: '⚠️' };
         const entry = document.createElement('div');
         entry.className = 'log-entry';
         entry.innerHTML = `<span class="time">${emoji[type] || '📌'}</span> <span class="${type}">${message}</span>`;
@@ -251,7 +290,7 @@
     }
 
     async function sendTelegramMessage(chatId, text) {
-        const url = `https://api.telegram.org/bot${token}/sendMessage`;
+        const url = getTelegramUrl('/sendMessage');
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -264,20 +303,25 @@
             });
             const data = await response.json();
             if (data.ok) {
-                addLog(`✅ Mensaje enviado a ${chatId}`, 'success');
+                addLog(`✅ Mensaje enviado`, 'success');
                 return true;
             } else {
                 addLog(`❌ Error: ${data.description}`, 'error');
+                // Si el error es de conexión, probar otro proxy
+                if (data.description?.includes('network') || data.description?.includes('timeout')) {
+                    siguienteProxy();
+                }
                 return false;
             }
         } catch (error) {
             addLog(`❌ Error de red: ${error.message}`, 'error');
+            siguienteProxy();
             return false;
         }
     }
 
     async function getUpdates() {
-        const url = `https://api.telegram.org/bot${token}/getUpdates?offset=${lastUpdateId + 1}&timeout=30`;
+        const url = getTelegramUrl(`/getUpdates?offset=${lastUpdateId + 1}&timeout=30`);
         try {
             const response = await fetch(url);
             const data = await response.json();
@@ -301,6 +345,7 @@
             return true;
         } catch (error) {
             addLog(`❌ Error: ${error.message}`, 'error');
+            siguienteProxy();
             return false;
         }
     }
@@ -313,21 +358,31 @@
         }
 
         addLog('📤 Probando conexión...', 'info');
-        try {
-            const url = `https://api.telegram.org/bot${token}/getMe`;
-            const response = await fetch(url);
-            const data = await response.json();
-            if (data.ok) {
-                addLog(`✅ Bot @${data.result.username} está activo`, 'success');
-                alert(`✅ Bot @${data.result.username} está activo!\n\nAhora inicia el bot y escribe en Telegram para probarlo.`);
-            } else {
-                addLog(`❌ Token inválido: ${data.description}`, 'error');
-                alert('❌ Token inválido.');
+
+        // Intentar con todos los proxies
+        let intentos = PROXIES.length;
+        for (let i = 0; i < intentos; i++) {
+            proxyIndex = i;
+            const url = getTelegramUrl('/getMe');
+            addLog(`🔌 Intentando proxy ${i + 1}/${intentos}...`, 'info');
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.ok) {
+                    addLog(`✅ Bot @${data.result.username} está activo (proxy ${i + 1})`, 'success');
+                    alert(`✅ Bot @${data.result.username} está activo!\n\nAhora inicia el bot y escribe en Telegram para probarlo.`);
+                    return;
+                } else {
+                    addLog(`❌ Error con proxy ${i + 1}: ${data.description}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Proxy ${i + 1} falló: ${error.message}`, 'error');
             }
-        } catch (error) {
-            addLog(`❌ Error: ${error.message}`, 'error');
-            alert(`❌ Error de conexión: ${error.message}`);
         }
+
+        alert('❌ No se pudo conectar con Telegram. Verifica tu conexión a internet o prueba con otro proxy.');
     }
 
     function startBot() {
@@ -339,36 +394,46 @@
         }
 
         if (isRunning) {
-            addLog('⚠️ El bot ya está corriendo', 'info');
+            addLog('⚠️ El bot ya está corriendo', 'warning');
             return;
         }
 
         addLog('🚀 Iniciando bot...', 'info');
+        proxyIndex = 0;
 
-        fetch(`https://api.telegram.org/bot${token}/getMe`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.ok) {
-                    isRunning = true;
-                    document.getElementById('statusValue').innerHTML = `✅ Conectado <span class="badge badge-on">ON</span>`;
-                    document.getElementById('btnStart').disabled = true;
-                    document.getElementById('btnStop').disabled = false;
-                    addLog(`✅ Bot @${data.result.username} iniciado`, 'success');
-                    addLog('📱 Escribe en Telegram para probarlo', 'info');
+        // Intentar iniciar con el primer proxy
+        testConnectionAndStart();
+    }
 
-                    lastUpdateId = 0;
-                    botInterval = setInterval(async () => {
-                        await getUpdates();
-                    }, 3000);
-                } else {
-                    addLog(`❌ Token inválido: ${data.description}`, 'error');
-                    alert('❌ Token inválido.');
-                }
-            })
-            .catch(error => {
-                addLog(`❌ Error: ${error.message}`, 'error');
-                alert(`❌ Error de conexión: ${error.message}`);
-            });
+    async function testConnectionAndStart() {
+        const url = getTelegramUrl('/getMe');
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            if (data.ok) {
+                isRunning = true;
+                document.getElementById('statusValue').innerHTML = `✅ Conectado <span class="badge badge-on">ON</span>`;
+                document.getElementById('btnStart').disabled = true;
+                document.getElementById('btnStop').disabled = false;
+                addLog(`✅ Bot @${data.result.username} iniciado (proxy ${proxyIndex + 1})`, 'success');
+                addLog('📱 Escribe en Telegram para probarlo', 'info');
+
+                lastUpdateId = 0;
+                botInterval = setInterval(async () => {
+                    await getUpdates();
+                }, 3000);
+            } else {
+                addLog(`❌ Error: ${data.description}`, 'error');
+                // Intentar con otro proxy
+                siguienteProxy();
+                setTimeout(testConnectionAndStart, 2000);
+            }
+        } catch (error) {
+            addLog(`❌ Error: ${error.message}`, 'error');
+            siguienteProxy();
+            setTimeout(testConnectionAndStart, 2000);
+        }
     }
 
     function stopBot() {
@@ -400,11 +465,6 @@
         document.getElementById('tokenInput').addEventListener('change', function() {
             localStorage.setItem('ania_telegram_token', this.value.trim());
         });
-
-        // Auto-iniciar si el token está guardado
-        if (savedToken) {
-            setTimeout(startBot, 1000);
-        }
     });
 </script>
 
