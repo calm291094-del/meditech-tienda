@@ -273,6 +273,60 @@
             } catch { return null; }
         }
 
+// ============================================================
+// GUARDAR USUARIOS - CORREGIDO (igual que productos)
+// ============================================================
+async function saveToGitHubUsers(path, data, message) {
+    if (!GITHUB_TOKEN || GITHUB_TOKEN === 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
+        showToast('⚠️ No hay token válido. Guardado solo local.', 'warning');
+        localStorage.setItem('usuarios_backup', JSON.stringify(data.usuarios || []));
+        return false;
+    }
+    
+    try {
+        const file = await fetchGitHubAPIUsers(path);
+        const sha = file?.sha || null;
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+        
+        const res = await fetch(`${API}/contents/${path}`, {
+            method: 'PUT',
+            headers: HEADERS,
+            body: JSON.stringify({
+                message: message || `Actualizar ${path}`,
+                content,
+                sha
+            })
+        });
+        
+        if (res.ok) {
+            showToast(`✅ ${path} guardado en GitHub`, 'success');
+            localStorage.setItem('usuarios_backup', JSON.stringify(data.usuarios || []));
+            return true;
+        } else {
+            const err = await res.json();
+            showToast(`❌ Error: ${err.message}`, 'error');
+            return false;
+        }
+    } catch (e) {
+        console.error(e);
+        showToast('❌ Error al guardar en GitHub', 'error');
+        return false;
+    }
+}
+
+// Asegúrate de que esta función exista en admin-usuarios.html
+async function fetchGitHubAPIUsers(path) {
+    try {
+        const res = await fetch(`${API}/contents/${path}`, { 
+            headers: HEADERS,
+            cache: 'no-cache'
+        });
+        if (res.status === 404) return null;
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+    } catch { return null; }
+}
+
         async function saveToGitHub(path, data, message) {
             if (!GITHUB_TOKEN || GITHUB_TOKEN === 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
                 showToast('⚠️ No hay token válido. Guardado solo local.', 'warning');

@@ -1646,7 +1646,7 @@ async function crearArchivoSiNoExiste(path) {
 }
 
 // ============================================
-// FETCH GITHUB API - CON TOKEN (PARA ESCRIBIR)
+// FETCH GITHUB API - CON TOKEN (para escritura)
 // ============================================
 async function fetchGitHubAPI(path) {
     try {
@@ -1685,7 +1685,7 @@ async function fetchGitHubAPI(path) {
 }
 
 // ============================================
-// GUARDAR EN GITHUB - CORREGIDA
+// GUARDAR EN GITHUB - CORREGIDA (asegurada)
 // ============================================
 async function saveToGitHub(path, data, message) {
     // Verificar que el usuario es admin
@@ -1701,6 +1701,10 @@ async function saveToGitHub(path, data, message) {
         // Guardar en localStorage como respaldo
         if (path === 'productos.json') {
             localStorage.setItem('productos_backup', JSON.stringify(data.productos || []));
+        } else if (path === 'config.json') {
+            localStorage.setItem('config_backup', JSON.stringify(data));
+        } else if (path === 'usuarios.json') {
+            localStorage.setItem('usuarios_backup', JSON.stringify(data.usuarios || []));
         }
         showNotif('⚠️ Cambios guardados solo en local (sin token). Configura tu token en Panel Admin → Configuración.', 'warning');
         return false;
@@ -1721,7 +1725,7 @@ async function saveToGitHub(path, data, message) {
             console.log('ℹ️ Archivo no existe, se creará uno nuevo');
         }
         
-        // 2. Preparar el contenido (asegurar encoding correcto)
+        // 2. Preparar el contenido
         const content = JSON.stringify(data, null, 2);
         const contentBase64 = btoa(unescape(encodeURIComponent(content)));
         
@@ -1741,9 +1745,13 @@ async function saveToGitHub(path, data, message) {
             console.log(`✅ ${path} guardado en GitHub (commit: ${result.commit?.sha?.substring(0, 7)})`);
             showNotif(`✅ ${path} guardado en GitHub`, 'success');
             
-            // También guardar en localStorage como respaldo
+            // Guardar en localStorage como respaldo
             if (path === 'productos.json') {
                 localStorage.setItem('productos_backup', JSON.stringify(data.productos || []));
+            } else if (path === 'config.json') {
+                localStorage.setItem('config_backup', JSON.stringify(data));
+            } else if (path === 'usuarios.json') {
+                localStorage.setItem('usuarios_backup', JSON.stringify(data.usuarios || []));
             }
             
             return true;
@@ -1751,7 +1759,6 @@ async function saveToGitHub(path, data, message) {
             const errorData = await response.json();
             console.error(`❌ Error al guardar ${path}:`, errorData.message);
             
-            // Si es error 401, el token expiró
             if (response.status === 401) {
                 showNotif('❌ Token expirado. Actualízalo en el Panel Admin → Configuración.', 'error');
             } else if (response.status === 404) {
@@ -1769,33 +1776,33 @@ async function saveToGitHub(path, data, message) {
 }
 
 // ============================================
-// CONFIGURACIÓN - VERSIÓN MEJORADA
+// CARGAR CONFIGURACIÓN - CORREGIDA
 // ============================================
 async function cargarConfig() {
     console.log('📄 Cargando configuración...');
     
     try {
-        const file = await fetchGitHub('config.json');
+        // Usar la misma función que los productos (fetchGitHubPublic)
+        const data = await fetchGitHubPublic('config.json');
         
-        if (file) {
-            try {
-                const data = JSON.parse(atob(file.content));
-                // Merge con configuración por defecto
-                S.config = { ...S.config, ...data };
-                console.log('✅ Configuración cargada desde GitHub');
-            } catch (parseError) {
-                console.error('❌ Error al parsear config.json:', parseError);
-                console.warn('⚠️ Usando configuración por defecto');
-            }
+        if (data) {
+            // Merge con configuración por defecto
+            S.config = { ...S.config, ...data };
+            console.log('✅ Configuración cargada desde GitHub');
+            localStorage.setItem('config_backup', JSON.stringify(S.config));
         } else {
-            console.warn('⚠️ config.json no existe en GitHub, creando uno por defecto...');
-            // Crear config.json con valores por defecto
+            console.warn('⚠️ config.json no existe en GitHub, usando configuración por defecto');
+            // Intentar crear config.json en GitHub
             await saveToGitHub('config.json', S.config, 'Crear configuración inicial');
-            console.log('✅ config.json creado en GitHub');
         }
     } catch (error) {
         console.error('❌ Error al cargar configuración:', error);
-        console.warn('⚠️ Usando configuración por defecto');
+        // Intentar recuperar backup local
+        const backup = localStorage.getItem('config_backup');
+        if (backup) {
+            S.config = { ...S.config, ...JSON.parse(backup) };
+            console.log('⚠️ Usando configuración desde backup local');
+        }
     }
 }
 
@@ -1810,24 +1817,20 @@ async function cargarConfig() {
             document.getElementById('footer-description').textContent = S.config.footerDescription;
         }
 
-        // ============================================
-        // AUTENTICACIÓN
-        // ============================================
+// ============================================
+// AUTENTICACIÓN - CORREGIDA (igual que productos)
+// ============================================
 async function initAuth() {
     console.log('🔐 Inicializando autenticación...');
     
     try {
-        const usersFile = await fetchGitHub('usuarios.json');
+        // Usar la misma función que los productos (fetchGitHubPublic)
+        const data = await fetchGitHubPublic('usuarios.json');
         
-        if (usersFile) {
-            try {
-                const data = JSON.parse(atob(usersFile.content));
-                S.users = data.usuarios || [];
-                console.log(`✅ ${S.users.length} usuarios cargados desde GitHub`);
-            } catch (parseError) {
-                console.error('❌ Error al parsear usuarios.json:', parseError);
-                S.users = [];
-            }
+        if (data && data.usuarios) {
+            S.users = data.usuarios;
+            console.log(`✅ ${S.users.length} usuarios cargados desde GitHub`);
+            localStorage.setItem('usuarios_backup', JSON.stringify(S.users));
         } else {
             console.warn('⚠️ usuarios.json no existe, creando por defecto...');
             S.users = [{ 
@@ -1838,12 +1841,9 @@ async function initAuth() {
                 role: 'admin',
                 fecha: new Date().toISOString()
             }];
-            
-            // Intentar guardar en GitHub (si falla, continuamos igual)
-            const saved = await saveToGitHub('usuarios.json', { usuarios: S.users }, 'Inicializar usuarios');
-            if (!saved) {
-                console.warn('⚠️ No se pudo crear usuarios.json en GitHub. Usando usuarios locales.');
-            }
+            localStorage.setItem('usuarios_backup', JSON.stringify(S.users));
+            // Intentar guardar en GitHub
+            await saveToGitHub('usuarios.json', { usuarios: S.users }, 'Inicializar usuarios');
         }
         
         // Restaurar sesión del localStorage
@@ -1868,16 +1868,22 @@ async function initAuth() {
         
     } catch (error) {
         console.error('❌ Error crítico en initAuth:', error);
-        // Fallback: usar usuarios por defecto si todo falla
+        // Fallback: usar usuarios por defecto
         if (S.users.length === 0) {
-            S.users = [{ 
-                username: 'root', 
-                password: 'Root*4815162342+-', 
-                name: 'Administrador', 
-                email: 'admin@meditech.com', 
-                role: 'admin'
-            }];
-            console.warn('⚠️ Usando usuarios por defecto (offline)');
+            const backup = localStorage.getItem('usuarios_backup');
+            if (backup) {
+                S.users = JSON.parse(backup);
+                console.log('⚠️ Usando usuarios desde backup local');
+            } else {
+                S.users = [{ 
+                    username: 'root', 
+                    password: 'Root*4815162342+-', 
+                    name: 'Administrador', 
+                    email: 'admin@meditech.com', 
+                    role: 'admin'
+                }];
+                console.warn('⚠️ Usando usuarios por defecto (offline)');
+            }
         }
     }
 }
@@ -2024,7 +2030,7 @@ async function cargarProductos() {
 }
 
 // ============================================
-// FETCH GITHUB - LECTURA PÚBLICA (SIN TOKEN)
+// FETCH GITHUB PÚBLICO - SIN TOKEN (para lectura)
 // ============================================
 async function fetchGitHubPublic(path) {
     try {
@@ -2657,6 +2663,10 @@ function editCarousel() {
     renderCarouselEditor();
 }
 
+// ============================================
+// CARRUSEL - FUNCIONES CORREGIDAS (igual que productos)
+// ============================================
+
 // Renderizar el editor de carrusel
 function renderCarouselEditor() {
     const container = document.getElementById('carousel-editor');
@@ -2670,7 +2680,7 @@ function renderCarouselEditor() {
     container.innerHTML = S.config.carousel.map((slide, index) => `
         <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
             <div class="w-24 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                <img src="${slide.image || 'https://via.placeholder.com/120x80'}" class="w-full h-full object-cover" alt="Slide ${index + 1}">
+                <img src="${slide.image || 'https://via.placeholder.com/120x80'}" class="w-full h-full object-cover" alt="Slide ${index + 1}" onerror="this.src='https://via.placeholder.com/120x80'">
             </div>
             <div class="flex-1 min-w-0">
                 <p class="font-bold text-sm truncate">${slide.title || 'Sin título'}</p>
@@ -2696,13 +2706,11 @@ function renderCarouselEditor() {
 
 // Agregar un nuevo slide al carrusel
 function addCarouselSlide() {
-    // Crear un slide por defecto
     const newSlide = {
         image: 'https://via.placeholder.com/1200x400/0d9488/ffffff?text=Nuevo+Slide',
         title: 'Nuevo Slide',
         subtitle: 'Descripción del nuevo slide'
     };
-    
     S.config.carousel.push(newSlide);
     renderCarouselEditor();
     showNotif('📤 Slide agregado. Guarda los cambios para aplicarlos.', 'info');
@@ -2713,7 +2721,6 @@ function editCarouselSlide(index) {
     const slide = S.config.carousel[index];
     if (!slide) return;
     
-    // Crear un modal simple para editar
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 modal-overlay';
     modal.id = 'edit-slide-modal';
@@ -2754,7 +2761,6 @@ function editCarouselSlide(index) {
     `;
     document.body.appendChild(modal);
     
-    // Previsualización en tiempo real
     document.getElementById('edit-slide-image').addEventListener('input', function() {
         const preview = document.getElementById('edit-slide-preview');
         if (this.value) {
@@ -2783,7 +2789,6 @@ function saveCarouselSlide(index) {
 // Eliminar un slide
 function deleteCarouselSlide(index) {
     if (!confirm(`¿Eliminar el slide "${S.config.carousel[index].title}"?`)) return;
-    
     S.config.carousel.splice(index, 1);
     renderCarouselEditor();
     showNotif('🗑️ Slide eliminado. Guarda los cambios para aplicarlos.', 'info');
@@ -2792,23 +2797,18 @@ function deleteCarouselSlide(index) {
 // Mover un slide (arriba/abajo)
 function moveCarouselSlide(index, direction) {
     const newIndex = direction === 'up' ? index - 1 : index + 1;
-    
     if (newIndex < 0 || newIndex >= S.config.carousel.length) return;
-    
-    // Intercambiar elementos
     const temp = S.config.carousel[index];
     S.config.carousel[index] = S.config.carousel[newIndex];
     S.config.carousel[newIndex] = temp;
-    
     renderCarouselEditor();
     showNotif('🔄 Orden actualizado. Guarda los cambios para aplicarlos.', 'info');
 }
 
 // ============================================
-// GUARDAR CARRUSEL - CORREGIDA
+// GUARDAR CARRUSEL - CORREGIDA (igual que productos)
 // ============================================
 async function saveCarousel() {
-    // Verificar que el usuario es admin
     if (!S.currentUser || S.currentUser.role !== 'admin') {
         showNotif('❌ Solo administradores pueden guardar cambios', 'error');
         return;
@@ -2820,19 +2820,17 @@ async function saveCarousel() {
         // 1. Guardar en localStorage como respaldo
         localStorage.setItem('config_backup', JSON.stringify(S.config));
         
-        // 2. Intentar guardar en GitHub
+        // 2. Guardar en GitHub usando la misma función que los productos
         const success = await saveToGitHub('config.json', S.config, 'Actualizar carrusel desde MediTech');
         
         if (success) {
             // 3. Recargar el carrusel en la página
             renderCarousel();
-            // 4. Reiniciar el autoplay
             initCarousel();
             showNotif("✅ Carrusel guardado correctamente en GitHub", "success");
         } else {
             // Si falla GitHub, al menos guardamos en local
             showNotif("⚠️ Cambios guardados solo localmente (sin token)", "warning");
-            // Aún así actualizamos la vista
             renderCarousel();
             initCarousel();
         }
