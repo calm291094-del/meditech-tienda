@@ -234,141 +234,159 @@
     <!-- TOAST NOTIFICATIONS -->
     <div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 space-y-2 pointer-events-none"></div>
 
-    <script>
-        // ============================================================
-        // CONFIGURACIÓN GITHUB (misma que en index.html)
-        // ============================================================
-        let GITHUB_TOKEN = localStorage.getItem('github_token') || "ghp_PEGA_AQUI_TU_NUEVO_TOKEN";
-        const GITHUB_USER = "calm291094-del";
-        const GITHUB_REPO = "meditech-tienda";
-        const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
-        let HEADERS = {
-            "Authorization": `token ${GITHUB_TOKEN}`,
-            "Accept": "application/vnd.github.v3+json"
-        };
 
-        // Estado
-        let users = [];
-        let currentUser = null;
-        let filteredUsers = [];
+<script>
+    // ============================================================
+    // CONFIGURACIÓN GITHUB (misma que en index.html)
+    // ============================================================
+    let GITHUB_TOKEN = localStorage.getItem('github_token') || "ghp_PEGA_AQUI_TU_NUEVO_TOKEN";
+    const GITHUB_USER = "calm291094-del";
+    const GITHUB_REPO = "meditech-tienda";
+    const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
+    let HEADERS = {
+        "Authorization": `token ${GITHUB_TOKEN}`,
+        "Accept": "application/vnd.github.v3+json"
+    };
 
-        // ============================================================
-        // FUNCIONES DE GITHUB (simplificadas)
-        // ============================================================
-        async function fetchGitHubPublic(path) {
-            try {
-                const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${path}?t=${Date.now()}`;
-                const res = await fetch(url, { cache: 'no-cache' });
-                if (!res.ok) return null;
-                return await res.json();
-            } catch { return null; }
-        }
+    // Estado
+    let users = [];
+    let currentUser = null;
+    let filteredUsers = [];
 
-        async function fetchGitHubAPI(path) {
-            try {
-                const res = await fetch(`${API}/contents/${path}`, { headers: HEADERS });
-                if (res.status === 404) return null;
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return await res.json();
-            } catch { return null; }
-        }
-
-// ============================================================
-// GUARDAR USUARIOS - CORREGIDO (igual que productos)
-// ============================================================
-async function saveToGitHubUsers(path, data, message) {
-    if (!GITHUB_TOKEN || GITHUB_TOKEN === 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
-        showToast('⚠️ No hay token válido. Guardado solo local.', 'warning');
-        localStorage.setItem('usuarios_backup', JSON.stringify(data.usuarios || []));
-        return false;
-    }
-    
-    try {
-        const file = await fetchGitHubAPIUsers(path);
-        const sha = file?.sha || null;
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+    // ============================================================
+    // VERIFICAR AUTENTICACIÓN - CORREGIDA
+    // ============================================================
+    function verificarAutenticacion() {
+        console.log('🔐 Verificando autenticación...');
         
-        const res = await fetch(`${API}/contents/${path}`, {
-            method: 'PUT',
-            headers: HEADERS,
-            body: JSON.stringify({
-                message: message || `Actualizar ${path}`,
-                content,
-                sha
-            })
-        });
+        // 1. Intentar obtener sesión de localStorage
+        const sessionData = localStorage.getItem('session');
+        console.log('📌 Session data:', sessionData);
         
-        if (res.ok) {
-            showToast(`✅ ${path} guardado en GitHub`, 'success');
-            localStorage.setItem('usuarios_backup', JSON.stringify(data.usuarios || []));
-            return true;
-        } else {
-            const err = await res.json();
-            showToast(`❌ Error: ${err.message}`, 'error');
+        if (!sessionData) {
+            console.warn('⚠️ No hay sesión guardada');
             return false;
         }
-    } catch (e) {
-        console.error(e);
-        showToast('❌ Error al guardar en GitHub', 'error');
-        return false;
-    }
-}
-
-// Asegúrate de que esta función exista en admin-usuarios.html
-async function fetchGitHubAPIUsers(path) {
-    try {
-        const res = await fetch(`${API}/contents/${path}`, { 
-            headers: HEADERS,
-            cache: 'no-cache'
-        });
-        if (res.status === 404) return null;
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return await res.json();
-    } catch { return null; }
-}
-
-        async function saveToGitHub(path, data, message) {
-            if (!GITHUB_TOKEN || GITHUB_TOKEN === 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
-                showToast('⚠️ No hay token válido. Guardado solo local.', 'warning');
-                localStorage.setItem('usuarios_backup', JSON.stringify(data.usuarios || []));
+        
+        try {
+            const user = JSON.parse(sessionData);
+            console.log('📌 Usuario:', user);
+            console.log('📌 Rol:', user.role);
+            
+            // Verificar que sea administrador
+            if (user.role === 'admin') {
+                currentUser = user;
+                document.getElementById('admin-name').textContent = user.name || 'Admin';
+                console.log('✅ Usuario autenticado como administrador');
+                return true;
+            } else {
+                console.warn('⚠️ Usuario no es administrador (rol:', user.role, ')');
                 return false;
             }
-            try {
-                const file = await fetchGitHubAPI(path);
-                const sha = file?.sha || null;
-                const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-                const res = await fetch(`${API}/contents/${path}`, {
-                    method: 'PUT',
-                    headers: HEADERS,
-                    body: JSON.stringify({
-                        message: message || `Actualizar ${path}`,
-                        content,
-                        sha
-                    })
-                });
-                if (!res.ok) throw new Error(await res.text());
+        } catch (e) {
+            console.error('❌ Error al parsear sesión:', e);
+            return false;
+        }
+    }
+
+    // ============================================================
+    // FUNCIONES DE GITHUB
+    // ============================================================
+    async function fetchGitHubPublic(path) {
+        try {
+            const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${path}?t=${Date.now()}`;
+            console.log(`📡 Leyendo: ${url}`);
+            const res = await fetch(url, { cache: 'no-cache' });
+            if (!res.ok) {
+                if (res.status === 404) console.warn(`⚠️ Archivo no encontrado: ${path}`);
+                return null;
+            }
+            return await res.json();
+        } catch (e) {
+            console.error(`❌ Error leyendo ${path}:`, e);
+            return null;
+        }
+    }
+
+    async function fetchGitHubAPI(path) {
+        try {
+            const res = await fetch(`${API}/contents/${path}`, { 
+                headers: HEADERS,
+                cache: 'no-cache'
+            });
+            if (res.status === 404) return null;
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return await res.json();
+        } catch (e) {
+            console.error(`❌ Error en API ${path}:`, e);
+            return null;
+        }
+    }
+
+    async function saveToGitHub(path, data, message) {
+        // Verificar token
+        if (!GITHUB_TOKEN || GITHUB_TOKEN === 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
+            console.warn('⚠️ No hay token válido. Guardado solo local.');
+            localStorage.setItem('usuarios_backup', JSON.stringify(data.usuarios || []));
+            showToast('⚠️ Guardado solo en local (sin token)', 'warning');
+            return false;
+        }
+        
+        try {
+            console.log(`💾 Guardando ${path}...`);
+            const file = await fetchGitHubAPI(path);
+            const sha = file?.sha || null;
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+            
+            const res = await fetch(`${API}/contents/${path}`, {
+                method: 'PUT',
+                headers: HEADERS,
+                body: JSON.stringify({
+                    message: message || `Actualizar ${path}`,
+                    content,
+                    sha
+                })
+            });
+            
+            if (res.ok) {
+                console.log(`✅ ${path} guardado en GitHub`);
+                localStorage.setItem('usuarios_backup', JSON.stringify(data.usuarios || []));
                 showToast(`✅ ${path} guardado`, 'success');
                 return true;
-            } catch (e) {
-                console.error(e);
-                showToast('❌ Error al guardar en GitHub', 'error');
+            } else {
+                const err = await res.json();
+                console.error(`❌ Error:`, err.message);
+                showToast(`❌ Error: ${err.message}`, 'error');
                 return false;
             }
+        } catch (e) {
+            console.error(`❌ Excepción guardando ${path}:`, e);
+            showToast('❌ Error al guardar en GitHub', 'error');
+            return false;
         }
+    }
 
-        // ============================================================
-        // CARGAR USUARIOS
-        // ============================================================
-        async function cargarUsuarios() {
-            try {
-                const data = await fetchGitHubPublic('usuarios.json');
-                if (data && data.usuarios) {
-                    users = data.usuarios;
+    // ============================================================
+    // CARGAR USUARIOS
+    // ============================================================
+    async function cargarUsuarios() {
+        console.log('📦 Cargando usuarios...');
+        try {
+            // 1. Intentar desde GitHub
+            const data = await fetchGitHubPublic('usuarios.json');
+            
+            if (data && data.usuarios && data.usuarios.length > 0) {
+                users = data.usuarios;
+                console.log(`✅ ${users.length} usuarios cargados desde GitHub`);
+            } else {
+                // 2. Fallback a backup local
+                const backup = localStorage.getItem('usuarios_backup');
+                if (backup) {
+                    users = JSON.parse(backup);
+                    console.log(`⚠️ Usando backup local: ${users.length} usuarios`);
                 } else {
-                    // Fallback a backup local o usuarios por defecto
-                    const backup = localStorage.getItem('usuarios_backup');
-                    if (backup) users = JSON.parse(backup);
-                    else users = [{
+                    // 3. Usuarios por defecto
+                    users = [{
                         username: 'root',
                         password: 'Root*4815162342+-',
                         name: 'Administrador',
@@ -376,267 +394,282 @@ async function fetchGitHubAPIUsers(path) {
                         role: 'admin',
                         fecha: new Date().toISOString()
                     }];
+                    console.log('📝 Usuarios por defecto creados');
                 }
-                // Guardar copia local
-                localStorage.setItem('usuarios_backup', JSON.stringify(users));
-                renderUsuarios();
-                actualizarEstadisticas();
-            } catch (e) {
-                console.error(e);
-                showToast('❌ Error cargando usuarios', 'error');
             }
+            
+            // Guardar backup
+            localStorage.setItem('usuarios_backup', JSON.stringify(users));
+            renderUsuarios();
+            actualizarEstadisticas();
+            
+        } catch (e) {
+            console.error('❌ Error cargando usuarios:', e);
+            showToast('❌ Error cargando usuarios', 'error');
         }
+    }
 
-        // ============================================================
-        // RENDERIZAR TABLA
-        // ============================================================
-        function renderUsuarios(lista) {
-            const tbody = document.getElementById('users-table-body');
-            const datos = lista || users;
-            filteredUsers = datos;
-            if (datos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-400">No hay usuarios registrados</td></tr>`;
-                document.getElementById('shown-users').textContent = '0';
-                document.getElementById('total-users-footer').textContent = users.length;
-                return;
-            }
-            tbody.innerHTML = datos.map(u => `
-                <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
-                    <td class="px-6 py-4 font-medium text-gray-900">@${u.username}</td>
-                    <td class="px-6 py-4">${u.name || 'Sin nombre'}</td>
-                    <td class="px-6 py-4 text-gray-600">${u.email || '—'}</td>
-                    <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">
-                            ${u.role === 'admin' ? '🔒 Admin' : '👤 Cliente'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-gray-500 text-xs">${u.fecha ? new Date(u.fecha).toLocaleDateString('es-ES') : '—'}</td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="editarUsuario('${u.username}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button onclick="eliminarUsuario('${u.username}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition" title="Eliminar">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-            document.getElementById('shown-users').textContent = datos.length;
+    // ============================================================
+    // RENDERIZAR TABLA
+    // ============================================================
+    function renderUsuarios(lista) {
+        const tbody = document.getElementById('users-table-body');
+        const datos = lista || users;
+        filteredUsers = datos;
+        
+        if (datos.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-400">No hay usuarios registrados</td></tr>`;
+            document.getElementById('shown-users').textContent = '0';
             document.getElementById('total-users-footer').textContent = users.length;
+            return;
+        }
+        
+        tbody.innerHTML = datos.map(u => `
+            <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+                <td class="px-6 py-4 font-medium text-gray-900">@${u.username}</td>
+                <td class="px-6 py-4">${u.name || 'Sin nombre'}</td>
+                <td class="px-6 py-4 text-gray-600">${u.email || '—'}</td>
+                <td class="px-6 py-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">
+                        ${u.role === 'admin' ? '🔒 Admin' : '👤 Cliente'}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-gray-500 text-xs">${u.fecha ? new Date(u.fecha).toLocaleDateString('es-ES') : '—'}</td>
+                <td class="px-6 py-4 text-right">
+                    <button onclick="editarUsuario('${u.username}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="eliminarUsuario('${u.username}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition" title="Eliminar" ${u.username === 'root' ? 'disabled' : ''}>
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+        
+        document.getElementById('shown-users').textContent = datos.length;
+        document.getElementById('total-users-footer').textContent = users.length;
+    }
+
+    function filtrarUsuarios() {
+        const q = document.getElementById('search-users').value.toLowerCase().trim();
+        if (!q) {
+            renderUsuarios(users);
+            return;
+        }
+        const filtrados = users.filter(u =>
+            u.username.toLowerCase().includes(q) ||
+            (u.name && u.name.toLowerCase().includes(q)) ||
+            (u.email && u.email.toLowerCase().includes(q))
+        );
+        renderUsuarios(filtrados);
+    }
+
+    function actualizarEstadisticas() {
+        document.getElementById('total-users').textContent = users.length;
+        document.getElementById('total-admins').textContent = users.filter(u => u.role === 'admin').length;
+        document.getElementById('total-clientes').textContent = users.filter(u => u.role === 'user').length;
+    }
+
+    // ============================================================
+    // CRUD - CREAR / EDITAR
+    // ============================================================
+    function openCreateModal() {
+        document.getElementById('modal-title').innerHTML = '<i class="fas fa-user-plus mr-2"></i>Nuevo Usuario';
+        document.getElementById('edit-username').value = '';
+        document.getElementById('form-name').value = '';
+        document.getElementById('form-username').value = '';
+        document.getElementById('form-email').value = '';
+        document.getElementById('form-password').value = '';
+        document.getElementById('form-password').required = true;
+        document.getElementById('password-required').style.display = 'inline';
+        document.getElementById('password-hint').textContent = 'Debe tener al menos 6 caracteres';
+        document.getElementById('form-role').value = 'user';
+        document.getElementById('user-modal').classList.remove('hidden');
+    }
+
+    function editarUsuario(username) {
+        const u = users.find(usr => usr.username === username);
+        if (!u) return showToast('Usuario no encontrado', 'error');
+        document.getElementById('modal-title').innerHTML = '<i class="fas fa-user-edit mr-2"></i>Editar Usuario';
+        document.getElementById('edit-username').value = u.username;
+        document.getElementById('form-name').value = u.name || '';
+        document.getElementById('form-username').value = u.username;
+        document.getElementById('form-email').value = u.email || '';
+        document.getElementById('form-password').value = '';
+        document.getElementById('form-password').required = false;
+        document.getElementById('password-required').style.display = 'none';
+        document.getElementById('password-hint').textContent = 'Dejar en blanco para mantener la contraseña actual';
+        document.getElementById('form-role').value = u.role || 'user';
+        document.getElementById('user-modal').classList.remove('hidden');
+    }
+
+    async function guardarUsuario(e) {
+        e.preventDefault();
+        const editUsername = document.getElementById('edit-username').value;
+        const name = document.getElementById('form-name').value.trim();
+        const username = document.getElementById('form-username').value.trim();
+        const email = document.getElementById('form-email').value.trim();
+        const password = document.getElementById('form-password').value;
+        const role = document.getElementById('form-role').value;
+
+        // Validaciones
+        if (!name || !username || !email) {
+            showToast('❌ Todos los campos son obligatorios', 'error');
+            return;
+        }
+        if (!editUsername && !password) {
+            showToast('❌ Debes ingresar una contraseña para el nuevo usuario', 'error');
+            return;
+        }
+        if (password && password.length < 6) {
+            showToast('❌ La contraseña debe tener al menos 6 caracteres', 'error');
+            return;
         }
 
-        function filtrarUsuarios() {
-            const q = document.getElementById('search-users').value.toLowerCase().trim();
-            if (!q) {
-                renderUsuarios(users);
-                return;
-            }
-            const filtrados = users.filter(u =>
-                u.username.toLowerCase().includes(q) ||
-                (u.name && u.name.toLowerCase().includes(q)) ||
-                (u.email && u.email.toLowerCase().includes(q))
-            );
-            renderUsuarios(filtrados);
+        // Verificar duplicado
+        const existe = users.find(u => u.username === username && u.username !== editUsername);
+        if (existe) {
+            showToast('❌ El nombre de usuario ya existe', 'error');
+            return;
         }
 
-        function actualizarEstadisticas() {
-            document.getElementById('total-users').textContent = users.length;
-            document.getElementById('total-admins').textContent = users.filter(u => u.role === 'admin').length;
-            document.getElementById('total-clientes').textContent = users.filter(u => u.role === 'user').length;
-        }
+        const userData = {
+            username,
+            password: password || (editUsername ? users.find(u => u.username === editUsername)?.password : ''),
+            name,
+            email,
+            role,
+            fecha: new Date().toISOString()
+        };
 
-        // ============================================================
-        // CRUD - CREAR / EDITAR
-        // ============================================================
-        function openCreateModal() {
-            document.getElementById('modal-title').innerHTML = '<i class="fas fa-user-plus mr-2"></i>Nuevo Usuario';
-            document.getElementById('edit-username').value = '';
-            document.getElementById('form-name').value = '';
-            document.getElementById('form-username').value = '';
-            document.getElementById('form-email').value = '';
-            document.getElementById('form-password').value = '';
-            document.getElementById('form-password').required = true;
-            document.getElementById('password-required').style.display = 'inline';
-            document.getElementById('password-hint').textContent = 'Debe tener al menos 6 caracteres';
-            document.getElementById('form-role').value = 'user';
-            document.getElementById('user-modal').classList.remove('hidden');
-        }
-
-        function editarUsuario(username) {
-            const u = users.find(usr => usr.username === username);
-            if (!u) return showToast('Usuario no encontrado', 'error');
-            document.getElementById('modal-title').innerHTML = '<i class="fas fa-user-edit mr-2"></i>Editar Usuario';
-            document.getElementById('edit-username').value = u.username;
-            document.getElementById('form-name').value = u.name || '';
-            document.getElementById('form-username').value = u.username;
-            document.getElementById('form-email').value = u.email || '';
-            document.getElementById('form-password').value = '';
-            document.getElementById('form-password').required = false;
-            document.getElementById('password-required').style.display = 'none';
-            document.getElementById('password-hint').textContent = 'Dejar en blanco para mantener la contraseña actual';
-            document.getElementById('form-role').value = u.role || 'user';
-            document.getElementById('user-modal').classList.remove('hidden');
-        }
-
-        async function guardarUsuario(e) {
-            e.preventDefault();
-            const editUsername = document.getElementById('edit-username').value;
-            const name = document.getElementById('form-name').value.trim();
-            const username = document.getElementById('form-username').value.trim();
-            const email = document.getElementById('form-email').value.trim();
-            const password = document.getElementById('form-password').value;
-            const role = document.getElementById('form-role').value;
-
-            // Validaciones
-            if (!name || !username || !email) {
-                showToast('❌ Todos los campos son obligatorios', 'error');
-                return;
-            }
-            if (!editUsername && !password) {
-                showToast('❌ Debes ingresar una contraseña para el nuevo usuario', 'error');
-                return;
-            }
-            if (password && password.length < 6) {
-                showToast('❌ La contraseña debe tener al menos 6 caracteres', 'error');
-                return;
-            }
-
-            // Verificar duplicado de username (si es nuevo o cambia)
-            const existe = users.find(u => u.username === username && u.username !== editUsername);
-            if (existe) {
-                showToast('❌ El nombre de usuario ya existe', 'error');
-                return;
-            }
-
-            const userData = {
-                username,
-                password: password || (editUsername ? users.find(u => u.username === editUsername)?.password : ''),
-                name,
-                email,
-                role,
-                fecha: new Date().toISOString()
-            };
-
-            if (editUsername) {
-                // Editar
-                const index = users.findIndex(u => u.username === editUsername);
-                if (index === -1) return showToast('❌ Usuario no encontrado', 'error');
-                // Mantener la contraseña si no se cambia
-                if (!password) userData.password = users[index].password;
-                users[index] = userData;
-            } else {
-                // Nuevo
-                users.push(userData);
-            }
-
-            // Guardar en GitHub
-            const ok = await saveToGitHub('usuarios.json', { usuarios: users }, editUsername ? `Actualizar ${username}` : `Crear ${username}`);
-            if (ok) {
-                closeModal();
-                renderUsuarios();
-                actualizarEstadisticas();
-                showToast(`✅ Usuario ${editUsername ? 'actualizado' : 'creado'} correctamente`, 'success');
-            } else {
-                // Revertir cambio local si falló GitHub
-                await cargarUsuarios();
-            }
-        }
-
-        // ============================================================
-        // ELIMINAR
-        // ============================================================
-        async function eliminarUsuario(username) {
-            if (username === 'root') {
-                showToast('❌ No se puede eliminar el usuario root', 'error');
-                return;
-            }
-            if (!confirm(`¿Eliminar al usuario "${username}"? Esta acción no se puede deshacer.`)) return;
-            const index = users.findIndex(u => u.username === username);
+        if (editUsername) {
+            const index = users.findIndex(u => u.username === editUsername);
             if (index === -1) return showToast('❌ Usuario no encontrado', 'error');
-            users.splice(index, 1);
-            const ok = await saveToGitHub('usuarios.json', { usuarios: users }, `Eliminar ${username}`);
-            if (ok) {
-                renderUsuarios();
-                actualizarEstadisticas();
-                showToast(`🗑️ Usuario ${username} eliminado`, 'success');
-            } else {
-                await cargarUsuarios(); // revertir
-            }
+            if (!password) userData.password = users[index].password;
+            users[index] = userData;
+        } else {
+            users.push(userData);
         }
 
-        // ============================================================
-        // RECARGAR
-        // ============================================================
-        async function recargarUsuarios() {
-            showToast('🔄 Recargando...', 'info');
+        const ok = await saveToGitHub('usuarios.json', { usuarios: users }, editUsername ? `Actualizar ${username}` : `Crear ${username}`);
+        if (ok) {
+            closeModal();
+            renderUsuarios();
+            actualizarEstadisticas();
+            showToast(`✅ Usuario ${editUsername ? 'actualizado' : 'creado'} correctamente`, 'success');
+        } else {
             await cargarUsuarios();
-            showToast('✅ Datos actualizados', 'success');
         }
+    }
 
-        // ============================================================
-        // MODAL
-        // ============================================================
-        function closeModal() {
-            document.getElementById('user-modal').classList.add('hidden');
+    // ============================================================
+    // ELIMINAR
+    // ============================================================
+    async function eliminarUsuario(username) {
+        if (username === 'root') {
+            showToast('❌ No se puede eliminar el usuario root', 'error');
+            return;
         }
-
-        // Cerrar modal con Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeModal();
-        });
-
-        // ============================================================
-        // TOAST
-        // ============================================================
-        function showToast(msg, type = 'info') {
-            const container = document.getElementById('toast-container');
-            const div = document.createElement('div');
-            const colors = {
-                success: 'bg-green-100 text-green-800 border-green-200',
-                error: 'bg-red-100 text-red-800 border-red-200',
-                warning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                info: 'bg-blue-100 text-blue-800 border-blue-200'
-            };
-            div.className = `pointer-events-auto px-6 py-3 rounded-full text-sm font-semibold shadow-2xl border-2 ${colors[type] || colors.info} fade-in`;
-            div.textContent = msg;
-            container.appendChild(div);
-            setTimeout(() => div.remove(), 3000);
-        }
-
-        // ============================================================
-        // LOGOUT
-        // ============================================================
-        function logout() {
-            localStorage.removeItem('session');
-            window.location.href = 'index.html';
-        }
-
-        // ============================================================
-        // INICIO
-        // ============================================================
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Verificar sesión
-            const session = localStorage.getItem('session');
-            if (session) {
-                try {
-                    const user = JSON.parse(session);
-                    if (user.role === 'admin') {
-                        currentUser = user;
-                        document.getElementById('admin-name').textContent = user.name || 'Admin';
-                    } else {
-                        showToast('⚠️ No tienes permisos de administrador', 'error');
-                        setTimeout(() => window.location.href = 'index.html', 1500);
-                        return;
-                    }
-                } catch { /* ignore */ }
-            } else {
-                showToast('⚠️ Debes iniciar sesión como administrador', 'warning');
-                setTimeout(() => window.location.href = 'index.html', 1500);
-                return;
-            }
+        if (!confirm(`¿Eliminar al usuario "${username}"? Esta acción no se puede deshacer.`)) return;
+        
+        const index = users.findIndex(u => u.username === username);
+        if (index === -1) return showToast('❌ Usuario no encontrado', 'error');
+        users.splice(index, 1);
+        
+        const ok = await saveToGitHub('usuarios.json', { usuarios: users }, `Eliminar ${username}`);
+        if (ok) {
+            renderUsuarios();
+            actualizarEstadisticas();
+            showToast(`🗑️ Usuario ${username} eliminado`, 'success');
+        } else {
             await cargarUsuarios();
-        });
-    </script>
+        }
+    }
+
+    // ============================================================
+    // RECARGAR
+    // ============================================================
+    async function recargarUsuarios() {
+        showToast('🔄 Recargando...', 'info');
+        await cargarUsuarios();
+        showToast('✅ Datos actualizados', 'success');
+    }
+
+    // ============================================================
+    // MODAL
+    // ============================================================
+    function closeModal() {
+        document.getElementById('user-modal').classList.add('hidden');
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    // ============================================================
+    // TOAST
+    // ============================================================
+    function showToast(msg, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const div = document.createElement('div');
+        const colors = {
+            success: 'bg-green-100 text-green-800 border-green-200',
+            error: 'bg-red-100 text-red-800 border-red-200',
+            warning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+            info: 'bg-blue-100 text-blue-800 border-blue-200'
+        };
+        div.className = `pointer-events-auto px-6 py-3 rounded-full text-sm font-semibold shadow-2xl border-2 ${colors[type] || colors.info} fade-in`;
+        div.textContent = msg;
+        container.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+    }
+
+    // ============================================================
+    // LOGOUT
+    // ============================================================
+    function logout() {
+        localStorage.removeItem('session');
+        window.location.href = 'index.html';
+    }
+
+    // ============================================================
+    // INICIO - CORREGIDO
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log('🚀 Iniciando admin-usuarios.html...');
+        
+        // 1. Verificar autenticación
+        const autenticado = verificarAutenticacion();
+        console.log('📌 Autenticado:', autenticado);
+        
+        if (!autenticado) {
+            showToast('⚠️ Debes iniciar sesión como administrador', 'warning');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+            return;
+        }
+        
+        // 2. Cargar usuarios
+        await cargarUsuarios();
+        
+        console.log('✅ admin-usuarios.html iniciado correctamente');
+    });
+
+    // ============================================================
+    // FUNCIÓN DE PRUEBA PARA DEPURAR
+    // ============================================================
+    function diagnosticar() {
+        console.log('🔍 DIAGNÓSTICO:');
+        console.log('📌 Session:', localStorage.getItem('session'));
+        console.log('📌 Token:', localStorage.getItem('github_token'));
+        console.log('📌 CurrentUser:', currentUser);
+        console.log('📌 Users:', users);
+    }
+
+    // Ejecutar en consola: diagnosticar()
+</script>
+
 
 </body>
 </html>

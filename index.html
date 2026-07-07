@@ -1893,23 +1893,29 @@ async function initAuth() {
         function openRegisterModal() { document.getElementById('register-modal').classList.remove('hidden'); closeUserMenu(); }
         function closeRegisterModal() { document.getElementById('register-modal').classList.add('hidden'); }
 
-        async function handleLogin(e) {
-            e.preventDefault();
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-            const user = S.users.find(u => u.username === username && u.password === password);
-            
-            if (user) {
-                S.currentUser = user;
-                localStorage.setItem('session', JSON.stringify(user));
-                updateUIForLoggedUser();
-                closeLoginModal();
-                showNotif(`✅ Bienvenido, ${user.name}`, 'success');
-                document.getElementById('login-form').reset();
-            } else {
-                showNotif('❌ Usuario o contraseña incorrectos', 'error');
-            }
-        }
+async function handleLogin(e) {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value;
+    const password = document.getElementById('login-password').value;
+    const user = S.users.find(u => u.username === username && u.password === password);
+    
+    if (user) {
+        S.currentUser = user;
+        // ✅ Asegurar que se guarda el objeto completo con el rol
+        localStorage.setItem('session', JSON.stringify({
+            username: user.username,
+            name: user.name,
+            email: user.email,
+            role: user.role  // ← IMPORTANTE: debe incluir el rol
+        }));
+        updateUIForLoggedUser();
+        closeLoginModal();
+        showNotif(`✅ Bienvenido, ${user.name}`, 'success');
+        document.getElementById('login-form').reset();
+    } else {
+        showNotif('❌ Usuario o contraseña incorrectos', 'error');
+    }
+}
 
         async function handleRegister(e) {
             e.preventDefault();
