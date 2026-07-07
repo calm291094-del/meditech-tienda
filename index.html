@@ -917,6 +917,11 @@ footer {
                                     <i class="fas fa-cog text-orange-600"></i>
                                     <span>Panel Admin</span>
                                 </button>
+                                <!-- BOTÓN PARA GESTIÓN DE USUARIOS -->
+                                <button id="users-menu-btn" onclick="window.location.href='admin-usuarios.html'" class="hidden w-full text-left px-4 py-3 hover:bg-gray-50 transition flex items-center gap-3">
+                                    <i class="fas fa-users-cog text-teal-600"></i>
+                                    <span>Gestión de Usuarios</span>
+                                </button>
                                 <button onclick="logout()" class="w-full text-left px-4 py-3 hover:bg-gray-50 transition flex items-center gap-3 text-red-600">
                                     <i class="fas fa-sign-out-alt"></i>
                                     <span>Cerrar Sesión</span>
@@ -1952,11 +1957,13 @@ async function initAuth() {
                 badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800';
                 document.getElementById('admin-menu-btn').classList.remove('hidden');
                 document.body.classList.add('admin-mode');
+                document.getElementById('users-menu-btn').classList.remove('hidden');
             } else {
                 badge.textContent = '👤 Cliente';
                 badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800';
                 document.getElementById('admin-menu-btn').classList.add('hidden');
                 document.body.classList.remove('admin-mode');
+                document.getElementById('users-menu-btn').classList.add('hidden');
             }
             
             document.getElementById('menu-logged-out').classList.add('hidden');

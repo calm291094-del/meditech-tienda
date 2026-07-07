@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediTech | Gestión de Usuarios</title>
+    <!-- Tailwind + Font Awesome + Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        body { background: #f1f5f9; }
+        .glass-card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #0d9488, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0d9488, #06b6d4);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(13,148,136,0.3);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239,68,68,0.3);
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .badge-admin {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .badge-user {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .table-hover tbody tr:hover {
+            background: #f8fafc;
+            transition: background 0.2s;
+        }
+        .modal-overlay {
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-content {
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: #0d9488; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0f766e; }
+        /* Tamaño táctil */
+        button, a, [onclick] { min-height: 44px; min-width: 44px; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 glass-card border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white shadow-lg">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-gray-900">Gestión de <span class="gradient-text">Usuarios</span></h1>
+                    <p class="text-xs text-gray-500">Panel de administración de MediTech</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="admin-name" class="text-sm font-medium text-gray-700 hidden sm:inline">Admin</span>
+                <a href="index.html" class="btn-primary text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 shadow-md">
+                    <i class="fas fa-arrow-left"></i> Volver a la tienda
+                </a>
+                <button onclick="logout()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-semibold transition">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Tarjeta de resumen -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-xl">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Total Usuarios</p>
+                        <p class="text-2xl font-bold" id="total-users">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xl">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Administradores</p>
+                        <p class="text-2xl font-bold" id="total-admins">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Clientes</p>
+                        <p class="text-2xl font-bold" id="total-clientes">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barra de acciones -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-3">
+                <button onclick="openCreateModal()" class="btn-primary text-white px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-md">
+                    <i class="fas fa-user-plus"></i> Nuevo Usuario
+                </button>
+                <button onclick="recargarUsuarios()" class="bg-white hover:bg-gray-50 text-gray-700 px-6 py-2.5 rounded-xl font-semibold border border-gray-200 transition flex items-center gap-2">
+                    <i class="fas fa-sync-alt"></i> Recargar
+                </button>
+            </div>
+            <div class="relative">
+                <input type="text" id="search-users" placeholder="🔍 Buscar usuario..." class="pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none w-full sm:w-64 transition" oninput="filtrarUsuarios()" />
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            </div>
+        </div>
+
+        <!-- Tabla de usuarios -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm table-hover">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-600">Usuario</th>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-600">Nombre</th>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-600">Email</th>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-600">Rol</th>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-600">Fecha</th>
+                            <th class="px-6 py-3 text-right font-semibold text-gray-600">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr><td colspan="6" class="text-center py-8 text-gray-400">Cargando usuarios...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
+                <span id="table-footer">Mostrando <span id="shown-users">0</span> de <span id="total-users-footer">0</span> usuarios</span>
+                <span>MediTech Admin v1.0</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL CREAR/EDITAR -->
+    <div id="user-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl modal-content overflow-hidden">
+            <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-6 text-white flex justify-between items-center">
+                <h2 class="text-2xl font-bold" id="modal-title"><i class="fas fa-user-plus mr-2"></i>Nuevo Usuario</h2>
+                <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="user-form" class="p-6 space-y-4" onsubmit="guardarUsuario(event)">
+                <input type="hidden" id="edit-username" value="" />
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre Completo *</label>
+                    <input type="text" id="form-name" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Ej: Juan Pérez" />
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Usuario *</label>
+                    <input type="text" id="form-username" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Ej: jperez" />
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Correo Electrónico *</label>
+                    <input type="email" id="form-email" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="ejemplo@correo.com" />
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Contraseña <span id="password-required" class="text-red-500">*</span></label>
+                    <input type="password" id="form-password" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Mínimo 6 caracteres" minlength="6" />
+                    <p class="text-xs text-gray-400 mt-1" id="password-hint">Dejar en blanco para mantener la actual</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Rol</label>
+                    <select id="form-role" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white">
+                        <option value="user">👤 Cliente</option>
+                        <option value="admin">🔒 Administrador</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="flex-1 btn-primary text-white font-bold py-3 rounded-xl transition shadow-md">
+                        <i class="fas fa-save mr-2"></i> Guardar
+                    </button>
+                    <button type="button" onclick="closeModal()" class="px-6 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-xl transition">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 space-y-2 pointer-events-none"></div>
+
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN GITHUB (misma que en index.html)
+        // ============================================================
+        let GITHUB_TOKEN = localStorage.getItem('github_token') || "ghp_PEGA_AQUI_TU_NUEVO_TOKEN";
+        const GITHUB_USER = "calm291094-del";
+        const GITHUB_REPO = "meditech-tienda";
+        const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
+        let HEADERS = {
+            "Authorization": `token ${GITHUB_TOKEN}`,
+            "Accept": "application/vnd.github.v3+json"
+        };
+
+        // Estado
+        let users = [];
+        let currentUser = null;
+        let filteredUsers = [];
+
+        // ============================================================
+        // FUNCIONES DE GITHUB (simplificadas)
+        // ============================================================
+        async function fetchGitHubPublic(path) {
+            try {
+                const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${path}?t=${Date.now()}`;
+                const res = await fetch(url, { cache: 'no-cache' });
+                if (!res.ok) return null;
+                return await res.json();
+            } catch { return null; }
+        }
+
+        async function fetchGitHubAPI(path) {
+            try {
+                const res = await fetch(`${API}/contents/${path}`, { headers: HEADERS });
+                if (res.status === 404) return null;
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return await res.json();
+            } catch { return null; }
+        }
+
+        async function saveToGitHub(path, data, message) {
+            if (!GITHUB_TOKEN || GITHUB_TOKEN === 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
+                showToast('⚠️ No hay token válido. Guardado solo local.', 'warning');
+                localStorage.setItem('usuarios_backup', JSON.stringify(data.usuarios || []));
+                return false;
+            }
+            try {
+                const file = await fetchGitHubAPI(path);
+                const sha = file?.sha || null;
+                const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+                const res = await fetch(`${API}/contents/${path}`, {
+                    method: 'PUT',
+                    headers: HEADERS,
+                    body: JSON.stringify({
+                        message: message || `Actualizar ${path}`,
+                        content,
+                        sha
+                    })
+                });
+                if (!res.ok) throw new Error(await res.text());
+                showToast(`✅ ${path} guardado`, 'success');
+                return true;
+            } catch (e) {
+                console.error(e);
+                showToast('❌ Error al guardar en GitHub', 'error');
+                return false;
+            }
+        }
+
+        // ============================================================
+        // CARGAR USUARIOS
+        // ============================================================
+        async function cargarUsuarios() {
+            try {
+                const data = await fetchGitHubPublic('usuarios.json');
+                if (data && data.usuarios) {
+                    users = data.usuarios;
+                } else {
+                    // Fallback a backup local o usuarios por defecto
+                    const backup = localStorage.getItem('usuarios_backup');
+                    if (backup) users = JSON.parse(backup);
+                    else users = [{
+                        username: 'root',
+                        password: 'Root*4815162342+-',
+                        name: 'Administrador',
+                        email: 'admin@meditech.com',
+                        role: 'admin',
+                        fecha: new Date().toISOString()
+                    }];
+                }
+                // Guardar copia local
+                localStorage.setItem('usuarios_backup', JSON.stringify(users));
+                renderUsuarios();
+                actualizarEstadisticas();
+            } catch (e) {
+                console.error(e);
+                showToast('❌ Error cargando usuarios', 'error');
+            }
+        }
+
+        // ============================================================
+        // RENDERIZAR TABLA
+        // ============================================================
+        function renderUsuarios(lista) {
+            const tbody = document.getElementById('users-table-body');
+            const datos = lista || users;
+            filteredUsers = datos;
+            if (datos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-400">No hay usuarios registrados</td></tr>`;
+                document.getElementById('shown-users').textContent = '0';
+                document.getElementById('total-users-footer').textContent = users.length;
+                return;
+            }
+            tbody.innerHTML = datos.map(u => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 font-medium text-gray-900">@${u.username}</td>
+                    <td class="px-6 py-4">${u.name || 'Sin nombre'}</td>
+                    <td class="px-6 py-4 text-gray-600">${u.email || '—'}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">
+                            ${u.role === 'admin' ? '🔒 Admin' : '👤 Cliente'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500 text-xs">${u.fecha ? new Date(u.fecha).toLocaleDateString('es-ES') : '—'}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="editarUsuario('${u.username}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="eliminarUsuario('${u.username}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('shown-users').textContent = datos.length;
+            document.getElementById('total-users-footer').textContent = users.length;
+        }
+
+        function filtrarUsuarios() {
+            const q = document.getElementById('search-users').value.toLowerCase().trim();
+            if (!q) {
+                renderUsuarios(users);
+                return;
+            }
+            const filtrados = users.filter(u =>
+                u.username.toLowerCase().includes(q) ||
+                (u.name && u.name.toLowerCase().includes(q)) ||
+                (u.email && u.email.toLowerCase().includes(q))
+            );
+            renderUsuarios(filtrados);
+        }
+
+        function actualizarEstadisticas() {
+            document.getElementById('total-users').textContent = users.length;
+            document.getElementById('total-admins').textContent = users.filter(u => u.role === 'admin').length;
+            document.getElementById('total-clientes').textContent = users.filter(u => u.role === 'user').length;
+        }
+
+        // ============================================================
+        // CRUD - CREAR / EDITAR
+        // ============================================================
+        function openCreateModal() {
+            document.getElementById('modal-title').innerHTML = '<i class="fas fa-user-plus mr-2"></i>Nuevo Usuario';
+            document.getElementById('edit-username').value = '';
+            document.getElementById('form-name').value = '';
+            document.getElementById('form-username').value = '';
+            document.getElementById('form-email').value = '';
+            document.getElementById('form-password').value = '';
+            document.getElementById('form-password').required = true;
+            document.getElementById('password-required').style.display = 'inline';
+            document.getElementById('password-hint').textContent = 'Debe tener al menos 6 caracteres';
+            document.getElementById('form-role').value = 'user';
+            document.getElementById('user-modal').classList.remove('hidden');
+        }
+
+        function editarUsuario(username) {
+            const u = users.find(usr => usr.username === username);
+            if (!u) return showToast('Usuario no encontrado', 'error');
+            document.getElementById('modal-title').innerHTML = '<i class="fas fa-user-edit mr-2"></i>Editar Usuario';
+            document.getElementById('edit-username').value = u.username;
+            document.getElementById('form-name').value = u.name || '';
+            document.getElementById('form-username').value = u.username;
+            document.getElementById('form-email').value = u.email || '';
+            document.getElementById('form-password').value = '';
+            document.getElementById('form-password').required = false;
+            document.getElementById('password-required').style.display = 'none';
+            document.getElementById('password-hint').textContent = 'Dejar en blanco para mantener la contraseña actual';
+            document.getElementById('form-role').value = u.role || 'user';
+            document.getElementById('user-modal').classList.remove('hidden');
+        }
+
+        async function guardarUsuario(e) {
+            e.preventDefault();
+            const editUsername = document.getElementById('edit-username').value;
+            const name = document.getElementById('form-name').value.trim();
+            const username = document.getElementById('form-username').value.trim();
+            const email = document.getElementById('form-email').value.trim();
+            const password = document.getElementById('form-password').value;
+            const role = document.getElementById('form-role').value;
+
+            // Validaciones
+            if (!name || !username || !email) {
+                showToast('❌ Todos los campos son obligatorios', 'error');
+                return;
+            }
+            if (!editUsername && !password) {
+                showToast('❌ Debes ingresar una contraseña para el nuevo usuario', 'error');
+                return;
+            }
+            if (password && password.length < 6) {
+                showToast('❌ La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+
+            // Verificar duplicado de username (si es nuevo o cambia)
+            const existe = users.find(u => u.username === username && u.username !== editUsername);
+            if (existe) {
+                showToast('❌ El nombre de usuario ya existe', 'error');
+                return;
+            }
+
+            const userData = {
+                username,
+                password: password || (editUsername ? users.find(u => u.username === editUsername)?.password : ''),
+                name,
+                email,
+                role,
+                fecha: new Date().toISOString()
+            };
+
+            if (editUsername) {
+                // Editar
+                const index = users.findIndex(u => u.username === editUsername);
+                if (index === -1) return showToast('❌ Usuario no encontrado', 'error');
+                // Mantener la contraseña si no se cambia
+                if (!password) userData.password = users[index].password;
+                users[index] = userData;
+            } else {
+                // Nuevo
+                users.push(userData);
+            }
+
+            // Guardar en GitHub
+            const ok = await saveToGitHub('usuarios.json', { usuarios: users }, editUsername ? `Actualizar ${username}` : `Crear ${username}`);
+            if (ok) {
+                closeModal();
+                renderUsuarios();
+                actualizarEstadisticas();
+                showToast(`✅ Usuario ${editUsername ? 'actualizado' : 'creado'} correctamente`, 'success');
+            } else {
+                // Revertir cambio local si falló GitHub
+                await cargarUsuarios();
+            }
+        }
+
+        // ============================================================
+        // ELIMINAR
+        // ============================================================
+        async function eliminarUsuario(username) {
+            if (username === 'root') {
+                showToast('❌ No se puede eliminar el usuario root', 'error');
+                return;
+            }
+            if (!confirm(`¿Eliminar al usuario "${username}"? Esta acción no se puede deshacer.`)) return;
+            const index = users.findIndex(u => u.username === username);
+            if (index === -1) return showToast('❌ Usuario no encontrado', 'error');
+            users.splice(index, 1);
+            const ok = await saveToGitHub('usuarios.json', { usuarios: users }, `Eliminar ${username}`);
+            if (ok) {
+                renderUsuarios();
+                actualizarEstadisticas();
+                showToast(`🗑️ Usuario ${username} eliminado`, 'success');
+            } else {
+                await cargarUsuarios(); // revertir
+            }
+        }
+
+        // ============================================================
+        // RECARGAR
+        // ============================================================
+        async function recargarUsuarios() {
+            showToast('🔄 Recargando...', 'info');
+            await cargarUsuarios();
+            showToast('✅ Datos actualizados', 'success');
+        }
+
+        // ============================================================
+        // MODAL
+        // ============================================================
+        function closeModal() {
+            document.getElementById('user-modal').classList.add('hidden');
+        }
+
+        // Cerrar modal con Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const div = document.createElement('div');
+            const colors = {
+                success: 'bg-green-100 text-green-800 border-green-200',
+                error: 'bg-red-100 text-red-800 border-red-200',
+                warning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                info: 'bg-blue-100 text-blue-800 border-blue-200'
+            };
+            div.className = `pointer-events-auto px-6 py-3 rounded-full text-sm font-semibold shadow-2xl border-2 ${colors[type] || colors.info} fade-in`;
+            div.textContent = msg;
+            container.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        // ============================================================
+        // LOGOUT
+        // ============================================================
+        function logout() {
+            localStorage.removeItem('session');
+            window.location.href = 'index.html';
+        }
+
+        // ============================================================
+        // INICIO
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Verificar sesión
+            const session = localStorage.getItem('session');
+            if (session) {
+                try {
+                    const user = JSON.parse(session);
+                    if (user.role === 'admin') {
+                        currentUser = user;
+                        document.getElementById('admin-name').textContent = user.name || 'Admin';
+                    } else {
+                        showToast('⚠️ No tienes permisos de administrador', 'error');
+                        setTimeout(() => window.location.href = 'index.html', 1500);
+                        return;
+                    }
+                } catch { /* ignore */ }
+            } else {
+                showToast('⚠️ Debes iniciar sesión como administrador', 'warning');
+                setTimeout(() => window.location.href = 'index.html', 1500);
+                return;
+            }
+            await cargarUsuarios();
+        });
+    </script>
+
+</body>
+</html>
