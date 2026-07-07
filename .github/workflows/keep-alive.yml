@@ -1,0 +1,17 @@
+# .github/workflows/keep-alive.yml
+name: Keep Alive - MediTech Bot
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Visitar el bot para mantenerlo activo
+        run: |
+          echo "🔄 Visitando el bot para mantenerlo activo..."
+          curl -s -o /dev/null -w "%{http_code}" https://meditech-tienda.onrender.com/telegram-bot.html
+          echo "✅ Pong exitoso - Bot mantenido activo"
