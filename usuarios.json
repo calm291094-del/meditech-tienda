@@ -6,6 +6,14 @@
       "name": "Administrador",
       "email": "admin@meditech.com",
       "role": "admin"
+    },
+    {
+      "username": "cliente",
+      "password": "Cliente123",
+      "name": "cliente",
+      "email": "cliente@gmail.com",
+      "role": "user",
+      "fecha": "2026-07-07T12:29:43.970Z"
     }
   ]
 }
