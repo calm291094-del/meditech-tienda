@@ -110,21 +110,23 @@
 </div>
 
 <script>
-    // ============================================================
-    // CONFIGURACIÓN
-    // ============================================================
+// ============================================================
+// CONFIGURACIÓN
+// ============================================================
 
-    // ⚠️ REEMPLAZA CON LA URL DE TU CLOUDFLARE WORKER
-    const WORKER_URL = "https://telegram-proxy.calm291094.workers.dev";
+const WORKER_URL = "https://telegram-proxy.calm291094.workers.dev";
+const GITHUB_USER = "calm291094-del";
+const GITHUB_REPO = "meditech-tienda";
 
-    const GITHUB_USER = "calm291094-del";
-    const GITHUB_REPO = "meditech-tienda";
+let botInterval = null;
+let isRunning = false;
+let lastUpdateId = 0;
+let token = '';
+let startTime = Date.now();
 
-    let botInterval = null;
-    let isRunning = false;
-    let lastUpdateId = 0;
-    let token = '';
-    let startTime = Date.now();
+// ✅ DECLARADO UNA SOLA VEZ
+let lastResponse = Date.now();
+let reinicioIntentos = 0;
 
     // ============================================================
     // FUNCIÓN PARA LLAMAR AL WORKER DE CLOUDFLARE
@@ -451,15 +453,6 @@ setInterval(() => {
     }
 }, 30000);
 
-// 2. Recargar la página si el bot no responde después de 2 minutos
-let lastResponse = Date.now();
-setInterval(() => {
-    if (isRunning && (Date.now() - lastResponse > 120000)) {
-        console.log('🔄 Bot sin respuesta, recargando página...');
-        location.reload();
-    }
-}, 60000);
-
 // 3. Actualizar lastResponse cuando se recibe un mensaje
 // Agrega esto en la función getUpdates(), después de procesar un mensaje:
 // lastResponse = Date.now();
@@ -478,7 +471,6 @@ setInterval(() => {
     }, 30000);
 
     // 2. Recargar la página si el bot no responde después de 2 minutos
-    let lastResponse = Date.now();
     setInterval(() => {
         if (isRunning && (Date.now() - lastResponse > 120000)) {
             console.log('🔄 Bot sin respuesta, recargando página...');
