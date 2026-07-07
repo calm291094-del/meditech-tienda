@@ -927,6 +927,11 @@ footer {
                                     <i class="fas fa-users-cog text-teal-600"></i>
                                     <span>Gestión de Usuarios</span>
                                 </button>
+                                <!-- ✅ NUEVO BOTÓN PARA TELEGRAM -->
+                                <button id="telegram-btn" onclick="window.open('telegram-bot.html', '_blank')" class="hidden w-full text-left px-4 py-3 hover:bg-gray-50 transition flex items-center gap-3">
+                                    <i class="fab fa-telegram text-blue-500"></i>
+                                    <span>🤖 Bot Telegram</span>
+                                </button>
                                 <button onclick="logout()" class="w-full text-left px-4 py-3 hover:bg-gray-50 transition flex items-center gap-3 text-red-600">
                                     <i class="fas fa-sign-out-alt"></i>
                                     <span>Cerrar Sesión</span>
@@ -1996,18 +2001,22 @@ async function handleLogin(e) {
             document.getElementById('user-menu-name').textContent = S.currentUser.name;
             
             const badge = document.getElementById('user-role-badge');
+
             if (S.currentUser.role === 'admin') {
                 badge.textContent = '🔒 Administrador';
                 badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800';
                 document.getElementById('admin-menu-btn').classList.remove('hidden');
                 document.body.classList.add('admin-mode');
                 document.getElementById('users-menu-btn').classList.remove('hidden');
+                document.getElementById('telegram-btn').classList.remove('hidden');
             } else {
+
                 badge.textContent = '👤 Cliente';
                 badge.className = 'inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-teal-100 text-teal-800';
                 document.getElementById('admin-menu-btn').classList.add('hidden');
                 document.body.classList.remove('admin-mode');
                 document.getElementById('users-menu-btn').classList.add('hidden');
+                document.getElementById('telegram-btn').classList.add('hidden');
             }
             
             document.getElementById('menu-logged-out').classList.add('hidden');

@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 Ania - Bot de Telegram</title>
+    <title>🤖 Ania Bot - MediTech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        * { font-family: 'Poppins', sans-serif; }
         body {
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             min-height: 100vh;
@@ -50,6 +53,8 @@
         .btn-stop:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .btn-test { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
         .btn-test:hover { background: rgba(255,255,255,0.2); }
+        .btn-telegram { background: linear-gradient(135deg, #0088cc, #006699); color: white; }
+        .btn-telegram:hover { transform: scale(1.02); box-shadow: 0 10px 30px rgba(0, 136, 204, 0.3); }
         .token-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 15px; color: white; width: 100%; font-family: 'Courier New', monospace; font-size: 0.8rem; margin-bottom: 10px; outline: none; }
         .token-input:focus { border-color: #f5576c; }
         .token-input::placeholder { color: rgba(255,255,255,0.3); }
@@ -57,11 +62,15 @@
         .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.6rem; font-weight: 600; margin-left: 8px; }
         .badge-on { background: #4ade80; color: #1a1a2e; }
         .badge-off { background: #f87171; color: white; }
+        .volver { color: rgba(255,255,255,0.3); text-decoration: none; font-size: 0.8rem; display: inline-block; margin-bottom: 15px; }
+        .volver:hover { color: rgba(255,255,255,0.6); }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <a href="index.html" class="volver"><i class="fas fa-arrow-left"></i> Volver a la tienda</a>
+
     <h1>🤖 <span>Ania</span> Bot</h1>
     <p class="subtitle">Asistente virtual de MediTech en Telegram</p>
 
@@ -83,6 +92,9 @@
         <button class="btn btn-start" id="btnStart" onclick="startBot()">▶️ Iniciar Bot</button>
         <button class="btn btn-stop" id="btnStop" onclick="stopBot()" disabled>⏹️ Detener</button>
         <button class="btn btn-test" onclick="testBot()">📤 Probar</button>
+        <a href="https://t.me/AniaAsistenteBot" target="_blank" class="btn btn-telegram" style="text-align:center; text-decoration:none; display:inline-block;">
+            <i class="fab fa-telegram"></i> Abrir en Telegram
+        </a>
     </div>
 
     <div class="footer">
@@ -147,7 +159,6 @@
     async function getAniaResponse(userMessage) {
         const productos = await obtenerProductos();
 
-        // Construir contexto de productos
         let contexto = "Productos disponibles:\n";
         if (productos.length > 0) {
             productos.slice(0, 10).forEach(p => {
@@ -159,7 +170,6 @@
         }
         contexto += "\n🔗 Web: https://calm291094-del.github.io/meditech-tienda/";
 
-        // Intentar usar la IA de Pollinations (gratis)
         try {
             const response = await fetch('https://text.pollinations.ai/', {
                 method: 'POST',
@@ -184,58 +194,43 @@
             console.error('Error en IA:', e);
         }
 
-        // Respuestas de fallback con personalidad
         return getLocalResponse(userMessage);
     }
 
     // ============================================================
-    // RESPUESTAS LOCALES (fallback)
+    // RESPUESTAS LOCALES
     // ============================================================
 
     function getLocalResponse(message) {
         const lower = message.toLowerCase();
 
-        // Saludos
         if (lower.includes('hola') || lower.includes('buenas') || lower.includes('hey')) {
             return "¡Hola! ☕️ Soy Ania, tu asistente de MediTech. ¿En qué puedo ayudarte hoy? Visita nuestra web: https://calm291094-del.github.io/meditech-tienda/ ✨";
         }
-
-        // Productos
         if (lower.includes('producto') || lower.includes('qué venden') || lower.includes('tienen')) {
             return "📦 ¡Claro! Tenemos medicamentos, tecnología, salud y gaming. Puedes ver todos en: https://calm291094-del.github.io/meditech-tienda/ ¿Algo en particular que te interese? ☕️";
         }
-
-        // Precios
         if (lower.includes('precio') || lower.includes('cuesta') || lower.includes('cuánto')) {
             return "💰 Los precios los puedes consultar directamente en nuestra web: https://calm291094-del.github.io/meditech-tienda/ ¡Cada producto tiene su precio actualizado! 😊";
         }
-
-        // Café
         if (lower.includes('café') || lower.includes('cafe')) {
-            return "☕ ¡El café es mi debilidad! Mi favorito es un Ethiopiano Yirgacheffe en pour-over. ¿Eres amante del café? ¡Podemos hablar de ello mientras te ayudo!";
+            return "☕ ¡El café es mi debilidad! Mi favorito es un Ethiopiano Yirgacheffe en pour-over. ¿Eres amante del café?";
         }
-
-        // Anime
         if (lower.includes('anime') || lower.includes('isekai') || lower.includes('manga')) {
-            return "🎌 ¡Waku waku! Me encanta el anime. Mi favorito es Tensei Slime, Rimuru es un protagonista increíble. ¿Has visto alguna serie buena últimamente?";
+            return "🎌 ¡Waku waku! Me encanta el anime. Mi favorito es Tensei Slime, Rimuru es un protagonista increíble.";
         }
-
-        // Ayuda
         if (lower.includes('ayuda') || lower.includes('qué puedes')) {
             return "🤖 ¡Claro! Puedo ayudarte con:\n• 📦 Consultar productos\n• 💰 Información de precios\n• 📱 Visitar nuestra web\n• ☕️ Hablar de café y anime\n\n¿Qué necesitas hoy? ✨";
         }
-
-        // Despedidas
         if (lower.includes('adiós') || lower.includes('chao') || lower.includes('bye')) {
-            return "¡Hasta luego! ☕️ Recuerda: 'Sonríe, mañana será bonito'. Si necesitas algo más, aquí estaré. ¡Cuídate! ✨";
+            return "¡Hasta luego! ☕️ Recuerda: 'Sonríe, mañana será bonito'. ¡Cuídate! ✨";
         }
 
-        // Respuesta por defecto
         const defaults = [
             "¡Interesante! ☕️ Déjame pensar... Como diría Rimuru: 'Cada problema tiene solución'. ¿Qué más necesitas saber?",
             "Eso me recuerda a un buen café etíope: tiene capas de sabor. ¿Quieres que te ayude con algo de la tienda?",
             "¡Waku waku! Me encanta este tema. ¿Podrías darme más detalles? 📝",
-            "Pan, café y anime solucionan el 80% de los problemas. ¿Cuál es el tuyo hoy? 🍞☕️"
+            "Pan, café y anime solucionan el 80% de los problemas. 🍞☕️"
         ];
         return defaults[Math.floor(Math.random() * defaults.length)];
     }
@@ -247,13 +242,7 @@
     function addLog(message, type = 'info') {
         const container = document.getElementById('logsContainer');
         const time = new Date().toLocaleTimeString();
-        const emoji = {
-            info: '📌',
-            user: '👤',
-            bot: '🤖',
-            error: '❌',
-            success: '✅'
-        };
+        const emoji = { info: '📌', user: '👤', bot: '🤖', error: '❌', success: '✅' };
         const entry = document.createElement('div');
         entry.className = 'log-entry';
         entry.innerHTML = `<span class="time">${emoji[type] || '📌'}</span> <span class="${type}">${message}</span>`;
@@ -296,14 +285,11 @@
             if (data.ok && data.result.length > 0) {
                 for (let update of data.result) {
                     lastUpdateId = update.update_id;
-
                     if (update.message && update.message.text) {
                         const chatId = update.message.chat.id;
                         const userName = update.message.from.first_name || 'Usuario';
                         const messageText = update.message.text;
-
                         addLog(`${userName}: ${messageText}`, 'user');
-
                         if (!messageText.startsWith('/')) {
                             const response = await getAniaResponse(messageText);
                             await sendTelegramMessage(chatId, response);
@@ -314,35 +300,29 @@
             }
             return true;
         } catch (error) {
-            addLog(`❌ Error obteniendo actualizaciones: ${error.message}`, 'error');
+            addLog(`❌ Error: ${error.message}`, 'error');
             return false;
         }
     }
 
-    // ============================================================
-    // PROBAR BOT
-    // ============================================================
-
     async function testBot() {
         if (!token) {
-            addLog('❌ Primero ingresa el token de Telegram', 'error');
-            alert('❌ Por favor, ingresa el token de Telegram primero');
+            addLog('❌ Ingresa el token primero', 'error');
+            alert('❌ Por favor, ingresa el token de Telegram');
             return;
         }
 
         addLog('📤 Probando conexión...', 'info');
-
         try {
             const url = `https://api.telegram.org/bot${token}/getMe`;
             const response = await fetch(url);
             const data = await response.json();
-
             if (data.ok) {
                 addLog(`✅ Bot @${data.result.username} está activo`, 'success');
                 alert(`✅ Bot @${data.result.username} está activo!\n\nAhora inicia el bot y escribe en Telegram para probarlo.`);
             } else {
                 addLog(`❌ Token inválido: ${data.description}`, 'error');
-                alert('❌ Token inválido. Verifica que lo hayas copiado correctamente de @BotFather');
+                alert('❌ Token inválido.');
             }
         } catch (error) {
             addLog(`❌ Error: ${error.message}`, 'error');
@@ -350,13 +330,8 @@
         }
     }
 
-    // ============================================================
-    // INICIAR / DETENER BOT
-    // ============================================================
-
     function startBot() {
         token = document.getElementById('tokenInput').value.trim();
-
         if (!token) {
             addLog('❌ Ingresa el token de Telegram primero', 'error');
             alert('❌ Por favor, ingresa el token de Telegram');
@@ -378,8 +353,8 @@
                     document.getElementById('statusValue').innerHTML = `✅ Conectado <span class="badge badge-on">ON</span>`;
                     document.getElementById('btnStart').disabled = true;
                     document.getElementById('btnStop').disabled = false;
-                    addLog(`✅ Bot @${data.result.username} iniciado correctamente`, 'success');
-                    addLog('📱 Escribe algo en Telegram para probarlo', 'info');
+                    addLog(`✅ Bot @${data.result.username} iniciado`, 'success');
+                    addLog('📱 Escribe en Telegram para probarlo', 'info');
 
                     lastUpdateId = 0;
                     botInterval = setInterval(async () => {
@@ -387,12 +362,12 @@
                     }, 3000);
                 } else {
                     addLog(`❌ Token inválido: ${data.description}`, 'error');
-                    alert('❌ Token inválido. Verifica que lo hayas copiado correctamente de @BotFather');
+                    alert('❌ Token inválido.');
                 }
             })
             .catch(error => {
-                addLog(`❌ Error de conexión: ${error.message}`, 'error');
-                alert(`❌ Error de conexión: ${error.message}\n\nVerifica tu conexión a internet.`);
+                addLog(`❌ Error: ${error.message}`, 'error');
+                alert(`❌ Error de conexión: ${error.message}`);
             });
     }
 
@@ -425,6 +400,11 @@
         document.getElementById('tokenInput').addEventListener('change', function() {
             localStorage.setItem('ania_telegram_token', this.value.trim());
         });
+
+        // Auto-iniciar si el token está guardado
+        if (savedToken) {
+            setTimeout(startBot, 1000);
+        }
     });
 </script>
 
