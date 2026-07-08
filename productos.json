@@ -120,6 +120,17 @@
       "image": "https://via.placeholder.com/300x200",
       "feat": false,
       "available": true
+    },
+    {
+      "id": "p1783472171660",
+      "name": "Sulfrapim",
+      "category": "medicamento",
+      "price": 280,
+      "desc": "S",
+      "stock": 20,
+      "image": "https://via.placeholder.com/300x200",
+      "feat": false,
+      "available": true
     }
   ]
 }
