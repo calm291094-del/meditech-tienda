@@ -175,6 +175,17 @@
       "image": "https://via.placeholder.com/300x200",
       "feat": false,
       "available": true
+    },
+    {
+      "id": "p1783517405737",
+      "name": "Furosemida 40 mg",
+      "category": "medicamento",
+      "price": 230,
+      "desc": "F",
+      "stock": 10,
+      "image": "https://via.placeholder.com/300x200",
+      "feat": false,
+      "available": true
     }
   ]
 }
