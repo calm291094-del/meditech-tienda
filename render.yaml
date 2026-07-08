@@ -1,14 +1,32 @@
-# render.yaml
+# render.yaml - Configuración para Render
 services:
+  # ============================================
+  # SERVICIO BACKEND (Bot de Telegram + API)
+  # ============================================
+  - type: web
+    name: meditech-bot
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: WORKER_URL
+        value: https://telegram-proxy.calm291094.workers.dev
+      - key: GITHUB_USER
+        value: calm291094-del
+      - key: GITHUB_REPO
+        value: meditech-tienda
+
+  # ============================================
+  # SERVICIO FRONTEND (Página HTML estática)
+  # ============================================
   - type: web
     name: meditech-tienda
     env: static
     buildCommand: echo "No build needed"
     staticPublishPath: .
-    headers:
-      - path: /telegram-bot.html
-        name: Cache-Control
-        value: no-cache, no-store, must-revalidate
     routes:
       - type: rewrite
         source: /keep-alive
