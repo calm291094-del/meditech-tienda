@@ -34,14 +34,36 @@
       "available": true
     },
     {
-      "id": "p1783470702313",
-      "name": "Furosemida ",
+      "id": "p1783470965713",
+      "name": "Alprazolam",
       "category": "medicamento",
-      "price": 230,
-      "desc": "F",
-      "stock": 20,
+      "price": 550,
+      "desc": "A",
+      "stock": 10,
       "image": "https://via.placeholder.com/300x200",
-      "feat": false,
+      "feat": true,
+      "available": true
+    },
+    {
+      "id": "p1783470974299",
+      "name": "Alprazolam",
+      "category": "medicamento",
+      "price": 550,
+      "desc": "A",
+      "stock": 10,
+      "image": "https://via.placeholder.com/300x200",
+      "feat": true,
+      "available": true
+    },
+    {
+      "id": "p1783470977840",
+      "name": "Alprazolam",
+      "category": "medicamento",
+      "price": 550,
+      "desc": "A",
+      "stock": 10,
+      "image": "https://via.placeholder.com/300x200",
+      "feat": true,
       "available": true
     }
   ]
