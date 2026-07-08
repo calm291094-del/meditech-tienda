@@ -153,6 +153,17 @@
       "image": "https://raw.githubusercontent.com/calm291094-del/meditech-tienda/main/imagenes/1783511299365_IMG_20260708_070800.jpg",
       "feat": false,
       "available": true
+    },
+    {
+      "id": "p1783517174371",
+      "name": "Nifedipino 20 mg",
+      "category": "medicamento",
+      "price": 250,
+      "desc": "n",
+      "stock": 10,
+      "image": "https://via.placeholder.com/300x200",
+      "feat": false,
+      "available": true
     }
   ]
 }
