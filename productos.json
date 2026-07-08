@@ -43,6 +43,17 @@
       "image": "https://via.placeholder.com/300x200",
       "feat": false,
       "available": true
+    },
+    {
+      "id": "p1783471116147",
+      "name": "Loratadina",
+      "category": "medicamento",
+      "price": 230,
+      "desc": "L",
+      "stock": 20,
+      "image": "https://via.placeholder.com/300x200",
+      "feat": false,
+      "available": true
     }
   ]
 }
