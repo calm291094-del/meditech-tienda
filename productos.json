@@ -137,7 +137,7 @@
       "name": "Metronidazol",
       "category": "medicamento",
       "price": 280,
-      "desc": "M",
+      "desc": "El metronidazol se usa para tratar infecciones del aparato reproductor, el tracto gastrointestinal (GI), la piel, el corazón, los huesos, las articulaciones, los pulmones, la sangre, el sistema nervioso y otras zonas del cuerpo.",
       "stock": 20,
       "image": "https://raw.githubusercontent.com/calm291094-del/meditech-tienda/main/imagenes/1783511299365_IMG_20260708_070800.jpg",
       "feat": false,
