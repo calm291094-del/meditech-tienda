@@ -115,7 +115,7 @@
       "name": "Domazol",
       "category": "medicamento",
       "price": 300,
-      "desc": "Omeprazol com domperidona",
+      "desc": "Se utiliza para tratar problemas digestivos como la acidez estomacal, el reflujo ácido (ERGE) y la indigestión. La combinación de domperidona y omeprazol combina un inhibidor de la bomba de protones con un pro-kinético (para acelerar el vaciado gástrico).",
       "stock": 10,
       "image": "https://via.placeholder.com/300x200",
       "feat": false,
