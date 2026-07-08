@@ -111,7 +111,7 @@
       "available": true
     },
     {
-      "id": "p1783472355034",
+      "id": "p1783472375804",
       "name": "Amoxicilina",
       "category": "medicamento",
       "price": 350,
@@ -122,11 +122,22 @@
       "available": true
     },
     {
-      "id": "p1783472375804",
-      "name": "Amoxicilina",
+      "id": "p1783472638173",
+      "name": "Omeprazol",
       "category": "medicamento",
-      "price": 350,
-      "desc": "Amox",
+      "price": 250,
+      "desc": "O",
+      "stock": 20,
+      "image": "https://via.placeholder.com/300x200",
+      "feat": false,
+      "available": true
+    },
+    {
+      "id": "p1783472658224",
+      "name": "Omeprazol",
+      "category": "medicamento",
+      "price": 250,
+      "desc": "O",
       "stock": 20,
       "image": "https://via.placeholder.com/300x200",
       "feat": false,
