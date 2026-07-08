@@ -1,4 +1,4 @@
-// server.js - Bot de Telegram + API REST para MediTech
+// server.js - Versión corregida para @AniaAsistenteBot
 
 const express = require('express');
 const cors = require('cors');
@@ -6,27 +6,34 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================================================
-// CONFIGURACIÓN
+// CONFIGURACIÓN - ¡TOKEN CORRECTO!
 // ============================================================
 
 app.use(cors());
 app.use(express.json());
 
+// ⚠️ IMPORTANTE: Usa el token de @AniaAsistenteBot
+// Obtenlo de @BotFather en Telegram
 const WORKER_URL = process.env.WORKER_URL || "https://telegram-proxy.calm291094.workers.dev";
-const GITHUB_USER = process.env.GITHUB_USER || "calm291094-del";
-const GITHUB_REPO = process.env.GITHUB_REPO || "meditech-tienda";
+const TOKEN = process.env.TELEGRAM_TOKEN || '8932505027:AAFkR4ZVC_hFcuc4YIhEmEIvGaIDr6yB7L0';
+
+console.log('🔧 Configuración:');
+console.log(`   Bot: @AniaAsistenteBot`);
+console.log(`   WORKER_URL: ${WORKER_URL}`);
+console.log(`   TOKEN: ${TOKEN.substring(0, 15)}...`);
 
 let botInterval = null;
 let isRunning = false;
 let lastUpdateId = 0;
-const TOKEN = process.env.TELEGRAM_TOKEN || '8932505027:AAFkR4ZVC_hFcuc4YIhEmEIvGaIDr6yB7L0';
 let lastResponse = Date.now();
+let reconnectAttempts = 0;
 
 // ============================================================
-// FUNCIÓN PARA LLAMAR AL WORKER DE CLOUDFLARE
+// FUNCIÓN PARA LLAMAR AL WORKER
 // ============================================================
 async function callWorker(method, data = {}) {
     try {
+        console.log(`📡 Llamando Worker: ${method}`);
         const response = await fetch(WORKER_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -36,22 +43,25 @@ async function callWorker(method, data = {}) {
                 data: data
             })
         });
+        
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
-            return await response.json();
+            const result = await response.json();
+            console.log(`✅ Worker respondió: ${method} -> ok: ${result.ok}`);
+            return result;
         } else {
             const text = await response.text();
-            console.warn('Respuesta no JSON:', text);
-            return { ok: false, error: `Error: ${text.substring(0, 100)}` };
+            console.warn('⚠️ Respuesta no JSON:', text.substring(0, 100));
+            return { ok: false, error: `Respuesta no JSON: ${text.substring(0, 100)}` };
         }
     } catch (error) {
-        console.error('Error en Worker:', error);
+        console.error('❌ Error en Worker:', error.message);
         return { ok: false, error: error.message };
     }
 }
 
 // ============================================================
-// ENVIAR MENSAJE A TELEGRAM
+// ENVIAR MENSAJE
 // ============================================================
 async function sendTelegramMessage(chatId, text) {
     const cleanText = text.replace(/<[^>]*>/g, '').trim();
@@ -64,37 +74,7 @@ async function sendTelegramMessage(chatId, text) {
 }
 
 // ============================================================
-// ENVIAR MENSAJE CON BOTONES (comandos del bot)
-// ============================================================
-async function sendTelegramKeyboard(chatId, text, keyboard) {
-    const result = await callWorker('sendMessage', {
-        chat_id: chatId,
-        text: text,
-        reply_markup: {
-            keyboard: keyboard,
-            resize_keyboard: true,
-            one_time_keyboard: true
-        }
-    });
-    return result.ok;
-}
-
-// ============================================================
-// PERSONALIDAD DE ANIA
-// ============================================================
-const ANIA_PERSONALIDAD = `
-Eres Ania, la asistente virtual de MediTech. Tienes 20 años.
-- Alegre, perceptiva y entusiasta
-- Te encanta el café ☕, el anime 🎌, los zombies 🧟 y la astronomía 🔭
-- Hablas en español con calidez y emojis
-- NUNCA uses etiquetas HTML
-- Si preguntan por precios: "Visita nuestra web: https://calm291094-del.github.io/meditech-tienda/"
-- Si preguntan por medicamentos: "Siempre consulta a un médico"
-- Si preguntan por el bot: "Soy Ania, tu asistente de MediTech"
-`;
-
-// ============================================================
-// GENERAR RESPUESTA DE ANIA
+// RESPONDER CON IA
 // ============================================================
 async function getAniaResponse(userMessage) {
     try {
@@ -103,66 +83,50 @@ async function getAniaResponse(userMessage) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 messages: [
-                    { role: 'system', content: ANIA_PERSONALIDAD },
+                    { role: 'system', content: 'Eres Ania, asistente de MediTech. Alegre, entusiasta, hablas español con emojis. Sin HTML.' },
                     { role: 'user', content: userMessage }
                 ],
-                model: 'openai',
-                seed: Math.floor(Math.random() * 100000)
+                model: 'openai'
             })
         });
 
         if (response.ok) {
             let texto = await response.text();
-            texto = texto.replace(/<[^>]*>/g, '');
-            texto = texto.replace(/```[\s\S]*?```/g, '').trim();
-            texto = texto.replace(/\*\*(.*?)\*\*/g, '$1');
+            texto = texto.replace(/<[^>]*>/g, '').trim();
             if (texto.length > 10) return texto;
         }
     } catch (e) {
-        console.error('Error en IA:', e);
+        console.error('Error en IA:', e.message);
     }
 
-    return getLocalResponse(userMessage);
-}
-
-function getLocalResponse(message) {
-    const lower = message.toLowerCase();
-    if (lower.includes('hola') || lower.includes('buenas') || lower.includes('hey')) {
-        return "¡Hola! ☕️ Soy Ania, tu asistente de MediTech. Visita nuestra web: https://calm291094-del.github.io/meditech-tienda/ ✨\n\nPuedes preguntarme sobre:\n• 💊 Medicamentos\n• 💻 Tecnología\n• 🛒 Productos\n• ☕ Café y anime";
+    // Respuestas locales
+    const lower = userMessage.toLowerCase();
+    if (lower.includes('hola') || lower.includes('buenas')) {
+        return "¡Hola! ☕️ Soy Ania, tu asistente de MediTech. ¿En qué puedo ayudarte hoy? ✨\n\nPuedes preguntarme sobre:\n• 💊 Medicamentos\n• 💻 Tecnología\n• 🛒 Productos\n• ☕ Café y anime";
     }
-    if (lower.includes('precio') || lower.includes('cuesta') || lower.includes('cuánto')) {
-        return "💰 Precios actualizados en nuestra web: https://calm291094-del.github.io/meditech-tienda/ 😊\n¿Quieres que te ayude con algo más?";
+    if (lower.includes('precio') || lower.includes('cuesta')) {
+        return "💰 Precios actualizados en nuestra web: https://calm291094-del.github.io/meditech-tienda/ 😊";
     }
-    if (lower.includes('café') || lower.includes('cafe')) {
-        return "☕ ¡El café es mi debilidad! Mi favorito es un Ethiopiano Yirgacheffe en pour-over. Tiene notas de jazmín y bergamota. ¿Te gusta el café?";
-    }
-    if (lower.includes('anime') || lower.includes('isekai') || lower.includes('japonés')) {
-        return "🎌 ¡Waku waku! Me encanta el anime. Mi favorito es Tensei Slime. Rimuru es un protagonista increíble. ¿Has visto alguna serie buena últimamente?";
-    }
-    if (lower.includes('adiós') || lower.includes('chao') || lower.includes('hasta luego')) {
-        return "¡Hasta luego! ☕️ Recuerda: 'Sonríe, mañana será bonito'. ¡Cuídate! ✨\n\nSi necesitas algo más, aquí estoy.";
-    }
-    if (lower.includes('gracias') || lower.includes('muchas gracias')) {
+    if (lower.includes('gracias')) {
         return "¡De nada! ☕️ Me alegra poder ayudarte. ¿Necesitas algo más? ✨";
     }
-    if (lower.includes('ayuda') || lower.includes('comandos') || lower.includes('qué puedes')) {
-        return "🤖 Soy Ania, tu asistente. Puedo:\n• Responder preguntas sobre MediTech\n• Recomendar productos\n• Hablar de café y anime\n• Darte información de contacto\n\n¿Qué necesitas hoy? ✨";
+    if (lower.includes('café') || lower.includes('cafe')) {
+        return "☕ ¡El café es mi debilidad! Mi favorito es un Ethiopiano Yirgacheffe en pour-over. ¿Te gusta el café?";
     }
-    if (lower.includes('producto') || lower.includes('medicamento') || lower.includes('tecnología')) {
-        return "📦 ¡Claro! Tenemos productos de calidad en:\n• 💊 Medicamentos\n• 💻 Tecnología\n• 🩺 Salud\n• 🎮 Gaming\n\nVisita nuestra web para ver el catálogo completo: https://calm291094-del.github.io/meditech-tienda/";
+    if (lower.includes('anime') || lower.includes('isekai')) {
+        return "🎌 ¡Waku waku! Me encanta el anime. Mi favorito es Tensei Slime. ¿Has visto alguna serie buena?";
     }
-    const defaults = [
-        "¡Interesante! ☕️ ¿Qué más necesitas saber de MediTech?",
-        "¡Waku waku! ¿Podrías darme más detalles? 📝",
-        "Pan, café y anime solucionan el 80% de los problemas. 🍞☕️",
-        "Eso me recuerda a un buen café etíope: tiene capas de sabor. ☕️",
-        "Aplicando la regla de Zombieland: 'Disfruta de las Pequeñas Cosas'. ¿Qué más necesitas? 😊"
-    ];
-    return defaults[Math.floor(Math.random() * defaults.length)];
+    if (lower.includes('adiós') || lower.includes('chao')) {
+        return "¡Hasta luego! ☕️ Recuerda: 'Sonríe, mañana será bonito'. ¡Cuídate! ✨";
+    }
+    if (lower.includes('ayuda') || lower.includes('help')) {
+        return "🤖 Puedo ayudarte con:\n• Información de productos\n• Precios\n• Contacto\n• Recomendaciones\n\n¿Qué necesitas hoy? ✨";
+    }
+    return "¡Interesante! ☕️ ¿Qué más necesitas saber de MediTech?";
 }
 
 // ============================================================
-// OBTENER ACTUALIZACIONES DE TELEGRAM
+// OBTENER ACTUALIZACIONES
 // ============================================================
 async function getUpdates() {
     try {
@@ -171,11 +135,10 @@ async function getUpdates() {
             timeout: 30
         });
 
-        if (result.ok && result.result.length > 0) {
+        if (result.ok && result.result && result.result.length > 0) {
+            console.log(`📩 Recibidas ${result.result.length} actualizaciones`);
             for (let update of result.result) {
                 lastUpdateId = update.update_id;
-                
-                // Mensajes de texto
                 if (update.message && update.message.text) {
                     const chatId = update.message.chat.id;
                     const userName = update.message.from.first_name || 'Usuario';
@@ -183,15 +146,12 @@ async function getUpdates() {
                     
                     console.log(`📩 ${userName}: ${messageText}`);
                     
-                    // Comandos especiales
+                    // Comandos
                     if (messageText === '/start') {
                         await sendTelegramMessage(chatId, 
-                            `¡Bienvenido! ☕️ Soy Ania, tu asistente de MediTech.\n\n` +
-                            `Puedes hacerme preguntas sobre:\n` +
-                            `• 💊 Medicamentos\n` +
-                            `• 💻 Tecnología\n` +
-                            `• 🛒 Productos\n` +
-                            `• ☕ Café y anime\n\n` +
+                            `¡Bienvenido a MediTech! ☕️\n\n` +
+                            `Soy Ania, tu asistente virtual. Puedo ayudarte con información sobre nuestros productos de salud y tecnología.\n\n` +
+                            `🌐 Visita nuestra web: https://calm291094-del.github.io/meditech-tienda/\n\n` +
                             `¿En qué puedo ayudarte hoy? ✨`
                         );
                         continue;
@@ -199,11 +159,10 @@ async function getUpdates() {
                     
                     if (messageText === '/help') {
                         await sendTelegramMessage(chatId,
-                            `🤖 Comandos disponibles:\n` +
+                            `📋 Comandos disponibles:\n` +
                             `/start - Saludo de bienvenida\n` +
                             `/help - Esta ayuda\n` +
-                            `/web - Enlace a la tienda\n` +
-                            `/contacto - Información de contacto\n\n` +
+                            `/web - Enlace a la tienda\n\n` +
                             `También puedes hacerme preguntas normales.`
                         );
                         continue;
@@ -218,73 +177,61 @@ async function getUpdates() {
                         continue;
                     }
                     
-                    if (messageText === '/contacto') {
-                        await sendTelegramMessage(chatId,
-                            `📱 Contáctanos:\n` +
-                            `• WhatsApp: +53 5XXXXXXXX\n` +
-                            `• Email: klorenzo29@nauta.cu\n` +
-                            `• Web: https://calm291094-del.github.io/meditech-tienda/`
-                        );
-                        continue;
-                    }
-                    
-                    // Respuesta normal (no comando)
+                    // Respuesta normal
                     if (!messageText.startsWith('/')) {
                         const response = await getAniaResponse(messageText);
-                        const sent = await sendTelegramMessage(chatId, response);
-                        if (sent) {
-                            console.log(`🤖 Ania: ${response.substring(0, 50)}...`);
-                            lastResponse = Date.now();
-                        }
+                        await sendTelegramMessage(chatId, response);
+                        lastResponse = Date.now();
                     }
                 }
             }
         }
-        lastResponse = Date.now();
-        return result.ok;
+        return true;
     } catch (error) {
-        console.error('Error en getUpdates:', error);
+        console.error('❌ Error en getUpdates:', error.message);
         return false;
     }
 }
 
 // ============================================================
-// INICIAR EL BOT
+// INICIAR BOT
 // ============================================================
 async function startBot() {
     if (isRunning) {
-        console.log('⚠️ El bot ya está corriendo');
+        console.log('⚠️ Bot ya está corriendo');
         return;
     }
 
-    console.log('🚀 Iniciando bot...');
+    console.log('🚀 Iniciando @AniaAsistenteBot...');
 
+    // Probar el token
+    console.log('🔑 Probando token...');
     const result = await callWorker('getMe');
-    if (result.ok) {
+    
+    if (result.ok && result.result) {
         isRunning = true;
+        reconnectAttempts = 0;
         console.log(`✅ Bot @${result.result.username} iniciado`);
+        console.log(`📱 ID: ${result.result.id}`);
         console.log('📱 Escribe en Telegram para probarlo');
 
-        lastUpdateId = 0;
         if (botInterval) clearInterval(botInterval);
         botInterval = setInterval(async () => {
             await getUpdates();
         }, 2000);
     } else {
-        console.error('❌ Error:', result.error || 'Token inválido');
-        setTimeout(startBot, 30000);
+        console.error('❌ Error al iniciar:', result.error || 'Token inválido');
+        reconnectAttempts++;
+        const delay = Math.min(30000, reconnectAttempts * 5000);
+        console.log(`⏳ Reintentando en ${delay/1000} segundos...`);
+        setTimeout(startBot, delay);
     }
 }
 
 // ============================================================
-// SERVIDOR WEB (API + Estado)
+// SERVIDOR WEB
 // ============================================================
 
-// ============================================================
-// RUTAS DE LA API
-// ============================================================
-
-// Estado del bot
 app.get('/', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -299,10 +246,15 @@ app.get('/', (req, res) => {
                 .status { display: inline-block; padding: 8px 20px; border-radius: 30px; font-weight: bold; }
                 .online { background: #10b981; color: white; }
                 .offline { background: #ef4444; color: white; }
+                .connecting { background: #f59e0b; color: white; }
                 .bot-info { background: #f8fafc; border-radius: 12px; padding: 15px; margin: 10px 0; }
                 h1 { color: #0d9488; }
                 .emoji-big { font-size: 48px; }
                 .footer { margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px; }
+                .btn { background: #0d9488; color: white; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-block; border: none; cursor: pointer; }
+                .btn:hover { background: #0f766e; }
+                .btn-warning { background: #f59e0b; }
+                .btn-warning:hover { background: #d97706; }
             </style>
         </head>
         <body>
@@ -314,10 +266,14 @@ app.get('/', (req, res) => {
                 </div>
                 
                 <div class="bot-info">
-                    <p><strong>📊 Estado:</strong> <span class="status ${isRunning ? 'online' : 'offline'}">${isRunning ? '✅ Conectado' : '⏸️ Detenido'}</span></p>
+                    <p><strong>📊 Estado:</strong> 
+                        <span class="status ${isRunning ? 'online' : 'connecting'}">
+                            ${isRunning ? '✅ Conectado' : '🔄 Conectando...'}
+                        </span>
+                    </p>
                     <p><strong>🕐 Última respuesta:</strong> ${new Date(lastResponse).toLocaleString('es-ES')}</p>
-                    <p><strong>📱 Bot:</strong> @AniaMediTechBot</p>
-                    <p><strong>👥 Usuarios activos:</strong> ${activeUsers.size}</p>
+                    <p><strong>📱 Bot:</strong> @AniaAsistenteBot</p>
+                    <p><strong>🔄 Intentos:</strong> ${reconnectAttempts}</p>
                 </div>
                 
                 <div style="margin: 20px 0;">
@@ -325,14 +281,17 @@ app.get('/', (req, res) => {
                     <ul style="list-style: none; padding: 0;">
                         <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><code>/start</code> - Saludo de bienvenida</li>
                         <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><code>/help</code> - Ver comandos disponibles</li>
-                        <li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;"><code>/web</code> - Enlace a la tienda</li>
-                        <li style="padding: 8px 0;"><code>/contacto</code> - Información de contacto</li>
+                        <li style="padding: 8px 0;"><code>/web</code> - Enlace a la tienda</li>
                     </ul>
                 </div>
                 
                 <div style="text-align: center; margin-top: 20px;">
-                    <a href="https://t.me/AniaMediTechBot" target="_blank" style="background: #0d9488; color: white; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-block;">
+                    <a href="https://t.me/AniaAsistenteBot" target="_blank" class="btn">
                         💬 Abrir en Telegram
+                    </a>
+                    <br><br>
+                    <a href="/force-restart" class="btn btn-warning">
+                        🔄 Forzar Reinicio
                     </a>
                 </div>
                 
@@ -345,13 +304,33 @@ app.get('/', (req, res) => {
     `);
 });
 
+// Endpoint para forzar reinicio
+app.get('/force-restart', (req, res) => {
+    console.log('🔄 Forzando reinicio del bot...');
+    isRunning = false;
+    if (botInterval) {
+        clearInterval(botInterval);
+        botInterval = null;
+    }
+    setTimeout(startBot, 1000);
+    res.redirect('/');
+});
+
 // ============================================================
-// SISTEMA DE REINICIO AUTOMÁTICO
+// INICIAR SERVIDOR
 // ============================================================
 
-let activeUsers = new Set();
+app.listen(PORT, () => {
+    console.log(`✅ Servidor web en puerto ${PORT}`);
+    console.log(`🌐 URL: https://meditech-bot.onrender.com`);
+    console.log(`📱 Bot: @AniaAsistenteBot`);
+    setTimeout(startBot, 1000);
+});
 
-// Verificar conexión cada 30 segundos
+// ============================================================
+// SISTEMA DE RECUPERACIÓN
+// ============================================================
+
 setInterval(() => {
     if (!isRunning) {
         console.log('🔄 Bot detenido, reiniciando...');
@@ -359,25 +338,16 @@ setInterval(() => {
     }
 }, 30000);
 
-// Si no hay actividad por 2 minutos, reiniciar
 setInterval(() => {
     if (isRunning && (Date.now() - lastResponse > 120000)) {
-        console.log('🔄 Bot sin respuesta, reiniciando...');
+        console.log('🔄 Bot sin actividad, reiniciando...');
         isRunning = false;
+        if (botInterval) {
+            clearInterval(botInterval);
+            botInterval = null;
+        }
         startBot();
     }
 }, 60000);
 
-// ============================================================
-// INICIAR SERVIDOR
-// ============================================================
-
-app.listen(PORT, () => {
-    console.log(`✅ Servidor web corriendo en puerto ${PORT}`);
-    console.log(`🌐 Visita: https://meditech-tienda.onrender.com`);
-    console.log(`📱 Bot: @AniaMediTechBot`);
-    // Iniciar el bot automáticamente
-    startBot();
-});
-
-console.log('🔥 Sistema 24/7 activo en servidor');
+console.log('🔥 Sistema 24/7 activo para @AniaAsistenteBot');
