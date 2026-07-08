@@ -142,6 +142,17 @@
       "image": "https://via.placeholder.com/300x200",
       "feat": false,
       "available": true
+    },
+    {
+      "id": "p1783472842386",
+      "name": "Hidroclorotizida",
+      "category": "medicamento",
+      "price": 230,
+      "desc": "Hi",
+      "stock": 10,
+      "image": "https://via.placeholder.com/300x200",
+      "feat": false,
+      "available": true
     }
   ]
 }
