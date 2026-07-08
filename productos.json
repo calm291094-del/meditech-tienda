@@ -54,6 +54,17 @@
       "image": "https://via.placeholder.com/300x200",
       "feat": true,
       "available": true
+    },
+    {
+      "id": "p1783471424225",
+      "name": "Alodipino",
+      "category": "medicamento",
+      "price": 250,
+      "desc": "A",
+      "stock": 20,
+      "image": "https://via.placeholder.com/300x200",
+      "feat": false,
+      "available": true
     }
   ]
 }
