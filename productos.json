@@ -93,7 +93,7 @@
       "name": "Amoxicilina",
       "category": "medicamento",
       "price": 350,
-      "desc": "Amox",
+      "desc": "La amoxicilina pertenece a una clase de medicamentos llamados antibióticos similares a la penicilina. Su acción consiste en detener el crecimiento de las bacterias. Los antibióticos como la amoxicilina no son efectivos para tratar los resfriados, la gripe y otras infecciones víricas.",
       "stock": 20,
       "image": "https://via.placeholder.com/300x200",
       "feat": false,
