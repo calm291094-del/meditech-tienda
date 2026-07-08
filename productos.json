@@ -32,17 +32,6 @@
       "image": "https://cyberdigitaltecnologia.com/wp-content/uploads/2024/06/1711574493_PRO2020404.jpg",
       "feat": true,
       "available": true
-    },
-    {
-      "id": "p1783470977840",
-      "name": "Alprazolam",
-      "category": "medicamento",
-      "price": 550,
-      "desc": "A",
-      "stock": 10,
-      "image": "https://via.placeholder.com/300x200",
-      "feat": true,
-      "available": true
     }
   ]
 }
