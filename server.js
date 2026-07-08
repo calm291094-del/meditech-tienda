@@ -1,24 +1,22 @@
-// server.js - Versión con logs detallados
+// server.js - Bot de Telegram para Render (CORREGIDO)
 const express = require('express');
-const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================================================
-// CONFIGURACIÓN
+// CONFIGURACIÓN - USANDO VARIABLES DE ENTORNO
 // ============================================================
 
-app.use(cors());
-app.use(express.json());
-
+// ⚠️ IMPORTANTE: NO uses localStorage en Node.js
+// Las variables de entorno se configuran en Render
 const WORKER_URL = process.env.WORKER_URL || "https://telegram-proxy.calm291094.workers.dev";
-const TOKEN = localStorage.getItem('telegram_token') || '8932505027:AAFkR4ZVC_hFcuc4YIhEmEIvGaIDr6yB7L0';
+const TOKEN = process.env.TELEGRAM_TOKEN;
 
 console.log('🔧 CONFIGURACIÓN:');
 console.log(`   WORKER_URL: ${WORKER_URL}`);
-console.log(`   TOKEN: ${TOKEN ? TOKEN.substring(0, 20) + '...' : '❌ NO CONFIGURADO'}`);
+console.log(`   TOKEN: ${TOKEN ? '✅ CONFIGURADO' : '❌ NO CONFIGURADO'}`);
+console.log(`   TOKEN (primeros 20 chars): ${TOKEN ? TOKEN.substring(0, 20) + '...' : 'N/A'}`);
 
-let botInterval = null;
 let isRunning = false;
 let lastUpdateId = 0;
 let lastResponse = Date.now();
@@ -31,9 +29,9 @@ let errorMessage = '';
 async function callWorker(method, data = {}) {
     console.log(`📡 [${method}] Llamando Worker...`);
     
-    if (!TOKEN || TOKEN === 'AQUI_TU_TOKEN_DE_ANIAASISTENTEBOT') {
+    if (!TOKEN) {
         console.error('❌ TOKEN NO CONFIGURADO');
-        errorMessage = 'Token no configurado';
+        errorMessage = 'Token no configurado en variables de entorno';
         return { ok: false, error: 'Token no configurado' };
     }
 
@@ -62,7 +60,7 @@ async function callWorker(method, data = {}) {
         } else {
             const text = await response.text();
             console.warn(`⚠️ [${method}] Respuesta no JSON:`, text.substring(0, 100));
-            errorMessage = 'Respuesta no JSON';
+            errorMessage = 'Respuesta no JSON del Worker';
             return { ok: false, error: 'Respuesta no JSON' };
         }
     } catch (error) {
@@ -86,7 +84,7 @@ async function sendTelegramMessage(chatId, text) {
 }
 
 // ============================================================
-// RESPONDER CON IA
+// RESPONDER CON IA (con fallback local)
 // ============================================================
 async function getAniaResponse(userMessage) {
     try {
@@ -213,9 +211,10 @@ async function startBot() {
     console.log(`🔑 Token: ${TOKEN ? TOKEN.substring(0, 15) + '...' : '❌'}`);
 
     // Verificar que el token existe
-    if (!TOKEN || TOKEN === 'AQUI_TU_TOKEN_DE_ANIAASISTENTEBOT') {
+    if (!TOKEN) {
         console.error('❌ TOKEN DE TELEGRAM NO CONFIGURADO');
         console.error('   Ve a Render → Environment → Añade TELEGRAM_TOKEN');
+        errorMessage = 'Token no configurado. Ve a Render → Environment → Añade TELEGRAM_TOKEN';
         setTimeout(startBot, 30000);
         return;
     }
@@ -232,8 +231,8 @@ async function startBot() {
         console.log(`📱 ID: ${result.result.id}`);
         console.log('📱 Escribe en Telegram para probarlo');
 
-        if (botInterval) clearInterval(botInterval);
-        botInterval = setInterval(async () => {
+        if (global.botInterval) clearInterval(global.botInterval);
+        global.botInterval = setInterval(async () => {
             await getUpdates();
         }, 2000);
     } else {
@@ -307,7 +306,7 @@ app.get('/', (req, res) => {
                     <p><strong>🔧 Configuración:</strong></p>
                     <p style="font-size: 12px; font-family: monospace; word-break: break-all;">
                         WORKER_URL: ${WORKER_URL}<br>
-                        TOKEN: ${TOKEN ? TOKEN.substring(0, 20) + '...' : '❌ NO CONFIGURADO'}
+                        TOKEN: ${TOKEN ? '✅ CONFIGURADO' : '❌ NO CONFIGURADO'}
                     </p>
                 </div>
                 
@@ -343,9 +342,9 @@ app.get('/', (req, res) => {
 app.get('/force-restart', (req, res) => {
     console.log('🔄 Forzando reinicio del bot...');
     isRunning = false;
-    if (botInterval) {
-        clearInterval(botInterval);
-        botInterval = null;
+    if (global.botInterval) {
+        clearInterval(global.botInterval);
+        global.botInterval = null;
     }
     errorMessage = 'Reiniciando...';
     setTimeout(() => {
@@ -357,7 +356,7 @@ app.get('/force-restart', (req, res) => {
 // Endpoint para diagnóstico
 app.get('/diagnostico', async (req, res) => {
     const resultados = {
-        token_configurado: !!(TOKEN && TOKEN !== 'AQUI_TU_TOKEN_DE_ANIAASISTENTEBOT'),
+        token_configurado: !!TOKEN,
         worker_url: WORKER_URL,
         bot_corriendo: isRunning,
         intentos: reconnectAttempts,
@@ -416,9 +415,9 @@ setInterval(() => {
     if (isRunning && (Date.now() - lastResponse > 120000)) {
         console.log('🔄 Bot sin actividad, reiniciando...');
         isRunning = false;
-        if (botInterval) {
-            clearInterval(botInterval);
-            botInterval = null;
+        if (global.botInterval) {
+            clearInterval(global.botInterval);
+            global.botInterval = null;
         }
         startBot();
     }
