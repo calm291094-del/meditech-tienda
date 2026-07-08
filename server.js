@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 const WORKER_URL = process.env.WORKER_URL || "https://telegram-proxy.calm291094.workers.dev";
-const TOKEN = process.env.TELEGRAM_TOKEN || '8932505027:AAFkR4ZVC_hFcuc4YIhEmEIvGaIDr6yB7L0';
+const TOKEN = localStorage.getItem('telegram_token') || '8932505027:AAFkR4ZVC_hFcuc4YIhEmEIvGaIDr6yB7L0';
 
 console.log('🔧 CONFIGURACIÓN:');
 console.log(`   WORKER_URL: ${WORKER_URL}`);
