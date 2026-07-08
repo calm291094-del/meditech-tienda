@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🤖 Ania Bot - MediTech</title>
+    <!-- Tailwind CSS - solo para desarrollo -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0fdfa; }
@@ -21,6 +22,9 @@
         .emoji-big { font-size: 48px; }
         .footer { margin-top: 30px; text-align: center; color: #6b7280; font-size: 14px; }
         .token-input { font-family: monospace; font-size: 14px; }
+        .success { color: #059669; }
+        .error { color: #dc2626; }
+        .warning { color: #f59e0b; }
     </style>
 </head>
 <body>
@@ -41,7 +45,6 @@
                 <p><strong>🕐 Última respuesta:</strong> <span id="last-response">-</span></p>
                 <p><strong>📱 Bot:</strong> @AniaAsistenteBot</p>
                 <p><strong>🔄 Intentos:</strong> <span id="attempts">0</span></p>
-                <p id="error-message" style="color: #dc2626; display: none;"></p>
             </div>
 
             <!-- 🔑 FORMULARIO PARA CAMBIAR TOKEN -->
@@ -54,13 +57,13 @@
                 </p>
                 <div class="flex flex-col sm:flex-row gap-3">
                     <input type="text" id="nuevo-token-input" 
-                           placeholder="8932505027:AAFkR4ZVC_hFcuc4YIhEmEIvGaIDr6yB7L0" 
+                           placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz" 
                            class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none token-input">
                     <button onclick="guardarToken()" 
                             class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-xl font-semibold transition whitespace-nowrap">
                         💾 Guardar Token
                     </button>
-                    <button onclick="probarTokenDirecto()" 
+                    <button onclick="probarToken()" 
                             class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition whitespace-nowrap">
                         🔍 Probar
                     </button>
@@ -105,40 +108,26 @@
         // ============================================
         // CONFIGURACIÓN
         // ============================================
-        // El token se carga desde localStorage
-        let TOKEN = localStorage.getItem('telegram_token') || '';
-        
-        // Si no hay token guardado, usar el que estaba hardcodeado
-        if (!TOKEN) {
-            TOKEN = '8932505027:AAFkR4ZVC_hFcuc4YIhEmEIvGaIDr6yB7L0';
-            localStorage.setItem('telegram_token', TOKEN);
-        }
-
         const WORKER_URL = 'https://telegram-proxy.calm291094.workers.dev';
+        let TOKEN = localStorage.getItem('telegram_token') || '';
         let isRunning = false;
         let attempts = 0;
         let lastResponse = Date.now();
-        let errorMessage = '';
+        let lastUpdateId = 0;
+        let botInterval = null;
 
         // ============================================
-        // FUNCIONES
+        // FUNCIONES DE UI
         // ============================================
 
         function showError(msg) {
-            const container = document.getElementById('error-container');
-            errorMessage = msg;
-            container.innerHTML = `
-                <div class="error-box">
-                    <strong>❌ Error:</strong> ${msg}
-                </div>
+            document.getElementById('error-container').innerHTML = `
+                <div class="error-box"><strong>❌ Error:</strong> ${msg}</div>
             `;
-            document.getElementById('error-message').textContent = msg;
-            document.getElementById('error-message').style.display = 'block';
         }
 
         function hideError() {
             document.getElementById('error-container').innerHTML = '';
-            document.getElementById('error-message').style.display = 'none';
         }
 
         function updateStatus(status, msg) {
@@ -159,76 +148,14 @@
                 '❌ NO CONFIGURADO';
         }
 
-        // ============================================
-        // PROBAR TOKEN DIRECTAMENTE CON TELEGRAM
-        // ============================================
-        async function probarTokenDirecto() {
-            const token = localStorage.getItem('telegram_token') || TOKEN;
-            const mensaje = document.getElementById('token-mensaje');
-            
-            if (!token || token === '') {
-                mensaje.innerHTML = '<span style="color: #dc2626;">❌ No hay token configurado</span>';
-                return;
-            }
-            
-            mensaje.innerHTML = '<span style="color: #f59e0b;">🔄 Probando token directamente con Telegram...</span>';
-            
-            try {
-                const url = `https://api.telegram.org/bot${token}/getMe`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                if (data.ok) {
-                    mensaje.innerHTML = `<span style="color: #059669;">✅ Token válido! Bot: @${data.result.username}</span>`;
-                    // Guardar el token
-                    localStorage.setItem('telegram_token', token);
-                    TOKEN = token;
-                    document.getElementById('token-status').textContent = token.substring(0, 20) + '...';
-                    // Intentar iniciar el bot
-                    setTimeout(iniciarBot, 1000);
-                } else {
-                    mensaje.innerHTML = `<span style="color: #dc2626;">❌ Token inválido: ${data.description}</span>`;
-                }
-            } catch (error) {
-                mensaje.innerHTML = `<span style="color: #dc2626;">❌ Error de conexión: ${error.message}</span>`;
-                console.error('Error probando token:', error);
-            }
+        function mostrarMensaje(texto, tipo) {
+            const el = document.getElementById('token-mensaje');
+            const clase = tipo === 'success' ? 'success' : tipo === 'error' ? 'error' : 'warning';
+            el.innerHTML = `<span class="${clase}">${texto}</span>`;
         }
 
         // ============================================
-        // GUARDAR TOKEN
-        // ============================================
-        function guardarToken() {
-            const input = document.getElementById('nuevo-token-input');
-            const token = input.value.trim();
-            const mensaje = document.getElementById('token-mensaje');
-            
-            if (!token) {
-                mensaje.innerHTML = '<span style="color: #dc2626;">❌ Ingresa un token válido</span>';
-                return;
-            }
-            
-            if (!token.includes(':') && !token.startsWith('8932505027')) {
-                mensaje.innerHTML = '<span style="color: #dc2626;">❌ El token debe tener formato NUMERO:CLAVE</span>';
-                return;
-            }
-            
-            // Guardar en localStorage
-            localStorage.setItem('telegram_token', token);
-            TOKEN = token;
-            
-            mensaje.innerHTML = '<span style="color: #059669;">✅ Token guardado. Probando conexión...</span>';
-            input.value = '';
-            
-            // Actualizar la interfaz
-            document.getElementById('token-status').textContent = token.substring(0, 20) + '...';
-            
-            // Probar el token automáticamente
-            setTimeout(probarTokenDirecto, 500);
-        }
-
-        // ============================================
-        // LLAMAR AL WORKER
+        // LLAMAR AL WORKER DE CLOUDFLARE
         // ============================================
         async function callWorker(method, data = {}) {
             try {
@@ -253,20 +180,76 @@
                 
                 try {
                     const result = JSON.parse(text);
-                    if (result.ok) {
-                        console.log(`✅ [${method}] Éxito`);
-                    } else {
-                        console.error(`❌ [${method}] Error:`, result.error || result.description);
-                    }
                     return result;
                 } catch (e) {
-                    console.error(`❌ [${method}] No es JSON:`, text.substring(0, 100));
+                    console.error(`❌ No es JSON:`, text.substring(0, 100));
                     throw new Error(`Respuesta no JSON: ${text.substring(0, 100)}`);
                 }
             } catch (error) {
                 console.error(`❌ Error en ${method}:`, error.message);
                 throw error;
             }
+        }
+
+        // ============================================
+        // PROBAR TOKEN
+        // ============================================
+        async function probarToken() {
+            const token = localStorage.getItem('telegram_token') || TOKEN;
+            
+            if (!token || token === '') {
+                mostrarMensaje('❌ No hay token configurado', 'error');
+                return;
+            }
+            
+            mostrarMensaje('🔄 Probando token con Telegram...', 'warning');
+            
+            try {
+                const result = await callWorker('getMe');
+                
+                if (result.ok && result.result) {
+                    mostrarMensaje(`✅ Token válido! Bot: @${result.result.username}`, 'success');
+                    TOKEN = token;
+                    localStorage.setItem('telegram_token', token);
+                    document.getElementById('token-status').textContent = token.substring(0, 20) + '...';
+                    setTimeout(iniciarBot, 1000);
+                } else {
+                    mostrarMensaje(`❌ Token inválido: ${result.description || result.error || 'Error desconocido'}`, 'error');
+                }
+            } catch (error) {
+                mostrarMensaje(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // ============================================
+        // GUARDAR TOKEN
+        // ============================================
+        function guardarToken() {
+            const input = document.getElementById('nuevo-token-input');
+            const token = input.value.trim();
+            
+            if (!token) {
+                mostrarMensaje('❌ Ingresa un token válido', 'error');
+                return;
+            }
+            
+            if (!token.includes(':')) {
+                mostrarMensaje('❌ El token debe tener formato NUMERO:CLAVE', 'error');
+                return;
+            }
+            
+            // Guardar en localStorage
+            localStorage.setItem('telegram_token', token);
+            TOKEN = token;
+            
+            mostrarMensaje('✅ Token guardado. Probando conexión...', 'success');
+            input.value = '';
+            
+            // Actualizar la interfaz
+            document.getElementById('token-status').textContent = token.substring(0, 20) + '...';
+            
+            // Probar el token automáticamente
+            setTimeout(probarToken, 500);
         }
 
         // ============================================
@@ -289,46 +272,47 @@
             }
 
             try {
-                // Probar el token directamente
-                const testUrl = `https://api.telegram.org/bot${TOKEN}/getMe`;
-                const testRes = await fetch(testUrl);
-                const testData = await testRes.json();
+                // Probar el token con el Worker
+                const result = await callWorker('getMe');
                 
-                if (!testData.ok) {
-                    throw new Error(testData.description || 'Token inválido');
+                if (!result.ok) {
+                    throw new Error(result.description || result.error || 'Token inválido');
                 }
                 
-                console.log(`✅ Token válido! Bot: @${testData.result.username}`);
+                console.log(`✅ Token válido! Bot: @${result.result.username}`);
                 hideError();
                 isRunning = true;
                 attempts = 0;
                 updateStatus('online');
                 
                 // Iniciar el polling
-                if (window.botInterval) clearInterval(window.botInterval);
-                window.botInterval = setInterval(async () => {
+                if (botInterval) clearInterval(botInterval);
+                botInterval = setInterval(async () => {
                     try {
-                        const result = await callWorker('getUpdates', {
-                            offset: window.lastUpdateId || 0,
+                        const updates = await callWorker('getUpdates', {
+                            offset: lastUpdateId + 1,
                             timeout: 30
                         });
-                        if (result.ok && result.result && result.result.length > 0) {
-                            for (let update of result.result) {
-                                window.lastUpdateId = update.update_id + 1;
+                        
+                        if (updates.ok && updates.result && updates.result.length > 0) {
+                            console.log(`📩 Recibidas ${updates.result.length} actualizaciones`);
+                            for (let update of updates.result) {
+                                lastUpdateId = update.update_id;
                                 if (update.message && update.message.text) {
                                     const chatId = update.message.chat.id;
                                     const text = update.message.text;
                                     console.log(`📩 Mensaje: ${text}`);
                                     
+                                    // Procesar comandos
                                     if (text === '/start') {
                                         await callWorker('sendMessage', {
                                             chat_id: chatId,
-                                            text: '¡Bienvenido a MediTech! ☕️ Soy Ania, tu asistente virtual. ¿En qué puedo ayudarte? ✨'
+                                            text: '¡Bienvenido a MediTech! ☕️ Soy Ania, tu asistente virtual. ¿En qué puedo ayudarte hoy? ✨'
                                         });
                                     } else if (text === '/help') {
                                         await callWorker('sendMessage', {
                                             chat_id: chatId,
-                                            text: '📋 Comandos:\n/start - Saludo\n/help - Ayuda\n/web - Tienda'
+                                            text: '📋 Comandos:\n/start - Saludo\n/help - Ayuda\n/web - Tienda\n\nTambién puedes hacerme preguntas normales.'
                                         });
                                     } else if (text === '/web') {
                                         await callWorker('sendMessage', {
@@ -388,6 +372,7 @@
                 console.error('Error en IA:', e.message);
             }
 
+            // Respuestas locales
             const lower = userMessage.toLowerCase();
             if (lower.includes('hola') || lower.includes('buenas')) {
                 return "¡Hola! ☕️ Soy Ania, tu asistente de MediTech. ¿En qué puedo ayudarte hoy? ✨";
@@ -398,6 +383,15 @@
             if (lower.includes('gracias')) {
                 return "¡De nada! ☕️ ¿Necesitas algo más? ✨";
             }
+            if (lower.includes('café') || lower.includes('cafe')) {
+                return "☕ ¡El café es mi debilidad! Mi favorito es un Ethiopiano Yirgacheffe. ¿Te gusta el café?";
+            }
+            if (lower.includes('anime') || lower.includes('isekai')) {
+                return "🎌 ¡Waku waku! Me encanta el anime. Mi favorito es Tensei Slime. ¿Has visto alguna serie buena?";
+            }
+            if (lower.includes('adiós') || lower.includes('chao')) {
+                return "¡Hasta luego! ☕️ Recuerda: 'Sonríe, mañana será bonito'. ¡Cuídate! ✨";
+            }
             return "¡Interesante! ☕️ ¿Qué más necesitas saber de MediTech?";
         }
 
@@ -407,9 +401,9 @@
         function forzarReinicio() {
             console.log('🔄 Forzando reinicio...');
             isRunning = false;
-            if (window.botInterval) {
-                clearInterval(window.botInterval);
-                window.botInterval = null;
+            if (botInterval) {
+                clearInterval(botInterval);
+                botInterval = null;
             }
             hideError();
             attempts = 0;
@@ -449,7 +443,7 @@
         // ============================================
         window.forzarReinicio = forzarReinicio;
         window.guardarToken = guardarToken;
-        window.probarTokenDirecto = probarTokenDirecto;
+        window.probarToken = probarToken;
     </script>
 </body>
 </html>
