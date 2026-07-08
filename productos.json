@@ -156,12 +156,12 @@
     },
     {
       "id": "p1783517242169",
-      "name": "Alodipino 10 mg",
+      "name": "Amlodipino 10 mg",
       "category": "medicamento",
       "price": 250,
       "desc": "Ayuda a controlar la presión arterial alta, la angina de pecho y la enfermedad coronaria, pero no cura estas afecciones. Siga tomando la amlodipina incluso si se siente bien.",
       "stock": 10,
-      "image": "https://via.placeholder.com/300x200",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRy4qtFWB_qBWaIBeuAM0FKqiJs9rAuE0a0UQdI-i8_og&s=10",
       "feat": false,
       "available": true
     },
