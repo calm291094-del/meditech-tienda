@@ -115,6 +115,25 @@
                 </button>
             </div>
 
+<div style="margin-top: 20px; padding: 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e5e7eb;">
+    <h4 class="font-bold mb-3">🔑 Cambiar Token de Telegram</h4>
+    <div class="flex flex-col sm:flex-row gap-3">
+        <input type="text" id="nuevo-token-input" 
+               placeholder="Pega el token de @BotFather" 
+               class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none"
+               style="font-size: 14px; font-family: monospace;">
+        <button onclick="guardarToken()" 
+                class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-xl font-semibold transition">
+            💾 Guardar Token
+        </button>
+        <button onclick="probarToken()" 
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition">
+            🔍 Probar
+        </button>
+    </div>
+    <div id="token-mensaje" style="margin-top: 10px; font-size: 14px;"></div>
+</div>
+
             <div class="footer">
                 <p>🔒 Sistema 24/7 activo en servidor</p>
             </div>
@@ -455,5 +474,80 @@
         window.forzarReinicio = forzarReinicio;
         window.verDiagnostico = verDiagnostico;
     </script>
+
+<script>
+// ============================================
+// FUNCIONES PARA GESTIONAR EL TOKEN
+// ============================================
+
+function guardarToken() {
+    const input = document.getElementById('nuevo-token-input');
+    const token = input.value.trim();
+    const mensaje = document.getElementById('token-mensaje');
+    
+    if (!token) {
+        mensaje.innerHTML = '<span style="color: #dc2626;">❌ Ingresa un token válido</span>';
+        return;
+    }
+    
+    if (!token.startsWith('8932505027') && !token.includes(':')) {
+        mensaje.innerHTML = '<span style="color: #dc2626;">❌ El token debe tener formato NUMERO:CLAVE</span>';
+        return;
+    }
+    
+    // Guardar en localStorage
+    localStorage.setItem('telegram_token', token);
+    
+    // Actualizar la variable global
+    if (typeof TOKEN !== 'undefined') {
+        window.TOKEN = token;
+    }
+    
+    mensaje.innerHTML = '<span style="color: #059669;">✅ Token guardado. Reinicia el bot para aplicar cambios.</span>';
+    input.value = '';
+    
+    // Actualizar la interfaz
+    document.getElementById('token-status').textContent = token.substring(0, 20) + '...';
+}
+
+function probarToken() {
+    const token = localStorage.getItem('telegram_token') || TOKEN;
+    const mensaje = document.getElementById('token-mensaje');
+    
+    if (!token || token === 'AQUI_EL_TOKEN_DE_ANIAASISTENTEBOT') {
+        mensaje.innerHTML = '<span style="color: #dc2626;">❌ No hay token configurado</span>';
+        return;
+    }
+    
+    mensaje.innerHTML = '<span style="color: #f59e0b;">🔄 Probando token...</span>';
+    
+    // Probar el token con Telegram
+    fetch(`https://api.telegram.org/bot${token}/getMe`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.ok) {
+                mensaje.innerHTML = `<span style="color: #059669;">✅ Token válido! Bot: @${data.result.username}</span>`;
+            } else {
+                mensaje.innerHTML = `<span style="color: #dc2626;">❌ Token inválido: ${data.description}</span>`;
+            }
+        })
+        .catch(err => {
+            mensaje.innerHTML = `<span style="color: #dc2626;">❌ Error de conexión: ${err.message}</span>`;
+        });
+}
+
+// Cargar token guardado al iniciar
+document.addEventListener('DOMContentLoaded', function() {
+    const tokenGuardado = localStorage.getItem('telegram_token');
+    if (tokenGuardado) {
+        // Actualizar la variable global
+        if (typeof TOKEN !== 'undefined') {
+            window.TOKEN = tokenGuardado;
+        }
+        document.getElementById('token-status').textContent = tokenGuardado.substring(0, 20) + '...';
+    }
+});
+</script>
+
 </body>
 </html>
