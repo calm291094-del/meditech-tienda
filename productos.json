@@ -32,6 +32,17 @@
       "image": "https://cyberdigitaltecnologia.com/wp-content/uploads/2024/06/1711574493_PRO2020404.jpg",
       "feat": true,
       "available": true
+    },
+    {
+      "id": "p1783470702313",
+      "name": "Furosemida ",
+      "category": "medicamento",
+      "price": 230,
+      "desc": "F",
+      "stock": 20,
+      "image": "https://via.placeholder.com/300x200",
+      "feat": false,
+      "available": true
     }
   ]
 }
