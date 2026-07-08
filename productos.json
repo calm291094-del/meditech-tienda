@@ -131,6 +131,17 @@
       "image": "https://via.placeholder.com/300x200",
       "feat": false,
       "available": true
+    },
+    {
+      "id": "p1783472753975",
+      "name": "Domazol",
+      "category": "medicamento",
+      "price": 300,
+      "desc": "D",
+      "stock": 10,
+      "image": "https://via.placeholder.com/300x200",
+      "feat": false,
+      "available": true
     }
   ]
 }
