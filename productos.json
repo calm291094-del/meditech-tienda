@@ -164,6 +164,17 @@
       "image": "https://via.placeholder.com/300x200",
       "feat": false,
       "available": true
+    },
+    {
+      "id": "p1783517242169",
+      "name": "Alodipino 10 mg",
+      "category": "medicamento",
+      "price": 250,
+      "desc": "a",
+      "stock": 10,
+      "image": "https://via.placeholder.com/300x200",
+      "feat": false,
+      "available": true
     }
   ]
 }
