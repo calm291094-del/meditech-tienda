@@ -34,17 +34,6 @@
       "available": true
     },
     {
-      "id": "p1783470965713",
-      "name": "Alprazolam",
-      "category": "medicamento",
-      "price": 550,
-      "desc": "A",
-      "stock": 10,
-      "image": "https://via.placeholder.com/300x200",
-      "feat": true,
-      "available": true
-    },
-    {
       "id": "p1783470974299",
       "name": "Alprazolam",
       "category": "medicamento",
