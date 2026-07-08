@@ -1,39 +1,43 @@
-// server.js - Versión corregida para @AniaAsistenteBot
-
+// server.js - Versión con logs detallados
 const express = require('express');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================================================
-// CONFIGURACIÓN - ¡TOKEN CORRECTO!
+// CONFIGURACIÓN
 // ============================================================
 
 app.use(cors());
 app.use(express.json());
 
-// ⚠️ IMPORTANTE: Usa el token de @AniaAsistenteBot
-// Obtenlo de @BotFather en Telegram
 const WORKER_URL = process.env.WORKER_URL || "https://telegram-proxy.calm291094.workers.dev";
 const TOKEN = process.env.TELEGRAM_TOKEN || '8932505027:AAFkR4ZVC_hFcuc4YIhEmEIvGaIDr6yB7L0';
 
-console.log('🔧 Configuración:');
-console.log(`   Bot: @AniaAsistenteBot`);
+console.log('🔧 CONFIGURACIÓN:');
 console.log(`   WORKER_URL: ${WORKER_URL}`);
-console.log(`   TOKEN: ${TOKEN.substring(0, 15)}...`);
+console.log(`   TOKEN: ${TOKEN ? TOKEN.substring(0, 20) + '...' : '❌ NO CONFIGURADO'}`);
 
 let botInterval = null;
 let isRunning = false;
 let lastUpdateId = 0;
 let lastResponse = Date.now();
 let reconnectAttempts = 0;
+let errorMessage = '';
 
 // ============================================================
 // FUNCIÓN PARA LLAMAR AL WORKER
 // ============================================================
 async function callWorker(method, data = {}) {
+    console.log(`📡 [${method}] Llamando Worker...`);
+    
+    if (!TOKEN || TOKEN === 'AQUI_TU_TOKEN_DE_ANIAASISTENTEBOT') {
+        console.error('❌ TOKEN NO CONFIGURADO');
+        errorMessage = 'Token no configurado';
+        return { ok: false, error: 'Token no configurado' };
+    }
+
     try {
-        console.log(`📡 Llamando Worker: ${method}`);
         const response = await fetch(WORKER_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -43,19 +47,27 @@ async function callWorker(method, data = {}) {
                 data: data
             })
         });
-        
+
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
             const result = await response.json();
-            console.log(`✅ Worker respondió: ${method} -> ok: ${result.ok}`);
+            console.log(`✅ [${method}] Respuesta: ok=${result.ok}`);
+            if (!result.ok) {
+                console.error(`❌ [${method}] Error:`, result.description || result.error);
+                errorMessage = result.description || result.error || 'Error desconocido';
+            } else {
+                errorMessage = '';
+            }
             return result;
         } else {
             const text = await response.text();
-            console.warn('⚠️ Respuesta no JSON:', text.substring(0, 100));
-            return { ok: false, error: `Respuesta no JSON: ${text.substring(0, 100)}` };
+            console.warn(`⚠️ [${method}] Respuesta no JSON:`, text.substring(0, 100));
+            errorMessage = 'Respuesta no JSON';
+            return { ok: false, error: 'Respuesta no JSON' };
         }
     } catch (error) {
-        console.error('❌ Error en Worker:', error.message);
+        console.error(`❌ [${method}] Excepción:`, error.message);
+        errorMessage = error.message;
         return { ok: false, error: error.message };
     }
 }
@@ -146,23 +158,20 @@ async function getUpdates() {
                     
                     console.log(`📩 ${userName}: ${messageText}`);
                     
-                    // Comandos
                     if (messageText === '/start') {
                         await sendTelegramMessage(chatId, 
                             `¡Bienvenido a MediTech! ☕️\n\n` +
-                            `Soy Ania, tu asistente virtual. Puedo ayudarte con información sobre nuestros productos de salud y tecnología.\n\n` +
-                            `🌐 Visita nuestra web: https://calm291094-del.github.io/meditech-tienda/\n\n` +
-                            `¿En qué puedo ayudarte hoy? ✨`
+                            `Soy Ania, tu asistente virtual. ¿En qué puedo ayudarte hoy? ✨`
                         );
                         continue;
                     }
                     
                     if (messageText === '/help') {
                         await sendTelegramMessage(chatId,
-                            `📋 Comandos disponibles:\n` +
-                            `/start - Saludo de bienvenida\n` +
-                            `/help - Esta ayuda\n` +
-                            `/web - Enlace a la tienda\n\n` +
+                            `📋 Comandos:\n` +
+                            `/start - Saludo\n` +
+                            `/help - Ayuda\n` +
+                            `/web - Tienda\n\n` +
                             `También puedes hacerme preguntas normales.`
                         );
                         continue;
@@ -170,14 +179,11 @@ async function getUpdates() {
                     
                     if (messageText === '/web') {
                         await sendTelegramMessage(chatId,
-                            `🌐 Visita nuestra tienda:\n` +
-                            `https://calm291094-del.github.io/meditech-tienda/\n\n` +
-                            `Encuentra los mejores productos de salud y tecnología.`
+                            `🌐 https://calm291094-del.github.io/meditech-tienda/`
                         );
                         continue;
                     }
                     
-                    // Respuesta normal
                     if (!messageText.startsWith('/')) {
                         const response = await getAniaResponse(messageText);
                         await sendTelegramMessage(chatId, response);
@@ -203,6 +209,16 @@ async function startBot() {
     }
 
     console.log('🚀 Iniciando @AniaAsistenteBot...');
+    console.log(`📡 Worker: ${WORKER_URL}`);
+    console.log(`🔑 Token: ${TOKEN ? TOKEN.substring(0, 15) + '...' : '❌'}`);
+
+    // Verificar que el token existe
+    if (!TOKEN || TOKEN === 'AQUI_TU_TOKEN_DE_ANIAASISTENTEBOT') {
+        console.error('❌ TOKEN DE TELEGRAM NO CONFIGURADO');
+        console.error('   Ve a Render → Environment → Añade TELEGRAM_TOKEN');
+        setTimeout(startBot, 30000);
+        return;
+    }
 
     // Probar el token
     console.log('🔑 Probando token...');
@@ -211,6 +227,7 @@ async function startBot() {
     if (result.ok && result.result) {
         isRunning = true;
         reconnectAttempts = 0;
+        errorMessage = '';
         console.log(`✅ Bot @${result.result.username} iniciado`);
         console.log(`📱 ID: ${result.result.id}`);
         console.log('📱 Escribe en Telegram para probarlo');
@@ -220,7 +237,9 @@ async function startBot() {
             await getUpdates();
         }, 2000);
     } else {
-        console.error('❌ Error al iniciar:', result.error || 'Token inválido');
+        console.error('❌ Error al iniciar:');
+        console.error('   ', result.error || result.description || 'Token inválido');
+        errorMessage = result.error || result.description || 'Token inválido';
         reconnectAttempts++;
         const delay = Math.min(30000, reconnectAttempts * 5000);
         console.log(`⏳ Reintentando en ${delay/1000} segundos...`);
@@ -255,6 +274,8 @@ app.get('/', (req, res) => {
                 .btn:hover { background: #0f766e; }
                 .btn-warning { background: #f59e0b; }
                 .btn-warning:hover { background: #d97706; }
+                .error-box { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 12px; padding: 15px; margin: 10px 0; color: #dc2626; }
+                .config-box { background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 15px; margin: 10px 0; }
             </style>
         </head>
         <body>
@@ -265,6 +286,12 @@ app.get('/', (req, res) => {
                     <p style="color: #6b7280;">Asistente virtual con inteligencia artificial</p>
                 </div>
                 
+                ${errorMessage ? `
+                <div class="error-box">
+                    <strong>❌ Error:</strong> ${errorMessage}
+                </div>
+                ` : ''}
+                
                 <div class="bot-info">
                     <p><strong>📊 Estado:</strong> 
                         <span class="status ${isRunning ? 'online' : 'connecting'}">
@@ -274,6 +301,14 @@ app.get('/', (req, res) => {
                     <p><strong>🕐 Última respuesta:</strong> ${new Date(lastResponse).toLocaleString('es-ES')}</p>
                     <p><strong>📱 Bot:</strong> @AniaAsistenteBot</p>
                     <p><strong>🔄 Intentos:</strong> ${reconnectAttempts}</p>
+                </div>
+                
+                <div class="config-box">
+                    <p><strong>🔧 Configuración:</strong></p>
+                    <p style="font-size: 12px; font-family: monospace; word-break: break-all;">
+                        WORKER_URL: ${WORKER_URL}<br>
+                        TOKEN: ${TOKEN ? TOKEN.substring(0, 20) + '...' : '❌ NO CONFIGURADO'}
+                    </p>
                 </div>
                 
                 <div style="margin: 20px 0;">
@@ -312,8 +347,46 @@ app.get('/force-restart', (req, res) => {
         clearInterval(botInterval);
         botInterval = null;
     }
-    setTimeout(startBot, 1000);
+    errorMessage = 'Reiniciando...';
+    setTimeout(() => {
+        startBot();
+    }, 1000);
     res.redirect('/');
+});
+
+// Endpoint para diagnóstico
+app.get('/diagnostico', async (req, res) => {
+    const resultados = {
+        token_configurado: !!(TOKEN && TOKEN !== 'AQUI_TU_TOKEN_DE_ANIAASISTENTEBOT'),
+        worker_url: WORKER_URL,
+        bot_corriendo: isRunning,
+        intentos: reconnectAttempts,
+        ultimo_error: errorMessage,
+        ultima_respuesta: new Date(lastResponse).toISOString()
+    };
+    
+    // Probar conexión al Worker
+    try {
+        const test = await fetch(WORKER_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                token: TOKEN,
+                method: 'getMe',
+                data: {}
+            })
+        });
+        resultados.worker_responde = test.ok;
+        resultados.worker_status = test.status;
+        if (test.ok) {
+            const data = await test.json();
+            resultados.bot_info = data.result;
+        }
+    } catch (e) {
+        resultados.worker_error = e.message;
+    }
+    
+    res.json(resultados);
 });
 
 // ============================================================
@@ -324,6 +397,7 @@ app.listen(PORT, () => {
     console.log(`✅ Servidor web en puerto ${PORT}`);
     console.log(`🌐 URL: https://meditech-bot.onrender.com`);
     console.log(`📱 Bot: @AniaAsistenteBot`);
+    console.log(`🔍 Diagnóstico: /diagnostico`);
     setTimeout(startBot, 1000);
 });
 
