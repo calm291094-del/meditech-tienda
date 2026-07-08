@@ -38,9 +38,9 @@
       "name": "Alprazolam",
       "category": "medicamento",
       "price": 550,
-      "desc": "A",
+      "desc": "Se utiliza para tratar los trastornos de ansiedad y el trastorno de pánico (ataques repentinos e inesperados de miedo extremo y preocupación por estos ataques). El alprazolam pertenece a una clase de medicamentos llamados benzodiacepinas. Su acción consiste en reducir la excitación anormal en el cerebro.",
       "stock": 10,
-      "image": "https://via.placeholder.com/300x200",
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKtuJJ31X4bzPmwj3Ji7mRkCybXFBv0DR61CtGQQDzSA&s=10",
       "feat": false,
       "available": true
     },
