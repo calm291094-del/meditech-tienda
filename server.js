@@ -545,6 +545,23 @@ app.get('/api/config', (req, res) => {
 });
 
 // ============================================================
+// 🔑 TOKEN DE GITHUB - RUTA PÚBLICA (para el frontend)
+// ============================================================
+
+// Obtener token de GitHub (público - solo lectura)
+// ⚠️ Esta ruta NO requiere autenticación para que el frontend pueda cargar el token
+app.get('/api/config/github-token-public', async (req, res) => {
+    try {
+        const result = await getOne('SELECT value FROM config WHERE key = $1', ['github_token']);
+        // Solo devolvemos el token si existe, sin información sensible adicional
+        res.json({ token: result ? result.value : '' });
+    } catch (error) {
+        console.error('Error al obtener token público:', error);
+        res.status(500).json({ error: 'Error al obtener token' });
+    }
+});
+
+// ============================================================
 // 🔑 CONFIGURACIÓN - TOKEN DE GITHUB (DESDE DB)
 // ============================================================
 
