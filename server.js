@@ -772,3 +772,56 @@ setInterval(() => {
 }, 30000);
 
 console.log('🔥 Sistema 24/7 activo para @AniaAsistenteBot');
+
+
+
+
+
+// ============================================================
+// 🔧 RUTA DE MIGRACIÓN (SOLO PARA USO ÚNICO)
+// ============================================================
+const { initTables } = require('./db');
+const fs = require('fs');
+const path = require('path');
+const bcrypt = require('bcryptjs');
+
+app.get('/run-migration', async (req, res) => {
+    // ⚠️ CLAVE SECRETA: Cambia 'tu_clave_secreta_aqui' por una clave que solo tú sepas
+    const SECRET_KEY = 'tu_clave_secreta_aqui';
+    const providedKey = req.query.key;
+
+    if (providedKey !== SECRET_KEY) {
+        return res.status(401).send('🔒 Acceso denegado. Clave incorrecta.');
+    }
+
+    try {
+        res.send('🚀 Iniciando migración... (revisa los logs)');
+        console.log('🚀 Ejecutando migración desde endpoint...');
+
+        // Inicializar tablas
+        await initTables();
+
+        const DATA_DIR = path.join(__dirname, 'data');
+        let totalMigrados = 0;
+
+        // 1. Migrar usuarios
+        const usuariosPath = path.join(DATA_DIR, 'usuarios.json');
+        if (fs.existsSync(usuariosPath)) {
+            const usuarios = JSON.parse(fs.readFileSync(usuariosPath, 'utf8'));
+            console.log(`📥 Insertando ${usuarios.length} usuarios...`);
+            for (const u of usuarios) {
+                // ... (código de migración de usuarios que te di en migrate.js)
+                // Cópialo aquí desde el archivo migrate.js
+            }
+            console.log('✅ Usuarios migrados.');
+        }
+
+        // 2. Migrar productos (copia el código de migrate.js)
+        // 3. Migrar pedidos (copia el código de migrate.js)
+
+        console.log('🎉 Migración completada desde endpoint.');
+    } catch (error) {
+        console.error('❌ Error en migración:', error);
+        res.status(500).send('❌ Error en la migración: ' + error.message);
+    }
+});
