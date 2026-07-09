@@ -1,109 +1,132 @@
 /* ============================================
-   RESPONSIVE.CSS - ESTILOS RESPONSIVOS
+   RESPONSIVE.CSS - COMPLETO
    ============================================ */
 
 /* ---------- MÓVILES PEQUEÑOS (hasta 400px) ---------- */
 @media (max-width: 400px) {
     .carousel-item img { height: 180px !important; }
-    .carousel-caption { bottom: 12px !important; left: 12px !important; right: 12px !important; padding: 12px 16px !important; }
-    .carousel-caption h3 { font-size: 0.9rem !important; }
-    .carousel-caption p { font-size: 0.65rem !important; }
-    .carousel-btn { width: 32px !important; height: 32px !important; font-size: 12px !important; }
-    .carousel-btn.prev { left: 8px !important; }
-    .carousel-btn.next { right: 8px !important; }
-    .carousel-dot { width: 8px !important; height: 8px !important; min-width: 8px !important; min-height: 8px !important; }
-    .carousel-dot.active { width: 18px !important; }
+    .carousel-caption { bottom: 12px !important; left: 12px !important; right: 12px !important; padding: 10px 14px !important; }
+    .carousel-caption h3 { font-size: 0.85rem !important; }
+    .carousel-caption p { font-size: 0.6rem !important; }
+    .carousel-btn { width: 28px !important; height: 28px !important; font-size: 10px !important; }
+    .carousel-btn.prev { left: 6px !important; }
+    .carousel-btn.next { right: 6px !important; }
+    .carousel-dot { width: 6px !important; height: 6px !important; min-width: 6px !important; min-height: 6px !important; }
+    .carousel-dot.active { width: 14px !important; }
     
-    .product-grid { gap: 10px !important; }
-    .product-card .image { height: 140px !important; }
-    .product-card .body { padding: 8px 10px !important; }
-    .product-card .body .name { font-size: 0.8rem !important; }
-    .product-card .body .desc { font-size: 0.7rem !important; min-height: 24px !important; }
-    .product-card .body .footer .price { font-size: 1rem !important; }
-    .product-card .body .footer .add-btn { width: 32px !important; height: 32px !important; font-size: 0.8rem !important; }
+    .product-grid { gap: 8px !important; grid-template-columns: repeat(2, 1fr) !important; }
+    .product-card .image-wrap { height: 120px !important; }
+    .product-card .body { padding: 6px 8px 8px !important; }
+    .product-card .body .name { font-size: 0.7rem !important; }
+    .product-card .body .desc { display: none !important; }
+    .product-card .body .footer .price { font-size: 0.85rem !important; }
+    .product-card .body .footer .add-btn { width: 28px !important; height: 28px !important; font-size: 0.7rem !important; }
+    .product-card .body .footer .stock-info { font-size: 0.5rem !important; }
     
-    .badge-new, .badge-soldout { font-size: 0.5rem !important; padding: 2px 8px !important; }
+    .badge-new, .badge-soldout { font-size: 0.45rem !important; padding: 1px 6px !important; top: 6px !important; }
+    .product-card .badge-category { font-size: 0.5rem !important; padding: 2px 8px !important; bottom: 6px !important; right: 6px !important; }
     
-    .header-logo h1 { font-size: 1.1rem !important; }
-    .header-logo-icon { width: 36px !important; height: 36px !important; font-size: 1rem !important; }
+    .header-logo h1 { font-size: 1rem !important; }
+    .header-logo-icon { width: 32px !important; height: 32px !important; font-size: 0.9rem !important; }
     
-    .section-title { font-size: 1.3rem !important; }
-    .category-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
-    .category-card { padding: 16px !important; min-height: 100px !important; }
-    .category-card .icon { width: 40px !important; height: 40px !important; font-size: 1.2rem !important; }
-    .category-card .name { font-size: 0.8rem !important; }
+    .section-title { font-size: 1.2rem !important; }
+    .category-grid { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+    .category-card { padding: 12px !important; min-height: 80px !important; }
+    .category-card .icon { width: 32px !important; height: 32px !important; font-size: 1rem !important; margin-bottom: 6px !important; }
+    .category-card .name { font-size: 0.7rem !important; }
+    .category-card .count { font-size: 0.6rem !important; }
     
-    .offer-grid { grid-template-columns: 1fr !important; }
+    .offer-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+    .offer-card { padding: 16px !important; }
+    .offer-card .title { font-size: 1.8rem !important; }
     
-    .admin-panel { margin: 8px !important; border-radius: 16px !important; }
-    .admin-header { padding: 12px !important; }
-    .admin-header h2 { font-size: 1rem !important; }
-    .admin-header .close-btn { font-size: 0.7rem !important; padding: 4px 12px !important; min-height: 32px !important; }
-    .admin-dashboard { grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; padding: 10px !important; }
-    .metric-card { padding: 8px 12px !important; }
-    .metric-card .value { font-size: 1rem !important; }
-    .admin-tab { font-size: 0.55rem !important; padding: 4px 8px !important; min-height: 28px !important; }
-    .admin-tab i { font-size: 0.6rem !important; margin-right: 2px !important; }
-    .admin-content { padding: 8px 10px !important; }
-    .admin-form .form-row { grid-template-columns: 1fr !important; }
-    .admin-form input, .admin-form select, .admin-form textarea { font-size: 14px !important; padding: 8px 10px !important; min-height: 36px !important; }
-    .admin-list-item { flex-direction: column !important; gap: 6px !important; padding: 10px !important; }
-    .admin-list-item img { width: 48px !important; height: 48px !important; }
-    .admin-list-item .info { width: 100% !important; }
-    .admin-list-item .actions { width: 100% !important; justify-content: flex-end !important; }
-    .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
-    .stat-card { padding: 10px 12px !important; }
-    .stat-card .stat-value { font-size: 1.2rem !important; }
+    .admin-panel { margin: 4px !important; border-radius: 12px !important; }
+    .admin-header { padding: 10px !important; }
+    .admin-header h2 { font-size: 0.85rem !important; }
+    .admin-header .close-btn { font-size: 0.6rem !important; padding: 4px 10px !important; min-height: 28px !important; }
+    .admin-dashboard { grid-template-columns: 1fr 1fr !important; gap: 4px !important; padding: 6px 8px !important; }
+    .metric-card { padding: 6px 8px !important; }
+    .metric-card .value { font-size: 0.85rem !important; }
+    .metric-card .label { font-size: 0.5rem !important; }
+    .admin-tab { font-size: 0.45rem !important; padding: 2px 6px !important; min-height: 22px !important; }
+    .admin-tab i { font-size: 0.5rem !important; margin-right: 2px !important; }
+    .admin-content { padding: 6px 8px !important; }
+    .admin-card { padding: 8px 10px !important; }
+    .admin-card .header h3 { font-size: 0.75rem !important; }
+    .admin-form .form-row { grid-template-columns: 1fr !important; gap: 6px !important; }
+    .admin-form input, .admin-form select, .admin-form textarea { font-size: 13px !important; padding: 6px 10px !important; min-height: 32px !important; border-radius: 8px !important; }
+    .admin-form label { font-size: 0.6rem !important; }
+    .admin-list-item { padding: 6px 8px !important; gap: 6px !important; }
+    .admin-list-item img { width: 36px !important; height: 36px !important; }
+    .admin-list-item .info .name { font-size: 0.75rem !important; }
+    .admin-list-item .info .meta { font-size: 0.6rem !important; }
+    .admin-list-item .actions button { min-height: 24px !important; min-width: 24px !important; padding: 2px 6px !important; font-size: 0.6rem !important; }
+    .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 4px !important; }
+    .stat-card { padding: 6px 8px !important; border-radius: 10px !important; }
+    .stat-card .stat-value { font-size: 0.9rem !important; }
+    .stat-card .stat-label { font-size: 0.6rem !important; }
     
-    .modal { margin: 8px !important; border-radius: 16px !important; }
-    .modal-body { padding: 12px !important; }
-    .modal-body input, .modal-body select, .modal-body textarea { font-size: 14px !important; padding: 8px 10px !important; min-height: 36px !important; }
+    .modal { margin: 4px !important; border-radius: 12px !important; }
+    .modal-header { padding: 10px 14px !important; }
+    .modal-header h2 { font-size: 0.9rem !important; }
+    .modal-body { padding: 10px !important; }
+    .modal-body input, .modal-body select, .modal-body textarea { font-size: 13px !important; padding: 6px 10px !important; min-height: 32px !important; }
     
-    .chatbot-window { width: 96vw !important; max-width: 340px !important; right: 2vw !important; bottom: 64px !important; }
-    .chatbot-messages { height: 40vh !important; max-height: 280px !important; }
-    .chatbot-input input { font-size: 14px !important; padding: 8px 12px !important; min-height: 40px !important; }
-    .chatbot-input button { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; font-size: 1rem !important; }
+    .chatbot-window { width: 96vw !important; max-width: 300px !important; right: 2vw !important; bottom: 56px !important; }
+    .chatbot-messages { height: 35vh !important; max-height: 220px !important; padding: 10px !important; }
+    .chatbot-input input { font-size: 13px !important; padding: 6px 10px !important; min-height: 36px !important; }
+    .chatbot-input button { width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important; font-size: 0.8rem !important; }
+    .chatbot-header h3 { font-size: 0.8rem !important; }
+    .chatbot-messages .message { font-size: 0.75rem !important; padding: 6px 10px !important; }
     
-    .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
+    .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+    .footer { padding: 24px 0 16px !important; }
 }
 
 /* ---------- MÓVILES (401px - 640px) ---------- */
 @media (min-width: 401px) and (max-width: 640px) {
-    .carousel-item img { height: 220px !important; }
-    .carousel-caption { bottom: 16px !important; left: 16px !important; right: 16px !important; padding: 14px 18px !important; }
-    .carousel-caption h3 { font-size: 1.1rem !important; }
-    .carousel-caption p { font-size: 0.75rem !important; }
-    .carousel-btn { width: 36px !important; height: 36px !important; font-size: 14px !important; }
+    .carousel-item img { height: 200px !important; }
+    .carousel-caption { bottom: 14px !important; left: 14px !important; right: 14px !important; padding: 12px 16px !important; }
+    .carousel-caption h3 { font-size: 1rem !important; }
+    .carousel-caption p { font-size: 0.7rem !important; }
+    .carousel-btn { width: 32px !important; height: 32px !important; font-size: 12px !important; }
     
-    .product-grid { gap: 14px !important; grid-template-columns: repeat(2, 1fr) !important; }
-    .product-card .image { height: 160px !important; }
-    .product-card .body { padding: 10px 12px !important; }
-    .product-card .body .name { font-size: 0.9rem !important; }
+    .product-grid { gap: 12px !important; grid-template-columns: repeat(2, 1fr) !important; }
+    .product-card .image-wrap { height: 150px !important; }
+    .product-card .body { padding: 10px 12px 12px !important; }
+    .product-card .body .name { font-size: 0.85rem !important; }
+    .product-card .body .desc { font-size: 0.7rem !important; min-height: 20px !important; -webkit-line-clamp: 1 !important; }
+    .product-card .body .footer .price { font-size: 1rem !important; }
+    .product-card .body .footer .add-btn { width: 34px !important; height: 34px !important; font-size: 0.9rem !important; }
     
-    .category-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+    .category-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+    .category-card { padding: 20px !important; min-height: 120px !important; }
+    .category-card .icon { width: 48px !important; height: 48px !important; font-size: 1.4rem !important; }
+    .category-card .name { font-size: 0.9rem !important; }
     
-    .admin-dashboard { grid-template-columns: repeat(2, 1fr) !important; }
+    .admin-dashboard { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
     .admin-form .form-row { grid-template-columns: 1fr !important; }
-    .admin-content { padding: 12px !important; }
+    .admin-content { padding: 10px 14px !important; }
     .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
     
-    .footer-grid { grid-template-columns: 1fr 1fr !important; }
+    .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
     
-    .chatbot-container { bottom: 12px !important; right: 12px !important; }
-    .chatbot-toggle { width: 52px !important; height: 52px !important; font-size: 1.3rem !important; }
-    .chatbot-window { width: 92vw !important; max-width: 380px !important; right: 4vw !important; bottom: 72px !important; max-height: 75vh !important; }
-    .chatbot-messages { height: 50vh !important; max-height: 350px !important; }
-    .chatbot-input input { font-size: 15px !important; padding: 10px 14px !important; min-height: 44px !important; }
-    .chatbot-input button { width: 48px !important; height: 48px !important; min-width: 48px !important; min-height: 48px !important; font-size: 1.1rem !important; }
+    .chatbot-container { bottom: 10px !important; right: 10px !important; }
+    .chatbot-toggle { width: 48px !important; height: 48px !important; font-size: 1.2rem !important; }
+    .chatbot-window { width: 90vw !important; max-width: 360px !important; right: 5vw !important; bottom: 64px !important; max-height: 70vh !important; }
+    .chatbot-messages { height: 45vh !important; max-height: 300px !important; }
+    .chatbot-input input { font-size: 14px !important; padding: 8px 12px !important; min-height: 40px !important; }
+    .chatbot-input button { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; font-size: 1rem !important; }
 }
 
 /* ---------- TABLETS (641px - 768px) ---------- */
 @media (min-width: 641px) and (max-width: 768px) {
-    .carousel-item img { height: 300px !important; }
-    .product-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .carousel-item img { height: 280px !important; }
+    .product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 18px !important; }
     .category-grid { grid-template-columns: repeat(2, 1fr) !important; }
     .admin-dashboard { grid-template-columns: repeat(2, 1fr) !important; }
     .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .admin-form .form-row { grid-template-columns: 1fr !important; }
 }
 
 /* ---------- TABLET/PC (769px - 1024px) ---------- */
@@ -134,12 +157,21 @@
 
 /* ---------- TOAST RESPONSIVE ---------- */
 @media (max-width: 640px) {
-    .toast { font-size: 0.8rem !important; padding: 10px 16px !important; max-width: 95% !important; top: 70px !important; }
+    .toast { font-size: 0.75rem !important; padding: 8px 14px !important; max-width: 95% !important; top: 64px !important; }
 }
 
 /* ---------- QUICK VIEW RESPONSIVE ---------- */
 @media (max-width: 640px) {
-    .quick-view-overlay .modal { max-width: 100% !important; margin: 8px !important; }
-    .quick-view-overlay .modal .grid { grid-template-columns: 1fr !important; }
-    .quick-view-overlay .modal img { height: 200px !important; }
+    .quick-view-overlay .modal { max-width: 98% !important; margin: 4px !important; border-radius: 12px !important; }
+    .quick-view-overlay .modal .grid { grid-template-columns: 1fr !important; gap: 12px !important; padding: 12px !important; }
+    .quick-view-overlay .modal img { height: 180px !important; border-radius: 10px !important; }
+    .quick-view-overlay .modal .text-4xl { font-size: 1.5rem !important; }
+    .quick-view-overlay .modal .text-3xl { font-size: 1.2rem !important; }
+}
+
+/* ---------- IMPRESIÓN ---------- */
+@media print {
+    .header, .footer, .chatbot-container, .carousel-btn { display: none !important; }
+    .product-card { break-inside: avoid; box-shadow: none !important; border: 1px solid #ddd !important; }
+    body { background: white !important; }
 }
