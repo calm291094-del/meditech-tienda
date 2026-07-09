@@ -2,14 +2,28 @@
 // ADMIN.JS - PANEL DE ADMINISTRACIÓN
 // ============================================
 
-function openAdminPanel() {
+// ============================================
+// ADMIN - ABRIR PANEL
+// ============================================
+async function openAdminPanel() {
     if (!S.currentUser || S.currentUser.role !== 'admin') {
         showNotif('❌ Solo administradores pueden acceder', 'error');
         return;
     }
+    
     document.getElementById('admin-panel').classList.add('active');
     renderAdminList();
     closeUserMenu();
+    
+    // 🔥 CARGAR DATOS PARA EL PANEL
+    await cargarUsuarios();
+    await cargarPedidosAdmin();
+    renderEstadisticas();
+    renderHistorial();
+    
+    // Generar gráficos después de cargar los datos
+    setTimeout(generarGraficos, 300);
+    setTimeout(actualizarDashboard, 400);
 }
 
 function closeAdminPanel() {
@@ -261,41 +275,37 @@ function renderAdminList() {
 }
 
 // ============================================
-// ADMIN - USUARIOS
+// ADMIN - RENDER USUARIOS
 // ============================================
-async function renderUsers() {
+function renderUsers() {
     const list = document.getElementById('users-list');
     if (!list) return;
     
-    try {
-        const usuarios = await apiRequest('/usuarios');
-        S.users = usuarios;
-        
-        if (!usuarios || usuarios.length === 0) {
-            list.innerHTML = '<p class="text-center text-gray-400 py-8">No hay usuarios registrados</p>';
-            return;
-        }
-        
-        list.innerHTML = usuarios.map(u => `
-            <div class="admin-list-item" onclick="verPerfilCliente('${u.username}')" style="cursor:pointer;">
-                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#06b6d4);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.2rem;flex-shrink:0;">
-                    ${u.name ? u.name.charAt(0).toUpperCase() : 'U'}
-                </div>
-                <div class="info">
-                    <div class="name">${u.name || u.username}</div>
-                    <div class="meta">@${u.username} | ${u.email || 'Sin email'}</div>
-                </div>
-                <div>
-                    <span class="badge-role ${u.role === 'admin' ? 'admin' : 'user'}">${u.role === 'admin' ? '🔒 Admin' : '👤 Cliente'}</span>
-                    <span class="meta" style="font-size:0.7rem;color:#6b7280;margin-left:8px;">
-                        ${S.orders ? S.orders.filter(o => o.usuario === u.username).length : 0} pedidos
-                    </span>
-                </div>
+    // Si no hay usuarios, mostrar mensaje
+    if (!S.users || S.users.length === 0) {
+        list.innerHTML = `
+            <div class="admin-list-item" style="justify-content:center;padding:20px;color:#6b7280;">
+                <i class="fas fa-users" style="font-size:2rem;opacity:0.3;display:block;text-align:center;width:100%;margin-bottom:8px;"></i>
+                No hay usuarios registrados
             </div>
-        `).join('');
-    } catch (error) {
-        list.innerHTML = `<p class="text-center text-red-500 py-8">❌ Error al cargar usuarios: ${error.message}</p>`;
+        `;
+        return;
     }
+    
+    list.innerHTML = S.users.map(u => `
+        <div class="admin-list-item" onclick="verPerfilCliente('${u.username}')" style="cursor:pointer;">
+            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#06b6d4);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.2rem;flex-shrink:0;">
+                ${u.name ? u.name.charAt(0).toUpperCase() : 'U'}
+            </div>
+            <div class="info">
+                <div class="name">${u.name || u.username}</div>
+                <div class="meta">@${u.username} | ${u.email || 'Sin email'}</div>
+            </div>
+            <div>
+                <span class="badge-role ${u.role === 'admin' ? 'admin' : 'user'}">${u.role === 'admin' ? '🔒 Admin' : '👤 Cliente'}</span>
+            </div>
+        </div>
+    `).join('');
 }
 
 function verPerfilCliente(username) {
@@ -361,31 +371,99 @@ function renderHistorial() {
     `).join('');
 }
 
+// ============================================
+// ADMIN - RENDER PEDIDOS
+// ============================================
 function renderPedidos() {
     const list = document.getElementById('orders-list');
     if (!list) return;
     
     if (!S.orders || S.orders.length === 0) {
-        list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin pedidos</p>';
+        list.innerHTML = `
+            <div class="admin-list-item" style="justify-content:center;padding:20px;color:#6b7280;">
+                <i class="fas fa-receipt" style="font-size:2rem;opacity:0.3;display:block;text-align:center;width:100%;margin-bottom:8px;"></i>
+                No hay pedidos registrados
+            </div>
+        `;
         return;
     }
     
     list.innerHTML = S.orders.slice(0, 20).map(o => `
-        <div class="admin-list-item" style="flex-direction:column;align-items:stretch;gap:4px;">
+        <div class="admin-list-item" style="flex-direction:column;align-items:stretch;gap:4px;padding:10px 14px;">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
                 <div>
-                    <div class="name">${o.id}</div>
+                    <div class="name" style="font-size:0.85rem;">${o.id || 'Sin ID'}</div>
                     <div class="meta"><i class="fas fa-user"></i> ${o.usuario || 'Anónimo'}</div>
                 </div>
                 <div>
-                    <span style="font-weight:700;color:#0d9488;">$${o.total ? o.total.toFixed(2) : '0.00'}</span>
-                    <span class="badge-role ${o.estado === 'pendiente' ? 'user' : 'admin'}" style="margin-left:8px;">${o.estado || 'Pendiente'}</span>
+                    <span style="font-weight:700;color:#0d9488;">$${o.total ? parseFloat(o.total).toFixed(2) : '0.00'}</span>
+                    <span class="badge-role ${o.estado === 'pendiente' ? 'user' : 'admin'}" style="margin-left:8px;font-size:0.6rem;">${o.estado || 'Pendiente'}</span>
                 </div>
             </div>
             <div class="meta" style="font-size:0.7rem;">
-                ${o.items ? o.items.map(i => `${i.nombre} x${i.cantidad}`).join(', ') : 'Sin items'}
+                ${o.items && o.items.length > 0 ? o.items.map(i => `${i.nombre || 'Producto'} x${i.cantidad || 0}`).join(', ') : 'Sin items'}
             </div>
-            <div style="font-size:0.6rem;color:#9ca3af;">${new Date(o.fecha).toLocaleString('es-ES')}</div>
+            <div style="font-size:0.6rem;color:#9ca3af;">${o.fecha ? new Date(o.fecha).toLocaleString('es-ES') : 'Fecha desconocida'}</div>
         </div>
     `).join('');
+}
+
+// ============================================
+// ADMIN - CARGAR USUARIOS DESDE EL BACKEND
+// ============================================
+async function cargarUsuarios() {
+    try {
+        const usuarios = await apiRequest('/usuarios');
+        S.users = usuarios || [];
+        console.log(`✅ ${S.users.length} usuarios cargados`);
+        renderUsers();
+        return S.users;
+    } catch (error) {
+        console.error('❌ Error cargando usuarios:', error.message);
+        S.users = [];
+        renderUsers();
+        return [];
+    }
+}
+
+// ============================================
+// ESTADÍSTICAS
+// ============================================
+function renderEstadisticas() {
+    const totalProductos = S.pr ? S.pr.length : 0;
+    const totalUsuarios = S.users ? S.users.length : 0;
+    const totalPedidos = S.orders ? S.orders.length : 0;
+    const totalVistas = S.history ? S.history.length : 0;
+    
+    document.getElementById('stat-products').textContent = totalProductos;
+    document.getElementById('stat-users').textContent = totalUsuarios;
+    document.getElementById('stat-views').textContent = totalVistas;
+    document.getElementById('stat-orders').textContent = totalPedidos;
+    
+    const revenue = S.orders ? S.orders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0) : 0;
+    document.getElementById('stat-revenue').textContent = `$${revenue.toFixed(2)}`;
+    
+    const today = new Date().toDateString();
+    const todayViews = S.history ? S.history.filter(h => h.fecha && new Date(h.fecha).toDateString() === today).length : 0;
+    document.getElementById('stat-today').textContent = todayViews;
+    
+    console.log(`📊 Estadísticas: ${totalProductos} productos, ${totalUsuarios} usuarios, ${totalPedidos} pedidos`);
+}
+
+// ============================================
+// ADMIN - CARGAR PEDIDOS DESDE EL BACKEND
+// ============================================
+async function cargarPedidosAdmin() {
+    try {
+        const pedidos = await apiRequest('/pedidos');
+        S.orders = pedidos || [];
+        console.log(`✅ ${S.orders.length} pedidos cargados`);
+        renderPedidos();
+        return S.orders;
+    } catch (error) {
+        console.error('❌ Error cargando pedidos:', error.message);
+        S.orders = [];
+        renderPedidos();
+        return [];
+    }
 }
