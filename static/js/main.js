@@ -260,12 +260,23 @@ async function init() {
         
         await cargarProductos();
         
-        // 🔥 Cargar datos adicionales
+        // Solo cargar datos de admin si el usuario es admin
         if (S.currentUser && S.currentUser.role === 'admin') {
-            await renderUsers();
-            await renderEstadisticas();
-            setTimeout(generarGraficos, 500);
-            actualizarDashboard();
+            // Verificar que los elementos existen antes de usarlos
+            if (document.getElementById('users-list')) {
+                await cargarUsuarios();
+            }
+            if (document.getElementById('orders-list')) {
+                await cargarPedidosAdmin();
+            }
+            // renderEstadisticas ahora maneja elementos que no existen
+            renderEstadisticas();
+            if (document.getElementById('ventas-categoria')) {
+                setTimeout(generarGraficos, 500);
+            }
+            if (document.getElementById('admin-dashboard')) {
+                actualizarDashboard();
+            }
         }
         
         renderCarousel();
