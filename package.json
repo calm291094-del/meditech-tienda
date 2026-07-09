@@ -1,7 +1,7 @@
 {
   "name": "meditech-backend",
   "version": "1.0.0",
-  "description": "Backend para MediTech con PostgreSQL",
+  "description": "Backend para MediTech con PostgreSQL, bcrypt y JWT",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
