@@ -805,7 +805,7 @@ app.get('/run-migration', async (req, res) => {
             // Inicializar tablas (ya existe)
             await initTables();
 
-            const DATA_DIR = path.join(__dirname, 'data');
+            const DATA_DIR = __dirname;
             let count = 0;
 
             // 1. Migrar usuarios
