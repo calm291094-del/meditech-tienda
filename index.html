@@ -2399,6 +2399,15 @@
 
 
 <script>
+    // Variables globales para GitHub
+    let GITHUB_TOKEN = '';
+    const GITHUB_USER = "calm291094-del";
+    const GITHUB_REPO = "meditech-tienda";
+    let HEADERS = {
+        "Authorization": "",
+        "Accept": "application/vnd.github.v3+json"
+    };
+    
     // ============================================
     // CONFIGURACIÓN - BACKEND
     // ============================================
@@ -3218,33 +3227,39 @@
     // ============================================
     // INICIALIZACIÓN
     // ============================================
-    async function init() {
-        console.log('🚀 Iniciando MediTech...');
-        try {
-            // Cargar usuario desde localStorage
-            const session = localStorage.getItem('session');
-            if (session) {
-                S.currentUser = JSON.parse(session);
-                updateUIForLoggedUser();
-            }
-            
-            // Cargar productos desde el backend
-            await cargarProductos();
-            
-            // Renderizar UI
-            renderCarousel();
-            renderCategorias();
-            renderOfertas();
-            applyTexts();
-            initCarousel();
-            updateCartUI();
-            
-            console.log('🎉 MediTech iniciado correctamente');
-        } catch (error) {
-            console.error('❌ Error en init:', error);
-            showNotif('⚠️ Error al cargar la página', 'error');
+// ============================================
+// INICIALIZACIÓN
+// ============================================
+async function init() {
+    console.log('🚀 Iniciando MediTech...');
+    try {
+        // 🔥 1. CARGAR TOKEN PRIMERO (desde la base de datos)
+        await loadToken();
+        
+        // 2. Cargar usuario desde localStorage
+        const session = localStorage.getItem('session');
+        if (session) {
+            S.currentUser = JSON.parse(session);
+            updateUIForLoggedUser();
         }
+        
+        // 3. Cargar productos desde el backend
+        await cargarProductos();
+        
+        // 4. Renderizar UI
+        renderCarousel();
+        renderCategorias();
+        renderOfertas();
+        applyTexts();
+        initCarousel();
+        updateCartUI();
+        
+        console.log('🎉 MediTech iniciado correctamente');
+    } catch (error) {
+        console.error('❌ Error en init:', error);
+        showNotif('⚠️ Error al cargar la página', 'error');
     }
+}
 
     // ============================================
     // EVENTOS Y EXPOSICIÓN GLOBAL
@@ -4204,6 +4219,64 @@
         showNotif('✅ Producto eliminado', 'success');
     }
 
+async function guardarProductosEnGitHub() {
+    try {
+        // 🔥 Obtener token desde la variable global (cargada desde DB)
+        const token = window.GITHUB_TOKEN || localStorage.getItem('github_token');
+        
+        if (!token || token === '' || token === 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
+            console.warn('⚠️ No hay token de GitHub configurado');
+            localStorage.setItem('productos_backup', JSON.stringify(S.pr));
+            showNotif('⚠️ Token no configurado. Guardado solo local.', 'warning');
+            return false;
+        }
+
+        const content = JSON.stringify({ productos: S.pr }, null, 2);
+        const contentBase64 = btoa(unescape(encodeURIComponent(content)));
+        
+        // Obtener SHA actual
+        const shaRes = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/productos.json`, {
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        
+        let sha = null;
+        if (shaRes.ok) {
+            const data = await shaRes.json();
+            sha = data.sha;
+        }
+        
+        // Guardar en GitHub
+        const response = await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/productos.json`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: 'Actualizar productos desde MediTech',
+                content: contentBase64,
+                sha: sha
+            })
+        });
+        
+        if (response.ok) {
+            console.log('✅ Productos guardados en GitHub');
+            localStorage.setItem('productos_backup', JSON.stringify(S.pr));
+            return true;
+        } else {
+            console.error('❌ Error guardando en GitHub:', await response.text());
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Error guardando en GitHub:', error);
+        localStorage.setItem('productos_backup', JSON.stringify(S.pr));
+        return false;
+    }
+}
+    
     // ============================================
     // CARRITO
     // ============================================
@@ -4620,31 +4693,50 @@
 // GESTIÓN DE TOKEN DESDE BASE DE DATOS
 // ============================================
 
-// Cargar token desde el backend
+
+// ============================================
+// CARGAR TOKEN AUTOMÁTICAMENTE DESDE LA BASE DE DATOS
+// ============================================
+
 async function loadToken() {
+    console.log('🔑 Cargando token desde la base de datos...');
+    
     try {
-        const data = await apiRequest('/config/github-token');
-        if (data.token) {
-            localStorage.setItem('github_token', data.token);
-            window.GITHUB_TOKEN = data.token;
-            // Actualizar HEADERS si existe
-            if (typeof HEADERS !== 'undefined') {
-                HEADERS['Authorization'] = `token ${data.token}`;
+        // 1. Intentar obtener el token desde el backend (público)
+        const response = await fetch(`${API_URL}/config/github-token-public`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.token && data.token !== '') {
+                // Guardar en localStorage como caché local
+                localStorage.setItem('github_token', data.token);
+                window.GITHUB_TOKEN = data.token;
+                
+                // Actualizar HEADERS si existe
+                if (typeof HEADERS !== 'undefined') {
+                    HEADERS['Authorization'] = `token ${data.token}`;
+                }
+                
+                console.log('✅ Token cargado desde la base de datos');
+                return true;
             }
-            console.log('✅ Token cargado desde la base de datos');
-            return true;
         }
+        console.warn('⚠️ No hay token en la base de datos');
     } catch (error) {
         console.warn('⚠️ No se pudo cargar token desde la base de datos:', error.message);
     }
-    // Fallback: intentar desde localStorage
+    
+    // 2. Fallback: intentar desde localStorage (por si ya estaba guardado)
     const savedToken = localStorage.getItem('github_token');
-    if (savedToken && savedToken !== 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
+    if (savedToken && savedToken !== '' && savedToken !== 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
         window.GITHUB_TOKEN = savedToken;
+        console.log('✅ Token cargado desde localStorage (fallback)');
         return true;
     }
+    
+    console.warn('⚠️ No hay token configurado');
     return false;
 }
+        
 
 // Guardar token en la base de datos (y en localStorage como respaldo)
 async function saveToken(token) {
@@ -4755,8 +4847,19 @@ function showTokenStatus(message, type) {
 // Cargar info de configuración (incluye token desde DB)
 async function loadConfigInfo() {
     try {
-        const data = await apiRequest('/config/github-token');
-        const currentToken = data.token || localStorage.getItem('github_token') || '';
+        // Obtener token desde el backend
+        const response = await fetch(`${API_URL}/config/github-token-public`);
+        let currentToken = '';
+        if (response.ok) {
+            const data = await response.json();
+            currentToken = data.token || '';
+        }
+        
+        // Si no hay token en DB, intentar desde localStorage
+        if (!currentToken) {
+            currentToken = localStorage.getItem('github_token') || '';
+        }
+        
         document.getElementById('current-token-display').value = currentToken;
 
         // Info del repo
@@ -4770,7 +4873,7 @@ async function loadConfigInfo() {
         document.getElementById('info-last-sync').textContent = lastSync ?
             new Date(lastSync).toLocaleString('es-ES') : 'Nunca';
 
-        // Verificar estado del token (opcional)
+        // Verificar estado del token
         if (currentToken) {
             try {
                 const testResult = await apiRequest('/config/test-github-token', {
