@@ -337,3 +337,55 @@ function buscarUsuarios(query) {
         </div>
     `).join('');
 }
+
+// ============================================
+// ADMIN - HISTORIAL Y PEDIDOS
+// ============================================
+function renderHistorial() {
+    const list = document.getElementById('history-list');
+    if (!list) return;
+    
+    if (!S.history || S.history.length === 0) {
+        list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin historial</p>';
+        return;
+    }
+    
+    list.innerHTML = S.history.slice(0, 50).map(h => `
+        <div class="admin-list-item">
+            <div class="info">
+                <div class="name"><i class="fas fa-user text-teal-600"></i> ${h.usuario || 'Anónimo'}</div>
+                <div class="meta"><i class="fas fa-link text-gray-400"></i> ${h.pagina || '/'}</div>
+            </div>
+            <div style="font-size:0.7rem;color:#6b7280;">${new Date(h.fecha).toLocaleString('es-ES')}</div>
+        </div>
+    `).join('');
+}
+
+function renderPedidos() {
+    const list = document.getElementById('orders-list');
+    if (!list) return;
+    
+    if (!S.orders || S.orders.length === 0) {
+        list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin pedidos</p>';
+        return;
+    }
+    
+    list.innerHTML = S.orders.slice(0, 20).map(o => `
+        <div class="admin-list-item" style="flex-direction:column;align-items:stretch;gap:4px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;">
+                <div>
+                    <div class="name">${o.id}</div>
+                    <div class="meta"><i class="fas fa-user"></i> ${o.usuario || 'Anónimo'}</div>
+                </div>
+                <div>
+                    <span style="font-weight:700;color:#0d9488;">$${o.total ? o.total.toFixed(2) : '0.00'}</span>
+                    <span class="badge-role ${o.estado === 'pendiente' ? 'user' : 'admin'}" style="margin-left:8px;">${o.estado || 'Pendiente'}</span>
+                </div>
+            </div>
+            <div class="meta" style="font-size:0.7rem;">
+                ${o.items ? o.items.map(i => `${i.nombre} x${i.cantidad}`).join(', ') : 'Sin items'}
+            </div>
+            <div style="font-size:0.6rem;color:#9ca3af;">${new Date(o.fecha).toLocaleString('es-ES')}</div>
+        </div>
+    `).join('');
+}
