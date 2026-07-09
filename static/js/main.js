@@ -52,9 +52,6 @@ const S = {
 };
 
 
-// ============================================
-// RENDER PRODUCTOS
-// ============================================
 function renderProducts() {
     const grid = document.getElementById('portada-productos');
     if (!grid) return;
@@ -76,23 +73,25 @@ function renderProducts() {
     
     grid.innerHTML = filtered.map(p => {
         const isSoldOut = p.available === false || p.stock <= 0;
+        const isLowStock = p.stock > 0 && p.stock <= 5;
+        const stockClass = isSoldOut ? 'soldout' : (isLowStock ? 'low-stock' : 'in-stock');
+        const stockText = isSoldOut ? '❌ Agotado' : `📦 ${p.stock} unidades`;
+        
         return `
-            <div class="product-card group">
-                <div class="image" onclick="openQuickView('${p.id}')">
+            <div class="product-card">
+                <div class="image-wrap" onclick="openQuickView('${p.id}')">
                     <img src="${p.image || 'https://via.placeholder.com/300x200?text=Sin+Imagen'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/300x200?text=Error'">
-                    ${p.feat ? '<span class="badge-new"><i class="fas fa-star mr-1"></i>Destacado</span>' : ''}
-                    ${isSoldOut ? '<span class="badge-soldout">❌ Agotado</span>' : `<span class="badge-soldout" style="background: rgba(0,0,0,0.7);">📦 ${p.stock} unidades</span>`}
-                    <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium">
-                        ${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}
-                    </div>
+                    ${p.feat ? '<span class="badge badge-featured"><i class="fas fa-star mr-1"></i>Destacado</span>' : ''}
+                    ${isSoldOut ? '<span class="badge badge-soldout">❌ Agotado</span>' : `<span class="badge badge-stock">${stockText}</span>`}
+                    <span class="badge-category">${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}</span>
                 </div>
                 <div class="body">
                     <div class="name" title="${p.name}">${p.name}</div>
                     <div class="desc">${p.desc || ''}</div>
                     <div class="footer">
-                        <div>
-                            <span class="price">$${parseFloat(p.price).toFixed(2)}</span>
-                            ${!isSoldOut ? `<span class="stock">📦 ${p.stock} disponibles</span>` : ''}
+                        <div class="price-block">
+                            <span class="price">$${parseFloat(p.price).toFixed(2)} <small>MXN</small></span>
+                            ${!isSoldOut ? `<span class="stock-info"><span class="dot ${stockClass}"></span> ${p.stock} disponibles</span>` : ''}
                         </div>
                         ${S.currentUser ? 
                             (isSoldOut ? 
@@ -105,6 +104,7 @@ function renderProducts() {
             </div>
         `;
     }).join('');
+    
     document.getElementById('product-total-label').textContent = `${filtered.length} productos`;
 }
 
