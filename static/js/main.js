@@ -403,15 +403,44 @@ function closeQuickView() {
     document.getElementById('quick-view').classList.remove('active');
 }
 
-// ---- ESTADÍSTICAS ----
+// ============================================
+// ESTADÍSTICAS - VERSIÓN SEGURA
+// ============================================
 function renderEstadisticas() {
-    document.getElementById('stat-products').textContent = S.pr.length || 0;
-    document.getElementById('stat-users').textContent = S.users ? S.users.length : 0;
-    document.getElementById('stat-views').textContent = S.history ? S.history.length : 0;
-    document.getElementById('stat-orders').textContent = S.orders ? S.orders.length : 0;
-    const revenue = S.orders ? S.orders.reduce((sum, o) => sum + (o.total || 0), 0) : 0;
-    document.getElementById('stat-revenue').textContent = `$${revenue.toFixed(2)}`;
-    document.getElementById('stat-today').textContent = 0;
+    // Verificar que los elementos existan antes de usarlos
+    const elements = {
+        products: document.getElementById('stat-products'),
+        users: document.getElementById('stat-users'),
+        views: document.getElementById('stat-views'),
+        orders: document.getElementById('stat-orders'),
+        revenue: document.getElementById('stat-revenue'),
+        today: document.getElementById('stat-today')
+    };
+    
+    // Solo actualizar si los elementos existen
+    if (elements.products) {
+        elements.products.textContent = S.pr ? S.pr.length : 0;
+    }
+    if (elements.users) {
+        elements.users.textContent = S.users ? S.users.length : 0;
+    }
+    if (elements.views) {
+        elements.views.textContent = S.history ? S.history.length : 0;
+    }
+    if (elements.orders) {
+        elements.orders.textContent = S.orders ? S.orders.length : 0;
+    }
+    if (elements.revenue) {
+        const revenue = S.orders ? S.orders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0) : 0;
+        elements.revenue.textContent = `$${revenue.toFixed(2)}`;
+    }
+    if (elements.today) {
+        const today = new Date().toDateString();
+        const todayViews = S.history ? S.history.filter(h => h.fecha && new Date(h.fecha).toDateString() === today).length : 0;
+        elements.today.textContent = todayViews;
+    }
+    
+    console.log(`📊 Estadísticas: ${S.pr ? S.pr.length : 0} productos, ${S.users ? S.users.length : 0} usuarios, ${S.orders ? S.orders.length : 0} pedidos`);
 }
 
 function generarGraficos() {
