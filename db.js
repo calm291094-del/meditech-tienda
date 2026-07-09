@@ -46,7 +46,6 @@ async function initTables() {
             email VARCHAR(200),
             role VARCHAR(20) DEFAULT 'user',
             refresh_token TEXT,
-            token_expiry TIMESTAMP,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
@@ -78,7 +77,7 @@ async function initTables() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        -- Tabla de tokens (para invalidación)
+        -- Tabla de tokens invalidados
         CREATE TABLE IF NOT EXISTS tokens_invalidados (
             id SERIAL PRIMARY KEY,
             token TEXT NOT NULL,
@@ -86,7 +85,14 @@ async function initTables() {
             invalidated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        -- Crear índices para mejorar rendimiento
+        -- 🔥 TABLA DE CONFIGURACIÓN (para tokens y otras configuraciones)
+        CREATE TABLE IF NOT EXISTS config (
+            key TEXT PRIMARY KEY,
+            value TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Índices para mejorar rendimiento
         CREATE INDEX IF NOT EXISTS idx_usuarios_username ON usuarios(username);
         CREATE INDEX IF NOT EXISTS idx_productos_category ON productos(category);
         CREATE INDEX IF NOT EXISTS idx_pedidos_usuario ON pedidos(usuario);
@@ -107,6 +113,13 @@ async function initTables() {
                 ['root', hashedPassword, 'Administrador', 'admin@meditech.com', 'admin']
             );
             console.log('✅ Usuario admin creado');
+        }
+
+        // 🔥 Insertar token de GitHub por defecto si no existe (opcional)
+        const tokenExists = await getOne('SELECT key FROM config WHERE key = $1', ['github_token']);
+        if (!tokenExists) {
+            // No insertamos token por defecto, el admin lo configurará desde el panel
+            console.log('ℹ️ Token de GitHub no configurado. Configúralo desde el Panel Admin → Configuración.');
         }
     } catch (error) {
         console.error('❌ Error al crear tablas:', error);

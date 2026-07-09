@@ -1,4 +1,4 @@
-// server.js - Backend completo con PostgreSQL + bcrypt + JWT
+// server.js - Backend completo con PostgreSQL + bcrypt + JWT + Bot Telegram
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
@@ -15,7 +15,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_change_me';
 // MIDDLEWARES
 // ============================================================
 app.use(cors({
-    origin: '*', // En producción, especifica tu dominio
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -30,7 +30,7 @@ const { query, getOne, getAll, initTables } = require('./db');
 initTables().catch(console.error);
 
 // ============================================================
-// CONFIGURACIÓN DEL BOT
+// CONFIGURACIÓN DEL BOT DE TELEGRAM
 // ============================================================
 const WORKER_URL = process.env.WORKER_URL || "https://telegram-proxy.calm291094.workers.dev";
 const TOKEN = process.env.TELEGRAM_TOKEN;
@@ -83,7 +83,7 @@ const esAdmin = (req, res, next) => {
 };
 
 // ============================================================
-// 📝 FUNCIONES DE TOKENS
+// 📝 FUNCIONES DE TOKENS JWT
 // ============================================================
 function generarToken(usuario) {
     return jwt.sign(
@@ -119,17 +119,14 @@ app.post('/api/register', async (req, res) => {
     }
 
     try {
-        // Verificar si el usuario ya existe
         const exists = await getOne('SELECT id FROM usuarios WHERE username = $1', [username]);
         if (exists) {
             return res.status(400).json({ error: 'El usuario ya existe' });
         }
 
-        // Hashear contraseña
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-        // Crear usuario
         const result = await query(
             `INSERT INTO usuarios (username, password_hash, name, email, role)
              VALUES ($1, $2, $3, $4, $5)
@@ -138,12 +135,9 @@ app.post('/api/register', async (req, res) => {
         );
 
         const newUser = result.rows[0];
-
-        // Generar token
         const token = generarToken(newUser);
         const refreshToken = generarRefreshToken(newUser);
 
-        // Guardar refresh token en la base de datos
         await query(
             'UPDATE usuarios SET refresh_token = $1 WHERE id = $2',
             [refreshToken, newUser.id]
@@ -189,7 +183,6 @@ app.post('/api/login', async (req, res) => {
         const token = generarToken(user);
         const refreshToken = generarRefreshToken(user);
 
-        // Actualizar refresh token en la base de datos
         await query(
             'UPDATE usuarios SET refresh_token = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
             [refreshToken, user.id]
@@ -218,10 +211,7 @@ app.post('/api/refresh', async (req, res) => {
     }
 
     try {
-        // Verificar refresh token
         const decoded = jwt.verify(refreshToken, JWT_SECRET);
-        
-        // Buscar usuario con ese refresh token
         const user = await getOne(
             'SELECT * FROM usuarios WHERE id = $1 AND refresh_token = $2',
             [decoded.id, refreshToken]
@@ -231,11 +221,9 @@ app.post('/api/refresh', async (req, res) => {
             return res.status(401).json({ error: 'Refresh token inválido' });
         }
 
-        // Generar nuevos tokens
         const newToken = generarToken(user);
         const newRefreshToken = generarRefreshToken(user);
 
-        // Actualizar refresh token en la base de datos
         await query(
             'UPDATE usuarios SET refresh_token = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
             [newRefreshToken, user.id]
@@ -257,13 +245,11 @@ app.post('/api/logout', authenticateToken, async (req, res) => {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
 
-        // Invalidar token
         await query(
             'INSERT INTO tokens_invalidados (token, usuario) VALUES ($1, $2)',
             [token, req.user.username]
         );
 
-        // Limpiar refresh token del usuario
         await query(
             'UPDATE usuarios SET refresh_token = NULL WHERE id = $1',
             [req.user.id]
@@ -339,7 +325,6 @@ app.delete('/api/usuarios/:id', authenticateToken, esAdmin, async (req, res) => 
     const { id } = req.params;
 
     try {
-        // Verificar que no sea root
         const user = await getOne('SELECT username FROM usuarios WHERE id = $1', [id]);
         if (!user) {
             return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -465,7 +450,6 @@ app.post('/api/pedidos', authenticateToken, async (req, res) => {
         let total = 0;
         const itemsValidados = [];
 
-        // Validar stock y calcular total
         for (const item of items) {
             const prod = await getOne('SELECT * FROM productos WHERE id = $1', [item.id]);
             if (!prod) {
@@ -483,7 +467,6 @@ app.post('/api/pedidos', authenticateToken, async (req, res) => {
                 precio: parseFloat(prod.price),
                 subtotal
             });
-            // Descontar stock
             await query(
                 'UPDATE productos SET stock = stock - $1, available = CASE WHEN stock - $1 <= 0 THEN 0 ELSE available END WHERE id = $2',
                 [item.cantidad, prod.id]
@@ -517,7 +500,6 @@ app.post('/api/pedidos', authenticateToken, async (req, res) => {
 app.get('/api/pedidos', authenticateToken, esAdmin, async (req, res) => {
     try {
         const pedidos = await getAll('SELECT * FROM pedidos ORDER BY created_at DESC');
-        // Parsear items JSON
         const parsed = pedidos.map(p => ({
             ...p,
             items: typeof p.items === 'string' ? JSON.parse(p.items) : p.items
@@ -548,7 +530,7 @@ app.put('/api/pedidos/:id', authenticateToken, esAdmin, async (req, res) => {
     }
 });
 
-// ---- CONFIGURACIÓN ----
+// ---- CONFIGURACIÓN (para la tienda) ----
 app.get('/api/config', (req, res) => {
     res.json({
         headerSubtitle: "Salud & Tecnología",
@@ -563,7 +545,63 @@ app.get('/api/config', (req, res) => {
 });
 
 // ============================================================
-// 🤖 FUNCIONES DEL BOT
+// 🔑 CONFIGURACIÓN - TOKEN DE GITHUB (DESDE DB)
+// ============================================================
+
+// Obtener token de GitHub (solo admin)
+app.get('/api/config/github-token', authenticateToken, esAdmin, async (req, res) => {
+    try {
+        const result = await getOne('SELECT value FROM config WHERE key = $1', ['github_token']);
+        res.json({ token: result ? result.value : '' });
+    } catch (error) {
+        console.error('Error al obtener token:', error);
+        res.status(500).json({ error: 'Error al obtener token' });
+    }
+});
+
+// Actualizar token de GitHub (solo admin)
+app.post('/api/config/github-token', authenticateToken, esAdmin, async (req, res) => {
+    const { token } = req.body;
+    if (!token) {
+        return res.status(400).json({ error: 'Token es requerido' });
+    }
+    try {
+        const exists = await getOne('SELECT key FROM config WHERE key = $1', ['github_token']);
+        if (exists) {
+            await query('UPDATE config SET value = $1, updated_at = CURRENT_TIMESTAMP WHERE key = $2', [token, 'github_token']);
+        } else {
+            await query('INSERT INTO config (key, value) VALUES ($1, $2)', ['github_token', token]);
+        }
+        res.json({ message: 'Token actualizado correctamente' });
+    } catch (error) {
+        console.error('Error al actualizar token:', error);
+        res.status(500).json({ error: 'Error al actualizar token' });
+    }
+});
+
+// Probar token (verifica si es válido contra GitHub)
+app.post('/api/config/test-github-token', authenticateToken, esAdmin, async (req, res) => {
+    const { token } = req.body;
+    if (!token) {
+        return res.status(400).json({ error: 'Token es requerido' });
+    }
+    try {
+        const response = await fetch('https://api.github.com/user', {
+            headers: { 'Authorization': `token ${token}` }
+        });
+        if (response.ok) {
+            res.json({ valid: true, message: 'Token válido' });
+        } else {
+            const errorData = await response.json();
+            res.json({ valid: false, message: errorData.message || 'Token inválido' });
+        }
+    } catch (error) {
+        res.json({ valid: false, message: 'Error de conexión' });
+    }
+});
+
+// ============================================================
+// 🤖 FUNCIONES DEL BOT DE TELEGRAM
 // ============================================================
 
 async function callWorker(method, data = {}) {
@@ -590,6 +628,7 @@ async function sendTelegramMessage(chatId, text) {
     return result.ok;
 }
 
+// 🔥 Función mejorada con acceso a productos desde la base de datos
 async function getAniaResponse(userMessage) {
     try {
         // 1. Obtener productos de la base de datos
@@ -599,7 +638,7 @@ async function getAniaResponse(userMessage) {
         let productosContexto = '';
         if (productos && productos.length > 0) {
             productosContexto = productos.map(p => 
-                `- ${p.name} ($${parseFloat(p.price).toFixed(2)}): ${(p.description || p.desc || '').substring(0, 100)}... Stock: ${p.stock}`
+                `- ${p.name} ($${parseFloat(p.price).toFixed(2)}): ${(p.description || '').substring(0, 100)}... Stock: ${p.stock}`
             ).join('\n');
         } else {
             productosContexto = 'No hay productos disponibles en este momento.';
@@ -652,7 +691,6 @@ async function getAniaResponse(userMessage) {
     }
     return "¡Interesante! ☕️ ¿Qué más necesitas saber de MediTech?";
 }
-
 
 async function getUpdates() {
     try {
@@ -795,48 +833,7 @@ app.get('/diagnostico', (req, res) => {
 });
 
 // ============================================================
-// 🚀 INICIAR SERVIDOR
-// ============================================================
-
-app.listen(PORT, () => {
-    console.log(`✅ Servidor en puerto ${PORT}`);
-    console.log(`🌐 URL: https://meditech-tienda-node.onrender.com`);
-    console.log(`📱 Bot: @AniaAsistenteBot`);
-    console.log(`🔍 Diagnóstico: /diagnostico`);
-    setTimeout(startBot, 1000);
-});
-
-// Sistema de recuperación
-setInterval(() => {
-    if (!isRunning) startBot();
-}, 30000);
-
-console.log('🔥 Sistema 24/7 activo para @AniaAsistenteBot');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ============================================================
-// 🔧 RUTA DE MIGRACIÓN (CON fs Y path DISPONIBLES)
+// 🔧 RUTA DE MIGRACIÓN (DESDE JSON A POSTGRESQL)
 // ============================================================
 app.get('/run-migration', async (req, res) => {
     const SECRET_KEY = 'tu_clave_secreta_aqui';
@@ -851,11 +848,9 @@ app.get('/run-migration', async (req, res) => {
     (async () => {
         try {
             console.log('🚀 === INICIANDO MIGRACIÓN ===');
-            
-            // ✅ fs y path ya están disponibles porque los importamos arriba
             const DATA_DIR = __dirname;
             console.log(`📂 Directorio de trabajo: ${DATA_DIR}`);
-            
+
             // Listar archivos
             try {
                 const files = fs.readdirSync(DATA_DIR);
@@ -864,29 +859,14 @@ app.get('/run-migration', async (req, res) => {
                 console.log('❌ No se pudo listar archivos:', e.message);
             }
 
-            // --- 1. MIGRAR USUARIOS ---
+            // 1. Migrar usuarios
             const usuariosPath = path.join(DATA_DIR, 'usuarios.json');
-            console.log(`📂 Buscando usuarios en: ${usuariosPath}`);
-            
             if (fs.existsSync(usuariosPath)) {
                 const rawData = fs.readFileSync(usuariosPath, 'utf8');
                 const data = JSON.parse(rawData);
-                
                 let usuariosArray = [];
-                if (Array.isArray(data)) {
-                    usuariosArray = data;
-                } else if (data.usuarios && Array.isArray(data.usuarios)) {
-                    usuariosArray = data.usuarios;
-                } else {
-                    for (const key in data) {
-                        if (Array.isArray(data[key])) {
-                            usuariosArray = data[key];
-                            console.log(`📋 Usando array encontrado en la propiedad "${key}"`);
-                            break;
-                        }
-                    }
-                }
-                
+                if (Array.isArray(data)) usuariosArray = data;
+                else if (data.usuarios) usuariosArray = data.usuarios;
                 console.log(`📥 Insertando ${usuariosArray.length} usuarios...`);
                 let count = 0;
                 for (const u of usuariosArray) {
@@ -900,60 +880,26 @@ app.get('/run-migration', async (req, res) => {
                         await query(
                             `INSERT INTO usuarios (username, password_hash, name, email, role, created_at)
                              VALUES ($1, $2, $3, $4, $5, $6)`,
-                            [
-                                u.username,
-                                passwordHash,
-                                u.name || u.username,
-                                u.email || '',
-                                u.role || 'user',
-                                u.fecha || u.created_at || new Date()
-                            ]
+                            [u.username, passwordHash, u.name, u.email || '', u.role || 'user', u.fecha || new Date()]
                         );
                         count++;
-                        console.log(`✅ Usuario insertado: ${u.username}`);
                     }
                 }
                 console.log(`✅ ${count} usuarios migrados.`);
-            } else {
-                console.log(`❌ No se encontró usuarios.json`);
             }
 
-            // --- 2. MIGRAR PRODUCTOS ---
+            // 2. Migrar productos
             const productosPath = path.join(DATA_DIR, 'productos.json');
-            console.log(`📂 Buscando productos en: ${productosPath}`);
-            
             if (fs.existsSync(productosPath)) {
                 const rawData = fs.readFileSync(productosPath, 'utf8');
-                console.log(`📄 productos.json encontrado (${rawData.length} bytes)`);
-                
                 const data = JSON.parse(rawData);
-                console.log(`📋 Claves en productos.json:`, Object.keys(data));
-                
                 let productosArray = [];
-                if (Array.isArray(data)) {
-                    productosArray = data;
-                } else if (data.productos && Array.isArray(data.productos)) {
-                    productosArray = data.productos;
-                    console.log(`📋 Usando data.productos (${productosArray.length} elementos)`);
-                } else {
-                    for (const key in data) {
-                        if (Array.isArray(data[key])) {
-                            productosArray = data[key];
-                            console.log(`📋 Usando array encontrado en la propiedad "${key}"`);
-                            break;
-                        }
-                    }
-                }
-                
+                if (Array.isArray(data)) productosArray = data;
+                else if (data.productos) productosArray = data.productos;
                 console.log(`📥 Insertando ${productosArray.length} productos...`);
                 let prodCount = 0;
-                
                 for (const p of productosArray) {
-                    if (!p.name) {
-                        console.log(`⚠️ Producto sin nombre:`, p);
-                        continue;
-                    }
-                    
+                    if (!p.name) continue;
                     const exists = await getOne('SELECT id FROM productos WHERE name = $1', [p.name]);
                     if (!exists) {
                         await query(
@@ -973,37 +919,19 @@ app.get('/run-migration', async (req, res) => {
                         );
                         prodCount++;
                         console.log(`✅ Producto insertado: ${p.name}`);
-                    } else {
-                        console.log(`⏭️ Producto ya existe: ${p.name}`);
                     }
                 }
                 console.log(`✅ ${prodCount} productos migrados.`);
-            } else {
-                console.log(`❌ No se encontró productos.json`);
             }
 
-            // --- 3. MIGRAR PEDIDOS ---
+            // 3. Migrar pedidos
             const pedidosPath = path.join(DATA_DIR, 'pedidos.json');
-            console.log(`📂 Buscando pedidos en: ${pedidosPath}`);
-            
             if (fs.existsSync(pedidosPath)) {
                 const rawData = fs.readFileSync(pedidosPath, 'utf8');
                 const data = JSON.parse(rawData);
-                
                 let pedidosArray = [];
-                if (Array.isArray(data)) {
-                    pedidosArray = data;
-                } else if (data.pedidos && Array.isArray(data.pedidos)) {
-                    pedidosArray = data.pedidos;
-                } else {
-                    for (const key in data) {
-                        if (Array.isArray(data[key])) {
-                            pedidosArray = data[key];
-                            break;
-                        }
-                    }
-                }
-                
+                if (Array.isArray(data)) pedidosArray = data;
+                else if (data.pedidos) pedidosArray = data.pedidos;
                 console.log(`📥 Insertando ${pedidosArray.length} pedidos...`);
                 let pedCount = 0;
                 for (const p of pedidosArray) {
@@ -1027,8 +955,6 @@ app.get('/run-migration', async (req, res) => {
                     }
                 }
                 console.log(`✅ ${pedCount} pedidos migrados.`);
-            } else {
-                console.log(`❌ No se encontró pedidos.json`);
             }
 
             console.log('🎉 Migración completada desde endpoint.');
@@ -1038,3 +964,22 @@ app.get('/run-migration', async (req, res) => {
         }
     })();
 });
+
+// ============================================================
+// 🚀 INICIAR SERVIDOR
+// ============================================================
+
+app.listen(PORT, () => {
+    console.log(`✅ Servidor en puerto ${PORT}`);
+    console.log(`🌐 URL: https://meditech-tienda-node.onrender.com`);
+    console.log(`📱 Bot: @AniaAsistenteBot`);
+    console.log(`🔍 Diagnóstico: /diagnostico`);
+    setTimeout(startBot, 1000);
+});
+
+// Sistema de recuperación del bot
+setInterval(() => {
+    if (!isRunning) startBot();
+}, 30000);
+
+console.log('🔥 Sistema 24/7 activo para @AniaAsistenteBot');
