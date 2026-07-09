@@ -884,11 +884,13 @@
            ============================================ */
 
         /* Contenedor del chatbot en móvil */
-        @media (max-width: 640px) {
-            #chatbot-container {
-                bottom: 12px !important;
-                right: 12px !important;
-            }
+/* Fix para chatbot en móvil */
+@media (max-width: 640px) {
+    #chat-input {
+        font-size: 16px !important;
+        padding: 12px 16px !important;
+        min-height: 48px !important;
+    }
 
             #chatbot-container .w-16.h-16 {
                 width: 52px !important;
@@ -910,15 +912,14 @@
                 max-height: 350px !important;
             }
 
-            /* Botón de enviar visible y grande */
-            #chat-send-btn {
-                width: 48px !important;
-                height: 48px !important;
-                min-width: 48px !important;
-                min-height: 48px !important;
-                font-size: 1.1rem !important;
-                flex-shrink: 0 !important;
-            }
+    #chat-send-btn {
+        width: 52px !important;
+        height: 52px !important;
+        min-width: 52px !important;
+        min-height: 52px !important;
+        font-size: 1.2rem !important;
+    }
+}
 
             #chat-input {
                 font-size: 15px !important;
@@ -1313,6 +1314,201 @@
     
     #portada-productos .p-5 {
         padding: 10px !important;
+    }
+}
+
+/* ============================================
+   RESPONSIVE PARA PANEL ADMIN (MÓVIL)
+   ============================================ */
+
+/* 📱 MÓVILES PEQUEÑOS (hasta 480px) */
+@media (max-width: 480px) {
+    /* Panel admin - padding reducido */
+    #admin-panel {
+        padding: 4px !important;
+    }
+    
+    #admin-panel .max-w-7xl {
+        padding: 8px !important;
+        margin-top: 0 !important;
+        border-radius: 12px !important;
+    }
+    
+    /* Header del panel */
+    #admin-panel .bg-gradient-to-r {
+        padding: 12px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+    }
+    
+    #admin-panel .bg-gradient-to-r h2 {
+        font-size: 1.1rem !important;
+    }
+    
+    /* Botón cerrar siempre visible */
+    #admin-panel .bg-white/10 {
+        font-size: 0.75rem !important;
+        padding: 8px 14px !important;
+    }
+    
+    /* Dashboard métricas */
+    #admin-dashboard .grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px !important;
+    }
+    
+    #admin-dashboard .p-4 {
+        padding: 10px !important;
+    }
+    
+    #admin-dashboard .text-2xl {
+        font-size: 1.1rem !important;
+    }
+    
+    /* Tabs del admin */
+    .admin-tab {
+        font-size: 0.55rem !important;
+        padding: 4px 8px !important;
+        min-height: 32px !important;
+        min-width: 32px !important;
+        border-radius: 6px !important;
+    }
+    
+    .admin-tab i {
+        font-size: 0.6rem !important;
+        margin-right: 2px !important;
+    }
+    
+    /* Contenido del admin */
+    #admin-panel .p-4.md\:p-6 {
+        padding: 8px !important;
+    }
+    
+    /* Formulario de productos */
+    #admin-panel .grid.md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+    
+    #admin-panel .grid.grid-cols-2 {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px !important;
+    }
+    
+    #admin-panel input,
+    #admin-panel select,
+    #admin-panel textarea {
+        font-size: 14px !important;
+        padding: 8px 10px !important;
+        border-radius: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        min-height: 40px !important;
+    }
+    
+    #admin-panel label {
+        font-size: 0.7rem !important;
+        margin-bottom: 2px !important;
+    }
+    
+    /* Lista de inventario */
+    #admin-list .flex {
+        flex-direction: column !important;
+        gap: 6px !important;
+        padding: 10px !important;
+    }
+    
+    #admin-list .w-16 {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    
+    #admin-list .flex-1 {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+    
+    /* Botones de acción */
+    #admin-panel .flex.gap-2 button {
+        font-size: 0.75rem !important;
+        padding: 6px 12px !important;
+        min-height: 36px !important;
+        min-width: 60px !important;
+    }
+    
+    /* Modal de edición */
+    .modal-content {
+        max-width: 100% !important;
+        margin: 8px !important;
+        padding: 12px !important;
+        border-radius: 12px !important;
+    }
+    
+    .modal-content input,
+    .modal-content select,
+    .modal-content textarea {
+        font-size: 14px !important;
+        padding: 8px 10px !important;
+        width: 100% !important;
+    }
+    
+    /* Estadísticas */
+    #tab-estadisticas .grid.md\:grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px !important;
+    }
+    
+    #tab-estadisticas .bg-gradient-to-br {
+        padding: 10px !important;
+    }
+    
+    #tab-estadisticas .text-3xl {
+        font-size: 1.2rem !important;
+    }
+    
+    /* Tabla de usuarios */
+    #users-list .flex {
+        flex-direction: column !important;
+        gap: 4px !important;
+    }
+    
+    #users-list .w-12 {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 0.8rem !important;
+    }
+    
+    /* Configuración */
+    #tab-config .grid.md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+    
+    #tab-config .flex.gap-2 {
+        flex-wrap: wrap !important;
+    }
+    
+    #tab-config .flex.gap-2 button {
+        flex: 1 !important;
+        min-width: 80px !important;
+        font-size: 0.7rem !important;
+        padding: 6px 10px !important;
+    }
+}
+
+/* 📱 TABLETS PEQUEÑAS (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    #admin-panel input,
+    #admin-panel select,
+    #admin-panel textarea {
+        font-size: 15px !important;
+        padding: 10px 12px !important;
+    }
+    
+    #admin-panel .grid.md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
     }
 }
 </style>
@@ -4419,6 +4615,252 @@
     window.saveCarousel = saveCarousel;
 </script>
 
+    <script>
+// ============================================
+// GESTIÓN DE TOKEN DESDE BASE DE DATOS
+// ============================================
+
+// Cargar token desde el backend
+async function loadToken() {
+    try {
+        const data = await apiRequest('/config/github-token');
+        if (data.token) {
+            localStorage.setItem('github_token', data.token);
+            window.GITHUB_TOKEN = data.token;
+            // Actualizar HEADERS si existe
+            if (typeof HEADERS !== 'undefined') {
+                HEADERS['Authorization'] = `token ${data.token}`;
+            }
+            console.log('✅ Token cargado desde la base de datos');
+            return true;
+        }
+    } catch (error) {
+        console.warn('⚠️ No se pudo cargar token desde la base de datos:', error.message);
+    }
+    // Fallback: intentar desde localStorage
+    const savedToken = localStorage.getItem('github_token');
+    if (savedToken && savedToken !== 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
+        window.GITHUB_TOKEN = savedToken;
+        return true;
+    }
+    return false;
+}
+
+// Guardar token en la base de datos (y en localStorage como respaldo)
+async function saveToken(token) {
+    try {
+        await apiRequest('/config/github-token', {
+            method: 'POST',
+            body: JSON.stringify({ token })
+        });
+        localStorage.setItem('github_token', token);
+        localStorage.setItem('github_token_date', new Date().toISOString());
+        window.GITHUB_TOKEN = token;
+        if (typeof HEADERS !== 'undefined') {
+            HEADERS['Authorization'] = `token ${token}`;
+        }
+        console.log('✅ Token guardado en la base de datos');
+        return true;
+    } catch (error) {
+        console.error('❌ Error al guardar token:', error);
+        // Fallback: guardar solo en localStorage
+        localStorage.setItem('github_token', token);
+        showNotif('⚠️ Token guardado solo localmente (error en servidor)', 'warning');
+        return false;
+    }
+}
+
+// Mostrar/ocultar token
+function toggleTokenVisibility() {
+    const input = document.getElementById('current-token-display');
+    const icon = event.target.closest('button').querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+// Actualizar token (desde el formulario del panel)
+async function updateToken() {
+    const newToken = document.getElementById('new-token-input').value.trim();
+    const statusDiv = document.getElementById('token-status');
+
+    if (!newToken) {
+        showTokenStatus('❌ Ingresa un token válido', 'error');
+        return;
+    }
+
+    if (!newToken.startsWith('ghp_') && !newToken.startsWith('github_pat_')) {
+        showTokenStatus('❌ El token debe empezar con "ghp_" o "github_pat_"', 'error');
+        return;
+    }
+
+    showTokenStatus('🔄 Guardando token...', 'info');
+
+    const success = await saveToken(newToken);
+    if (success) {
+        showTokenStatus('✅ Token actualizado correctamente en la base de datos', 'success');
+        document.getElementById('new-token-input').value = '';
+        loadConfigInfo();
+        // Recargar productos si es necesario
+        if (typeof cargarProductos === 'function') {
+            await cargarProductos();
+        }
+    } else {
+        showTokenStatus('❌ Error al guardar el token', 'error');
+    }
+}
+
+// Probar token (desde el formulario)
+async function testToken() {
+    const token = document.getElementById('new-token-input').value.trim() || localStorage.getItem('github_token');
+    const statusDiv = document.getElementById('token-status');
+    
+    if (!token) {
+        showTokenStatus('❌ No hay token para probar', 'error');
+        return;
+    }
+
+    showTokenStatus('🔄 Probando token...', 'info');
+
+    try {
+        const result = await apiRequest('/config/test-github-token', {
+            method: 'POST',
+            body: JSON.stringify({ token })
+        });
+        if (result.valid) {
+            showTokenStatus(`✅ ${result.message}`, 'success');
+        } else {
+            showTokenStatus(`❌ ${result.message}`, 'error');
+        }
+    } catch (error) {
+        showTokenStatus(`❌ Error al probar: ${error.message}`, 'error');
+    }
+}
+
+function showTokenStatus(message, type) {
+    const statusDiv = document.getElementById('token-status');
+    statusDiv.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-blue-100', 'text-blue-800');
+
+    if (type === 'success') statusDiv.classList.add('bg-green-100', 'text-green-800');
+    else if (type === 'error') statusDiv.classList.add('bg-red-100', 'text-red-800');
+    else statusDiv.classList.add('bg-blue-100', 'text-blue-800');
+
+    statusDiv.innerHTML = message;
+}
+
+// Cargar info de configuración (incluye token desde DB)
+async function loadConfigInfo() {
+    try {
+        const data = await apiRequest('/config/github-token');
+        const currentToken = data.token || localStorage.getItem('github_token') || '';
+        document.getElementById('current-token-display').value = currentToken;
+
+        // Info del repo
+        document.getElementById('info-repo').textContent = `${GITHUB_USER || 'calm291094-del'}/${GITHUB_REPO || 'meditech-tienda'}`;
+
+        const tokenType = currentToken.startsWith('github_pat_') ? 'Fine-Grained (Beta)' :
+                          currentToken.startsWith('ghp_') ? 'Classic' : 'No configurado';
+        document.getElementById('info-token-type').textContent = tokenType;
+
+        const lastSync = localStorage.getItem('github_token_date');
+        document.getElementById('info-last-sync').textContent = lastSync ?
+            new Date(lastSync).toLocaleString('es-ES') : 'Nunca';
+
+        // Verificar estado del token (opcional)
+        if (currentToken) {
+            try {
+                const testResult = await apiRequest('/config/test-github-token', {
+                    method: 'POST',
+                    body: JSON.stringify({ token: currentToken })
+                });
+                const statusEl = document.getElementById('info-status');
+                if (testResult.valid) {
+                    statusEl.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle"></i> Conectado</span>';
+                } else {
+                    statusEl.innerHTML = '<span class="text-red-600"><i class="fas fa-times-circle"></i> Token inválido</span>';
+                }
+            } catch (e) {
+                document.getElementById('info-status').innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle"></i> No verificado</span>';
+            }
+        } else {
+            document.getElementById('info-status').innerHTML = '<span class="text-gray-500">No configurado</span>';
+        }
+    } catch (error) {
+        console.error('Error al cargar configuración:', error);
+        // Fallback a localStorage
+        const currentToken = localStorage.getItem('github_token') || '';
+        document.getElementById('current-token-display').value = currentToken;
+    }
+}
+
+// Exportar todos los datos (incluye config)
+async function exportAllData() {
+    const backup = {
+        version: '2.0',
+        fecha: new Date().toISOString(),
+        productos: S.pr,
+        usuarios: S.users,
+        pedidos: S.orders,
+        config: S.config
+    };
+    
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `meditech-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showNotif('✅ Backup descargado', 'success');
+}
+
+// Importar backup (sin cambios, pero ahora usa la API para guardar)
+async function importBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const backup = JSON.parse(e.target.result);
+            if (!confirm(`¿Importar backup del ${new Date(backup.fecha).toLocaleString('es-ES')}?`)) return;
+            
+            showNotif('📤 Importando backup...', 'info');
+            
+            // Importar productos
+            if (backup.productos) {
+                S.pr = backup.productos;
+                // Guardar en el backend
+                for (const p of S.pr) {
+                    await apiRequest('/productos', { method: 'POST', body: JSON.stringify(p) }).catch(() => {});
+                }
+            }
+            // Importar usuarios (solo si no existen)
+            if (backup.usuarios) {
+                for (const u of backup.usuarios) {
+                    await apiRequest('/register', { method: 'POST', body: JSON.stringify(u) }).catch(() => {});
+                }
+            }
+            // Importar pedidos
+            if (backup.pedidos) {
+                for (const p of backup.pedidos) {
+                    await apiRequest('/pedidos', { method: 'POST', body: JSON.stringify({ items: p.items }) }).catch(() => {});
+                }
+            }
+            
+            renderProducts();
+            renderAdminList();
+            showNotif('✅ Backup importado correctamente', 'success');
+        } catch (err) {
+            showNotif('❌ Error al importar: ' + err.message, 'error');
+        }
+    };
+    reader.readAsText(file);
+}
+    </script>
 
 </body>
 </html>
