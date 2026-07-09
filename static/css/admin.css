@@ -203,14 +203,14 @@
 .admin-form select,
 .admin-form textarea {
     width: 100%;
-    padding: 8px 12px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 0.85rem;
+    padding: 10px 14px;
+    border: 2px solid #d1d5db; /* Gris visible */
+    border-radius: 10px;
+    font-size: 0.9rem;
     outline: none;
     transition: var(--transition);
     font-family: inherit;
-    min-height: 38px;
+    min-height: 42px;
     background: white;
     color: #1f2937;
 }
@@ -219,7 +219,7 @@
 .admin-form select:focus,
 .admin-form textarea:focus {
     border-color: #0d9488;
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.06);
+    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
 }
 
 .admin-form .form-row {
