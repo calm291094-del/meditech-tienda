@@ -51,6 +51,64 @@ const S = {
     }
 };
 
+
+// ============================================
+// RENDER PRODUCTOS
+// ============================================
+function renderProducts() {
+    const grid = document.getElementById('portada-productos');
+    if (!grid) return;
+    
+    const category = document.getElementById('filter-category')?.value || '';
+    const sort = document.getElementById('sort-by')?.value || 'default';
+    
+    let filtered = [...S.pr];
+    if (category) filtered = filtered.filter(p => p.category === category);
+    if (sort === 'price-asc') filtered.sort((a, b) => a.price - b.price);
+    else if (sort === 'price-desc') filtered.sort((a, b) => b.price - a.price);
+    else if (sort === 'name') filtered.sort((a, b) => a.name.localeCompare(b.name));
+    
+    if (filtered.length === 0) {
+        grid.innerHTML = `<p class="col-span-full text-center py-16 text-gray-400"><i class="fas fa-box-open text-5xl mb-4 block opacity-50"></i>No hay productos disponibles.</p>`;
+        document.getElementById('product-total-label').textContent = '0 productos';
+        return;
+    }
+    
+    grid.innerHTML = filtered.map(p => {
+        const isSoldOut = p.available === false || p.stock <= 0;
+        return `
+            <div class="product-card group">
+                <div class="image" onclick="openQuickView('${p.id}')">
+                    <img src="${p.image || 'https://via.placeholder.com/300x200?text=Sin+Imagen'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/300x200?text=Error'">
+                    ${p.feat ? '<span class="badge-new"><i class="fas fa-star mr-1"></i>Destacado</span>' : ''}
+                    ${isSoldOut ? '<span class="badge-soldout">❌ Agotado</span>' : `<span class="badge-soldout" style="background: rgba(0,0,0,0.7);">📦 ${p.stock} unidades</span>`}
+                    <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full font-medium">
+                        ${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}
+                    </div>
+                </div>
+                <div class="body">
+                    <div class="name" title="${p.name}">${p.name}</div>
+                    <div class="desc">${p.desc || ''}</div>
+                    <div class="footer">
+                        <div>
+                            <span class="price">$${parseFloat(p.price).toFixed(2)}</span>
+                            ${!isSoldOut ? `<span class="stock">📦 ${p.stock} disponibles</span>` : ''}
+                        </div>
+                        ${S.currentUser ? 
+                            (isSoldOut ? 
+                                `<button class="add-btn" disabled><i class="fas fa-ban"></i></button>` :
+                                `<button class="add-btn" onclick="addToCart('${p.id}')"><i class="fas fa-plus"></i></button>`) :
+                            `<button class="add-btn" onclick="openLoginModal(); return false;"><i class="fas fa-lock"></i></button>`
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    document.getElementById('product-total-label').textContent = `${filtered.length} productos`;
+}
+
+
 // ============================================
 // CARRUSEL
 // ============================================
