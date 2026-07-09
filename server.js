@@ -780,11 +780,6 @@ console.log('🔥 Sistema 24/7 activo para @AniaAsistenteBot');
 // ============================================================
 // 🔧 RUTA DE MIGRACIÓN (SOLO PARA USO ÚNICO)
 // ============================================================
-const { initTables } = require('./db');
-const fs = require('fs');
-const path = require('path');
-const bcrypt = require('bcryptjs');
-
 app.get('/run-migration', async (req, res) => {
     // ⚠️ CLAVE SECRETA: Cambia 'tu_clave_secreta_aqui' por una clave que solo tú sepas
     const SECRET_KEY = 'tu_clave_secreta_aqui';
