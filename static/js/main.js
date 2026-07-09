@@ -698,3 +698,7 @@ window.renderPedidos = renderPedidos;
 window.renderHistorial = renderHistorial;
 window.renderEstadisticas = renderEstadisticas;
 window.generarGraficos = generarGraficos;
+window.cargarUsuarios = cargarUsuarios;
+window.cargarPedidosAdmin = cargarPedidosAdmin;
+window.renderEstadisticas = renderEstadisticas;
+window.renderHistorial = renderHistorial;
