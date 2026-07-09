@@ -1,8 +1,7 @@
 /* ============================================
-   MEDITECH - DISEÑO PROFESIONAL COMPLETO
+   MEDITECH - ESTILOS COMPLETOS
    ============================================ */
 
-/* ---------- RESET Y VARIABLES ---------- */
 * {
     margin: 0;
     padding: 0;
@@ -15,24 +14,14 @@
     --primary-dark: #0f766e;
     --primary-light: #14b8a6;
     --secondary: #06b6d4;
-    --accent: #f59e0b;
     --bg: #f0fdfa;
-    --bg-card: #ffffff;
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --text-light: #94a3b8;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 20px rgba(0,0,0,0.06);
+    --shadow: 0 4px 20px rgba(0,0,0,0.06);
     --shadow-lg: 0 12px 40px rgba(13,148,136,0.12);
-    --shadow-xl: 0 20px 60px rgba(0,0,0,0.1);
     --radius: 16px;
-    --radius-sm: 10px;
-    --radius-full: 9999px;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-html {
-    scroll-behavior: smooth;
 }
 
 body {
@@ -41,8 +30,6 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    overflow-x: hidden;
-    line-height: 1.6;
 }
 
 .container {
@@ -58,7 +45,6 @@ body {
     z-index: 40;
     background: rgba(255,255,255,0.92);
     backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid rgba(0,0,0,0.04);
     box-shadow: 0 1px 4px rgba(0,0,0,0.02);
 }
@@ -110,42 +96,8 @@ body {
     font-size: 0.6rem;
     color: var(--text-light);
     margin-top: -2px;
-    font-weight: 500;
 }
 
-/* ---------- SEARCH ---------- */
-.search-container {
-    position: relative;
-    flex: 1;
-    max-width: 340px;
-}
-
-.search-container input {
-    width: 100%;
-    padding: 8px 42px 8px 16px;
-    border: 2px solid #e2e8f0;
-    border-radius: var(--radius-full);
-    font-size: 0.85rem;
-    outline: none;
-    transition: var(--transition);
-    background: white;
-    color: var(--text-primary);
-}
-
-.search-container input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(13,148,136,0.06);
-}
-
-.search-container .search-icon {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-light);
-}
-
-/* ---------- NAV ---------- */
 .nav {
     display: flex;
     gap: 28px;
@@ -179,14 +131,18 @@ body {
     width: 100%;
 }
 
-/* ---------- USER MENU ---------- */
+/* ---------- USER ---------- */
+.user-section {
+    position: relative;
+}
+
 .user-btn {
     display: flex;
     align-items: center;
     gap: 8px;
     background: #f1f5f9;
     padding: 6px 14px 6px 10px;
-    border-radius: var(--radius-full);
+    border-radius: 9999px;
     border: none;
     cursor: pointer;
     transition: var(--transition);
@@ -206,7 +162,7 @@ body {
     width: 220px;
     background: white;
     border-radius: var(--radius);
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
     border: 1px solid #f1f5f9;
     padding: 6px 0;
     display: none;
@@ -253,8 +209,6 @@ body {
     border: none;
     cursor: pointer;
     transition: var(--transition);
-    min-height: 38px;
-    min-width: 38px;
 }
 
 .cart-btn:hover {
@@ -277,7 +231,89 @@ body {
     font-weight: 700;
 }
 
-/* ---------- HERO / CARRUSEL ---------- */
+/* ---------- SEARCH ---------- */
+.search-container {
+    position: relative;
+    flex: 1;
+    max-width: 340px;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 8px 42px 8px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    outline: none;
+    transition: var(--transition);
+    background: white;
+}
+
+.search-container input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(13,148,136,0.06);
+}
+
+.search-container .search-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    max-height: 400px;
+    overflow-y: auto;
+    display: none;
+    z-index: 50;
+    margin-top: 8px;
+    border: 1px solid #f1f5f9;
+}
+
+.search-results.active {
+    display: block;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.search-result-item:hover {
+    background: #f8fafc;
+}
+
+.search-result-item img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.search-result-item .info .name {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.search-result-item .info .price {
+    font-size: 0.75rem;
+    color: var(--text-light);
+}
+
+/* ---------- CARRUSEL ---------- */
 .hero {
     padding: 24px 0;
 }
@@ -286,7 +322,7 @@ body {
     position: relative;
     overflow: hidden;
     border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow);
 }
 
 .carousel-inner {
@@ -313,15 +349,13 @@ body {
     background: rgba(0,0,0,0.5);
     backdrop-filter: blur(12px);
     padding: 18px 24px;
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     color: white;
-    border: 1px solid rgba(255,255,255,0.06);
 }
 
 .carousel-caption h3 {
     font-size: 1.3rem;
     font-weight: 700;
-    margin-bottom: 2px;
 }
 
 .carousel-caption p {
@@ -343,7 +377,7 @@ body {
     color: var(--primary);
     transition: var(--transition);
     z-index: 10;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -352,7 +386,6 @@ body {
 .carousel-btn:hover {
     background: white;
     transform: translateY(-50%) scale(1.05);
-    box-shadow: var(--shadow-md);
 }
 
 .carousel-btn.prev { left: 14px; }
@@ -383,7 +416,7 @@ body {
     border-radius: 4px;
 }
 
-/* ---------- CATEGORÍAS - REDISEÑO ---------- */
+/* ---------- CATEGORÍAS ---------- */
 .categories-section {
     padding: 48px 0 40px;
 }
@@ -397,7 +430,6 @@ body {
     font-size: 2rem;
     font-weight: 700;
     color: var(--text-primary);
-    letter-spacing: -0.5px;
 }
 
 .section-header p {
@@ -420,7 +452,7 @@ body {
     cursor: pointer;
     transition: var(--transition);
     border: 1px solid #f1f5f9;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow);
     position: relative;
     overflow: hidden;
 }
@@ -456,23 +488,21 @@ body {
     justify-content: center;
     font-size: 1.6rem;
     margin: 0 auto 12px;
-    background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+    background: #f0fdfa;
     color: var(--primary);
 }
 
 .category-card .name {
     font-weight: 700;
     font-size: 1rem;
-    color: var(--text-primary);
 }
 
 .category-card .count {
     font-size: 0.8rem;
     color: var(--text-light);
-    margin-top: 2px;
 }
 
-/* ---------- PRODUCTOS - REDISEÑO ---------- */
+/* ---------- PRODUCTOS ---------- */
 .products-section {
     padding: 40px 0 48px;
 }
@@ -504,7 +534,7 @@ body {
 .products-header .filters select {
     padding: 8px 16px;
     border: 2px solid #e2e8f0;
-    border-radius: var(--radius-full);
+    border-radius: 9999px;
     font-size: 0.8rem;
     outline: none;
     background: white;
@@ -521,13 +551,12 @@ body {
 .products-header .filters .product-count {
     padding: 8px 16px;
     background: white;
-    border-radius: var(--radius-full);
+    border-radius: 9999px;
     font-size: 0.8rem;
     color: var(--text-light);
     border: 2px solid #e2e8f0;
 }
 
-/* ---------- PRODUCT CARDS ---------- */
 .product-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -540,7 +569,7 @@ body {
     overflow: hidden;
     border: 1px solid #f1f5f9;
     transition: var(--transition);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow);
 }
 
 .product-card:hover {
@@ -572,11 +601,10 @@ body {
     position: absolute;
     top: 10px;
     padding: 3px 12px;
-    border-radius: var(--radius-full);
+    border-radius: 9999px;
     font-size: 0.5rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
     z-index: 2;
 }
 
@@ -606,7 +634,7 @@ body {
     backdrop-filter: blur(4px);
     color: white;
     padding: 2px 12px;
-    border-radius: var(--radius-full);
+    border-radius: 9999px;
     font-size: 0.5rem;
     font-weight: 600;
     z-index: 2;
@@ -623,7 +651,6 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: 2px;
 }
 
 .product-card .body .desc {
@@ -650,7 +677,6 @@ body {
     font-size: 1.2rem;
     font-weight: 700;
     color: var(--primary);
-    line-height: 1.2;
 }
 
 .product-card .body .footer .price small {
@@ -762,7 +788,6 @@ body {
 .offer-card .desc {
     font-size: 1rem;
     font-weight: 600;
-    margin: 6px 0;
 }
 
 .offer-card .detail {
@@ -777,7 +802,7 @@ body {
     font-weight: 700;
     padding: 8px;
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: 10px;
     cursor: pointer;
     transition: var(--transition);
     margin-top: 12px;
@@ -831,6 +856,265 @@ body {
     opacity: 0.5;
 }
 
+/* ---------- MODALES ---------- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 50;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: white;
+    border-radius: 20px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 95vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border-radius: 20px 20px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.modal-header .close {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-header .close:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-body label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+}
+
+.modal-body input,
+.modal-body select,
+.modal-body textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: var(--transition);
+    font-family: inherit;
+    min-height: 42px;
+}
+
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(13,148,136,0.06);
+}
+
+.modal-body .form-group {
+    margin-bottom: 14px;
+}
+
+/* ---------- CHATBOT ---------- */
+.chatbot-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+    pointer-events: none;
+}
+
+.chatbot-container > * {
+    pointer-events: auto;
+}
+
+.chatbot-toggle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 30px rgba(13,148,136,0.3);
+    transition: var(--transition);
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chatbot-toggle:hover {
+    transform: scale(1.05);
+}
+
+.chatbot-window {
+    width: 360px;
+    max-width: 92vw;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    overflow: hidden;
+    margin-bottom: 12px;
+    display: none;
+    max-height: 80vh;
+}
+
+.chatbot-window.open {
+    display: block;
+}
+
+.chatbot-header {
+    padding: 14px 18px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chatbot-header h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chatbot-header .close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chatbot-messages {
+    height: 300px;
+    max-height: 45vh;
+    padding: 14px;
+    overflow-y: auto;
+    background: #f9fafb;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chatbot-messages .message {
+    max-width: 85%;
+    padding: 8px 14px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.chatbot-messages .message.user {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.chatbot-messages .message.bot {
+    background: white;
+    color: var(--text-primary);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.chatbot-input {
+    padding: 10px 14px;
+    background: white;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    gap: 8px;
+}
+
+.chatbot-input input {
+    flex: 1;
+    padding: 8px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 9999px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: var(--transition);
+    min-height: 40px;
+}
+
+.chatbot-input input:focus {
+    border-color: var(--primary);
+}
+
+.chatbot-input button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.chatbot-input button:hover {
+    transform: scale(1.05);
+}
+
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 1024px) {
     .product-grid { grid-template-columns: repeat(3, 1fr); }
@@ -841,18 +1125,18 @@ body {
 @media (max-width: 768px) {
     .nav { display: none; }
     .search-container { display: none; }
-    
+
     .product-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
     .category-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .offer-grid { grid-template-columns: 1fr; }
     .footer-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
-    
+
     .carousel-item img { height: 220px; }
     .carousel-caption { bottom: 16px; left: 16px; right: 16px; padding: 12px 16px; }
     .carousel-caption h3 { font-size: 1rem; }
     .carousel-caption p { font-size: 0.7rem; }
     .carousel-btn { width: 32px; height: 32px; font-size: 12px; }
-    
+
     .section-header h2 { font-size: 1.4rem; }
     .product-card .image-wrap { height: 160px; }
     .product-card .body .name { font-size: 0.8rem; }
@@ -871,23 +1155,15 @@ body {
     .product-card .body .desc { display: none; }
     .product-card .body .footer .price { font-size: 0.85rem; }
     .product-card .body .footer .add-btn { width: 28px; height: 28px; font-size: 0.7rem; }
-    .product-card .body .footer .stock-info { font-size: 0.5rem; }
     .product-card .badge { font-size: 0.4rem; padding: 2px 8px; top: 6px; }
     .product-card .badge-category { font-size: 0.4rem; padding: 1px 8px; bottom: 6px; right: 6px; }
-    
+
     .category-card { padding: 16px; }
     .category-card .icon { width: 40px; height: 40px; font-size: 1.2rem; }
     .category-card .name { font-size: 0.75rem; }
-    
+
     .header-logo h1 { font-size: 1rem; }
     .header-logo-icon { width: 32px; height: 32px; font-size: 0.9rem; }
     .carousel-item img { height: 160px; }
-}
-
-@media (max-width: 380px) {
-    .product-grid { gap: 6px; }
-    .product-card .image-wrap { height: 110px; }
-    .product-card .body .name { font-size: 0.6rem; }
-    .product-card .body .footer .price { font-size: 0.75rem; }
-    .product-card .body .footer .add-btn { width: 24px; height: 24px; font-size: 0.6rem; }
+    .chatbot-window { width: 90vw; }
 }
