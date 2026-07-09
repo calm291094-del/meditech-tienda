@@ -3,18 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Meta tags SEO -->
-    <meta name="description" content="MediTech - Tienda de medicamentos y tecnología. Encuentra productos farmacéuticos y componentes de PC de calidad.">
-    <meta name="keywords" content="medicamentos, tecnología, PC, gaming, salud, farmacia, componentes">
-    <meta name="author" content="MediTech">
-    <meta property="og:title" content="MediTech | Medicamentos y Tecnología">
-    <meta property="og:description" content="Tu tienda confiable para medicamentos y hardware de última generación.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://meditech-tienda.onrender.com">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://meditech-tienda.onrender.com">
-
     <title>MediTech | Medicamentos y Tecnología</title>
 
     <!-- ========== EXTERNAL LIBRARIES ========== -->
@@ -22,40 +10,17 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- ========== LOCAL STYLES ========== -->
     <link rel="stylesheet" href="static/css/style.css">
     <link rel="stylesheet" href="static/css/admin.css">
-    <link rel="stylesheet" href="static/css/responsive.css">
 
     <!-- ========== FAVICON ========== -->
-    <link rel="icon" type="image/svg+xml" href="static/img/favicon.svg">
-
-    <!-- ========== STYLES CRITICAL (inline) ========== -->
-    <style>
-        /* Estilos críticos para el renderizado inicial */
-        .typing-indicator span {
-            animation: typing 1.4s infinite;
-        }
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-            30% { transform: translateY(-12px); opacity: 1; }
-        }
-        .no-copy {
-            -webkit-user-select: none !important;
-            -moz-user-select: none !important;
-            -ms-user-select: none !important;
-            user-select: none !important;
-        }
-        /* Estilos de los modales (siempre visibles) */
-        .modal-overlay { display: none; }
-        .modal-overlay.active { display: flex; }
-    </style>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232c3e50'/%3E%3Ctext x='50' y='70' font-family='Arial' font-size='70' font-weight='bold' fill='white' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E">
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body>
 
     <!-- ============================================ -->
     <!-- HEADER -->
@@ -70,14 +35,12 @@
                 </div>
             </div>
 
-            <!-- SEARCH -->
             <div class="search-container">
                 <input type="text" id="search-input" placeholder="Buscar productos..." oninput="searchProducts(this.value)">
                 <i class="fas fa-search search-icon"></i>
                 <div id="search-results" class="search-results"></div>
             </div>
 
-            <!-- NAV -->
             <nav class="nav">
                 <a href="#inicio">Inicio</a>
                 <a href="#productos">Productos</a>
@@ -85,20 +48,19 @@
                 <a href="#ofertas">Ofertas</a>
             </nav>
 
-            <!-- RIGHT -->
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
                 <button id="cart-btn" onclick="openCart()" class="cart-btn hidden">
                     <i class="fas fa-shopping-cart text-xl"></i>
                     <span id="cart-count" class="cart-count">0</span>
                 </button>
+
                 <div class="user-section" id="user-section">
                     <button id="user-btn" onclick="toggleUserMenu()" class="user-btn">
-                        <i class="fas fa-user-circle text-xl text-gray-600"></i>
-                        <span id="user-name-display" class="text-sm font-medium text-gray-700 hidden md:inline">Iniciar Sesión</span>
-                        <i class="fas fa-chevron-down text-xs text-gray-500"></i>
+                        <i class="fas fa-user-circle text-xl"></i>
+                        <span id="user-name-display" class="hidden md:inline">Iniciar Sesión</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
                     </button>
                     <div id="user-menu" class="user-menu">
-                        <!-- MENU LOGGED OUT -->
                         <div id="menu-logged-out">
                             <button onclick="openLoginModal()" class="user-menu-item">
                                 <i class="fas fa-sign-in-alt text-teal-600"></i> Iniciar Sesión
@@ -107,7 +69,6 @@
                                 <i class="fas fa-user-plus text-teal-600"></i> Registrarse
                             </button>
                         </div>
-                        <!-- MENU LOGGED IN -->
                         <div id="menu-logged-in" class="hidden">
                             <div class="px-4 py-3 border-b border-gray-200">
                                 <p class="text-sm text-gray-500">Conectado como</p>
@@ -118,7 +79,7 @@
                                 <i class="fas fa-cog text-orange-600"></i> Panel Admin
                             </button>
                             <button id="users-menu-btn" onclick="window.location.href='admin-usuarios.html'" class="user-menu-item hidden">
-                                <i class="fas fa-users-cog text-teal-600"></i> Gestión de Usuarios
+                                <i class="fas fa-users-cog text-teal-600"></i> Gestión Usuarios
                             </button>
                             <button id="telegram-btn" onclick="window.open('telegram-bot.html', '_blank')" class="user-menu-item hidden">
                                 <i class="fab fa-telegram text-blue-500"></i> 🤖 Bot Telegram
@@ -137,27 +98,27 @@
     </header>
 
     <!-- ============================================ -->
-    <!-- CARRUSEL -->
+    <!-- CARRUSEL HERO -->
     <!-- ============================================ -->
-    <section id="inicio" class="container py-8 relative">
-        <button class="edit-btn" onclick="editCarousel()" title="Editar carrusel"><i class="fas fa-edit"></i></button>
-        <div class="carousel">
-            <div class="carousel-inner" id="carousel-inner"></div>
-            <button class="carousel-btn prev" onclick="moveCarousel(-1)"><i class="fas fa-chevron-left"></i></button>
-            <button class="carousel-btn next" onclick="moveCarousel(1)"><i class="fas fa-chevron-right"></i></button>
-            <div class="carousel-dots" id="carousel-dots"></div>
+    <section id="inicio" class="hero">
+        <div class="container">
+            <div class="carousel">
+                <div class="carousel-inner" id="carousel-inner"></div>
+                <button class="carousel-btn prev" onclick="moveCarousel(-1)"><i class="fas fa-chevron-left"></i></button>
+                <button class="carousel-btn next" onclick="moveCarousel(1)"><i class="fas fa-chevron-right"></i></button>
+                <div class="carousel-dots" id="carousel-dots"></div>
+            </div>
         </div>
     </section>
 
     <!-- ============================================ -->
     <!-- CATEGORÍAS -->
     <!-- ============================================ -->
-    <section id="categorias" class="py-16 px-4 bg-white relative">
-        <button class="edit-btn" onclick="editSection('categorias')" title="Editar categoría"><i class="fas fa-edit"></i></button>
+    <section id="categorias" class="categories-section">
         <div class="container">
-            <div class="text-center mb-12">
-                <h2 class="section-title" id="categorias-title">Explora por Categoría</h2>
-                <p class="section-subtitle" id="categorias-subtitle">Encuentra exactamente lo que necesitas</p>
+            <div class="section-header">
+                <h2 id="categorias-title">Explora por Categoría</h2>
+                <p id="categorias-subtitle">Encuentra exactamente lo que necesitas</p>
             </div>
             <div class="category-grid" id="categorias-grid"></div>
         </div>
@@ -166,35 +127,34 @@
     <!-- ============================================ -->
     <!-- PRODUCTOS -->
     <!-- ============================================ -->
-    <section id="productos" class="py-16 px-4 bg-gray-50 relative">
-        <button class="edit-btn" onclick="editSection('productos')" title="Editar productos"><i class="fas fa-edit"></i></button>
+    <section id="productos" class="products-section">
         <div class="container">
-            <div class="flex justify-between items-end mb-10 flex-wrap gap-4">
-                <div>
-                    <h2 class="section-title" id="productos-title">🌟 Productos Destacados</h2>
-                    <p class="section-subtitle" id="productos-subtitle">Los más populares entre nuestros clientes</p>
+            <div class="products-header">
+                <div class="section-header">
+                    <h2 id="productos-title">🌟 Productos Destacados</h2>
+                    <p id="productos-subtitle">Los más populares entre nuestros clientes</p>
                 </div>
-                <div class="flex items-center gap-3 flex-wrap">
-                    <select id="filter-category" onchange="filterProducts()" class="px-4 py-2 border-2 border-gray-200 rounded-full focus:border-teal-500 outline-none bg-white">
-                        <option value="">Todas las categorías</option>
+                <div class="filters">
+                    <select id="filter-category" onchange="filterProducts()">
+                        <option value="">Todas</option>
                         <option value="medicamento">💊 Medicamentos</option>
                         <option value="tecnologia">💻 Tecnología</option>
                         <option value="salud">🩺 Salud</option>
                         <option value="gaming">🎮 Gaming</option>
                     </select>
-                    <select id="sort-by" onchange="filterProducts()" class="px-4 py-2 border-2 border-gray-200 rounded-full focus:border-teal-500 outline-none bg-white">
-                        <option value="default">Ordenar por</option>
-                        <option value="price-asc">Precio: Menor a Mayor</option>
-                        <option value="price-desc">Precio: Mayor a Menor</option>
+                    <select id="sort-by" onchange="filterProducts()">
+                        <option value="default">Ordenar</option>
+                        <option value="price-asc">Precio: Menor</option>
+                        <option value="price-desc">Precio: Mayor</option>
                         <option value="name">Nombre A-Z</option>
                     </select>
-                    <span class="text-sm text-gray-500 font-medium bg-white px-4 py-2 rounded-full shadow-sm" id="product-total-label">Cargando...</span>
+                    <span class="product-count" id="product-total-label">Cargando...</span>
                 </div>
             </div>
             <div id="portada-productos" class="product-grid">
                 <p class="col-span-full text-center py-16 text-gray-400">
                     <i class="fas fa-spinner fa-spin text-3xl mb-4 block"></i>
-                    Sincronizando catálogo...
+                    Cargando productos...
                 </p>
             </div>
         </div>
@@ -203,12 +163,11 @@
     <!-- ============================================ -->
     <!-- OFERTAS -->
     <!-- ============================================ -->
-    <section id="ofertas" class="offers-section relative">
-        <button class="edit-btn" onclick="editSection('ofertas')" title="Editar ofertas" style="background: rgba(255,255,255,0.9); color: #f59e0b;"><i class="fas fa-edit"></i></button>
+    <section id="ofertas" class="offers-section">
         <div class="container">
-            <div class="text-center mb-12">
-                <h2 class="text-4xl font-bold mb-3" id="ofertas-title">🔥 Ofertas Especiales</h2>
-                <p class="opacity-90" id="ofertas-subtitle">Aprovecha estos descuentos exclusivos</p>
+            <div class="section-header">
+                <h2 id="ofertas-title">🔥 Ofertas Especiales</h2>
+                <p id="ofertas-subtitle">Aprovecha estos descuentos exclusivos</p>
             </div>
             <div class="offer-grid" id="ofertas-grid"></div>
         </div>
@@ -281,7 +240,7 @@
                 </div>
                 <button type="submit" class="btn-primary w-full">Iniciar Sesión</button>
                 <p class="text-center text-sm text-gray-600 mt-4">
-                    ¿No tienes cuenta? 
+                    ¿No tienes cuenta?
                     <button type="button" onclick="closeLoginModal(); openRegisterModal();" class="text-teal-600 font-semibold hover:underline">Regístrate aquí</button>
                 </p>
             </form>
@@ -314,7 +273,7 @@
                 </div>
                 <button type="submit" class="btn-primary w-full">Crear Cuenta</button>
                 <p class="text-center text-sm text-gray-600 mt-4">
-                    ¿Ya tienes cuenta? 
+                    ¿Ya tienes cuenta?
                     <button type="button" onclick="closeRegisterModal(); openLoginModal();" class="text-teal-600 font-semibold hover:underline">Inicia sesión</button>
                 </p>
             </form>
@@ -358,10 +317,9 @@
     <!-- ============================================ -->
     <div id="admin-panel" class="admin-panel-overlay">
         <div class="admin-panel">
-            <!-- HEADER -->
             <div class="admin-header">
                 <div class="content">
-                    <h2><i class="fas fa-cog"></i> Panel de Administración <span class="text-xs bg-white/20 px-3 py-1 rounded-full font-normal">v2.0</span></h2>
+                    <h2><i class="fas fa-cog"></i> Panel de Administración</h2>
                     <div class="flex items-center gap-3 flex-wrap">
                         <div class="status"><span class="dot"></span> Online</div>
                         <div id="admin-notifications" class="flex items-center gap-2">
@@ -373,29 +331,23 @@
                 </div>
             </div>
 
-            <!-- DASHBOARD -->
             <div class="admin-dashboard" id="admin-dashboard">
                 <div class="metric-card"><div class="label">Ventas Hoy</div><div class="value" id="dashboard-ventas-hoy">$0</div></div>
-                <div class="metric-card" style="border-left-color:#3b82f6;"><div class="label">Pedidos Pendientes</div><div class="value" id="dashboard-pedidos-pendientes">0</div></div>
+                <div class="metric-card" style="border-left-color:#3b82f6;"><div class="label">Pedidos</div><div class="value" id="dashboard-pedidos-pendientes">0</div></div>
                 <div class="metric-card" style="border-left-color:#f59e0b;"><div class="label">Stock Crítico</div><div class="value" id="dashboard-stock-critico">0</div></div>
                 <div class="metric-card" style="border-left-color:#ef4444;"><div class="label">Clientes Nuevos</div><div class="value" id="dashboard-clientes-nuevos">0</div></div>
             </div>
 
-            <!-- TABS -->
             <div class="admin-tabs">
                 <button onclick="showAdminTab('productos')" class="admin-tab active" data-tab="productos"><i class="fas fa-box"></i>Productos</button>
                 <button onclick="showAdminTab('carrusel')" class="admin-tab" data-tab="carrusel"><i class="fas fa-images"></i>Carrusel</button>
                 <button onclick="showAdminTab('textos')" class="admin-tab" data-tab="textos"><i class="fas fa-font"></i>Textos</button>
                 <button onclick="showAdminTab('usuarios')" class="admin-tab" data-tab="usuarios"><i class="fas fa-users"></i>Usuarios</button>
-                <button onclick="showAdminTab('historial')" class="admin-tab" data-tab="historial"><i class="fas fa-history"></i>Historial</button>
                 <button onclick="showAdminTab('pedidos')" class="admin-tab" data-tab="pedidos"><i class="fas fa-receipt"></i>Pedidos</button>
                 <button onclick="showAdminTab('estadisticas')" class="admin-tab" data-tab="estadisticas"><i class="fas fa-chart-line"></i>Estadísticas</button>
                 <button onclick="showAdminTab('config')" class="admin-tab" data-tab="config"><i class="fas fa-key"></i>Configuración</button>
-                <button onclick="showAdminTab('asistente')" class="admin-tab" data-tab="asistente"><i class="fas fa-robot"></i>Asistente IA</button>
-                <button onclick="showAdminTab('logs')" class="admin-tab" data-tab="logs"><i class="fas fa-clipboard-list"></i>📋 Logs</button>
             </div>
 
-            <!-- CONTENT -->
             <div class="admin-content">
                 <!-- Productos -->
                 <div id="tab-productos" class="tab-content active">
@@ -449,12 +401,12 @@
                                 <label><input type="checkbox" id="prod-feat"> Producto destacado</label>
                             </div>
                             <div class="form-actions">
-                                <button type="submit" class="btn-primary flex-1"><i class="fas fa-save"></i> Guardar</button>
-                                <button type="button" onclick="resetProductForm()" class="px-6 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-xl transition">Cancelar</button>
+                                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Guardar</button>
+                                <button type="button" onclick="resetProductForm()" class="btn-secondary">Cancelar</button>
                             </div>
                         </form>
                     </div>
-                    <div class="admin-card mt-6">
+                    <div class="admin-card">
                         <div class="header">
                             <h3><i class="fas fa-boxes text-teal-600"></i> Inventario <span class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-sm font-semibold" id="admin-count">0</span></h3>
                         </div>
@@ -464,137 +416,107 @@
 
                 <!-- Carrusel -->
                 <div id="tab-carrusel" class="tab-content">
-                    <h3 class="text-xl font-bold mb-4"><i class="fas fa-images text-purple-600"></i> Editar Carrusel</h3>
-                    <div id="carousel-editor"></div>
-                    <div class="flex gap-3 mt-4">
-                        <button onclick="addCarouselSlide()" class="btn-primary"><i class="fas fa-plus"></i> Agregar Slide</button>
-                        <button onclick="saveCarousel()" class="btn-primary"><i class="fas fa-save"></i> Guardar Carrusel</button>
+                    <div class="admin-card">
+                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-images text-purple-600"></i> Editar Carrusel</h3>
+                        <div id="carousel-editor"></div>
+                        <div class="flex gap-3 mt-4">
+                            <button onclick="addCarouselSlide()" class="btn-primary"><i class="fas fa-plus"></i> Agregar Slide</button>
+                            <button onclick="saveCarousel()" class="btn-primary"><i class="fas fa-save"></i> Guardar</button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Textos -->
                 <div id="tab-textos" class="tab-content">
-                    <h3 class="text-xl font-bold mb-4"><i class="fas fa-font text-blue-600"></i> Editar Textos</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="form-group"><label>Subtítulo del Header</label><input type="text" id="edit-header-subtitle"></div>
-                        <div class="form-group"><label>Título de Categorías</label><input type="text" id="edit-categorias-title"></div>
-                        <div class="form-group"><label>Subtítulo de Categorías</label><input type="text" id="edit-categorias-subtitle"></div>
-                        <div class="form-group"><label>Título de Productos</label><input type="text" id="edit-productos-title"></div>
-                        <div class="form-group"><label>Subtítulo de Productos</label><input type="text" id="edit-productos-subtitle"></div>
-                        <div class="form-group"><label>Título de Ofertas</label><input type="text" id="edit-ofertas-title"></div>
-                        <div class="form-group"><label>Subtítulo de Ofertas</label><input type="text" id="edit-ofertas-subtitle"></div>
-                        <div class="form-group"><label>Descripción del Footer</label><textarea id="edit-footer-description" rows="3"></textarea></div>
+                    <div class="admin-card">
+                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-font text-blue-600"></i> Editar Textos</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="form-group"><label>Subtítulo del Header</label><input type="text" id="edit-header-subtitle" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Título de Categorías</label><input type="text" id="edit-categorias-title" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Subtítulo de Categorías</label><input type="text" id="edit-categorias-subtitle" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Título de Productos</label><input type="text" id="edit-productos-title" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Subtítulo de Productos</label><input type="text" id="edit-productos-subtitle" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Título de Ofertas</label><input type="text" id="edit-ofertas-title" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Subtítulo de Ofertas</label><input type="text" id="edit-ofertas-subtitle" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Descripción del Footer</label><textarea id="edit-footer-description" rows="3" class="border-2 border-gray-300 rounded-lg p-3 w-full"></textarea></div>
+                        </div>
+                        <button onclick="saveTexts()" class="btn-primary mt-4"><i class="fas fa-save"></i> Guardar Textos</button>
                     </div>
-                    <button onclick="saveTexts()" class="btn-primary mt-4"><i class="fas fa-save"></i> Guardar Textos</button>
                 </div>
 
                 <!-- Usuarios -->
                 <div id="tab-usuarios" class="tab-content">
-                    <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
-                        <h3 class="text-xl font-bold"><i class="fas fa-users text-green-600"></i> Usuarios Registrados</h3>
-                        <div class="flex gap-2">
-                            <input type="text" id="buscar-usuario" placeholder="🔍 Buscar usuario..." class="px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none text-sm" oninput="buscarUsuarios(this.value)">
-                            <button onclick="exportarClientesCSV()" class="btn-primary">📥 Exportar</button>
+                    <div class="admin-card">
+                        <div class="header">
+                            <h3><i class="fas fa-users text-green-600"></i> Usuarios Registrados</h3>
+                            <div class="flex gap-2">
+                                <input type="text" id="buscar-usuario" placeholder="🔍 Buscar..." class="border-2 border-gray-300 rounded-lg px-4 py-2 text-sm" oninput="buscarUsuarios(this.value)">
+                                <button onclick="exportarClientesCSV()" class="btn-primary text-sm">📥 Exportar</button>
+                            </div>
                         </div>
+                        <div id="users-list"></div>
                     </div>
-                    <div id="users-list"></div>
-                    <div id="perfil-cliente-container" class="hidden mt-6">
-                        <!-- Perfil de cliente -->
-                    </div>
-                </div>
-
-                <!-- Historial -->
-                <div id="tab-historial" class="tab-content">
-                    <h3 class="text-xl font-bold mb-4"><i class="fas fa-history text-orange-600"></i> Historial de Vistas</h3>
-                    <div id="history-list"></div>
                 </div>
 
                 <!-- Pedidos -->
                 <div id="tab-pedidos" class="tab-content">
-                    <h3 class="text-xl font-bold mb-4"><i class="fas fa-receipt text-red-600"></i> Pedidos Recibidos</h3>
-                    <div id="orders-list"></div>
+                    <div class="admin-card">
+                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-receipt text-red-600"></i> Pedidos Recibidos</h3>
+                        <div id="orders-list"></div>
+                    </div>
                 </div>
 
                 <!-- Estadísticas -->
                 <div id="tab-estadisticas" class="tab-content">
-                    <h3 class="text-xl font-bold mb-4"><i class="fas fa-chart-line text-indigo-600"></i> Estadísticas</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        <div class="bg-gradient-to-br from-teal-500 to-cyan-600 text-white p-5 rounded-2xl"><p class="text-3xl font-bold" id="stat-products">0</p><p class="text-sm opacity-90">Productos</p></div>
-                        <div class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-5 rounded-2xl"><p class="text-3xl font-bold" id="stat-users">0</p><p class="text-sm opacity-90">Usuarios</p></div>
-                        <div class="bg-gradient-to-br from-green-500 to-emerald-600 text-white p-5 rounded-2xl"><p class="text-3xl font-bold" id="stat-views">0</p><p class="text-sm opacity-90">Vistas</p></div>
-                        <div class="bg-gradient-to-br from-orange-500 to-red-600 text-white p-5 rounded-2xl"><p class="text-3xl font-bold" id="stat-orders">0</p><p class="text-sm opacity-90">Pedidos</p></div>
-                        <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white p-5 rounded-2xl"><p class="text-3xl font-bold" id="stat-revenue">$0</p><p class="text-sm opacity-90">Ingresos</p></div>
-                        <div class="bg-gradient-to-br from-gray-700 to-gray-900 text-white p-5 rounded-2xl"><p class="text-3xl font-bold" id="stat-today">0</p><p class="text-sm opacity-90">Vistas Hoy</p></div>
-                    </div>
-                    <div class="grid md:grid-cols-2 gap-6 mt-6">
-                        <div class="bg-white p-4 rounded-2xl border"><h4 class="font-semibold">📊 Ventas por Categoría</h4><canvas id="ventas-categoria" height="180"></canvas></div>
-                        <div class="bg-white p-4 rounded-2xl border"><h4 class="font-semibold">📈 Pedidos (7 días)</h4><canvas id="pedidos-dia" height="180"></canvas></div>
+                    <div class="admin-card">
+                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-chart-line text-indigo-600"></i> Estadísticas</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card"><div class="stat-value" id="stat-products">0</div><div class="stat-label">Productos</div></div>
+                            <div class="stat-card"><div class="stat-value" id="stat-users">0</div><div class="stat-label">Usuarios</div></div>
+                            <div class="stat-card"><div class="stat-value" id="stat-orders">0</div><div class="stat-label">Pedidos</div></div>
+                            <div class="stat-card"><div class="stat-value" id="stat-revenue">$0</div><div class="stat-label">Ingresos</div></div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6 mt-4">
+                            <div class="bg-white p-4 rounded-xl border"><h4 class="font-semibold">📊 Ventas por Categoría</h4><canvas id="ventas-categoria" height="180"></canvas></div>
+                            <div class="bg-white p-4 rounded-xl border"><h4 class="font-semibold">📈 Pedidos (7 días)</h4><canvas id="pedidos-dia" height="180"></canvas></div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Configuración -->
                 <div id="tab-config" class="tab-content">
-                    <h3 class="text-xl font-bold mb-4"><i class="fas fa-key text-amber-600"></i> Configuración del Sistema</h3>
-                    <div class="token-config">
-                        <h4 class="font-bold text-lg mb-3"><i class="fas fa-key text-blue-600"></i> Token de GitHub</h4>
-                        <p class="text-sm text-gray-600 mb-3">Si tu token deja de funcionar, cámbialo aquí.</p>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-sm font-semibold mb-2">Token actual</label>
-                                <div class="flex gap-2">
-                                    <input type="password" id="current-token-display" readonly class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 font-mono text-sm" value="">
-                                    <button onclick="toggleTokenVisibility()" class="px-4 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl transition"><i class="fas fa-eye"></i></button>
+                    <div class="admin-card">
+                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-key text-amber-600"></i> Configuración</h3>
+                        <div class="token-config">
+                            <h4 class="font-bold text-lg mb-3"><i class="fas fa-key text-blue-600"></i> Token de GitHub</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">Token actual</label>
+                                    <div class="flex gap-2">
+                                        <input type="password" id="current-token-display" readonly class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl bg-gray-50 font-mono text-sm" value="">
+                                        <button onclick="toggleTokenVisibility()" class="px-4 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl transition"><i class="fas fa-eye"></i></button>
+                                    </div>
                                 </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">Nuevo token</label>
+                                    <input type="text" id="new-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-teal-500 outline-none font-mono text-sm">
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="updateToken()" class="btn-primary"><i class="fas fa-save"></i> Actualizar</button>
+                                    <button onclick="testToken()" class="btn-secondary"><i class="fas fa-vial"></i> Probar</button>
+                                </div>
+                                <div id="token-status" class="token-status" style="display:none;"></div>
                             </div>
-                            <div>
-                                <label class="block text-sm font-semibold mb-2">Nuevo token</label>
-                                <input type="text" id="new-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none font-mono text-sm">
-                                <p class="text-xs text-gray-500 mt-2">💡 Crea uno en: <a href="https://github.com/settings/tokens/new" target="_blank" class="text-teal-600 hover:underline">github.com/settings/tokens/new</a></p>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="font-bold text-lg mb-3"><i class="fas fa-database text-amber-600"></i> Backup</h4>
+                            <div class="flex gap-2 flex-wrap">
+                                <button onclick="exportAllData()" class="btn-primary"><i class="fas fa-download"></i> Exportar</button>
+                                <label class="btn-primary cursor-pointer"><i class="fas fa-upload"></i> Importar<input type="file" accept=".json" onchange="importBackup(event)" class="hidden"></label>
+                                <button onclick="forzarRecarga()" class="btn-secondary"><i class="fas fa-sync"></i> Recargar</button>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="updateToken()" class="btn-primary"><i class="fas fa-save"></i> Actualizar Token</button>
-                                <button onclick="testToken()" class="px-6 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition"><i class="fas fa-vial"></i> Probar</button>
-                            </div>
-                            <div id="token-status" class="token-status" style="display:none;"></div>
                         </div>
                     </div>
-                    <div class="bg-gradient-to-r from-gray-50 to-slate-50 p-6 rounded-xl border-2 border-gray-200 mt-6">
-                        <h4 class="font-bold text-lg mb-3"><i class="fas fa-info-circle text-gray-600"></i> Información del Sistema</h4>
-                        <div class="grid md:grid-cols-2 gap-4 text-sm">
-                            <div class="bg-white p-4 rounded-lg border"><p class="text-gray-500">Repositorio</p><p class="font-mono font-semibold" id="info-repo">-</p></div>
-                            <div class="bg-white p-4 rounded-lg border"><p class="text-gray-500">Tipo de Token</p><p class="font-mono font-semibold" id="info-token-type">-</p></div>
-                            <div class="bg-white p-4 rounded-lg border"><p class="text-gray-500">Última sincronización</p><p class="font-mono font-semibold" id="info-last-sync">-</p></div>
-                            <div class="bg-white p-4 rounded-lg border"><p class="text-gray-500">Estado</p><p class="font-semibold" id="info-status">-</p></div>
-                        </div>
-                    </div>
-                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-6 rounded-xl border-2 border-amber-200 mt-6">
-                        <h4 class="font-bold text-lg mb-3"><i class="fas fa-database text-amber-600"></i> Backup y Restauración</h4>
-                        <p class="text-sm text-gray-600 mb-3">Exporta todos tus datos como respaldo de seguridad.</p>
-                        <div class="flex gap-2 flex-wrap">
-                            <button onclick="exportAllData()" class="px-6 bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-xl transition"><i class="fas fa-download"></i> Exportar Todo</button>
-                            <label class="px-6 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl transition cursor-pointer"><i class="fas fa-upload"></i> Importar Backup<input type="file" accept=".json" onchange="importBackup(event)" class="hidden"></label>
-                            <button onclick="forzarRecarga()" class="px-6 bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl transition"><i class="fas fa-sync"></i> Forzar Recarga</button>
-                            <button onclick="realizarBackup()" class="px-6 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl transition"><i class="fas fa-save"></i> Backup Manual</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Asistente IA -->
-                <div id="tab-asistente" class="tab-content">
-                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-2xl border-2 border-purple-200 mb-6">
-                        <h3 class="text-2xl font-bold text-purple-800"><i class="fas fa-robot text-purple-600"></i> 🤖 Asistente Ania</h3>
-                        <p class="text-purple-700">Tu asistente personal con inteligencia artificial.</p>
-                    </div>
-                    <div id="ania-chat-container"></div>
-                </div>
-
-                <!-- Logs -->
-                <div id="tab-logs" class="tab-content">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold"><i class="fas fa-clipboard-list text-gray-600"></i> 📋 Registro de Actividad</h3>
-                        <button onclick="limpiarLogs()" class="btn-danger"><i class="fas fa-trash-alt"></i> Limpiar Logs</button>
-                    </div>
-                    <div id="logs-container"></div>
                 </div>
             </div>
         </div>
@@ -606,24 +528,23 @@
     <div class="chatbot-container">
         <div id="chatbot-window" class="chatbot-window">
             <div class="chatbot-header">
-                <h3><i class="fas fa-robot"></i> Asistente MediTech <span class="text-xs bg-white/20 px-2 py-1 rounded-full">AI</span></h3>
+                <h3><i class="fas fa-robot"></i> Asistente MediTech</h3>
                 <button class="close" onclick="toggleChat()"><i class="fas fa-times"></i></button>
             </div>
             <div id="chat-messages" class="chatbot-messages">
                 <div class="message bot">
                     <strong>¡Hola! 👋</strong><br>
-                    Soy MediTech con <b>Inteligencia Artificial</b>. Pregúntame sobre:
+                    Soy el asistente de MediTech. Pregúntame sobre:
                     <ul class="text-xs mt-2 space-y-1">
                         <li>💊 Medicamentos y sus usos</li>
                         <li>💻 Piezas de PC y componentes</li>
                         <li>🛒 Información de productos</li>
-                        <li>❓ Cualquier duda general</li>
                     </ul>
                 </div>
             </div>
             <div class="chatbot-input">
                 <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter') sendMessage()">
-                <button onclick="sendMessage()" id="chat-send-btn"><i class="fas fa-paper-plane"></i></button>
+                <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
         <button onclick="toggleChat()" class="chatbot-toggle"><i class="fas fa-comment-dots"></i></button>
@@ -632,8 +553,6 @@
     <!-- ============================================ -->
     <!-- SCRIPTS -->
     <!-- ============================================ -->
-
-    <!-- ========== LOCAL SCRIPTS ========== -->
     <script src="static/js/api.js"></script>
     <script src="static/js/token.js"></script>
     <script src="static/js/auth.js"></script>
@@ -642,40 +561,27 @@
     <script src="static/js/admin.js"></script>
     <script src="static/js/main.js"></script>
 
-    <!-- ============================================ -->
-    <!-- SCRIPTS DE PROTECCIÓN (opcionales) -->
-    <!-- ============================================ -->
     <script>
-        // Lazy loading para imágenes
-        if ('IntersectionObserver' in window) {
-            const imageObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        if (img.dataset.src) {
-                            img.src = img.dataset.src;
-                            img.removeAttribute('data-src');
-                            observer.unobserve(img);
-                        }
-                    }
-                });
-            });
-            document.querySelectorAll('img[data-src]').forEach(img => imageObserver.observe(img));
-        }
+        // Año en el footer
+        document.getElementById('year').textContent = new Date().getFullYear();
 
-        // Prevenir spam en formularios
-        let lastSubmitTime = 0;
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', (e) => {
-                const now = Date.now();
-                if (now - lastSubmitTime < 2000) {
-                    e.preventDefault();
-                    showNotif('⚠️ Espera unos segundos antes de enviar de nuevo', 'warning');
-                    return false;
-                }
-                lastSubmitTime = now;
-                form.classList.add('submitted');
-            });
+        // Cerrar modales con Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active, .admin-panel-overlay.active, .quick-view-overlay.active')
+                    .forEach(el => el.classList.remove('active'));
+                document.getElementById('user-menu').classList.remove('open');
+            }
+        });
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#user-section')) {
+                document.getElementById('user-menu').classList.remove('open');
+            }
+            if (!e.target.closest('.search-container')) {
+                document.getElementById('search-results').classList.remove('active');
+            }
         });
     </script>
 </body>
