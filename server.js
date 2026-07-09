@@ -592,29 +592,67 @@ async function sendTelegramMessage(chatId, text) {
 
 async function getAniaResponse(userMessage) {
     try {
+        // 1. Obtener productos de la base de datos
+        const productos = await getAll('SELECT name, price, description, stock FROM productos LIMIT 20');
+        
+        // 2. Construir contexto de productos
+        let productosContexto = '';
+        if (productos && productos.length > 0) {
+            productosContexto = productos.map(p => 
+                `- ${p.name} ($${parseFloat(p.price).toFixed(2)}): ${(p.description || p.desc || '').substring(0, 100)}... Stock: ${p.stock}`
+            ).join('\n');
+        } else {
+            productosContexto = 'No hay productos disponibles en este momento.';
+        }
+
+        // 3. Llamar a la IA con contexto
         const response = await fetch('https://text.pollinations.ai/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 messages: [
-                    { role: 'system', content: 'Eres Ania, asistente de MediTech. Alegre, entusiasta, hablas español con emojis.' },
+                    { 
+                        role: 'system', 
+                        content: `Eres Ania, la asistente virtual de MediTech. 
+                        Tienes acceso a estos productos de la tienda:\n${productosContexto}\n
+                        Tu personalidad es alegre, entusiasta y usas emojis.
+                        Hablas en español.
+                        Si preguntan por un producto, dales información específica.
+                        Si preguntan por precios, menciónalos.
+                        Siempre recomienda consultar a un médico para temas de salud.`
+                    },
                     { role: 'user', content: userMessage }
                 ],
                 model: 'openai'
             })
         });
+
         if (response.ok) {
             let texto = await response.text();
             texto = texto.replace(/<[^>]*>/g, '').trim();
             if (texto.length > 10) return texto;
         }
-    } catch (e) {}
+    } catch (e) {
+        console.error('Error en IA:', e.message);
+    }
+
+    // Fallback: respuestas locales
     const lower = userMessage.toLowerCase();
-    if (lower.includes('hola')) return "¡Hola! ☕️ Soy Ania, tu asistente de MediTech. ¿En qué puedo ayudarte hoy? ✨";
-    if (lower.includes('precio')) return "💰 Precios en: https://calm291094-del.github.io/meditech-tienda/ 😊";
-    if (lower.includes('gracias')) return "¡De nada! ☕️ ¿Necesitas algo más? ✨";
+    if (lower.includes('hola') || lower.includes('buenas')) {
+        return "¡Hola! ☕️ Soy Ania, tu asistente de MediTech. ¿En qué puedo ayudarte hoy? ✨\n\nPuedes preguntarme por nuestros productos, precios o recomendaciones.";
+    }
+    if (lower.includes('precio') || lower.includes('cuesta')) {
+        return "💰 Puedes ver todos los precios en nuestra web: https://calm291094-del.github.io/meditech-tienda/ 😊 ¿Quieres que te recomiende algún producto?";
+    }
+    if (lower.includes('gracias')) {
+        return "¡De nada! ☕️ Me alegra poder ayudarte. ¿Necesitas algo más? ✨";
+    }
+    if (lower.includes('producto') || lower.includes('medicamento') || lower.includes('tecnología')) {
+        return "📦 Tenemos una amplia variedad de productos en:\n• 💊 Medicamentos\n• 💻 Tecnología\n• 🩺 Salud\n• 🎮 Gaming\n\n¿Quieres que te cuente más sobre algún producto en particular?";
+    }
     return "¡Interesante! ☕️ ¿Qué más necesitas saber de MediTech?";
 }
+
 
 async function getUpdates() {
     try {
