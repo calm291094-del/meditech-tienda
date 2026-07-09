@@ -69,7 +69,10 @@ function resetProductForm() {
 async function toggleProductAvailability(id) {
     const p = S.pr.find(x => x.id === id);
     if (!p) return;
+    
     const newVal = p.available === false ? true : false;
+    const estadoTexto = newVal ? 'Disponible' : 'Agotado';
+    
     try {
         await apiRequest(`/productos/${id}`, {
             method: 'PUT',
@@ -78,7 +81,7 @@ async function toggleProductAvailability(id) {
         p.available = newVal;
         renderProducts();
         renderAdminList();
-        showNotif(`✅ Estado cambiado: ${newVal ? 'Disponible' : 'Agotado'}`, 'success');
+        showNotif(`✅ Estado cambiado: ${estadoTexto}`, 'success');
     } catch (error) {
         showNotif(`❌ ${error.message}`, 'error');
     }
