@@ -260,6 +260,14 @@ async function init() {
         
         await cargarProductos();
         
+        // 🔥 Cargar datos adicionales
+        if (S.currentUser && S.currentUser.role === 'admin') {
+            await renderUsers();
+            await renderEstadisticas();
+            setTimeout(generarGraficos, 500);
+            actualizarDashboard();
+        }
+        
         renderCarousel();
         renderCategorias();
         renderOfertas();
