@@ -1,17 +1,34 @@
-// server.js - Backend completo (Bot + API REST)
+// server.js - Backend completo con PostgreSQL + bcrypt + JWT
 const express = require('express');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_change_me';
 
 // ============================================================
 // MIDDLEWARES
 // ============================================================
-app.use(cors()); // Permite peticiones desde cualquier origen
+app.use(cors({
+    origin: '*', // En producción, especifica tu dominio
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json({ limit: '10mb' }));
 
 // ============================================================
-// CONFIGURACIÓN DEL BOT (existente)
+// IMPORTAR BASE DE DATOS
+// ============================================================
+const { query, getOne, getAll, initTables } = require('./db');
+
+// Inicializar tablas al iniciar
+initTables().catch(console.error);
+
+// ============================================================
+// CONFIGURACIÓN DEL BOT
 // ============================================================
 const WORKER_URL = process.env.WORKER_URL || "https://telegram-proxy.calm291094.workers.dev";
 const TOKEN = process.env.TELEGRAM_TOKEN;
@@ -28,55 +45,62 @@ console.log(`   WORKER_URL: ${WORKER_URL}`);
 console.log(`   TOKEN: ${TOKEN ? '✅ CONFIGURADO' : '❌ NO CONFIGURADO'}`);
 
 // ============================================================
-// 📦 BASE DE DATOS EN MEMORIA (para pruebas)
+// 🛡️ MIDDLEWARE DE AUTENTICACIÓN JWT
 // ============================================================
-// ⚠️ IMPORTANTE: En producción usa una base de datos real (MongoDB, PostgreSQL, etc.)
-let usuarios = [];
-let productos = [];
-let pedidos = [];
+const authenticateToken = async (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
-// Cargar datos desde archivos JSON si existen (opcional)
-const fs = require('fs');
-const path = require('path');
-const DATA_DIR = path.join(__dirname, 'data');
+    if (!token) {
+        return res.status(401).json({ error: 'Acceso denegado. Token no proporcionado.' });
+    }
 
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    // Verificar si el token fue invalidado
+    const invalidated = await getOne(
+        'SELECT * FROM tokens_invalidados WHERE token = $1',
+        [token]
+    );
+    if (invalidated) {
+        return res.status(403).json({ error: 'Token inválido o revocado.' });
+    }
 
-function leerJSON(nombre) {
     try {
-        const data = fs.readFileSync(path.join(DATA_DIR, nombre), 'utf8');
-        return JSON.parse(data);
-    } catch { return null; }
-}
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        return res.status(403).json({ error: 'Token inválido o expirado.' });
+    }
+};
 
-function escribirJSON(nombre, datos) {
-    fs.writeFileSync(path.join(DATA_DIR, nombre), JSON.stringify(datos, null, 2));
-}
-
-// Cargar datos iniciales
-const usuariosGuardados = leerJSON('usuarios.json');
-if (usuariosGuardados) usuarios = usuariosGuardados;
-else {
-    // Usuario admin por defecto
-    usuarios = [{
-        username: 'root',
-        password: 'Root*4815162342+-', // ⚠️ En producción usa bcrypt
-        name: 'Administrador',
-        email: 'admin@meditech.com',
-        role: 'admin',
-        fecha: new Date().toISOString()
-    }];
-    escribirJSON('usuarios.json', usuarios);
-}
-
-const productosGuardados = leerJSON('productos.json');
-if (productosGuardados) productos = productosGuardados;
-
-const pedidosGuardados = leerJSON('pedidos.json');
-if (pedidosGuardados) pedidos = pedidosGuardados;
+const esAdmin = (req, res, next) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Se requiere rol de administrador.' });
+    }
+    next();
+};
 
 // ============================================================
-// 🌐 RUTAS DE LA API (LO QUE LE FALTA A TU INDEX.HTML)
+// 📝 FUNCIONES DE TOKENS
+// ============================================================
+function generarToken(usuario) {
+    return jwt.sign(
+        { id: usuario.id, username: usuario.username, role: usuario.role },
+        JWT_SECRET,
+        { expiresIn: '8h' }
+    );
+}
+
+function generarRefreshToken(usuario) {
+    return jwt.sign(
+        { id: usuario.id, username: usuario.username },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+    );
+}
+
+// ============================================================
+// 🌐 RUTAS DE LA API
 // ============================================================
 
 // ---- Health Check ----
@@ -84,146 +108,445 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// ---- Productos ----
-app.get('/api/productos', (req, res) => {
-    res.json(productos);
-});
-
-app.post('/api/productos', (req, res) => {
-    const { name, category, price, desc, stock, image, feat, available } = req.body;
-    const nuevo = {
-        id: 'p' + Date.now(),
-        name,
-        category: category || 'medicamento',
-        price: parseFloat(price),
-        desc: desc || '',
-        stock: parseInt(stock) || 0,
-        image: image || 'https://via.placeholder.com/300x200',
-        feat: feat || false,
-        available: available !== undefined ? available : true
-    };
-    productos.push(nuevo);
-    escribirJSON('productos.json', productos);
-    res.json(nuevo);
-});
-
-app.put('/api/productos/:id', (req, res) => {
-    const { id } = req.params;
-    const index = productos.findIndex(p => p.id === id);
-    if (index === -1) return res.status(404).json({ error: 'Producto no encontrado' });
-    const { name, category, price, desc, stock, image, available, feat } = req.body;
-    if (name) productos[index].name = name;
-    if (category) productos[index].category = category;
-    if (price !== undefined) productos[index].price = parseFloat(price);
-    if (desc) productos[index].desc = desc;
-    if (stock !== undefined) productos[index].stock = parseInt(stock);
-    if (image) productos[index].image = image;
-    if (available !== undefined) productos[index].available = available;
-    if (feat !== undefined) productos[index].feat = feat;
-    escribirJSON('productos.json', productos);
-    res.json(productos[index]);
-});
-
-app.delete('/api/productos/:id', (req, res) => {
-    const { id } = req.params;
-    const index = productos.findIndex(p => p.id === id);
-    if (index === -1) return res.status(404).json({ error: 'Producto no encontrado' });
-    productos.splice(index, 1);
-    escribirJSON('productos.json', productos);
-    res.json({ message: 'Producto eliminado' });
-});
-
-// ---- Usuarios ----
-app.get('/api/usuarios', (req, res) => {
-    // ⚠️ En producción, no devuelvas contraseñas
-    const usuariosSinPass = usuarios.map(({ password, ...rest }) => rest);
-    res.json(usuariosSinPass);
-});
-
-app.post('/api/register', (req, res) => {
+// ---- REGISTRO ----
+app.post('/api/register', async (req, res) => {
     const { username, password, name, email } = req.body;
-    if (usuarios.find(u => u.username === username)) {
-        return res.status(400).json({ error: 'El usuario ya existe' });
+
+    if (!username || !password || !name) {
+        return res.status(400).json({ error: 'Nombre, usuario y contraseña son obligatorios' });
     }
-    const nuevo = {
-        username,
-        password, // ⚠️ En producción usa bcrypt
-        name,
-        email,
-        role: 'user',
-        fecha: new Date().toISOString()
-    };
-    usuarios.push(nuevo);
-    escribirJSON('usuarios.json', usuarios);
-    // ⚠️ En producción no devuelvas la contraseña
-    const { password: _, ...usuarioSinPass } = nuevo;
-    res.json({ 
-        message: 'Usuario creado',
-        usuario: usuarioSinPass,
-        token: 'fake-jwt-token' // ⚠️ En producción genera un JWT real
-    });
+
+    try {
+        // Verificar si el usuario ya existe
+        const exists = await getOne('SELECT id FROM usuarios WHERE username = $1', [username]);
+        if (exists) {
+            return res.status(400).json({ error: 'El usuario ya existe' });
+        }
+
+        // Hashear contraseña
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        // Crear usuario
+        const result = await query(
+            `INSERT INTO usuarios (username, password_hash, name, email, role)
+             VALUES ($1, $2, $3, $4, $5)
+             RETURNING id, username, name, email, role, created_at`,
+            [username, hashedPassword, name, email, 'user']
+        );
+
+        const newUser = result.rows[0];
+
+        // Generar token
+        const token = generarToken(newUser);
+        const refreshToken = generarRefreshToken(newUser);
+
+        // Guardar refresh token en la base de datos
+        await query(
+            'UPDATE usuarios SET refresh_token = $1 WHERE id = $2',
+            [refreshToken, newUser.id]
+        );
+
+        res.status(201).json({
+            message: 'Usuario creado correctamente',
+            usuario: {
+                id: newUser.id,
+                username: newUser.username,
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role
+            },
+            token,
+            refreshToken
+        });
+    } catch (error) {
+        console.error('Error en registro:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
 });
 
-app.post('/api/login', (req, res) => {
+// ---- LOGIN ----
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
-    const user = usuarios.find(u => u.username === username && u.password === password);
-    if (!user) {
-        return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
+
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Usuario y contraseña son obligatorios' });
     }
-    const { password: _, ...usuarioSinPass } = user;
-    res.json({
-        token: 'fake-jwt-token', // ⚠️ En producción genera un JWT real
-        usuario: usuarioSinPass
-    });
+
+    try {
+        const user = await getOne('SELECT * FROM usuarios WHERE username = $1', [username]);
+        if (!user) {
+            return res.status(401).json({ error: 'Credenciales incorrectas' });
+        }
+
+        const validPassword = await bcrypt.compare(password, user.password_hash);
+        if (!validPassword) {
+            return res.status(401).json({ error: 'Credenciales incorrectas' });
+        }
+
+        const token = generarToken(user);
+        const refreshToken = generarRefreshToken(user);
+
+        // Actualizar refresh token en la base de datos
+        await query(
+            'UPDATE usuarios SET refresh_token = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [refreshToken, user.id]
+        );
+
+        const { password_hash, refresh_token, ...usuarioSinPass } = user;
+
+        res.json({
+            message: 'Login exitoso',
+            usuario: usuarioSinPass,
+            token,
+            refreshToken
+        });
+    } catch (error) {
+        console.error('Error en login:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
+    }
 });
 
-// ---- Pedidos ----
-app.post('/api/pedidos', (req, res) => {
+// ---- REFRESH TOKEN ----
+app.post('/api/refresh', async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.status(400).json({ error: 'Refresh token requerido' });
+    }
+
+    try {
+        // Verificar refresh token
+        const decoded = jwt.verify(refreshToken, JWT_SECRET);
+        
+        // Buscar usuario con ese refresh token
+        const user = await getOne(
+            'SELECT * FROM usuarios WHERE id = $1 AND refresh_token = $2',
+            [decoded.id, refreshToken]
+        );
+
+        if (!user) {
+            return res.status(401).json({ error: 'Refresh token inválido' });
+        }
+
+        // Generar nuevos tokens
+        const newToken = generarToken(user);
+        const newRefreshToken = generarRefreshToken(user);
+
+        // Actualizar refresh token en la base de datos
+        await query(
+            'UPDATE usuarios SET refresh_token = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [newRefreshToken, user.id]
+        );
+
+        res.json({
+            token: newToken,
+            refreshToken: newRefreshToken
+        });
+    } catch (error) {
+        console.error('Error en refresh:', error);
+        res.status(401).json({ error: 'Refresh token inválido o expirado' });
+    }
+});
+
+// ---- LOGOUT ----
+app.post('/api/logout', authenticateToken, async (req, res) => {
+    try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+
+        // Invalidar token
+        await query(
+            'INSERT INTO tokens_invalidados (token, usuario) VALUES ($1, $2)',
+            [token, req.user.username]
+        );
+
+        // Limpiar refresh token del usuario
+        await query(
+            'UPDATE usuarios SET refresh_token = NULL WHERE id = $1',
+            [req.user.id]
+        );
+
+        res.json({ message: 'Sesión cerrada correctamente' });
+    } catch (error) {
+        console.error('Error en logout:', error);
+        res.status(500).json({ error: 'Error al cerrar sesión' });
+    }
+});
+
+// ---- USUARIOS (solo admin) ----
+app.get('/api/usuarios', authenticateToken, esAdmin, async (req, res) => {
+    try {
+        const usuarios = await getAll(
+            'SELECT id, username, name, email, role, created_at FROM usuarios ORDER BY id'
+        );
+        res.json(usuarios);
+    } catch (error) {
+        console.error('Error al obtener usuarios:', error);
+        res.status(500).json({ error: 'Error al obtener usuarios' });
+    }
+});
+
+app.get('/api/usuarios/:id', authenticateToken, esAdmin, async (req, res) => {
+    try {
+        const user = await getOne(
+            'SELECT id, username, name, email, role, created_at FROM usuarios WHERE id = $1',
+            [req.params.id]
+        );
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+        res.json(user);
+    } catch (error) {
+        console.error('Error al obtener usuario:', error);
+        res.status(500).json({ error: 'Error al obtener usuario' });
+    }
+});
+
+app.put('/api/usuarios/:id', authenticateToken, esAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { name, email, role, password } = req.body;
+
+    try {
+        let queryText = 'UPDATE usuarios SET name = $1, email = $2, role = $3, updated_at = CURRENT_TIMESTAMP';
+        let params = [name, email, role, id];
+
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            queryText = 'UPDATE usuarios SET name = $1, email = $2, role = $3, password_hash = $4, updated_at = CURRENT_TIMESTAMP';
+            params = [name, email, role, hashedPassword, id];
+        }
+
+        const result = await query(
+            `${queryText} WHERE id = $${params.length} RETURNING id, username, name, email, role, created_at`,
+            params
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error al actualizar usuario:', error);
+        res.status(500).json({ error: 'Error al actualizar usuario' });
+    }
+});
+
+app.delete('/api/usuarios/:id', authenticateToken, esAdmin, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Verificar que no sea root
+        const user = await getOne('SELECT username FROM usuarios WHERE id = $1', [id]);
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+        if (user.username === 'root') {
+            return res.status(400).json({ error: 'No se puede eliminar al usuario root' });
+        }
+
+        await query('DELETE FROM usuarios WHERE id = $1', [id]);
+        res.json({ message: 'Usuario eliminado correctamente' });
+    } catch (error) {
+        console.error('Error al eliminar usuario:', error);
+        res.status(500).json({ error: 'Error al eliminar usuario' });
+    }
+});
+
+// ---- PRODUCTOS ----
+app.get('/api/productos', async (req, res) => {
+    try {
+        const productos = await getAll('SELECT * FROM productos ORDER BY id DESC');
+        res.json(productos);
+    } catch (error) {
+        console.error('Error al obtener productos:', error);
+        res.status(500).json({ error: 'Error al obtener productos' });
+    }
+});
+
+app.post('/api/productos', authenticateToken, esAdmin, async (req, res) => {
+    const { name, category, price, description, stock, image, feat, available } = req.body;
+
+    if (!name || price === undefined || stock === undefined) {
+        return res.status(400).json({ error: 'Nombre, precio y stock son obligatorios' });
+    }
+
+    try {
+        const result = await query(
+            `INSERT INTO productos (name, category, price, description, stock, image, feat, available, created_by)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+             RETURNING *`,
+            [
+                name,
+                category || 'medicamento',
+                parseFloat(price),
+                description || '',
+                parseInt(stock) || 0,
+                image || 'https://via.placeholder.com/300x200',
+                feat ? 1 : 0,
+                available !== undefined ? (available ? 1 : 0) : 1,
+                req.user.username
+            ]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error('Error al crear producto:', error);
+        res.status(500).json({ error: 'Error al crear producto' });
+    }
+});
+
+app.put('/api/productos/:id', authenticateToken, esAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { name, category, price, description, stock, image, available, feat } = req.body;
+
+    try {
+        const result = await query(
+            `UPDATE productos SET
+                name = $1,
+                category = $2,
+                price = $3,
+                description = $4,
+                stock = $5,
+                image = $6,
+                available = $7,
+                feat = $8,
+                updated_at = CURRENT_TIMESTAMP
+             WHERE id = $9
+             RETURNING *`,
+            [
+                name,
+                category,
+                parseFloat(price),
+                description,
+                parseInt(stock),
+                image,
+                available !== undefined ? (available ? 1 : 0) : 1,
+                feat ? 1 : 0,
+                id
+            ]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error al actualizar producto:', error);
+        res.status(500).json({ error: 'Error al actualizar producto' });
+    }
+});
+
+app.delete('/api/productos/:id', authenticateToken, esAdmin, async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await query('DELETE FROM productos WHERE id = $1 RETURNING id', [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Producto no encontrado' });
+        }
+        res.json({ message: 'Producto eliminado' });
+    } catch (error) {
+        console.error('Error al eliminar producto:', error);
+        res.status(500).json({ error: 'Error al eliminar producto' });
+    }
+});
+
+// ---- PEDIDOS ----
+app.post('/api/pedidos', authenticateToken, async (req, res) => {
     const { items } = req.body;
+
     if (!items || items.length === 0) {
         return res.status(400).json({ error: 'El carrito está vacío' });
     }
-    // Validar stock
-    let total = 0;
-    const itemsValidados = [];
-    for (const item of items) {
-        const prod = productos.find(p => p.id === item.id);
-        if (!prod) return res.status(404).json({ error: `Producto ${item.id} no encontrado` });
-        if (!prod.available || prod.stock < item.cantidad) {
-            return res.status(400).json({ error: `Stock insuficiente para ${prod.name}` });
+
+    try {
+        let total = 0;
+        const itemsValidados = [];
+
+        // Validar stock y calcular total
+        for (const item of items) {
+            const prod = await getOne('SELECT * FROM productos WHERE id = $1', [item.id]);
+            if (!prod) {
+                return res.status(404).json({ error: `Producto ${item.id} no encontrado` });
+            }
+            if (!prod.available || prod.stock < item.cantidad) {
+                return res.status(400).json({ error: `Stock insuficiente para ${prod.name}` });
+            }
+            const subtotal = parseFloat(prod.price) * item.cantidad;
+            total += subtotal;
+            itemsValidados.push({
+                id: prod.id,
+                nombre: prod.name,
+                cantidad: item.cantidad,
+                precio: parseFloat(prod.price),
+                subtotal
+            });
+            // Descontar stock
+            await query(
+                'UPDATE productos SET stock = stock - $1, available = CASE WHEN stock - $1 <= 0 THEN 0 ELSE available END WHERE id = $2',
+                [item.cantidad, prod.id]
+            );
         }
-        const subtotal = prod.price * item.cantidad;
-        total += subtotal;
-        itemsValidados.push({
-            id: prod.id,
-            nombre: prod.name,
-            cantidad: item.cantidad,
-            precio: prod.price,
-            subtotal
+
+        const pedidoId = 'PED-' + Date.now();
+        await query(
+            `INSERT INTO pedidos (id, usuario, email, items, total, estado)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [
+                pedidoId,
+                req.user.username,
+                req.user.email || 'no-email',
+                JSON.stringify(itemsValidados),
+                total,
+                'pendiente'
+            ]
+        );
+
+        res.status(201).json({
+            message: 'Pedido creado',
+            pedido: { id: pedidoId, usuario: req.user.username, total, items: itemsValidados }
         });
-        // Descontar stock
-        prod.stock -= item.cantidad;
-        if (prod.stock === 0) prod.available = false;
+    } catch (error) {
+        console.error('Error al crear pedido:', error);
+        res.status(500).json({ error: 'Error al crear pedido' });
     }
-    const pedido = {
-        id: 'PED-' + Date.now(),
-        usuario: req.body.usuario || 'anonimo',
-        fecha: new Date().toISOString(),
-        items: itemsValidados,
-        total,
-        estado: 'pendiente'
-    };
-    pedidos.push(pedido);
-    escribirJSON('pedidos.json', pedidos);
-    escribirJSON('productos.json', productos);
-    res.json({ message: 'Pedido creado', pedido });
 });
 
-app.get('/api/pedidos', (req, res) => {
-    res.json(pedidos);
+app.get('/api/pedidos', authenticateToken, esAdmin, async (req, res) => {
+    try {
+        const pedidos = await getAll('SELECT * FROM pedidos ORDER BY created_at DESC');
+        // Parsear items JSON
+        const parsed = pedidos.map(p => ({
+            ...p,
+            items: typeof p.items === 'string' ? JSON.parse(p.items) : p.items
+        }));
+        res.json(parsed);
+    } catch (error) {
+        console.error('Error al obtener pedidos:', error);
+        res.status(500).json({ error: 'Error al obtener pedidos' });
+    }
 });
 
-// ---- Configuración (opcional) ----
+app.put('/api/pedidos/:id', authenticateToken, esAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { estado } = req.body;
+
+    try {
+        const result = await query(
+            'UPDATE pedidos SET estado = $1 WHERE id = $2 RETURNING *',
+            [estado, id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Pedido no encontrado' });
+        }
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error al actualizar pedido:', error);
+        res.status(500).json({ error: 'Error al actualizar pedido' });
+    }
+});
+
+// ---- CONFIGURACIÓN ----
 app.get('/api/config', (req, res) => {
     res.json({
         headerSubtitle: "Salud & Tecnología",
@@ -238,7 +561,7 @@ app.get('/api/config', (req, res) => {
 });
 
 // ============================================================
-// 🤖 FUNCIONES DEL BOT (existentes)
+// 🤖 FUNCIONES DEL BOT
 // ============================================================
 
 async function callWorker(method, data = {}) {
@@ -350,7 +673,7 @@ async function startBot() {
 }
 
 // ============================================================
-// 🌐 RUTAS WEB (existentes)
+// 🌐 RUTAS WEB
 // ============================================================
 
 app.get('/', (req, res) => {
@@ -427,10 +750,7 @@ app.get('/diagnostico', (req, res) => {
         bot_corriendo: isRunning,
         intentos: reconnectAttempts,
         ultimo_error: errorMessage,
-        ultima_respuesta: new Date(lastResponse).toISOString(),
-        usuarios: usuarios.length,
-        productos: productos.length,
-        pedidos: pedidos.length
+        ultima_respuesta: new Date(lastResponse).toISOString()
     });
 });
 

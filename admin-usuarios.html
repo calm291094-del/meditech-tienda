@@ -1,675 +1,567 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MediTech | Gestión de Usuarios</title>
-    <!-- Tailwind + Font Awesome + Google Fonts -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin CRUD - MediTech</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        * { font-family: 'Poppins', sans-serif; }
+        * { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background: #f1f5f9; }
-        .glass-card {
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-        .gradient-text {
-            background: linear-gradient(135deg, #0d9488, #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #0d9488, #06b6d4);
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(13,148,136,0.3);
-        }
-        .btn-danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            transition: all 0.3s ease;
-        }
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(239,68,68,0.3);
-        }
-        .fade-in {
-            animation: fadeIn 0.4s ease;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .badge-admin {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        .badge-user {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        .table-hover tbody tr:hover {
-            background: #f8fafc;
-            transition: background 0.2s;
-        }
-        .modal-overlay {
-            animation: fadeIn 0.3s ease;
-        }
-        .modal-content {
-            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px) scale(0.98); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        /* Scrollbar personalizada */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 8px; }
-        ::-webkit-scrollbar-thumb { background: #0d9488; border-radius: 8px; }
-        ::-webkit-scrollbar-thumb:hover { background: #0f766e; }
-        /* Tamaño táctil */
-        button, a, [onclick] { min-height: 44px; min-width: 44px; }
+        .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .tab-active { background: #0d9488; color: white; }
+        .tab-inactive { background: #f1f5f9; color: #475569; }
+        .tab-inactive:hover { background: #e2e8f0; }
+        .btn-primary { background: #0d9488; color: white; padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-primary:hover { background: #0f766e; }
+        .btn-danger { background: #ef4444; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-warning { background: #f59e0b; color: white; padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; }
+        .btn-warning:hover { background: #d97706; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 10px 8px; background: #f1f5f9; font-weight: 600; font-size: 0.85rem; color: #475569; }
+        td { padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
+        tr:hover td { background: #f8fafc; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px); }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 16px; padding: 24px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal input, .modal select, .modal textarea { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px; margin-top: 4px; font-size: 0.95rem; }
+        .modal label { font-weight: 600; font-size: 0.85rem; color: #374151; display: block; margin-top: 12px; }
+        .badge-admin { background: #fef3c7; color: #92400e; padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .badge-user { background: #dbeafe; color: #1e40af; padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .badge-pendiente { background: #fef3c7; color: #92400e; padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .badge-pagado { background: #d1fae5; color: #065f46; padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .badge { background: #e2e8f0; padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
     </style>
 </head>
 <body>
-
-    <!-- HEADER -->
-    <header class="sticky top-0 z-50 glass-card border-b border-gray-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white shadow-lg">
-                    <i class="fas fa-users-cog"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-gray-900">Gestión de <span class="gradient-text">Usuarios</span></h1>
-                    <p class="text-xs text-gray-500">Panel de administración de MediTech</p>
-                </div>
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-teal-600 flex items-center gap-3">
+                    <i class="fas fa-database"></i> Panel CRUD - MediTech
+                </h1>
+                <p class="text-gray-500 text-sm">Gestión completa de usuarios, productos y pedidos</p>
             </div>
-            <div class="flex items-center gap-3">
-                <span id="admin-name" class="text-sm font-medium text-gray-700 hidden sm:inline">Admin</span>
-                <a href="index.html" class="btn-primary text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 shadow-md">
-                    <i class="fas fa-arrow-left"></i> Volver a la tienda
-                </a>
-                <button onclick="logout()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm font-semibold transition">
-                    <i class="fas fa-sign-out-alt"></i>
+            <div class="flex items-center gap-4">
+                <span id="user-info" class="text-sm text-gray-600"></span>
+                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                 </button>
             </div>
         </div>
-    </header>
 
-    <!-- MAIN -->
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        <!-- Tarjeta de resumen -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-xl">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Total Usuarios</p>
-                        <p class="text-2xl font-bold" id="total-users">0</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xl">
-                        <i class="fas fa-user-shield"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Administradores</p>
-                        <p class="text-2xl font-bold" id="total-admins">0</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Clientes</p>
-                        <p class="text-2xl font-bold" id="total-clientes">0</p>
-                    </div>
-                </div>
-            </div>
+        <!-- Pestañas -->
+        <div class="flex flex-wrap gap-2 mb-6">
+            <button onclick="switchTab('usuarios')" data-tab="usuarios" class="px-5 py-2.5 rounded-lg font-semibold transition tab-active">
+                <i class="fas fa-users mr-2"></i>Usuarios
+            </button>
+            <button onclick="switchTab('productos')" data-tab="productos" class="px-5 py-2.5 rounded-lg font-semibold transition tab-inactive">
+                <i class="fas fa-box mr-2"></i>Productos
+            </button>
+            <button onclick="switchTab('pedidos')" data-tab="pedidos" class="px-5 py-2.5 rounded-lg font-semibold transition tab-inactive">
+                <i class="fas fa-receipt mr-2"></i>Pedidos
+            </button>
+            <button onclick="switchTab('tokens')" data-tab="tokens" class="px-5 py-2.5 rounded-lg font-semibold transition tab-inactive">
+                <i class="fas fa-key mr-2"></i>Tokens
+            </button>
         </div>
 
-        <!-- Barra de acciones -->
-        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-            <div class="flex items-center gap-3">
-                <button onclick="openCreateModal()" class="btn-primary text-white px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-md">
-                    <i class="fas fa-user-plus"></i> Nuevo Usuario
-                </button>
-                <button onclick="recargarUsuarios()" class="bg-white hover:bg-gray-50 text-gray-700 px-6 py-2.5 rounded-xl font-semibold border border-gray-200 transition flex items-center gap-2">
-                    <i class="fas fa-sync-alt"></i> Recargar
-                </button>
-            </div>
-            <div class="relative">
-                <input type="text" id="search-users" placeholder="🔍 Buscar usuario..." class="pl-10 pr-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none w-full sm:w-64 transition" oninput="filtrarUsuarios()" />
-                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            </div>
-        </div>
+        <!-- Contenido -->
+        <div id="tab-usuarios" class="tab-content card"></div>
+        <div id="tab-productos" class="tab-content card hidden"></div>
+        <div id="tab-pedidos" class="tab-content card hidden"></div>
+        <div id="tab-tokens" class="tab-content card hidden"></div>
+    </div>
 
-        <!-- Tabla de usuarios -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm table-hover">
-                    <thead class="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th class="px-6 py-3 text-left font-semibold text-gray-600">Usuario</th>
-                            <th class="px-6 py-3 text-left font-semibold text-gray-600">Nombre</th>
-                            <th class="px-6 py-3 text-left font-semibold text-gray-600">Email</th>
-                            <th class="px-6 py-3 text-left font-semibold text-gray-600">Rol</th>
-                            <th class="px-6 py-3 text-left font-semibold text-gray-600">Fecha</th>
-                            <th class="px-6 py-3 text-right font-semibold text-gray-600">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-table-body">
-                        <tr><td colspan="6" class="text-center py-8 text-gray-400">Cargando usuarios...</td></tr>
-                    </tbody>
-                </table>
+    <!-- Modal -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modal-title" class="text-xl font-bold">Agregar</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-2xl"></i></button>
             </div>
-            <div class="bg-gray-50 px-6 py-3 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
-                <span id="table-footer">Mostrando <span id="shown-users">0</span> de <span id="total-users-footer">0</span> usuarios</span>
-                <span>MediTech Admin v1.0</span>
-            </div>
-        </div>
-    </main>
-
-    <!-- MODAL CREAR/EDITAR -->
-    <div id="user-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 modal-overlay">
-        <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl modal-content overflow-hidden">
-            <div class="bg-gradient-to-r from-teal-600 to-cyan-600 p-6 text-white flex justify-between items-center">
-                <h2 class="text-2xl font-bold" id="modal-title"><i class="fas fa-user-plus mr-2"></i>Nuevo Usuario</h2>
-                <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <form id="user-form" class="p-6 space-y-4" onsubmit="guardarUsuario(event)">
-                <input type="hidden" id="edit-username" value="" />
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nombre Completo *</label>
-                    <input type="text" id="form-name" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Ej: Juan Pérez" />
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Usuario *</label>
-                    <input type="text" id="form-username" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Ej: jperez" />
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Correo Electrónico *</label>
-                    <input type="email" id="form-email" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="ejemplo@correo.com" />
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Contraseña <span id="password-required" class="text-red-500">*</span></label>
-                    <input type="password" id="form-password" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none" placeholder="Mínimo 6 caracteres" minlength="6" />
-                    <p class="text-xs text-gray-400 mt-1" id="password-hint">Dejar en blanco para mantener la actual</p>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Rol</label>
-                    <select id="form-role" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 outline-none bg-white">
-                        <option value="user">👤 Cliente</option>
-                        <option value="admin">🔒 Administrador</option>
-                    </select>
-                </div>
-                <div class="flex gap-3 pt-2">
-                    <button type="submit" class="flex-1 btn-primary text-white font-bold py-3 rounded-xl transition shadow-md">
-                        <i class="fas fa-save mr-2"></i> Guardar
-                    </button>
-                    <button type="button" onclick="closeModal()" class="px-6 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-xl transition">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
+            <div id="modal-body"></div>
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATIONS -->
-    <div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 space-y-2 pointer-events-none"></div>
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN
+        // ============================================================
+        const API_URL = 'https://meditech-tienda-node.onrender.com/api';
+        let currentUser = null;
+        let currentTab = 'usuarios';
+        let editingId = null;
+        let editingTable = null;
 
-
-<script>
-    // ============================================================
-    // CONFIGURACIÓN GITHUB (misma que en index.html)
-    // ============================================================
-    let GITHUB_TOKEN = localStorage.getItem('github_token') || "ghp_PEGA_AQUI_TU_NUEVO_TOKEN";
-    const GITHUB_USER = "calm291094-del";
-    const GITHUB_REPO = "meditech-tienda";
-    const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}`;
-    let HEADERS = {
-        "Authorization": `token ${GITHUB_TOKEN}`,
-        "Accept": "application/vnd.github.v3+json"
-    };
-
-    // Estado
-    let users = [];
-    let currentUser = null;
-    let filteredUsers = [];
-
-    // ============================================================
-    // VERIFICAR AUTENTICACIÓN - CORREGIDA
-    // ============================================================
-    function verificarAutenticacion() {
-        console.log('🔐 Verificando autenticación...');
-        
-        // 1. Intentar obtener sesión de localStorage
-        const sessionData = localStorage.getItem('session');
-        console.log('📌 Session data:', sessionData);
-        
-        if (!sessionData) {
-            console.warn('⚠️ No hay sesión guardada');
-            return false;
+        // ============================================================
+        // AUTENTICACIÓN
+        // ============================================================
+        function getToken() {
+            return localStorage.getItem('token');
         }
-        
-        try {
-            const user = JSON.parse(sessionData);
-            console.log('📌 Usuario:', user);
-            console.log('📌 Rol:', user.role);
-            
-            // Verificar que sea administrador
-            if (user.role === 'admin') {
-                currentUser = user;
-                document.getElementById('admin-name').textContent = user.name || 'Admin';
-                console.log('✅ Usuario autenticado como administrador');
-                return true;
-            } else {
-                console.warn('⚠️ Usuario no es administrador (rol:', user.role, ')');
-                return false;
-            }
-        } catch (e) {
-            console.error('❌ Error al parsear sesión:', e);
-            return false;
-        }
-    }
 
-    // ============================================================
-    // FUNCIONES DE GITHUB
-    // ============================================================
-    async function fetchGitHubPublic(path) {
-        try {
-            const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/${path}?t=${Date.now()}`;
-            console.log(`📡 Leyendo: ${url}`);
-            const res = await fetch(url, { cache: 'no-cache' });
-            if (!res.ok) {
-                if (res.status === 404) console.warn(`⚠️ Archivo no encontrado: ${path}`);
-                return null;
+        function getRefreshToken() {
+            return localStorage.getItem('refreshToken');
+        }
+
+        function getUserInfo() {
+            const session = localStorage.getItem('session');
+            if (session) {
+                try { return JSON.parse(session); } catch (e) {}
             }
-            return await res.json();
-        } catch (e) {
-            console.error(`❌ Error leyendo ${path}:`, e);
             return null;
         }
-    }
 
-    async function fetchGitHubAPI(path) {
-        try {
-            const res = await fetch(`${API}/contents/${path}`, { 
-                headers: HEADERS,
-                cache: 'no-cache'
-            });
-            if (res.status === 404) return null;
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            return await res.json();
-        } catch (e) {
-            console.error(`❌ Error en API ${path}:`, e);
-            return null;
-        }
-    }
-
-    async function saveToGitHub(path, data, message) {
-        // Verificar token
-        if (!GITHUB_TOKEN || GITHUB_TOKEN === 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
-            console.warn('⚠️ No hay token válido. Guardado solo local.');
-            localStorage.setItem('usuarios_backup', JSON.stringify(data.usuarios || []));
-            showToast('⚠️ Guardado solo en local (sin token)', 'warning');
-            return false;
-        }
-        
-        try {
-            console.log(`💾 Guardando ${path}...`);
-            const file = await fetchGitHubAPI(path);
-            const sha = file?.sha || null;
-            const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-            
-            const res = await fetch(`${API}/contents/${path}`, {
-                method: 'PUT',
-                headers: HEADERS,
-                body: JSON.stringify({
-                    message: message || `Actualizar ${path}`,
-                    content,
-                    sha
-                })
-            });
-            
-            if (res.ok) {
-                console.log(`✅ ${path} guardado en GitHub`);
-                localStorage.setItem('usuarios_backup', JSON.stringify(data.usuarios || []));
-                showToast(`✅ ${path} guardado`, 'success');
-                return true;
-            } else {
-                const err = await res.json();
-                console.error(`❌ Error:`, err.message);
-                showToast(`❌ Error: ${err.message}`, 'error');
-                return false;
+        async function apiRequest(endpoint, options = {}) {
+            const token = getToken();
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
             }
-        } catch (e) {
-            console.error(`❌ Excepción guardando ${path}:`, e);
-            showToast('❌ Error al guardar en GitHub', 'error');
-            return false;
-        }
-    }
 
-    // ============================================================
-    // CARGAR USUARIOS
-    // ============================================================
-    async function cargarUsuarios() {
-        console.log('📦 Cargando usuarios...');
-        try {
-            // 1. Intentar desde GitHub
-            const data = await fetchGitHubPublic('usuarios.json');
-            
-            if (data && data.usuarios && data.usuarios.length > 0) {
-                users = data.usuarios;
-                console.log(`✅ ${users.length} usuarios cargados desde GitHub`);
-            } else {
-                // 2. Fallback a backup local
-                const backup = localStorage.getItem('usuarios_backup');
-                if (backup) {
-                    users = JSON.parse(backup);
-                    console.log(`⚠️ Usando backup local: ${users.length} usuarios`);
-                } else {
-                    // 3. Usuarios por defecto
-                    users = [{
-                        username: 'root',
-                        password: 'Root*4815162342+-',
-                        name: 'Administrador',
-                        email: 'admin@meditech.com',
-                        role: 'admin',
-                        fecha: new Date().toISOString()
-                    }];
-                    console.log('📝 Usuarios por defecto creados');
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    ...options,
+                    headers
+                });
+
+                if (response.status === 401) {
+                    // Token expirado - intentar refrescar
+                    const refreshed = await refreshToken();
+                    if (refreshed) {
+                        // Reintentar con el nuevo token
+                        const newToken = getToken();
+                        headers['Authorization'] = `Bearer ${newToken}`;
+                        const retry = await fetch(`${API_URL}${endpoint}`, {
+                            ...options,
+                            headers
+                        });
+                        if (!retry.ok) {
+                            const error = await retry.json().catch(() => ({ error: 'Error en la petición' }));
+                            throw new Error(error.error || `Error ${retry.status}`);
+                        }
+                        return retry.json();
+                    } else {
+                        logout();
+                        throw new Error('Sesión expirada. Inicia sesión nuevamente.');
+                    }
                 }
+
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({ error: 'Error en la petición' }));
+                    throw new Error(error.error || `Error ${response.status}`);
+                }
+                return response.json();
+            } catch (error) {
+                console.error('❌ Error en API:', error.message);
+                throw error;
             }
-            
-            // Guardar backup
-            localStorage.setItem('usuarios_backup', JSON.stringify(users));
-            renderUsuarios();
-            actualizarEstadisticas();
-            
-        } catch (e) {
-            console.error('❌ Error cargando usuarios:', e);
-            showToast('❌ Error cargando usuarios', 'error');
         }
-    }
 
-    // ============================================================
-    // RENDERIZAR TABLA
-    // ============================================================
-    function renderUsuarios(lista) {
-        const tbody = document.getElementById('users-table-body');
-        const datos = lista || users;
-        filteredUsers = datos;
-        
-        if (datos.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-400">No hay usuarios registrados</td></tr>`;
-            document.getElementById('shown-users').textContent = '0';
-            document.getElementById('total-users-footer').textContent = users.length;
-            return;
+        async function refreshToken() {
+            try {
+                const refreshToken = getRefreshToken();
+                if (!refreshToken) return false;
+
+                const response = await fetch(`${API_URL}/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                return false;
+            }
         }
-        
-        tbody.innerHTML = datos.map(u => `
-            <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
-                <td class="px-6 py-4 font-medium text-gray-900">@${u.username}</td>
-                <td class="px-6 py-4">${u.name || 'Sin nombre'}</td>
-                <td class="px-6 py-4 text-gray-600">${u.email || '—'}</td>
-                <td class="px-6 py-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">
-                        ${u.role === 'admin' ? '🔒 Admin' : '👤 Cliente'}
-                    </span>
-                </td>
-                <td class="px-6 py-4 text-gray-500 text-xs">${u.fecha ? new Date(u.fecha).toLocaleDateString('es-ES') : '—'}</td>
-                <td class="px-6 py-4 text-right">
-                    <button onclick="editarUsuario('${u.username}')" class="text-blue-500 hover:bg-blue-50 p-2 rounded-lg transition" title="Editar">
-                        <i class="fas fa-edit"></i>
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('session');
+            window.location.href = '/';
+        }
+
+        // ============================================================
+        // INICIALIZACIÓN
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = getUserInfo();
+            if (!user || user.role !== 'admin') {
+                alert('Acceso denegado. Solo administradores.');
+                window.location.href = '/';
+                return;
+            }
+            currentUser = user;
+            document.getElementById('user-info').textContent = `👤 ${user.name} (${user.role})`;
+            await switchTab('usuarios');
+        });
+
+        // ============================================================
+        // CAMBIO DE PESTAÑA
+        // ============================================================
+        async function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.querySelectorAll('[data-tab]').forEach(el => {
+                el.classList.remove('tab-active', 'tab-inactive');
+                el.classList.add(el.dataset.tab === tab ? 'tab-active' : 'tab-inactive');
+            });
+            await cargarTabla(tab);
+        }
+
+        // ============================================================
+        // CARGAR TABLA
+        // ============================================================
+        async function cargarTabla(tab) {
+            const container = document.getElementById(`tab-${tab}`);
+            try {
+                let data = [];
+                if (tab === 'usuarios') {
+                    data = await apiRequest('/usuarios');
+                    container.innerHTML = renderUsuarios(data);
+                } else if (tab === 'productos') {
+                    data = await apiRequest('/productos');
+                    container.innerHTML = renderProductos(data);
+                } else if (tab === 'pedidos') {
+                    data = await apiRequest('/pedidos');
+                    container.innerHTML = renderPedidos(data);
+                } else if (tab === 'tokens') {
+                    container.innerHTML = renderTokens();
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="text-red-500 p-4">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        // ============================================================
+        // RENDER TABLAS
+        // ============================================================
+        function renderUsuarios(usuarios) {
+            return `
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">👥 Usuarios (${usuarios.length})</h2>
+                    <button onclick="abrirModal('usuarios')" class="btn-primary"><i class="fas fa-plus"></i> Nuevo Usuario</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table>
+                        <thead><tr>
+                            <th>ID</th><th>Usuario</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Fecha</th><th>Acciones</th>
+                        </tr></thead>
+                        <tbody>
+                            ${usuarios.map(u => `
+                                <tr>
+                                    <td>${u.id}</td>
+                                    <td><strong>${u.username}</strong></td>
+                                    <td>${u.name}</td>
+                                    <td>${u.email || '-'}</td>
+                                    <td><span class="badge ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">${u.role}</span></td>
+                                    <td>${new Date(u.created_at).toLocaleDateString()}</td>
+                                    <td>
+                                        <button onclick="abrirModal('usuarios', ${u.id})" class="btn-warning mr-1"><i class="fas fa-edit"></i></button>
+                                        <button onclick="eliminar('usuarios', ${u.id})" class="btn-danger"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderProductos(productos) {
+            return `
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">📦 Productos (${productos.length})</h2>
+                    <button onclick="abrirModal('productos')" class="btn-primary"><i class="fas fa-plus"></i> Nuevo Producto</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table>
+                        <thead><tr>
+                            <th>ID</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th>
+                        </tr></thead>
+                        <tbody>
+                            ${productos.map(p => `
+                                <tr>
+                                    <td>${p.id}</td>
+                                    <td><strong>${p.name}</strong></td>
+                                    <td>${p.category}</td>
+                                    <td>$${parseFloat(p.price).toFixed(2)}</td>
+                                    <td>${p.stock}</td>
+                                    <td>${p.available ? '✅ Disponible' : '❌ Agotado'}</td>
+                                    <td>
+                                        <button onclick="abrirModal('productos', ${p.id})" class="btn-warning mr-1"><i class="fas fa-edit"></i></button>
+                                        <button onclick="eliminar('productos', ${p.id})" class="btn-danger"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderPedidos(pedidos) {
+            return `
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">📋 Pedidos (${pedidos.length})</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table>
+                        <thead><tr>
+                            <th>ID</th><th>Usuario</th><th>Total</th><th>Estado</th><th>Fecha</th><th>Items</th><th>Acciones</th>
+                        </tr></thead>
+                        <tbody>
+                            ${pedidos.map(p => `
+                                <tr>
+                                    <td><strong>${p.id}</strong></td>
+                                    <td>${p.usuario}</td>
+                                    <td>$${p.total.toFixed(2)}</td>
+                                    <td><span class="badge ${p.estado === 'pendiente' ? 'badge-pendiente' : 'badge-pagado'}">${p.estado}</span></td>
+                                    <td>${new Date(p.created_at).toLocaleDateString()}</td>
+                                    <td>${Array.isArray(p.items) ? p.items.map(i => `${i.nombre} x${i.cantidad}`).join(', ') : '-'}</td>
+                                    <td>
+                                        <select onchange="cambiarEstadoPedido('${p.id}', this.value)" class="border rounded px-2 py-1 text-sm">
+                                            <option value="pendiente" ${p.estado === 'pendiente' ? 'selected' : ''}>Pendiente</option>
+                                            <option value="pagado" ${p.estado === 'pagado' ? 'selected' : ''}>Pagado</option>
+                                            <option value="enviado" ${p.estado === 'enviado' ? 'selected' : ''}>Enviado</option>
+                                            <option value="entregado" ${p.estado === 'entregado' ? 'selected' : ''}>Entregado</option>
+                                            <option value="cancelado" ${p.estado === 'cancelado' ? 'selected' : ''}>Cancelado</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderTokens() {
+            return `
+                <div class="p-4">
+                    <h2 class="text-xl font-bold mb-4">🔑 Gestión de Tokens</h2>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <p class="text-sm text-blue-800">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Los tokens JWT expiran automáticamente después de 8 horas.
+                            Los refresh tokens duran 7 días.
+                        </p>
+                    </div>
+                    <button onclick="invalidarTodosLosTokens()" class="btn-danger px-4 py-2">
+                        <i class="fas fa-ban"></i> Invalidar todos los tokens
                     </button>
-                    <button onclick="eliminarUsuario('${u.username}')" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition" title="Eliminar" ${u.username === 'root' ? 'disabled' : ''}>
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-        
-        document.getElementById('shown-users').textContent = datos.length;
-        document.getElementById('total-users-footer').textContent = users.length;
-    }
-
-    function filtrarUsuarios() {
-        const q = document.getElementById('search-users').value.toLowerCase().trim();
-        if (!q) {
-            renderUsuarios(users);
-            return;
-        }
-        const filtrados = users.filter(u =>
-            u.username.toLowerCase().includes(q) ||
-            (u.name && u.name.toLowerCase().includes(q)) ||
-            (u.email && u.email.toLowerCase().includes(q))
-        );
-        renderUsuarios(filtrados);
-    }
-
-    function actualizarEstadisticas() {
-        document.getElementById('total-users').textContent = users.length;
-        document.getElementById('total-admins').textContent = users.filter(u => u.role === 'admin').length;
-        document.getElementById('total-clientes').textContent = users.filter(u => u.role === 'user').length;
-    }
-
-    // ============================================================
-    // CRUD - CREAR / EDITAR
-    // ============================================================
-    function openCreateModal() {
-        document.getElementById('modal-title').innerHTML = '<i class="fas fa-user-plus mr-2"></i>Nuevo Usuario';
-        document.getElementById('edit-username').value = '';
-        document.getElementById('form-name').value = '';
-        document.getElementById('form-username').value = '';
-        document.getElementById('form-email').value = '';
-        document.getElementById('form-password').value = '';
-        document.getElementById('form-password').required = true;
-        document.getElementById('password-required').style.display = 'inline';
-        document.getElementById('password-hint').textContent = 'Debe tener al menos 6 caracteres';
-        document.getElementById('form-role').value = 'user';
-        document.getElementById('user-modal').classList.remove('hidden');
-    }
-
-    function editarUsuario(username) {
-        const u = users.find(usr => usr.username === username);
-        if (!u) return showToast('Usuario no encontrado', 'error');
-        document.getElementById('modal-title').innerHTML = '<i class="fas fa-user-edit mr-2"></i>Editar Usuario';
-        document.getElementById('edit-username').value = u.username;
-        document.getElementById('form-name').value = u.name || '';
-        document.getElementById('form-username').value = u.username;
-        document.getElementById('form-email').value = u.email || '';
-        document.getElementById('form-password').value = '';
-        document.getElementById('form-password').required = false;
-        document.getElementById('password-required').style.display = 'none';
-        document.getElementById('password-hint').textContent = 'Dejar en blanco para mantener la contraseña actual';
-        document.getElementById('form-role').value = u.role || 'user';
-        document.getElementById('user-modal').classList.remove('hidden');
-    }
-
-    async function guardarUsuario(e) {
-        e.preventDefault();
-        const editUsername = document.getElementById('edit-username').value;
-        const name = document.getElementById('form-name').value.trim();
-        const username = document.getElementById('form-username').value.trim();
-        const email = document.getElementById('form-email').value.trim();
-        const password = document.getElementById('form-password').value;
-        const role = document.getElementById('form-role').value;
-
-        // Validaciones
-        if (!name || !username || !email) {
-            showToast('❌ Todos los campos son obligatorios', 'error');
-            return;
-        }
-        if (!editUsername && !password) {
-            showToast('❌ Debes ingresar una contraseña para el nuevo usuario', 'error');
-            return;
-        }
-        if (password && password.length < 6) {
-            showToast('❌ La contraseña debe tener al menos 6 caracteres', 'error');
-            return;
+                </div>
+            `;
         }
 
-        // Verificar duplicado
-        const existe = users.find(u => u.username === username && u.username !== editUsername);
-        if (existe) {
-            showToast('❌ El nombre de usuario ya existe', 'error');
-            return;
+        // ============================================================
+        // MODAL CRUD
+        // ============================================================
+        function abrirModal(tab, id = null) {
+            editingTable = tab;
+            editingId = id;
+            const overlay = document.getElementById('modal-overlay');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+
+            if (id) {
+                title.textContent = `Editar ${tab.slice(0, -1)}`;
+                cargarDatosParaEditar(tab, id);
+            } else {
+                title.textContent = `Nuevo ${tab.slice(0, -1)}`;
+                body.innerHTML = generarFormulario(tab, null);
+            }
+            overlay.classList.add('active');
         }
 
-        const userData = {
-            username,
-            password: password || (editUsername ? users.find(u => u.username === editUsername)?.password : ''),
-            name,
-            email,
-            role,
-            fecha: new Date().toISOString()
-        };
-
-        if (editUsername) {
-            const index = users.findIndex(u => u.username === editUsername);
-            if (index === -1) return showToast('❌ Usuario no encontrado', 'error');
-            if (!password) userData.password = users[index].password;
-            users[index] = userData;
-        } else {
-            users.push(userData);
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+            editingId = null;
+            editingTable = null;
         }
 
-        const ok = await saveToGitHub('usuarios.json', { usuarios: users }, editUsername ? `Actualizar ${username}` : `Crear ${username}`);
-        if (ok) {
-            closeModal();
-            renderUsuarios();
-            actualizarEstadisticas();
-            showToast(`✅ Usuario ${editUsername ? 'actualizado' : 'creado'} correctamente`, 'success');
-        } else {
-            await cargarUsuarios();
+        async function cargarDatosParaEditar(tab, id) {
+            const body = document.getElementById('modal-body');
+            try {
+                const data = await apiRequest(`/${tab}/${id}`);
+                body.innerHTML = generarFormulario(tab, data);
+            } catch (error) {
+                body.innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
+            }
         }
-    }
 
-    // ============================================================
-    // ELIMINAR
-    // ============================================================
-    async function eliminarUsuario(username) {
-        if (username === 'root') {
-            showToast('❌ No se puede eliminar el usuario root', 'error');
-            return;
+        function generarFormulario(tab, data) {
+            let html = '';
+            if (tab === 'usuarios') {
+                html = `
+                    <label>Nombre de usuario</label>
+                    <input type="text" id="edit-username" value="${data ? data.username : ''}" ${data ? 'readonly' : ''}>
+                    ${!data ? `<label>Contraseña</label><input type="password" id="edit-password" minlength="6">` : ''}
+                    <label>Nombre completo</label>
+                    <input type="text" id="edit-name" value="${data ? data.name : ''}">
+                    <label>Email</label>
+                    <input type="email" id="edit-email" value="${data ? data.email : ''}">
+                    <label>Rol</label>
+                    <select id="edit-role">
+                        <option value="user" ${data && data.role === 'user' ? 'selected' : ''}>Usuario</option>
+                        <option value="admin" ${data && data.role === 'admin' ? 'selected' : ''}>Administrador</option>
+                    </select>
+                `;
+            } else if (tab === 'productos') {
+                html = `
+                    <label>Nombre</label>
+                    <input type="text" id="edit-name" value="${data ? data.name : ''}">
+                    <label>Categoría</label>
+                    <select id="edit-category">
+                        <option value="medicamento" ${data && data.category === 'medicamento' ? 'selected' : ''}>💊 Medicamento</option>
+                        <option value="tecnologia" ${data && data.category === 'tecnologia' ? 'selected' : ''}>💻 Tecnología</option>
+                        <option value="salud" ${data && data.category === 'salud' ? 'selected' : ''}>🩺 Salud</option>
+                        <option value="gaming" ${data && data.category === 'gaming' ? 'selected' : ''}>🎮 Gaming</option>
+                    </select>
+                    <label>Precio</label>
+                    <input type="number" step="0.01" id="edit-price" value="${data ? data.price : ''}">
+                    <label>Descripción</label>
+                    <textarea id="edit-description" rows="2">${data ? data.description : ''}</textarea>
+                    <label>Stock</label>
+                    <input type="number" id="edit-stock" value="${data ? data.stock : 0}">
+                    <label>Imagen (URL)</label>
+                    <input type="url" id="edit-image" value="${data ? data.image : ''}">
+                    <label>Destacado</label>
+                    <select id="edit-feat">
+                        <option value="0" ${data && !data.feat ? 'selected' : ''}>No</option>
+                        <option value="1" ${data && data.feat ? 'selected' : ''}>Sí</option>
+                    </select>
+                    <label>Disponible</label>
+                    <select id="edit-available">
+                        <option value="1" ${data && data.available ? 'selected' : ''}>Sí</option>
+                        <option value="0" ${data && !data.available ? 'selected' : ''}>No</option>
+                    </select>
+                `;
+            }
+            html += `
+                <div class="flex gap-2 mt-4">
+                    <button onclick="guardar()" class="btn-primary flex-1"><i class="fas fa-save"></i> Guardar</button>
+                    <button onclick="closeModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition">Cancelar</button>
+                </div>
+            `;
+            return html;
         }
-        if (!confirm(`¿Eliminar al usuario "${username}"? Esta acción no se puede deshacer.`)) return;
-        
-        const index = users.findIndex(u => u.username === username);
-        if (index === -1) return showToast('❌ Usuario no encontrado', 'error');
-        users.splice(index, 1);
-        
-        const ok = await saveToGitHub('usuarios.json', { usuarios: users }, `Eliminar ${username}`);
-        if (ok) {
-            renderUsuarios();
-            actualizarEstadisticas();
-            showToast(`🗑️ Usuario ${username} eliminado`, 'success');
-        } else {
-            await cargarUsuarios();
+
+        // ============================================================
+        // GUARDAR
+        // ============================================================
+        async function guardar() {
+            const tab = editingTable;
+            const id = editingId;
+            let data = {};
+
+            if (tab === 'usuarios') {
+                data = {
+                    name: document.getElementById('edit-name').value,
+                    email: document.getElementById('edit-email').value,
+                    role: document.getElementById('edit-role').value
+                };
+                if (!id) {
+                    const password = document.getElementById('edit-password').value;
+                    if (!password) { alert('La contraseña es obligatoria'); return; }
+                    data.password = password;
+                    data.username = document.getElementById('edit-username').value;
+                }
+            } else if (tab === 'productos') {
+                data = {
+                    name: document.getElementById('edit-name').value,
+                    category: document.getElementById('edit-category').value,
+                    price: parseFloat(document.getElementById('edit-price').value),
+                    description: document.getElementById('edit-description').value,
+                    stock: parseInt(document.getElementById('edit-stock').value) || 0,
+                    image: document.getElementById('edit-image').value,
+                    feat: parseInt(document.getElementById('edit-feat').value) === 1,
+                    available: parseInt(document.getElementById('edit-available').value) === 1
+                };
+            }
+
+            try {
+                let endpoint, method;
+                if (id) {
+                    endpoint = `/${tab}/${id}`;
+                    method = 'PUT';
+                } else {
+                    endpoint = `/${tab}`;
+                    method = 'POST';
+                }
+
+                await apiRequest(endpoint, { method, body: JSON.stringify(data) });
+                closeModal();
+                await cargarTabla(currentTab);
+                alert('✅ Guardado correctamente');
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
-    }
 
-    // ============================================================
-    // RECARGAR
-    // ============================================================
-    async function recargarUsuarios() {
-        showToast('🔄 Recargando...', 'info');
-        await cargarUsuarios();
-        showToast('✅ Datos actualizados', 'success');
-    }
-
-    // ============================================================
-    // MODAL
-    // ============================================================
-    function closeModal() {
-        document.getElementById('user-modal').classList.add('hidden');
-    }
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeModal();
-    });
-
-    // ============================================================
-    // TOAST
-    // ============================================================
-    function showToast(msg, type = 'info') {
-        const container = document.getElementById('toast-container');
-        const div = document.createElement('div');
-        const colors = {
-            success: 'bg-green-100 text-green-800 border-green-200',
-            error: 'bg-red-100 text-red-800 border-red-200',
-            warning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-            info: 'bg-blue-100 text-blue-800 border-blue-200'
-        };
-        div.className = `pointer-events-auto px-6 py-3 rounded-full text-sm font-semibold shadow-2xl border-2 ${colors[type] || colors.info} fade-in`;
-        div.textContent = msg;
-        container.appendChild(div);
-        setTimeout(() => div.remove(), 3000);
-    }
-
-    // ============================================================
-    // LOGOUT
-    // ============================================================
-    function logout() {
-        localStorage.removeItem('session');
-        window.location.href = 'index.html';
-    }
-
-    // ============================================================
-    // INICIO - CORREGIDO
-    // ============================================================
-    document.addEventListener('DOMContentLoaded', async () => {
-        console.log('🚀 Iniciando admin-usuarios.html...');
-        
-        // 1. Verificar autenticación
-        const autenticado = verificarAutenticacion();
-        console.log('📌 Autenticado:', autenticado);
-        
-        if (!autenticado) {
-            showToast('⚠️ Debes iniciar sesión como administrador', 'warning');
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 2000);
-            return;
+        // ============================================================
+        // ELIMINAR
+        // ============================================================
+        async function eliminar(tab, id) {
+            if (!confirm(`¿Eliminar este ${tab.slice(0, -1)}?`)) return;
+            try {
+                await apiRequest(`/${tab}/${id}`, { method: 'DELETE' });
+                await cargarTabla(currentTab);
+                alert('✅ Eliminado correctamente');
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
         }
-        
-        // 2. Cargar usuarios
-        await cargarUsuarios();
-        
-        console.log('✅ admin-usuarios.html iniciado correctamente');
-    });
 
-    // ============================================================
-    // FUNCIÓN DE PRUEBA PARA DEPURAR
-    // ============================================================
-    function diagnosticar() {
-        console.log('🔍 DIAGNÓSTICO:');
-        console.log('📌 Session:', localStorage.getItem('session'));
-        console.log('📌 Token:', localStorage.getItem('github_token'));
-        console.log('📌 CurrentUser:', currentUser);
-        console.log('📌 Users:', users);
-    }
+        // ============================================================
+        // CAMBIAR ESTADO PEDIDO
+        // ============================================================
+        async function cambiarEstadoPedido(id, estado) {
+            try {
+                await apiRequest(`/pedidos/${id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ estado })
+                });
+                await cargarTabla('pedidos');
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
 
-    // Ejecutar en consola: diagnosticar()
-</script>
+        // ============================================================
+        // INVALIDAR TOKENS
+        // ============================================================
+        async function invalidarTodosLosTokens() {
+            if (!confirm('¿Invalidar todos los tokens de acceso? Esto cerrará sesión a todos los usuarios.')) return;
+            // Esta funcionalidad se puede implementar en el backend
+            alert('⚠️ Funcionalidad en desarrollo. Por ahora, reinicia el servidor.');
+        }
 
-
+        // ============================================================
+        // EXPONER FUNCIONES GLOBALES
+        // ============================================================
+        window.switchTab = switchTab;
+        window.abrirModal = abrirModal;
+        window.closeModal = closeModal;
+        window.guardar = guardar;
+        window.eliminar = eliminar;
+        window.cambiarEstadoPedido = cambiarEstadoPedido;
+        window.invalidarTodosLosTokens = invalidarTodosLosTokens;
+        window.logout = logout;
+    </script>
 </body>
 </html>
