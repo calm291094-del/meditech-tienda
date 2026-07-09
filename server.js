@@ -780,6 +780,11 @@ console.log('🔥 Sistema 24/7 activo para @AniaAsistenteBot');
 // ============================================================
 // 🔧 RUTA DE MIGRACIÓN (SOLO PARA USO ÚNICO)
 // ============================================================
+// ✅ Asegúrate de que fs y path estén importados al inicio del archivo
+// Si no, impórtalos aquí:
+const fs = require('fs');
+const path = require('path');
+
 app.get('/run-migration', async (req, res) => {
     // ⚠️ CLAVE SECRETA: Cambia 'tu_clave_secreta_aqui' por una clave que solo tú sepas
     const SECRET_KEY = 'tu_clave_secreta_aqui';
@@ -789,34 +794,104 @@ app.get('/run-migration', async (req, res) => {
         return res.status(401).send('🔒 Acceso denegado. Clave incorrecta.');
     }
 
-    try {
-        res.send('🚀 Iniciando migración... (revisa los logs)');
-        console.log('🚀 Ejecutando migración desde endpoint...');
+    // Enviar respuesta inmediata para no bloquear al cliente
+    res.send('🚀 Iniciando migración... (revisa los logs)');
 
-        // Inicializar tablas
-        await initTables();
+    // Ejecutar la migración en segundo plano (sin bloquear la respuesta)
+    (async () => {
+        try {
+            console.log('🚀 Ejecutando migración desde endpoint...');
 
-        const DATA_DIR = path.join(__dirname, 'data');
-        let totalMigrados = 0;
+            // Inicializar tablas (ya existe)
+            await initTables();
 
-        // 1. Migrar usuarios
-        const usuariosPath = path.join(DATA_DIR, 'usuarios.json');
-        if (fs.existsSync(usuariosPath)) {
-            const usuarios = JSON.parse(fs.readFileSync(usuariosPath, 'utf8'));
-            console.log(`📥 Insertando ${usuarios.length} usuarios...`);
-            for (const u of usuarios) {
-                // ... (código de migración de usuarios que te di en migrate.js)
-                // Cópialo aquí desde el archivo migrate.js
+            const DATA_DIR = path.join(__dirname, 'data');
+            let count = 0;
+
+            // 1. Migrar usuarios
+            const usuariosPath = path.join(DATA_DIR, 'usuarios.json');
+            if (fs.existsSync(usuariosPath)) {
+                const usuarios = JSON.parse(fs.readFileSync(usuariosPath, 'utf8'));
+                console.log(`📥 Insertando ${usuarios.length} usuarios...`);
+                for (const u of usuarios) {
+                    const exists = await getOne('SELECT id FROM usuarios WHERE username = $1', [u.username]);
+                    if (!exists) {
+                        let passwordHash = u.password;
+                        if (!passwordHash.startsWith('$2a$') && !passwordHash.startsWith('$2b$')) {
+                            passwordHash = await bcrypt.hash(passwordHash, 10);
+                        }
+                        await query(
+                            `INSERT INTO usuarios (username, password_hash, name, email, role, created_at)
+                             VALUES ($1, $2, $3, $4, $5, $6)`,
+                            [u.username, passwordHash, u.name, u.email || '', u.role || 'user', u.fecha || new Date()]
+                        );
+                        count++;
+                    }
+                }
+                console.log(`✅ ${count} usuarios migrados.`);
             }
-            console.log('✅ Usuarios migrados.');
+
+            // 2. Migrar productos
+            const productosPath = path.join(DATA_DIR, 'productos.json');
+            if (fs.existsSync(productosPath)) {
+                const productos = JSON.parse(fs.readFileSync(productosPath, 'utf8'));
+                console.log(`📥 Insertando ${productos.length} productos...`);
+                let prodCount = 0;
+                for (const p of productos) {
+                    const exists = await getOne('SELECT id FROM productos WHERE name = $1', [p.name]);
+                    if (!exists) {
+                        await query(
+                            `INSERT INTO productos (name, category, price, description, stock, image, feat, available, created_at)
+                             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+                            [
+                                p.name,
+                                p.category || 'medicamento',
+                                p.price,
+                                p.desc || '',
+                                p.stock || 0,
+                                p.image || 'https://via.placeholder.com/300x200',
+                                p.feat ? 1 : 0,
+                                p.available !== undefined ? (p.available ? 1 : 0) : 1,
+                                p.fechaCreacion || new Date()
+                            ]
+                        );
+                        prodCount++;
+                    }
+                }
+                console.log(`✅ ${prodCount} productos migrados.`);
+            }
+
+            // 3. Migrar pedidos
+            const pedidosPath = path.join(DATA_DIR, 'pedidos.json');
+            if (fs.existsSync(pedidosPath)) {
+                const pedidos = JSON.parse(fs.readFileSync(pedidosPath, 'utf8'));
+                console.log(`📥 Insertando ${pedidos.length} pedidos...`);
+                let pedCount = 0;
+                for (const p of pedidos) {
+                    const exists = await getOne('SELECT id FROM pedidos WHERE id = $1', [p.id]);
+                    if (!exists) {
+                        await query(
+                            `INSERT INTO pedidos (id, usuario, email, items, total, estado, created_at)
+                             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                            [
+                                p.id,
+                                p.usuario || 'anonimo',
+                                p.email || 'no-email',
+                                JSON.stringify(p.items || []),
+                                p.total || 0,
+                                p.estado || 'pendiente',
+                                p.fecha || new Date()
+                            ]
+                        );
+                        pedCount++;
+                    }
+                }
+                console.log(`✅ ${pedCount} pedidos migrados.`);
+            }
+
+            console.log('🎉 Migración completada desde endpoint.');
+        } catch (error) {
+            console.error('❌ Error en migración:', error);
         }
-
-        // 2. Migrar productos (copia el código de migrate.js)
-        // 3. Migrar pedidos (copia el código de migrate.js)
-
-        console.log('🎉 Migración completada desde endpoint.');
-    } catch (error) {
-        console.error('❌ Error en migración:', error);
-        res.status(500).send('❌ Error en la migración: ' + error.message);
-    }
+    })(); // Ejecutar en segundo plano
 });
