@@ -259,3 +259,81 @@ function renderAdminList() {
         </div>
     `).join('');
 }
+
+// ============================================
+// ADMIN - USUARIOS
+// ============================================
+async function renderUsers() {
+    const list = document.getElementById('users-list');
+    if (!list) return;
+    
+    try {
+        const usuarios = await apiRequest('/usuarios');
+        S.users = usuarios;
+        
+        if (!usuarios || usuarios.length === 0) {
+            list.innerHTML = '<p class="text-center text-gray-400 py-8">No hay usuarios registrados</p>';
+            return;
+        }
+        
+        list.innerHTML = usuarios.map(u => `
+            <div class="admin-list-item" onclick="verPerfilCliente('${u.username}')" style="cursor:pointer;">
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#06b6d4);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.2rem;flex-shrink:0;">
+                    ${u.name ? u.name.charAt(0).toUpperCase() : 'U'}
+                </div>
+                <div class="info">
+                    <div class="name">${u.name || u.username}</div>
+                    <div class="meta">@${u.username} | ${u.email || 'Sin email'}</div>
+                </div>
+                <div>
+                    <span class="badge-role ${u.role === 'admin' ? 'admin' : 'user'}">${u.role === 'admin' ? '🔒 Admin' : '👤 Cliente'}</span>
+                    <span class="meta" style="font-size:0.7rem;color:#6b7280;margin-left:8px;">
+                        ${S.orders ? S.orders.filter(o => o.usuario === u.username).length : 0} pedidos
+                    </span>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        list.innerHTML = `<p class="text-center text-red-500 py-8">❌ Error al cargar usuarios: ${error.message}</p>`;
+    }
+}
+
+function verPerfilCliente(username) {
+    showNotif(`📊 Perfil de ${username}`, 'info');
+}
+
+function buscarUsuarios(query) {
+    const list = document.getElementById('users-list');
+    if (!list) return;
+    
+    if (!query.trim()) {
+        renderUsers();
+        return;
+    }
+    
+    const filtrados = S.users.filter(u =>
+        u.username.toLowerCase().includes(query.toLowerCase()) ||
+        (u.name && u.name.toLowerCase().includes(query.toLowerCase())) ||
+        (u.email && u.email.toLowerCase().includes(query.toLowerCase()))
+    );
+    
+    if (filtrados.length === 0) {
+        list.innerHTML = '<p class="text-center text-gray-400 py-8">No se encontraron usuarios</p>';
+        return;
+    }
+    
+    list.innerHTML = filtrados.map(u => `
+        <div class="admin-list-item" onclick="verPerfilCliente('${u.username}')" style="cursor:pointer;">
+            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#06b6d4);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.2rem;flex-shrink:0;">
+                ${u.name ? u.name.charAt(0).toUpperCase() : 'U'}
+            </div>
+            <div class="info">
+                <div class="name">${u.name || u.username}</div>
+                <div class="meta">@${u.username} | ${u.email || 'Sin email'}</div>
+            </div>
+            <div>
+                <span class="badge-role ${u.role === 'admin' ? 'admin' : 'user'}">${u.role === 'admin' ? '🔒 Admin' : '👤 Cliente'}</span>
+            </div>
+        </div>
+    `).join('');
+}
