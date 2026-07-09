@@ -1,0 +1,514 @@
+/* ============================================
+   ADMIN.CSS - ESTILOS DEL PANEL ADMIN
+   ============================================ */
+
+/* ---------- ADMIN PANEL ---------- */
+.admin-panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 60;
+    display: none;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.admin-panel-overlay.active {
+    display: block;
+}
+
+.admin-panel {
+    max-width: 80rem;
+    margin: 20px auto;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    animation: slideUp 0.4s ease;
+}
+
+.admin-header {
+    background: linear-gradient(135deg, var(--primary), var(--secondary), var(--primary-dark));
+    padding: 24px 28px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-header::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+}
+
+.admin-header .content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.admin-header h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-header .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 6px 16px;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+}
+
+.admin-header .status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #34d399;
+    animation: pulse 2s infinite;
+}
+
+.admin-header .close-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: white;
+    padding: 8px 20px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+    font-size: 0.9rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-header .close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ---------- DASHBOARD METRICS ---------- */
+.admin-dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    padding: 20px 24px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.metric-card {
+    background: white;
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    border-left: 4px solid var(--primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.metric-card .label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--text-gray);
+    letter-spacing: 0.5px;
+}
+
+.metric-card .value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.metric-card .trend {
+    font-size: 0.7rem;
+    color: #10b981;
+}
+
+/* ---------- ADMIN TABS ---------- */
+.admin-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px 16px 0 16px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+}
+
+.admin-tab {
+    padding: 10px 18px;
+    border: none;
+    background: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-gray);
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: 10px 10px 0 0;
+    white-space: nowrap;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.admin-tab:hover {
+    color: var(--text-dark);
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.admin-tab.active {
+    color: var(--primary);
+    background: white;
+    box-shadow: 0 -2px 8px rgba(13, 148, 136, 0.08);
+}
+
+.admin-tab i {
+    font-size: 0.9rem;
+}
+
+/* ---------- ADMIN CONTENT ---------- */
+.admin-content {
+    padding: 20px 24px;
+}
+
+.admin-content .tab-content {
+    display: none;
+}
+
+.admin-content .tab-content.active {
+    display: block;
+}
+
+/* ---------- ADMIN FORMS ---------- */
+.admin-form {
+    display: grid;
+    gap: 16px;
+}
+
+.admin-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.admin-form label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-dark);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: var(--transition);
+    font-family: inherit;
+    min-height: 44px;
+    background: white;
+}
+
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
+}
+
+.admin-form textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.admin-form .form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+/* ---------- ADMIN TABLE ---------- */
+.admin-table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius);
+    border: 1px solid #e5e7eb;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.admin-table th {
+    text-align: left;
+    padding: 12px 16px;
+    background: #f8fafc;
+    font-weight: 600;
+    color: var(--text-gray);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+}
+
+.admin-table tr:hover td {
+    background: #fafafa;
+}
+
+.admin-table .actions {
+    display: flex;
+    gap: 6px;
+}
+
+.admin-table .actions button {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+    min-height: 32px;
+    min-width: 32px;
+    font-size: 0.8rem;
+}
+
+.admin-table .actions .edit {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.admin-table .actions .edit:hover {
+    background: #fde68a;
+}
+
+.admin-table .actions .delete {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.admin-table .actions .delete:hover {
+    background: #fca5a5;
+}
+
+/* ---------- BADGES IN TABLE ---------- */
+.badge-role {
+    padding: 2px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.badge-role.admin {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-role.user {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-status {
+    padding: 2px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.badge-status.pendiente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-status.pagado {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-status.enviado {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-status.entregado {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-status.cancelado {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* ---------- ADMIN CARDS ---------- */
+.admin-card {
+    background: white;
+    border-radius: var(--radius);
+    border: 1px solid #e5e7eb;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.admin-card .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.admin-card .header h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+/* ---------- TOKEN CONFIG ---------- */
+.token-config {
+    background: linear-gradient(135deg, #eff6ff, #eef2ff);
+    border-radius: var(--radius);
+    padding: 20px;
+    border: 2px solid #bfdbfe;
+}
+
+.token-config .token-input-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.token-config .token-input-group input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    border: 2px solid #bfdbfe;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-family: monospace;
+    outline: none;
+    transition: var(--transition);
+    min-height: 44px;
+}
+
+.token-config .token-input-group input:focus {
+    border-color: var(--primary);
+}
+
+.token-config .token-status {
+    margin-top: 12px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.token-config .token-status.success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.token-config .token-status.error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.token-config .token-status.info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+/* ---------- ADMIN LIST ---------- */
+.admin-list-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    background: #f9fafb;
+    border-radius: var(--radius);
+    border: 1px solid #e5e7eb;
+    transition: var(--transition);
+    margin-bottom: 8px;
+}
+
+.admin-list-item:hover {
+    background: white;
+    box-shadow: var(--shadow);
+}
+
+.admin-list-item img {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: white;
+}
+
+.admin-list-item .info {
+    flex: 1;
+    min-width: 0;
+}
+
+.admin-list-item .info .name {
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-list-item .info .meta {
+    font-size: 0.85rem;
+    color: var(--text-gray);
+}
+
+.admin-list-item .actions {
+    display: flex;
+    gap: 4px;
+}
+
+.admin-list-item .actions button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+    min-height: 36px;
+    min-width: 36px;
+}
+
+.admin-list-item .actions .toggle-on {
+    color: #10b981;
+}
+.admin-list-item .actions .toggle-on:hover {
+    background: #ecfdf5;
+}
+
+.admin-list-item .actions .toggle-off {
+    color: #ef4444;
+}
+.admin-list-item .actions .toggle-off:hover {
+    background: #fef2f2;
+}
