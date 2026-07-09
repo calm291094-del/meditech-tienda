@@ -344,40 +344,45 @@ body {
     border-radius: 6px;
 }
 
-/* ---------- PRODUCT CARDS ---------- */
+/* ============================================
+   PRODUCT CARDS - DISEÑO PROFESIONAL
+   ============================================ */
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 24px;
 }
 
 .product-card {
     background: white;
-    border-radius: var(--radius);
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: var(--shadow-md);
-    transition: var(--transition);
-    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    border: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
 }
 
 .product-card:hover {
     transform: translateY(-6px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
 }
 
 .product-card .image-wrap {
     position: relative;
-    height: 220px;
+    height: 200px;
     overflow: hidden;
     background: #f8fafc;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .product-card .image-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    transition: transform 0.4s ease;
 }
 
 .product-card:hover .image-wrap img {
@@ -388,8 +393,8 @@ body {
 .product-card .badge {
     position: absolute;
     top: 12px;
-    padding: 3px 12px;
-    border-radius: var(--radius-full);
+    padding: 3px 14px;
+    border-radius: 9999px;
     font-size: 0.55rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -418,27 +423,30 @@ body {
 
 .product-card .badge-category {
     position: absolute;
-    bottom: 12px;
-    right: 12px;
+    bottom: 10px;
+    right: 10px;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(4px);
     color: white;
     padding: 2px 12px;
-    border-radius: var(--radius-full);
-    font-size: 0.55rem;
+    border-radius: 9999px;
+    font-size: 0.5rem;
     font-weight: 600;
     z-index: 2;
 }
 
-/* Cuerpo de la tarjeta */
+/* Body */
 .product-card .body {
     padding: 14px 16px 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .product-card .body .name {
     font-weight: 700;
     font-size: 1rem;
-    color: var(--text-dark);
+    color: #1f2937;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -446,8 +454,8 @@ body {
 }
 
 .product-card .body .desc {
-    font-size: 0.8rem;
-    color: var(--text-gray);
+    font-size: 0.78rem;
+    color: #6b7280;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -455,15 +463,17 @@ body {
     min-height: 36px;
     line-height: 1.5;
     margin-bottom: 10px;
+    flex: 1;
 }
 
-/* Footer de la tarjeta */
+/* Footer - profesional */
 .product-card .body .footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 10px;
+    padding-top: 12px;
     border-top: 1px solid #f1f5f9;
+    margin-top: auto;
 }
 
 .product-card .body .footer .price-block {
@@ -474,14 +484,14 @@ body {
 .product-card .body .footer .price {
     font-size: 1.3rem;
     font-weight: 700;
-    color: var(--primary);
+    color: #0d9488;
     line-height: 1.2;
 }
 
 .product-card .body .footer .price small {
     font-size: 0.6rem;
     font-weight: 400;
-    color: var(--text-light);
+    color: #9ca3af;
 }
 
 .product-card .body .footer .stock-info {
@@ -489,16 +499,24 @@ body {
     align-items: center;
     gap: 4px;
     font-size: 0.65rem;
-    color: var(--text-gray);
+    color: #6b7280;
     margin-top: 2px;
 }
 
-.product-card .body .footer .stock-info .dot-in-stock {
+.product-card .body .footer .stock-info .dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #10b981;
     display: inline-block;
+}
+
+.product-card .body .footer .stock-info .dot.in-stock {
+    background: #10b981;
+}
+
+.product-card .body .footer .stock-info .dot.low-stock {
+    background: #f59e0b;
+    animation: pulse 1.5s infinite;
 }
 
 /* Botón añadir */
@@ -510,7 +528,7 @@ body {
     color: white;
     border: none;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -520,7 +538,7 @@ body {
 }
 
 .product-card .body .footer .add-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: linear-gradient(135deg, #0d9488, #06b6d4);
     transform: scale(1.08);
     box-shadow: 0 6px 20px rgba(13, 148, 136, 0.3);
 }
@@ -529,6 +547,82 @@ body {
     opacity: 0.4;
     cursor: not-allowed;
     background: #9ca3af;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* ---------- RESPONSIVE PRODUCTOS ---------- */
+@media (max-width: 768px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 14px;
+    }
+    .product-card .image-wrap {
+        height: 160px;
+    }
+    .product-card .body {
+        padding: 10px 12px 12px;
+    }
+    .product-card .body .name {
+        font-size: 0.85rem;
+    }
+    .product-card .body .desc {
+        font-size: 0.7rem;
+        min-height: 28px;
+        -webkit-line-clamp: 1;
+    }
+    .product-card .body .footer .price {
+        font-size: 1.1rem;
+    }
+    .product-card .body .footer .add-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .product-card .image-wrap {
+        height: 130px;
+    }
+    .product-card .body {
+        padding: 6px 8px 8px;
+    }
+    .product-card .body .name {
+        font-size: 0.7rem;
+    }
+    .product-card .body .desc {
+        display: none;
+    }
+    .product-card .body .footer .price {
+        font-size: 0.9rem;
+    }
+    .product-card .body .footer .add-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.7rem;
+    }
+    .product-card .body .footer .stock-info {
+        font-size: 0.5rem;
+    }
+    .product-card .badge {
+        font-size: 0.45rem;
+        padding: 1px 8px;
+        top: 6px;
+    }
+    .product-card .badge-category {
+        font-size: 0.45rem;
+        padding: 1px 8px;
+        bottom: 6px;
+        right: 6px;
+    }
 }
 
 /* ---------- CATEGORÍAS ---------- */
