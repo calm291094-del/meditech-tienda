@@ -245,33 +245,35 @@ async function saveTexts() {
     showNotif('✅ Textos actualizados localmente', 'success');
 }
 
-// ============================================
-// ADMIN - RENDER LIST
-// ============================================
 function renderAdminList() {
     const list = document.getElementById('admin-list');
     if (!list) return;
-    document.getElementById('admin-count').textContent = S.pr.length;
-    if (S.pr.length === 0) { 
-        list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin productos</p>'; 
-        return; 
+    document.getElementById('admin-count').textContent = S.pr ? S.pr.length : 0;
+    
+    if (!S.pr || S.pr.length === 0) {
+        list.innerHTML = '<p class="text-center text-gray-400 py-8">Sin productos</p>';
+        return;
     }
-    list.innerHTML = S.pr.map(p => `
-        <div class="admin-list-item">
-            <img src="${p.image || 'https://via.placeholder.com/60'}" alt="${p.name}">
-            <div class="info">
-                <div class="name">${p.name}</div>
-                <div class="meta">$${p.price} | Stock: ${p.stock} | ${p.available !== false ? '✅ Disponible' : '❌ Agotado'}</div>
+    
+    list.innerHTML = S.pr.map(p => {
+        const isAvailable = p.available !== false;
+        return `
+            <div class="admin-list-item">
+                <img src="${p.image || 'https://via.placeholder.com/60'}" alt="${p.name}">
+                <div class="info">
+                    <div class="name">${p.name}</div>
+                    <div class="meta">$${p.price} | Stock: ${p.stock} | <span style="color:${isAvailable ? '#10b981' : '#ef4444'};font-weight:600;">${isAvailable ? '✅ Disponible' : '❌ Agotado'}</span></div>
+                </div>
+                <div class="actions">
+                    <button class="${isAvailable ? 'toggle-on' : 'toggle-off'}" onclick="toggleProductAvailability('${p.id}')" title="${isAvailable ? 'Marcar como agotado' : 'Marcar como disponible'}">
+                        <i class="fas ${isAvailable ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                    </button>
+                    <button class="edit" onclick="editProduct('${p.id}')"><i class="fas fa-edit"></i></button>
+                    <button class="delete" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
+                </div>
             </div>
-            <div class="actions">
-                <button class="${p.available !== false ? 'toggle-on' : 'toggle-off'}" onclick="toggleProductAvailability('${p.id}')" title="${p.available !== false ? 'Marcar como agotado' : 'Marcar como disponible'}">
-                    <i class="fas ${p.available !== false ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
-                </button>
-                <button class="edit" onclick="editProduct('${p.id}')"><i class="fas fa-edit"></i></button>
-                <button class="delete" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // ============================================
