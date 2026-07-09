@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -795,10 +797,8 @@ console.log('🔥 Sistema 24/7 activo para @AniaAsistenteBot');
 
 
 
-
-
 // ============================================================
-// 🔧 RUTA DE MIGRACIÓN CON SOPORTE PARA { "productos": [...] }
+// 🔧 RUTA DE MIGRACIÓN (CON fs Y path DISPONIBLES)
 // ============================================================
 app.get('/run-migration', async (req, res) => {
     const SECRET_KEY = 'tu_clave_secreta_aqui';
@@ -814,6 +814,7 @@ app.get('/run-migration', async (req, res) => {
         try {
             console.log('🚀 === INICIANDO MIGRACIÓN ===');
             
+            // ✅ fs y path ya están disponibles porque los importamos arriba
             const DATA_DIR = __dirname;
             console.log(`📂 Directorio de trabajo: ${DATA_DIR}`);
             
@@ -833,14 +834,12 @@ app.get('/run-migration', async (req, res) => {
                 const rawData = fs.readFileSync(usuariosPath, 'utf8');
                 const data = JSON.parse(rawData);
                 
-                // ✅ SOPORTAR { "usuarios": [...] } O [...] DIRECTAMENTE
                 let usuariosArray = [];
                 if (Array.isArray(data)) {
                     usuariosArray = data;
                 } else if (data.usuarios && Array.isArray(data.usuarios)) {
                     usuariosArray = data.usuarios;
                 } else {
-                    // Buscar cualquier array en el objeto
                     for (const key in data) {
                         if (Array.isArray(data[key])) {
                             usuariosArray = data[key];
@@ -877,9 +876,11 @@ app.get('/run-migration', async (req, res) => {
                     }
                 }
                 console.log(`✅ ${count} usuarios migrados.`);
+            } else {
+                console.log(`❌ No se encontró usuarios.json`);
             }
 
-            // --- 2. MIGRAR PRODUCTOS (CORREGIDO PARA TU ESTRUCTURA) ---
+            // --- 2. MIGRAR PRODUCTOS ---
             const productosPath = path.join(DATA_DIR, 'productos.json');
             console.log(`📂 Buscando productos en: ${productosPath}`);
             
@@ -890,7 +891,6 @@ app.get('/run-migration', async (req, res) => {
                 const data = JSON.parse(rawData);
                 console.log(`📋 Claves en productos.json:`, Object.keys(data));
                 
-                // ✅ TU ESTRUCTURA ES { "productos": [...] }
                 let productosArray = [];
                 if (Array.isArray(data)) {
                     productosArray = data;
@@ -916,13 +916,11 @@ app.get('/run-migration', async (req, res) => {
                         continue;
                     }
                     
-                    // Verificar si ya existe (por nombre)
                     const exists = await getOne('SELECT id FROM productos WHERE name = $1', [p.name]);
                     if (!exists) {
-                        const result = await query(
+                        await query(
                             `INSERT INTO productos (name, category, price, description, stock, image, feat, available, created_at)
-                             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-                             RETURNING id`,
+                             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
                             [
                                 p.name,
                                 p.category || 'medicamento',
@@ -935,17 +933,15 @@ app.get('/run-migration', async (req, res) => {
                                 p.fechaCreacion || p.created_at || new Date()
                             ]
                         );
-                        if (result.rows.length > 0) {
-                            prodCount++;
-                            console.log(`✅ Producto insertado: ${p.name}`);
-                        }
+                        prodCount++;
+                        console.log(`✅ Producto insertado: ${p.name}`);
                     } else {
                         console.log(`⏭️ Producto ya existe: ${p.name}`);
                     }
                 }
                 console.log(`✅ ${prodCount} productos migrados.`);
             } else {
-                console.log(`❌ No se encontró productos.json en: ${productosPath}`);
+                console.log(`❌ No se encontró productos.json`);
             }
 
             // --- 3. MIGRAR PEDIDOS ---
@@ -994,7 +990,7 @@ app.get('/run-migration', async (req, res) => {
                 }
                 console.log(`✅ ${pedCount} pedidos migrados.`);
             } else {
-                console.log(`❌ No se encontró pedidos.json en: ${pedidosPath}`);
+                console.log(`❌ No se encontró pedidos.json`);
             }
 
             console.log('🎉 Migración completada desde endpoint.');
