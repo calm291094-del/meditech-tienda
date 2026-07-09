@@ -777,16 +777,30 @@ console.log('🔥 Sistema 24/7 activo para @AniaAsistenteBot');
 
 
 
-// ============================================================
-// 🔧 RUTA DE MIGRACIÓN (SOLO PARA USO ÚNICO)
-// ============================================================
-// ✅ Asegúrate de que fs y path estén importados al inicio del archivo
-// Si no, impórtalos aquí:
-const fs = require('fs');
-const path = require('path');
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// 🔧 RUTA DE MIGRACIÓN (CORREGIDA - JSON EN RAÍZ)
+// ============================================================
 app.get('/run-migration', async (req, res) => {
-    // ⚠️ CLAVE SECRETA: Cambia 'tu_clave_secreta_aqui' por una clave que solo tú sepas
     const SECRET_KEY = 'tu_clave_secreta_aqui';
     const providedKey = req.query.key;
 
@@ -794,25 +808,23 @@ app.get('/run-migration', async (req, res) => {
         return res.status(401).send('🔒 Acceso denegado. Clave incorrecta.');
     }
 
-    // Enviar respuesta inmediata para no bloquear al cliente
     res.send('🚀 Iniciando migración... (revisa los logs)');
 
-    // Ejecutar la migración en segundo plano (sin bloquear la respuesta)
     (async () => {
         try {
             console.log('🚀 Ejecutando migración desde endpoint...');
 
-            // Inicializar tablas (ya existe)
-            await initTables();
-
+            const fs = require('fs');
+            const path = require('path');
+            // ✅ LOS JSON ESTÁN EN LA RAÍZ, NO EN data/
             const DATA_DIR = __dirname;
-            let count = 0;
 
-            // 1. Migrar usuarios
+            // --- 1. MIGRAR USUARIOS ---
             const usuariosPath = path.join(DATA_DIR, 'usuarios.json');
             if (fs.existsSync(usuariosPath)) {
                 const usuarios = JSON.parse(fs.readFileSync(usuariosPath, 'utf8'));
                 console.log(`📥 Insertando ${usuarios.length} usuarios...`);
+                let count = 0;
                 for (const u of usuarios) {
                     const exists = await getOne('SELECT id FROM usuarios WHERE username = $1', [u.username]);
                     if (!exists) {
@@ -829,14 +841,25 @@ app.get('/run-migration', async (req, res) => {
                     }
                 }
                 console.log(`✅ ${count} usuarios migrados.`);
+            } else {
+                console.log('⚠️ No se encontró usuarios.json en la raíz');
             }
 
-            // 2. Migrar productos
+            // --- 2. MIGRAR PRODUCTOS ---
             const productosPath = path.join(DATA_DIR, 'productos.json');
+            console.log(`📂 Buscando productos en: ${productosPath}`);
+            
             if (fs.existsSync(productosPath)) {
-                const productos = JSON.parse(fs.readFileSync(productosPath, 'utf8'));
+                const rawData = fs.readFileSync(productosPath, 'utf8');
+                console.log(`📄 Archivo productos.json encontrado`);
+                
+                const data = JSON.parse(rawData);
+                // Detectar si los productos están en data.productos o directamente en el array
+                const productos = Array.isArray(data) ? data : (data.productos || []);
+                
                 console.log(`📥 Insertando ${productos.length} productos...`);
                 let prodCount = 0;
+                
                 for (const p of productos) {
                     const exists = await getOne('SELECT id FROM productos WHERE name = $1', [p.name]);
                     if (!exists) {
@@ -846,22 +869,27 @@ app.get('/run-migration', async (req, res) => {
                             [
                                 p.name,
                                 p.category || 'medicamento',
-                                p.price,
-                                p.desc || '',
-                                p.stock || 0,
+                                parseFloat(p.price) || 0,
+                                p.desc || p.description || '',
+                                parseInt(p.stock) || 0,
                                 p.image || 'https://via.placeholder.com/300x200',
                                 p.feat ? 1 : 0,
                                 p.available !== undefined ? (p.available ? 1 : 0) : 1,
-                                p.fechaCreacion || new Date()
+                                p.fechaCreacion || p.created_at || new Date()
                             ]
                         );
                         prodCount++;
+                        console.log(`✅ Producto insertado: ${p.name}`);
+                    } else {
+                        console.log(`⏭️ Producto ya existe: ${p.name}`);
                     }
                 }
                 console.log(`✅ ${prodCount} productos migrados.`);
+            } else {
+                console.log(`❌ No se encontró productos.json en: ${productosPath}`);
             }
 
-            // 3. Migrar pedidos
+            // --- 3. MIGRAR PEDIDOS ---
             const pedidosPath = path.join(DATA_DIR, 'pedidos.json');
             if (fs.existsSync(pedidosPath)) {
                 const pedidos = JSON.parse(fs.readFileSync(pedidosPath, 'utf8'));
@@ -892,6 +920,7 @@ app.get('/run-migration', async (req, res) => {
             console.log('🎉 Migración completada desde endpoint.');
         } catch (error) {
             console.error('❌ Error en migración:', error);
+            console.error('📚 Stack:', error.stack);
         }
-    })(); // Ejecutar en segundo plano
+    })();
 });
