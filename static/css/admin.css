@@ -566,3 +566,33 @@
     .stat-card .stat-value { font-size: 0.9rem; }
     .stat-card .stat-label { font-size: 0.6rem; }
 }
+
+/* ============================================
+   FIX: INPUTS CON BORDES VISIBLES
+   ============================================ */
+#tab-textos input,
+#tab-textos textarea {
+    border: 2px solid #d1d5db !important;
+    background: white !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    width: 100% !important;
+    font-size: 0.9rem !important;
+    color: #1f2937 !important;
+    transition: all 0.3s ease !important;
+}
+
+#tab-textos input:focus,
+#tab-textos textarea:focus {
+    border-color: #0d9488 !important;
+    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1) !important;
+    outline: none !important;
+}
+
+#tab-textos label {
+    font-weight: 600 !important;
+    font-size: 0.8rem !important;
+    color: #374151 !important;
+    display: block !important;
+    margin-bottom: 4px !important;
+}
