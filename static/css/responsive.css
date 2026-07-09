@@ -16,10 +16,11 @@
     
     .product-grid { gap: 10px !important; }
     .product-card .image { height: 140px !important; }
-    .product-card .body { padding: 10px !important; }
+    .product-card .body { padding: 8px 10px !important; }
     .product-card .body .name { font-size: 0.8rem !important; }
+    .product-card .body .desc { font-size: 0.7rem !important; min-height: 24px !important; }
     .product-card .body .footer .price { font-size: 1rem !important; }
-    .product-card .body .footer .add-btn { width: 36px !important; height: 36px !important; font-size: 0.8rem !important; }
+    .product-card .body .footer .add-btn { width: 32px !important; height: 32px !important; font-size: 0.8rem !important; }
     
     .badge-new, .badge-soldout { font-size: 0.5rem !important; padding: 2px 8px !important; }
     
@@ -35,23 +36,27 @@
     .offer-grid { grid-template-columns: 1fr !important; }
     
     .admin-panel { margin: 8px !important; border-radius: 16px !important; }
-    .admin-header { padding: 16px !important; }
-    .admin-header h2 { font-size: 1.1rem !important; }
+    .admin-header { padding: 12px !important; }
+    .admin-header h2 { font-size: 1rem !important; }
     .admin-header .close-btn { font-size: 0.7rem !important; padding: 4px 12px !important; min-height: 32px !important; }
-    .admin-dashboard { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; padding: 12px !important; }
-    .metric-card { padding: 10px 14px !important; }
-    .metric-card .value { font-size: 1.2rem !important; }
-    .admin-tab { font-size: 0.6rem !important; padding: 6px 10px !important; min-height: 32px !important; }
-    .admin-content { padding: 12px !important; }
+    .admin-dashboard { grid-template-columns: repeat(2, 1fr) !important; gap: 6px !important; padding: 10px !important; }
+    .metric-card { padding: 8px 12px !important; }
+    .metric-card .value { font-size: 1rem !important; }
+    .admin-tab { font-size: 0.55rem !important; padding: 4px 8px !important; min-height: 28px !important; }
+    .admin-tab i { font-size: 0.6rem !important; margin-right: 2px !important; }
+    .admin-content { padding: 8px 10px !important; }
     .admin-form .form-row { grid-template-columns: 1fr !important; }
     .admin-form input, .admin-form select, .admin-form textarea { font-size: 14px !important; padding: 8px 10px !important; min-height: 36px !important; }
     .admin-list-item { flex-direction: column !important; gap: 6px !important; padding: 10px !important; }
     .admin-list-item img { width: 48px !important; height: 48px !important; }
     .admin-list-item .info { width: 100% !important; }
     .admin-list-item .actions { width: 100% !important; justify-content: flex-end !important; }
+    .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+    .stat-card { padding: 10px 12px !important; }
+    .stat-card .stat-value { font-size: 1.2rem !important; }
     
     .modal { margin: 8px !important; border-radius: 16px !important; }
-    .modal-body { padding: 16px !important; }
+    .modal-body { padding: 12px !important; }
     .modal-body input, .modal-body select, .modal-body textarea { font-size: 14px !important; padding: 8px 10px !important; min-height: 36px !important; }
     
     .chatbot-window { width: 96vw !important; max-width: 340px !important; right: 2vw !important; bottom: 64px !important; }
@@ -70,17 +75,26 @@
     .carousel-caption p { font-size: 0.75rem !important; }
     .carousel-btn { width: 36px !important; height: 36px !important; font-size: 14px !important; }
     
-    .product-grid { gap: 14px !important; }
+    .product-grid { gap: 14px !important; grid-template-columns: repeat(2, 1fr) !important; }
     .product-card .image { height: 160px !important; }
-    .product-card .body { padding: 12px !important; }
+    .product-card .body { padding: 10px 12px !important; }
+    .product-card .body .name { font-size: 0.9rem !important; }
     
     .category-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
     
     .admin-dashboard { grid-template-columns: repeat(2, 1fr) !important; }
     .admin-form .form-row { grid-template-columns: 1fr !important; }
-    .admin-content { padding: 16px !important; }
+    .admin-content { padding: 12px !important; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
     
     .footer-grid { grid-template-columns: 1fr 1fr !important; }
+    
+    .chatbot-container { bottom: 12px !important; right: 12px !important; }
+    .chatbot-toggle { width: 52px !important; height: 52px !important; font-size: 1.3rem !important; }
+    .chatbot-window { width: 92vw !important; max-width: 380px !important; right: 4vw !important; bottom: 72px !important; max-height: 75vh !important; }
+    .chatbot-messages { height: 50vh !important; max-height: 350px !important; }
+    .chatbot-input input { font-size: 15px !important; padding: 10px 14px !important; min-height: 44px !important; }
+    .chatbot-input button { width: 48px !important; height: 48px !important; min-width: 48px !important; min-height: 48px !important; font-size: 1.1rem !important; }
 }
 
 /* ---------- TABLETS (641px - 768px) ---------- */
@@ -88,18 +102,22 @@
     .carousel-item img { height: 300px !important; }
     .product-grid { grid-template-columns: repeat(2, 1fr) !important; }
     .category-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .admin-dashboard { grid-template-columns: repeat(2, 1fr) !important; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
 }
 
 /* ---------- TABLET/PC (769px - 1024px) ---------- */
 @media (min-width: 769px) and (max-width: 1024px) {
     .product-grid { grid-template-columns: repeat(3, 1fr) !important; }
     .category-grid { grid-template-columns: repeat(3, 1fr) !important; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr) !important; }
 }
 
 /* ---------- PC GRANDE (1025px+) ---------- */
 @media (min-width: 1025px) {
     .product-grid { grid-template-columns: repeat(4, 1fr) !important; }
     .category-grid { grid-template-columns: repeat(4, 1fr) !important; }
+    .stats-grid { grid-template-columns: repeat(4, 1fr) !important; }
 }
 
 /* ---------- OCULTAR EN MÓVIL ---------- */
@@ -112,47 +130,6 @@
 /* ---------- MOSTRAR EN MÓVIL ---------- */
 @media (min-width: 769px) {
     .show-mobile { display: none !important; }
-}
-
-/* ---------- ADMIN RESPONSIVE ---------- */
-@media (max-width: 768px) {
-    .admin-panel-overlay { padding: 8px !important; }
-    .admin-header .content { flex-direction: column !important; align-items: stretch !important; }
-    .admin-tabs { padding: 8px 8px 0 8px !important; }
-    .admin-tab { font-size: 0.65rem !important; padding: 6px 10px !important; min-height: 36px !important; }
-    .admin-tab i { font-size: 0.75rem !important; }
-    .admin-dashboard { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-    .admin-content { padding: 12px !important; }
-    .admin-table-wrap { font-size: 0.75rem !important; }
-    .admin-table th, .admin-table td { padding: 8px 10px !important; }
-    .admin-table .actions button { min-height: 28px !important; min-width: 28px !important; font-size: 0.7rem !important; }
-    
-    .token-config .token-input-group { flex-direction: column !important; }
-    .token-config .token-input-group input { min-width: 100% !important; }
-}
-
-@media (max-width: 480px) {
-    .admin-tab { font-size: 0.55rem !important; padding: 4px 8px !important; min-height: 28px !important; }
-    .admin-tab i { font-size: 0.6rem !important; margin-right: 2px !important; }
-    .admin-dashboard { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
-    .metric-card { padding: 8px 12px !important; }
-    .metric-card .value { font-size: 1rem !important; }
-    .admin-header h2 { font-size: 1rem !important; }
-    .admin-table { font-size: 0.65rem !important; }
-    .admin-table th, .admin-table td { padding: 4px 6px !important; }
-}
-
-/* ---------- CHATBOT RESPONSIVE ---------- */
-@media (max-width: 640px) {
-    .chatbot-container { bottom: 12px !important; right: 12px !important; }
-    .chatbot-toggle { width: 52px !important; height: 52px !important; font-size: 1.3rem !important; }
-    .chatbot-window { width: 92vw !important; max-width: 380px !important; right: 4vw !important; bottom: 72px !important; max-height: 75vh !important; }
-    .chatbot-messages { height: 50vh !important; max-height: 350px !important; }
-    .chatbot-input input { font-size: 15px !important; padding: 10px 14px !important; min-height: 44px !important; }
-    .chatbot-input button { width: 48px !important; height: 48px !important; min-width: 48px !important; min-height: 48px !important; font-size: 1.1rem !important; }
-    .chatbot-header { padding: 10px 14px !important; }
-    .chatbot-header h3 { font-size: 0.9rem !important; }
-    .chatbot-messages .message { font-size: 0.85rem !important; padding: 8px 12px !important; max-width: 90% !important; }
 }
 
 /* ---------- TOAST RESPONSIVE ---------- */
