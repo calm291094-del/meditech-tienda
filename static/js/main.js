@@ -537,6 +537,108 @@ function exportarReportePDF(tipo) {
     showNotif('📄 Generando PDF... (funcionalidad en desarrollo)', 'info');
 }
 
+// ============================================
+// ESTADÍSTICAS
+// ============================================
+function renderEstadisticas() {
+    document.getElementById('stat-products').textContent = S.pr.length || 0;
+    document.getElementById('stat-users').textContent = S.users ? S.users.length : 0;
+    document.getElementById('stat-views').textContent = S.history ? S.history.length : 0;
+    document.getElementById('stat-orders').textContent = S.orders ? S.orders.length : 0;
+    
+    const revenue = S.orders ? S.orders.reduce((sum, o) => sum + (o.total || 0), 0) : 0;
+    document.getElementById('stat-revenue').textContent = `$${revenue.toFixed(2)}`;
+    
+    const today = new Date().toDateString();
+    const todayViews = S.history ? S.history.filter(h => new Date(h.fecha).toDateString() === today).length : 0;
+    document.getElementById('stat-today').textContent = todayViews;
+}
+
+function generarGraficos() {
+    try {
+        // Gráfico de ventas por categoría
+        const ctx1 = document.getElementById('ventas-categoria');
+        if (ctx1 && typeof Chart !== 'undefined') {
+            const categorias = ['medicamento', 'tecnologia', 'salud', 'gaming'];
+            const nombres = ['💊 Medicamentos', '💻 Tecnología', '🩺 Salud', '🎮 Gaming'];
+            const colores = ['#0d9488', '#3b82f6', '#10b981', '#8b5cf6'];
+            
+            const ventas = categorias.map(cat => 
+                S.orders ? S.orders.reduce((sum, o) => {
+                    const items = o.items ? o.items.filter(i => {
+                        const producto = S.pr.find(p => p.name === i.nombre);
+                        return producto && producto.category === cat;
+                    }) : [];
+                    return sum + items.reduce((s, i) => s + (i.subtotal || 0), 0);
+                }, 0) : 0
+            );
+            
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: nombres,
+                    datasets: [{
+                        data: ventas,
+                        backgroundColor: colores,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+        
+        // Gráfico de pedidos por día
+        const ctx2 = document.getElementById('pedidos-dia');
+        if (ctx2 && typeof Chart !== 'undefined') {
+            const dias = [];
+            const counts = [];
+            const hoy = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const fecha = new Date(hoy);
+                fecha.setDate(fecha.getDate() - i);
+                const fechaStr = fecha.toISOString().split('T')[0];
+                dias.push(fecha.toLocaleDateString('es-ES', { weekday: 'short' }));
+                
+                const count = S.orders ? S.orders.filter(o => o.fecha && o.fecha.startsWith(fechaStr)).length : 0;
+                counts.push(count);
+            }
+            
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: dias,
+                    datasets: [{
+                        label: 'Pedidos',
+                        data: counts,
+                        backgroundColor: '#0d9488',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+        }
+    } catch (e) {
+        console.warn('Error generando gráficos:', e.message);
+    }
+}
 
 // ============================================
 // EXPONER FUNCIONES GLOBALES
