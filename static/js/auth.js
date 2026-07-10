@@ -90,6 +90,7 @@ function updateUIForLoggedUser() {
         document.getElementById('users-menu-btn').classList.remove('hidden');
         document.getElementById('telegram-btn').classList.remove('hidden');
         document.getElementById('crud-menu-btn').classList.remove('hidden');
+        document.getElementById('agent-office-btn').classList.remove('hidden');
     } else {
         badge.textContent = '👤 Cliente';
         badge.className = 'badge-role user';
