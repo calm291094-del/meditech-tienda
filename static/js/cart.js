@@ -1,5 +1,5 @@
 // ============================================================
-// CART.JS - CARRITO DE COMPRAS (CON DEPURACIÓN)
+// CART.JS - CARRITO DE COMPRAS (CON CORRECCIÓN DE PRECIO)
 // ============================================================
 
 // ============================================================
@@ -19,17 +19,24 @@ function cargarCarrito() {
         
         if (saved) {
             S.cart = JSON.parse(saved);
+            
+            // 🔧 CORRECCIÓN: Convertir price a número en cada item
+            S.cart = S.cart.map(item => {
+                if (item.producto && item.producto.price) {
+                    item.producto.price = parseFloat(item.producto.price) || 0;
+                }
+                return item;
+            });
+            
             console.log('✅ Carrito cargado desde localStorage:', S.cart.length, 'items');
         } else {
             S.cart = [];
             console.log('📦 No hay carrito guardado, iniciando vacío');
         }
         
-        // FORZAR sincronización: si localStorage tiene datos pero S.cart está vacío
         if (S.cart.length > 0) {
             console.log('🛒 Carrito con items:', S.cart.map(i => `${i.producto?.name || 'unknown'} x${i.cantidad}`));
         } else {
-            // Limpiar localStorage si S.cart está vacío
             localStorage.removeItem('meditech_carrito');
         }
         
@@ -55,7 +62,6 @@ function guardarCarrito() {
 // ACTUALIZAR CONTADOR
 // ============================================================
 function actualizarContadorCarrito() {
-    // Calcular total de items
     const count = S.cart.reduce((sum, i) => sum + (i.cantidad || 0), 0);
     console.log('🔢 Actualizando contador:', count, 'items');
     
@@ -97,12 +103,16 @@ function addToCart(productId) {
         return; 
     }
     
+    // 🔧 CORRECCIÓN: Asegurar que price sea número
+    if (producto.price) {
+        producto.price = parseFloat(producto.price) || 0;
+    }
+    
     if (producto.available === false || producto.stock <= 0) { 
         showNotif(`❌ ${producto.name} está agotado`, 'error'); 
         return; 
     }
     
-    // Buscar si ya está en el carrito
     const item = S.cart.find(i => i.producto?.id === productId || i.producto?.id == productId);
     if (item) {
         if (item.cantidad >= producto.stock) { 
@@ -121,7 +131,6 @@ function addToCart(productId) {
     
     guardarCarrito();
     console.log('🛒 Carrito actual:', S.cart.length, 'items');
-    console.log('📋 Items:', S.cart.map(i => `${i.producto?.name} x${i.cantidad}`));
 }
 
 // ============================================================
@@ -138,6 +147,11 @@ function removeFromCart(productId) {
 function updateCartQuantity(productId, change) {
     const item = S.cart.find(i => i.producto?.id === productId || i.producto?.id == productId);
     if (!item) return;
+    
+    // 🔧 CORRECCIÓN: Asegurar que price sea número
+    if (item.producto && item.producto.price) {
+        item.producto.price = parseFloat(item.producto.price) || 0;
+    }
     
     const nueva = item.cantidad + change;
     if (nueva < 1) { 
@@ -167,7 +181,14 @@ function renderCartItems() {
         return;
     }
     
-    // FORZAR: Verificar consistencia
+    // 🔧 CORRECCIÓN: Validar y convertir precios
+    S.cart = S.cart.filter(item => item && item.producto && item.producto.id);
+    S.cart.forEach(item => {
+        if (item.producto && item.producto.price) {
+            item.producto.price = parseFloat(item.producto.price) || 0;
+        }
+    });
+    
     if (S.cart.length === 0) {
         console.log('📦 Carrito vacío, mostrando mensaje');
         container.innerHTML = `
@@ -178,28 +199,17 @@ function renderCartItems() {
             </div>
         `;
         if (totalElement) totalElement.textContent = '$0.00';
-        // Limpiar localStorage si está vacío
         localStorage.removeItem('meditech_carrito');
         return;
-    }
-    
-    // Validar que los items tengan producto
-    const validItems = S.cart.filter(i => i.producto && i.producto.id);
-    if (validItems.length !== S.cart.length) {
-        console.warn('⚠️ Algunos items no tienen producto válido, limpiando...');
-        S.cart = validItems;
-        guardarCarrito();
-        if (S.cart.length === 0) {
-            renderCartItems();
-            return;
-        }
     }
     
     let total = 0;
     let html = '';
     
     S.cart.forEach((item, index) => {
-        const subtotal = item.producto.price * item.cantidad;
+        // 🔧 CORRECCIÓN: Asegurar que price sea número antes de usarlo
+        const price = parseFloat(item.producto.price) || 0;
+        const subtotal = price * item.cantidad;
         total += subtotal;
         
         html += `
@@ -207,7 +217,7 @@ function renderCartItems() {
                 <img src="${item.producto.image || 'https://via.placeholder.com/100'}" alt="${item.producto.name}" class="w-16 h-16 object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/100'">
                 <div class="flex-1">
                     <h4 class="font-semibold">${item.producto.name}</h4>
-                    <p class="text-sm text-gray-500">$${item.producto.price.toFixed(2)} c/u</p>
+                    <p class="text-sm text-gray-500">$${price.toFixed(2)} c/u</p>
                     <p class="text-xs text-gray-400">📦 Stock: ${item.producto.stock}</p>
                 </div>
                 <div class="flex items-center gap-2">
@@ -247,14 +257,12 @@ function renderCartItems() {
 function openCart() {
     console.log('🛒 Abriendo carrito...');
     
-    // Verificar usuario
     if (!S.currentUser) { 
         showNotif('⚠️ Inicia sesión para ver tu carrito', 'warning'); 
         if (typeof openLoginModal === 'function') openLoginModal();
         return; 
     }
     
-    // Verificar modal
     const modal = document.getElementById('cart-modal');
     if (!modal) {
         console.error('❌ Modal del carrito no encontrado');
@@ -262,16 +270,24 @@ function openCart() {
         return;
     }
     
-    // FORZAR: Recargar carrito desde localStorage antes de mostrar
+    // 🔧 CORRECCIÓN: Sincronizar y convertir precios al abrir
     const saved = localStorage.getItem('meditech_carrito');
     if (saved) {
         try {
             const parsed = JSON.parse(saved);
-            if (parsed.length > 0 && S.cart.length === 0) {
-                console.log('🔄 Sincronizando carrito desde localStorage');
+            if (parsed.length > 0) {
+                // Convertir precios a números
+                parsed.forEach(item => {
+                    if (item.producto && item.producto.price) {
+                        item.producto.price = parseFloat(item.producto.price) || 0;
+                    }
+                });
                 S.cart = parsed;
+                guardarCarrito();
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error('Error al sincronizar:', e);
+        }
     }
     
     renderCartItems();
@@ -300,7 +316,7 @@ async function enviarPedidoPorCorreo() {
     
     const userEmail = S.currentUser?.email || 'cliente@meditech.com';
     const userName = S.currentUser?.name || 'Cliente';
-    const total = S.cart.reduce((sum, i) => sum + (i.producto.price * i.cantidad), 0);
+    const total = S.cart.reduce((sum, i) => sum + (parseFloat(i.producto.price) || 0) * i.cantidad, 0);
     
     try {
         showNotif('📤 Procesando pedido...', 'info');
@@ -314,7 +330,7 @@ async function enviarPedidoPorCorreo() {
                 pedido: S.cart.map(i => ({ 
                     nombre: i.producto.name, 
                     cantidad: i.cantidad, 
-                    precio: i.producto.price 
+                    precio: parseFloat(i.producto.price) || 0
                 })),
                 total: total
             })
@@ -351,30 +367,20 @@ function showNotif(msg, type = 'info') {
 }
 
 // ============================================================
-// INICIALIZACIÓN Y DEPURACIÓN
+// FUNCIÓN DE SINCRONIZACIÓN
 // ============================================================
-cargarCarrito();
-
-// Función para forzar sincronización
 function sincronizarCarrito() {
     console.log('🔄 Forzando sincronización...');
-    const saved = localStorage.getItem('meditech_carrito');
-    if (saved) {
-        try {
-            const parsed = JSON.parse(saved);
-            S.cart = parsed;
-            guardarCarrito();
-            actualizarContadorCarrito();
-            console.log('✅ Carrito sincronizado:', S.cart.length, 'items');
-        } catch (e) {
-            console.error('❌ Error al sincronizar:', e);
-        }
-    } else {
-        S.cart = [];
-        actualizarContadorCarrito();
-        console.log('📦 No hay carrito guardado');
-    }
+    cargarCarrito();
+    renderCartItems();
+    actualizarContadorCarrito();
+    console.log('✅ Carrito sincronizado');
 }
+
+// ============================================================
+// INICIALIZACIÓN
+// ============================================================
+cargarCarrito();
 
 // ============================================================
 // EXPONER FUNCIONES GLOBALMENTE
@@ -393,5 +399,5 @@ window.renderCartItems = renderCartItems;
 window.showNotif = showNotif;
 window.sincronizarCarrito = sincronizarCarrito;
 
-console.log('✅ Cart.js cargado');
+console.log('✅ Cart.js cargado (con corrección de precio)');
 console.log('🔧 Usa sincronizarCarrito() para forzar sincronización');
