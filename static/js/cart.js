@@ -306,56 +306,62 @@ function closeCart() {
 }
 
 // ============================================================
-// ENVIAR PEDIDO
+// FUNCIÓN PARA ENVIAR PEDIDO POR CORREO
 // ============================================================
 async function enviarPedidoPorCorreo() {
-    if (S.cart.length === 0) {
+    // 1. Verificar que el carrito no esté vacío
+    if (!S.cart || S.cart.length === 0) {
         showNotif('⚠️ El carrito está vacío', 'warning');
         return;
     }
-    
-    // Obtener usuario
+
+    // 2. Obtener datos del usuario
     const user = S.currentUser || JSON.parse(localStorage.getItem('session') || '{}');
     const userEmail = user?.email || 'cliente@meditech.com';
     const userName = user?.name || 'Cliente';
-    
-    // Calcular total
-    const total = S.cart.reduce((sum, i) => {
-        const price = parseFloat(i.producto?.price) || 0;
-        return sum + (price * (i.cantidad || 1));
-    }, 0);
-    
-    // Preparar datos
-    const pedidoData = {
+
+    // 3. Calcular el total y preparar el pedido
+    let total = 0;
+    const pedidoData = S.cart.map(item => {
+        const producto = item.producto || {};
+        const precio = parseFloat(producto.price) || 0;
+        const cantidad = item.cantidad || 1;
+        const subtotal = precio * cantidad;
+        total += subtotal;
+        return {
+            nombre: producto.name || 'Producto',
+            cantidad: cantidad,
+            precio: precio
+        };
+    });
+
+    const payload = {
         email: userEmail,
         nombre: userName,
-        pedido: S.cart.map(i => ({
-            nombre: i.producto?.name || 'Producto',
-            cantidad: i.cantidad || 1,
-            precio: parseFloat(i.producto?.price) || 0
-        })),
+        pedido: pedidoData,
         total: total
     };
-    
-    console.log('📤 Enviando pedido:', pedidoData);
-    
+
+    console.log('📤 Enviando pedido:', payload);
+
     try {
         showNotif('📤 Procesando pedido...', 'info');
-        
+
+        // 4. Enviar la petición al servidor
         const response = await fetch('/api/enviar-pedido', {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify(pedidoData)
+            body: JSON.stringify(payload)
         });
-        
-        // 🔧 Leer la respuesta como texto primero para depuración
+
+        // 5. Leer la respuesta (como texto primero para depuración)
         const responseText = await response.text();
-        console.log('📥 Respuesta del servidor:', responseText);
-        
-        // Intentar parsear como JSON
+        console.log('📥 Respuesta del servidor (texto):', responseText);
+
+        // 6. Intentar parsear como JSON
         let data;
         try {
             data = JSON.parse(responseText);
@@ -363,26 +369,27 @@ async function enviarPedidoPorCorreo() {
             console.error('❌ Error parseando JSON:', parseError);
             throw new Error('El servidor devolvió una respuesta inválida');
         }
-        
-        if (!response.ok) {
+
+        // 7. Verificar si la respuesta fue exitosa
+        if (!response.ok || !data.success) {
             throw new Error(data.error || data.message || `Error ${response.status}`);
         }
-        
+
+        // 8. Éxito: mostrar mensaje y vaciar carrito
         showNotif('✅ Pedido enviado correctamente', 'success');
-        
+
         // Vaciar carrito
         S.cart = [];
         guardarCarrito();
         actualizarContadorCarrito();
         closeCart();
         renderCartItems();
-        
-        // Mostrar detalles del pedido
+
         if (data.pedido) {
             console.log('📋 Pedido creado:', data.pedido.id);
             showNotif(`📋 Pedido #${data.pedido.id} creado`, 'success');
         }
-        
+
     } catch (error) {
         console.error('❌ Error enviando pedido:', error);
         showNotif(`❌ ${error.message}`, 'error');
