@@ -1065,6 +1065,41 @@ app.get('/run-migration', async (req, res) => {
     })();
 });
 
+// ---- ENVIAR PEDIDO POR CORREO (SIMPLIFICADO) ----
+app.post('/api/enviar-pedido', (req, res) => {
+    try {
+        console.log('📧 POST /api/enviar-pedido recibido');
+        console.log('📦 Body:', req.body);
+        
+        const { email, nombre, pedido, total } = req.body;
+        
+        // Validación básica
+        if (!pedido || pedido.length === 0) {
+            return res.status(400).json({ error: 'El pedido está vacío' });
+        }
+        
+        // Respuesta exitosa (sin guardar en archivo, solo para probar)
+        res.json({
+            success: true,
+            message: 'Pedido recibido (modo prueba)',
+            pedido: {
+                id: 'PED-' + Date.now(),
+                cliente: nombre,
+                email: email,
+                total: total,
+                items: pedido
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+        res.status(500).json({ 
+            error: 'Error interno',
+            message: error.message 
+        });
+    }
+});
+
 // ============================================================
 // 🚀 INICIAR SERVIDOR
 // ============================================================
