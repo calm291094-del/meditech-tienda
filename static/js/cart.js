@@ -1,15 +1,15 @@
 // ============================================================
-// CART.JS - CARRITO DE COMPRAS (VERSIÓN UNIFICADA CON S)
+// CART.JS - CARRITO DE COMPRAS (VERSIÓN COMPLETA)
 // ============================================================
 
 // ============================================================
-// INICIALIZAR CARRITO EN S
+// INICIALIZAR CARRITO
 // ============================================================
 if (typeof S === 'undefined') {
     window.S = { cart: [], currentUser: null, pr: [] };
 }
 
-// Cargar carrito desde localStorage al iniciar
+// Cargar carrito desde localStorage
 function cargarCarrito() {
     try {
         const saved = localStorage.getItem('meditech_carrito');
@@ -36,19 +36,17 @@ function guardarCarrito() {
 }
 
 // ============================================================
-// FUNCIÓN PRINCIPAL: addToCart (la que usa main.js)
+// FUNCIÓN PRINCIPAL: addToCart
 // ============================================================
 function addToCart(productId) {
     console.log('🛒 addToCart llamado con ID:', productId);
     
-    // Verificar usuario
     if (!S.currentUser) { 
         showNotif('⚠️ Inicia sesión para agregar productos', 'warning'); 
         if (typeof openLoginModal === 'function') openLoginModal();
         return; 
     }
     
-    // Buscar producto
     const producto = S.pr.find(p => p.id === productId || p.id == productId);
     if (!producto) { 
         console.error('❌ Producto no encontrado:', productId);
@@ -56,13 +54,11 @@ function addToCart(productId) {
         return; 
     }
     
-    // Verificar disponibilidad
     if (producto.available === false || producto.stock <= 0) { 
         showNotif(`❌ ${producto.name} está agotado`, 'error'); 
         return; 
     }
     
-    // Buscar si ya está en el carrito
     const item = S.cart.find(i => i.producto.id === productId || i.producto.id == productId);
     if (item) {
         if (item.cantidad >= producto.stock) { 
@@ -81,22 +77,17 @@ function addToCart(productId) {
     
     guardarCarrito();
     actualizarContadorCarrito();
-    if (typeof renderCartItems === 'function') renderCartItems();
     console.log(`🛒 Carrito actual: ${S.cart.length} items`);
 }
 
 // ============================================================
-// FUNCIONES DE CARRITO (alias para compatibilidad)
+// FUNCIONES DE MANIPULACIÓN
 // ============================================================
-function agregarAlCarrito(productId) {
-    addToCart(productId);
-}
-
 function removeFromCart(productId) {
     S.cart = S.cart.filter(i => i.producto.id !== productId && i.producto.id != productId);
     guardarCarrito();
     actualizarContadorCarrito();
-    if (typeof renderCartItems === 'function') renderCartItems();
+    renderCartItems();
     showNotif('🗑️ Producto eliminado del carrito', 'info');
 }
 
@@ -116,7 +107,7 @@ function updateCartQuantity(productId, change) {
     item.cantidad = nueva;
     guardarCarrito();
     actualizarContadorCarrito();
-    if (typeof renderCartItems === 'function') renderCartItems();
+    renderCartItems();
 }
 
 // ============================================================
@@ -127,10 +118,7 @@ function actualizarContadorCarrito() {
     const cartCountEl = document.getElementById('cart-count');
     const cartBtnEl = document.getElementById('cart-btn');
     
-    if (cartCountEl) {
-        cartCountEl.textContent = count;
-    }
-    
+    if (cartCountEl) cartCountEl.textContent = count;
     if (cartBtnEl) {
         if (count > 0) {
             cartBtnEl.classList.remove('hidden');
@@ -141,42 +129,16 @@ function actualizarContadorCarrito() {
 }
 
 // ============================================================
-// ABRIR/CERRAR CARRITO
+// RENDERIZAR ITEMS DEL CARRITO (COMPLETO)
 // ============================================================
-function openCart() {
-    if (!S.currentUser) { 
-        showNotif('⚠️ Inicia sesión para ver tu carrito', 'warning'); 
-        if (typeof openLoginModal === 'function') openLoginModal();
-        return; 
-    }
-    
-    const modal = document.getElementById('cart-modal');
-    if (!modal) {
-        console.error('❌ Modal del carrito no encontrado');
-        return;
-    }
-    
-    if (typeof renderCartItems === 'function') {
-        renderCartItems();
-    } else {
-        renderCartItemsFallback();
-    }
-    modal.classList.add('active');
-}
-
-function closeCart() {
-    const modal = document.getElementById('cart-modal');
-    if (modal) modal.classList.remove('active');
-}
-
-// ============================================================
-// RENDERIZAR ITEMS (fallback si no está en admin.js)
-// ============================================================
-function renderCartItemsFallback() {
+function renderCartItems() {
     const container = document.getElementById('cart-items');
     const totalElement = document.getElementById('cart-total');
     
-    if (!container) return;
+    if (!container) {
+        console.warn('⚠️ contenedor cart-items no encontrado');
+        return;
+    }
     
     if (S.cart.length === 0) {
         container.innerHTML = `
@@ -236,6 +198,45 @@ function renderCartItemsFallback() {
 }
 
 // ============================================================
+// ABRIR/CERRAR CARRITO (FUNCIONES PRINCIPALES)
+// ============================================================
+function openCart() {
+    console.log('🛒 Abriendo carrito...');
+    
+    // Verificar usuario
+    if (!S.currentUser) { 
+        showNotif('⚠️ Inicia sesión para ver tu carrito', 'warning'); 
+        if (typeof openLoginModal === 'function') openLoginModal();
+        return; 
+    }
+    
+    // Verificar que el modal existe
+    const modal = document.getElementById('cart-modal');
+    if (!modal) {
+        console.error('❌ Modal del carrito no encontrado');
+        showNotif('❌ Error al abrir el carrito', 'error');
+        return;
+    }
+    
+    // Renderizar items
+    renderCartItems();
+    
+    // Mostrar modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    console.log('✅ Carrito abierto');
+}
+
+function closeCart() {
+    const modal = document.getElementById('cart-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        console.log('✅ Carrito cerrado');
+    }
+}
+
+// ============================================================
 // ENVIAR PEDIDO POR CORREO
 // ============================================================
 async function enviarPedidoPorCorreo() {
@@ -246,8 +247,6 @@ async function enviarPedidoPorCorreo() {
     
     const userEmail = S.currentUser?.email || 'cliente@meditech.com';
     const userName = S.currentUser?.name || 'Cliente';
-    
-    // Calcular total
     const total = S.cart.reduce((sum, i) => sum + (i.producto.price * i.cantidad), 0);
     
     try {
@@ -273,17 +272,30 @@ async function enviarPedidoPorCorreo() {
         const data = await response.json();
         showNotif('✅ Pedido enviado por correo. Revisa tu bandeja de entrada.', 'success');
         
-        // Vaciar carrito
         S.cart = [];
         guardarCarrito();
         actualizarContadorCarrito();
         closeCart();
-        if (typeof renderCartItems === 'function') renderCartItems();
+        renderCartItems();
         
     } catch (error) {
         console.error('❌ Error enviando pedido:', error);
         showNotif('❌ Error al enviar el pedido. Intenta nuevamente.', 'error');
     }
+}
+
+// ============================================================
+// NOTIFICACIONES
+// ============================================================
+function showNotif(msg, type = 'info') {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    
+    const n = document.createElement('div');
+    n.className = `toast ${type}`;
+    n.textContent = msg;
+    document.body.appendChild(n);
+    setTimeout(() => n.remove(), 3000);
 }
 
 // ============================================================
@@ -295,7 +307,7 @@ cargarCarrito();
 // EXPONER FUNCIONES GLOBALMENTE
 // ============================================================
 window.addToCart = addToCart;
-window.agregarAlCarrito = agregarAlCarrito;
+window.agregarAlCarrito = addToCart;
 window.removeFromCart = removeFromCart;
 window.openCart = openCart;
 window.closeCart = closeCart;
@@ -304,5 +316,7 @@ window.enviarPedidoPorCorreo = enviarPedidoPorCorreo;
 window.actualizarContadorCarrito = actualizarContadorCarrito;
 window.cargarCarrito = cargarCarrito;
 window.guardarCarrito = guardarCarrito;
+window.renderCartItems = renderCartItems;
+window.showNotif = showNotif;
 
-console.log('✅ Cart.js cargado correctamente (unificado con S)');
+console.log('✅ Cart.js cargado correctamente (versión completa)');
