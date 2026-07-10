@@ -387,30 +387,22 @@ function renderAdminList() {
 }
 
 // ============================================
-// ESTADÍSTICAS - CORREGIDA
+// ESTADÍSTICAS - CORREGIDA (eliminadas referencias a stat-views y stat-today)
 // ============================================
 function renderEstadisticas() {
     const elements = {
         products: safeElement('stat-products'),
         users: safeElement('stat-users'),
-        views: safeElement('stat-views'),
         orders: safeElement('stat-orders'),
-        revenue: safeElement('stat-revenue'),
-        today: safeElement('stat-today')
+        revenue: safeElement('stat-revenue')
     };
     
     if (elements.products) elements.products.textContent = S.pr ? S.pr.length : 0;
     if (elements.users) elements.users.textContent = S.users ? S.users.length : 0;
-    if (elements.views) elements.views.textContent = S.history ? S.history.length : 0;
     if (elements.orders) elements.orders.textContent = S.orders ? S.orders.length : 0;
     if (elements.revenue) {
         const revenue = S.orders ? S.orders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0) : 0;
         elements.revenue.textContent = `$${revenue.toFixed(2)}`;
-    }
-    if (elements.today) {
-        const today = new Date().toDateString();
-        const todayViews = S.history ? S.history.filter(h => h.fecha && new Date(h.fecha).toDateString() === today).length : 0;
-        elements.today.textContent = todayViews;
     }
     console.log(`📊 Estadísticas: ${S.pr ? S.pr.length : 0} productos, ${S.users ? S.users.length : 0} usuarios, ${S.orders ? S.orders.length : 0} pedidos`);
 }
@@ -526,7 +518,13 @@ async function init() {
         renderOfertas();
         applyTexts();
         initCarousel();
-        updateCartUI();
+        
+        // 🔧 CORRECCIÓN: Usar el nombre correcto de la función
+        if (typeof actualizarContadorCarrito === 'function') {
+            actualizarContadorCarrito();
+        } else {
+            console.warn('⚠️ actualizarContadorCarrito no está disponible');
+        }
         
         console.log('🎉 MediTech iniciado correctamente');
     } catch (error) {
@@ -581,7 +579,7 @@ document.addEventListener('click', (e) => {
 });
 
 // ============================================
-// EXPONER FUNCIONES GLOBALES
+// EXPONER FUNCIONES GLOBALES (SOLO LAS QUE EXISTEN)
 // ============================================
 // Auth
 window.openLoginModal = openLoginModal;
@@ -605,8 +603,6 @@ window.closeQuickView = closeQuickView;
 window.moveCarousel = moveCarousel;
 window.filterProducts = filterProducts;
 window.searchProducts = searchProducts;
-window.toggleChat = toggleChat;
-window.sendMessage = sendMessage;
 // Admin
 window.openAdminPanel = openAdminPanel;
 window.closeAdminPanel = closeAdminPanel;
@@ -635,15 +631,11 @@ window.renderEstadisticas = renderEstadisticas;
 window.generarGraficos = generarGraficos;
 window.actualizarDashboard = actualizarDashboard;
 window.verificarNotificaciones = verificarNotificaciones;
-// Admin extra
-window.cargarUsuarios = cargarUsuarios;
-window.cargarPedidosAdmin = cargarPedidosAdmin;
-window.renderPedidos = renderPedidos;
-window.renderHistorial = renderHistorial;
-window.mostrarLogs = mostrarLogs;
-window.limpiarLogs = limpiarLogs;
-window.aniaEnviarAWhatsApp = aniaEnviarAWhatsApp;
-window.aniaEnviarATelegram = aniaEnviarATelegram;
-window.renderAniaChat = renderAniaChat;
-window.sendAniaMessage = sendAniaMessage;
-window.exportarReportePDF = exportarReportePDF;
+// Admin extra (solo si existen)
+if (typeof cargarUsuarios !== 'undefined') window.cargarUsuarios = cargarUsuarios;
+if (typeof cargarPedidosAdmin !== 'undefined') window.cargarPedidosAdmin = cargarPedidosAdmin;
+if (typeof renderPedidos !== 'undefined') window.renderPedidos = renderPedidos;
+if (typeof renderHistorial !== 'undefined') window.renderHistorial = renderHistorial;
+if (typeof exportarReportePDF !== 'undefined') window.exportarReportePDF = exportarReportePDF;
+if (typeof toggleChat !== 'undefined') window.toggleChat = toggleChat;
+if (typeof sendMessage !== 'undefined') window.sendMessage = sendMessage;
