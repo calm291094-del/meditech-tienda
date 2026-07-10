@@ -1065,32 +1065,35 @@ app.get('/run-migration', async (req, res) => {
     })();
 });
 
+
+
 // ============================================================
-// 📧 RUTA PARA ENVIAR PEDIDO POR CORREO
+// 📧 ENVIAR PEDIDO POR CORREO (CON NODEMAILER)
 // ============================================================
+
+// Instalar nodemailer primero: npm install nodemailer
+// const nodemailer = require('nodemailer'); // <-- Descomentar después de instalar
+
 app.post('/api/enviar-pedido', async (req, res) => {
     try {
         const { email, nombre, pedido, total } = req.body;
         
         console.log('📧 Recibido pedido de:', nombre, 'Email:', email);
-        console.log('📦 Productos:', pedido);
+        console.log('📦 Items:', pedido?.length || 0);
         console.log('💰 Total:', total);
         
-        // Validación básica
+        // Validar
         if (!pedido || pedido.length === 0) {
             return res.status(400).json({ error: 'El pedido está vacío' });
         }
         
-        // Guardar en archivo pedidos.json
+        // 1. Guardar en pedidos.json
         const fs = require('fs');
-        const path = require('path');
-        
         let pedidos = [];
         try {
             const data = fs.readFileSync('pedidos.json', 'utf8');
             pedidos = JSON.parse(data);
         } catch (e) {
-            // Si no existe, empezar vacío
             pedidos = [];
         }
         
@@ -1110,9 +1113,76 @@ app.post('/api/enviar-pedido', async (req, res) => {
         
         pedidos.push(nuevoPedido);
         fs.writeFileSync('pedidos.json', JSON.stringify(pedidos, null, 2));
+        console.log('✅ Pedido guardado en pedidos.json:', nuevoPedido.id);
         
-        console.log('✅ Pedido guardado:', nuevoPedido.id);
+        // 2. Intentar guardar en PostgreSQL (si existe la tabla)
+        try {
+            await query(
+                `INSERT INTO pedidos (id, usuario, email, items, total, estado, created_at)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                [
+                    nuevoPedido.id,
+                    nuevoPedido.cliente,
+                    nuevoPedido.email,
+                    JSON.stringify(nuevoPedido.items),
+                    nuevoPedido.total,
+                    nuevoPedido.estado,
+                    nuevoPedido.fecha
+                ]
+            );
+            console.log('✅ Pedido guardado en PostgreSQL');
+        } catch (dbError) {
+            console.warn('⚠️ No se pudo guardar en PostgreSQL:', dbError.message);
+        }
         
+        // 3. Enviar correo electrónico (OPCIONAL - requiere nodemailer)
+        // Descomentar después de instalar nodemailer y configurar variables de entorno
+        /*
+        try {
+            const transporter = nodemailer.createTransport({
+                host: process.env.SMTP_HOST || 'smtp.gmail.com',
+                port: parseInt(process.env.SMTP_PORT) || 587,
+                secure: false,
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASS
+                }
+            });
+            
+            let itemsHtml = nuevoPedido.items.map(p => `
+                <tr>
+                    <td>${p.nombre}</td>
+                    <td>${p.cantidad}</td>
+                    <td>$${p.precio.toFixed(2)}</td>
+                    <td>$${(p.cantidad * p.precio).toFixed(2)}</td>
+                </tr>
+            `).join('');
+            
+            await transporter.sendMail({
+                from: process.env.SMTP_USER,
+                to: email,
+                subject: '📋 Confirmación de Pedido - MediTech',
+                html: `
+                    <h2>📋 Confirmación de Pedido</h2>
+                    <p><strong>Cliente:</strong> ${nombre}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Fecha:</strong> ${new Date().toLocaleString()}</p>
+                    <table border="1" cellpadding="5" style="border-collapse:collapse;width:100%;">
+                        <tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr>
+                        ${itemsHtml}
+                        <tr><td colspan="3" style="text-align:right;"><strong>Total:</strong></td>
+                        <td><strong>$${total.toFixed(2)}</strong></td></tr>
+                    </table>
+                    <p>Gracias por tu compra. Te contactaremos pronto.</p>
+                `
+            });
+            console.log('✅ Correo enviado a:', email);
+        } catch (mailError) {
+            console.warn('⚠️ No se pudo enviar correo:', mailError.message);
+        }
+        */
+        
+        // 4. Responder al frontend
         res.json({
             success: true,
             message: 'Pedido recibido correctamente',
@@ -1127,6 +1197,8 @@ app.post('/api/enviar-pedido', async (req, res) => {
         });
     }
 });
+
+
 
 
 // ============================================================
