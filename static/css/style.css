@@ -1167,3 +1167,79 @@ body {
     .carousel-item img { height: 160px; }
     .chatbot-window { width: 90vw; }
 }
+
+/* ============================================
+   FALLBACK PARA IMÁGENES ROTAS
+   ============================================ */
+.product-card .image-wrap img {
+    background-color: #f3f4f6;
+    background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="200"%3E%3Crect width="300" height="200" fill="%23f3f4f6"/%3E%3Ctext x="150" y="105" font-family="Arial" font-size="16" fill="%239ca3af" text-anchor="middle"%3ESin imagen%3C/text%3E%3C/svg%3E');
+    background-size: cover;
+    background-position: center;
+}
+
+/* ============================================
+   MEJORAS PARA EL CARRITO
+   ============================================ */
+.cart-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.cart-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    background-color: #f3f4f6;
+}
+
+.cart-item .info {
+    flex: 1;
+}
+
+.cart-item .info .name {
+    font-weight: 600;
+}
+
+.cart-item .info .price {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.cart-item .actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cart-item .actions button {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: #e5e7eb;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cart-item .actions button:hover {
+    background: #d1d5db;
+}
+
+.cart-item .actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.cart-item .subtotal {
+    font-weight: 600;
+    color: #0d9488;
+    min-width: 80px;
+    text-align: right;
+}
