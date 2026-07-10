@@ -1068,56 +1068,59 @@ app.get('/run-migration', async (req, res) => {
 
 
 // ============================================================
-// 📧 ENVIAR PEDIDO POR CORREO - VERSIÓN CON LOGS
+// 📧 ENVIAR PEDIDO POR CORREO - VERSIÓN SIMPLIFICADA
 // ============================================================
-app.post('/api/enviar-pedido', async (req, res) => {
-    console.log('🔥 === POST /api/enviar-pedido ===');
-    console.log('📦 Body:', JSON.stringify(req.body, null, 2));
+app.post('/api/enviar-pedido', (req, res) => {
+    console.log('🔥 POST /api/enviar-pedido recibido');
+    console.log('📦 Body:', req.body);
     
-    // Siempre responder, incluso si hay error
     try {
         const { email, nombre, pedido, total } = req.body;
         
-        // Validar
-        if (!pedido || !Array.isArray(pedido) || pedido.length === 0) {
-            console.warn('⚠️ Pedido vacío');
+        // Validar que hay pedido
+        if (!pedido || pedido.length === 0) {
             return res.status(400).json({ 
                 success: false, 
                 error: 'El pedido está vacío' 
             });
         }
         
-        // Construir respuesta
-        const respuesta = {
-            success: true,
-            message: 'Pedido recibido correctamente',
-            pedido: {
-                id: 'PED-' + Date.now(),
-                cliente: nombre || 'Cliente',
-                email: email || 'cliente@meditech.com',
-                fecha: new Date().toISOString(),
-                items: pedido.map(p => ({
-                    nombre: p.nombre || 'Producto',
-                    cantidad: p.cantidad || 1,
-                    precio: parseFloat(p.precio) || 0
-                })),
-                total: parseFloat(total) || 0,
-                estado: 'pendiente'
-            }
+        // Guardar en pedidos.json
+        const fs = require('fs');
+        let pedidos = [];
+        try {
+            const data = fs.readFileSync('pedidos.json', 'utf8');
+            pedidos = JSON.parse(data);
+        } catch (e) {
+            pedidos = [];
+        }
+        
+        const nuevoPedido = {
+            id: 'PED-' + Date.now(),
+            cliente: nombre || 'Cliente',
+            email: email || 'cliente@meditech.com',
+            fecha: new Date().toISOString(),
+            items: pedido,
+            total: total || 0,
+            estado: 'pendiente'
         };
         
-        console.log('✅ Respondiendo con éxito');
-        return res.status(200).json(respuesta);
+        pedidos.push(nuevoPedido);
+        fs.writeFileSync('pedidos.json', JSON.stringify(pedidos, null, 2));
+        
+        console.log('✅ Pedido guardado:', nuevoPedido.id);
+        
+        return res.status(200).json({
+            success: true,
+            message: 'Pedido recibido correctamente',
+            pedido: nuevoPedido
+        });
         
     } catch (error) {
-        console.error('❌ Error:', error.message);
-        console.error('📚 Stack:', error.stack);
-        
-        // Incluso en error, devolver un JSON
+        console.error('❌ Error:', error);
         return res.status(500).json({
             success: false,
-            error: 'Error interno',
-            message: error.message
+            error: error.message
         });
     }
 });
