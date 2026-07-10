@@ -314,41 +314,78 @@ async function enviarPedidoPorCorreo() {
         return;
     }
     
-    const userEmail = S.currentUser?.email || 'cliente@meditech.com';
-    const userName = S.currentUser?.name || 'Cliente';
-    const total = S.cart.reduce((sum, i) => sum + (parseFloat(i.producto.price) || 0) * i.cantidad, 0);
+    // Obtener usuario
+    const user = S.currentUser || JSON.parse(localStorage.getItem('session') || '{}');
+    const userEmail = user?.email || 'cliente@meditech.com';
+    const userName = user?.name || 'Cliente';
+    
+    // Calcular total
+    const total = S.cart.reduce((sum, i) => {
+        const price = parseFloat(i.producto?.price) || 0;
+        return sum + (price * (i.cantidad || 1));
+    }, 0);
+    
+    // Preparar datos
+    const pedidoData = {
+        email: userEmail,
+        nombre: userName,
+        pedido: S.cart.map(i => ({
+            nombre: i.producto?.name || 'Producto',
+            cantidad: i.cantidad || 1,
+            precio: parseFloat(i.producto?.price) || 0
+        })),
+        total: total
+    };
+    
+    console.log('📤 Enviando pedido:', pedidoData);
     
     try {
         showNotif('📤 Procesando pedido...', 'info');
         
         const response = await fetch('/api/enviar-pedido', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                email: userEmail,
-                nombre: userName,
-                pedido: S.cart.map(i => ({ 
-                    nombre: i.producto.name, 
-                    cantidad: i.cantidad, 
-                    precio: parseFloat(i.producto.price) || 0
-                })),
-                total: total
-            })
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(pedidoData)
         });
         
-        if (!response.ok) throw new Error('Error al enviar el pedido');
+        // 🔧 Leer la respuesta como texto primero para depuración
+        const responseText = await response.text();
+        console.log('📥 Respuesta del servidor:', responseText);
         
-        const data = await response.json();
-        showNotif('✅ Pedido enviado por correo. Revisa tu bandeja de entrada.', 'success');
+        // Intentar parsear como JSON
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('❌ Error parseando JSON:', parseError);
+            throw new Error('El servidor devolvió una respuesta inválida');
+        }
         
+        if (!response.ok) {
+            throw new Error(data.error || data.message || `Error ${response.status}`);
+        }
+        
+        showNotif('✅ Pedido enviado correctamente', 'success');
+        
+        // Vaciar carrito
         S.cart = [];
         guardarCarrito();
+        actualizarContadorCarrito();
         closeCart();
         renderCartItems();
         
+        // Mostrar detalles del pedido
+        if (data.pedido) {
+            console.log('📋 Pedido creado:', data.pedido.id);
+            showNotif(`📋 Pedido #${data.pedido.id} creado`, 'success');
+        }
+        
     } catch (error) {
         console.error('❌ Error enviando pedido:', error);
-        showNotif('❌ Error al enviar el pedido. Intenta nuevamente.', 'error');
+        showNotif(`❌ ${error.message}`, 'error');
     }
 }
 
