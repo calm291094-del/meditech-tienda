@@ -1065,40 +1065,69 @@ app.get('/run-migration', async (req, res) => {
     })();
 });
 
-// ---- ENVIAR PEDIDO POR CORREO (SIMPLIFICADO) ----
-app.post('/api/enviar-pedido', (req, res) => {
+// ============================================================
+// 📧 RUTA PARA ENVIAR PEDIDO POR CORREO
+// ============================================================
+app.post('/api/enviar-pedido', async (req, res) => {
     try {
-        console.log('📧 POST /api/enviar-pedido recibido');
-        console.log('📦 Body:', req.body);
-        
         const { email, nombre, pedido, total } = req.body;
+        
+        console.log('📧 Recibido pedido de:', nombre, 'Email:', email);
+        console.log('📦 Productos:', pedido);
+        console.log('💰 Total:', total);
         
         // Validación básica
         if (!pedido || pedido.length === 0) {
             return res.status(400).json({ error: 'El pedido está vacío' });
         }
         
-        // Respuesta exitosa (sin guardar en archivo, solo para probar)
+        // Guardar en archivo pedidos.json
+        const fs = require('fs');
+        const path = require('path');
+        
+        let pedidos = [];
+        try {
+            const data = fs.readFileSync('pedidos.json', 'utf8');
+            pedidos = JSON.parse(data);
+        } catch (e) {
+            // Si no existe, empezar vacío
+            pedidos = [];
+        }
+        
+        const nuevoPedido = {
+            id: 'PED-' + Date.now(),
+            cliente: nombre || 'Cliente',
+            email: email || 'cliente@meditech.com',
+            fecha: new Date().toISOString(),
+            items: pedido.map(p => ({
+                nombre: p.nombre || p.producto?.name || 'Producto',
+                cantidad: p.cantidad || 1,
+                precio: p.precio || p.producto?.price || 0
+            })),
+            total: total || 0,
+            estado: 'pendiente'
+        };
+        
+        pedidos.push(nuevoPedido);
+        fs.writeFileSync('pedidos.json', JSON.stringify(pedidos, null, 2));
+        
+        console.log('✅ Pedido guardado:', nuevoPedido.id);
+        
         res.json({
             success: true,
-            message: 'Pedido recibido (modo prueba)',
-            pedido: {
-                id: 'PED-' + Date.now(),
-                cliente: nombre,
-                email: email,
-                total: total,
-                items: pedido
-            }
+            message: 'Pedido recibido correctamente',
+            pedido: nuevoPedido
         });
         
     } catch (error) {
-        console.error('❌ Error:', error);
+        console.error('❌ Error en /api/enviar-pedido:', error);
         res.status(500).json({ 
-            error: 'Error interno',
-            message: error.message 
+            error: 'Error al procesar el pedido',
+            details: error.message 
         });
     }
 });
+
 
 // ============================================================
 // 🚀 INICIAR SERVIDOR
