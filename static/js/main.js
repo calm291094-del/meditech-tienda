@@ -81,9 +81,6 @@ async function cargarProductos() {
     }
 }
 
-// ============================================
-// RENDER PRODUCTOS
-// ============================================
 function renderProducts() {
     const grid = safeElement('portada-productos');
     if (!grid) return;
@@ -107,16 +104,22 @@ function renderProducts() {
         return;
     }
     
+    // 🔧 SVG de respaldo para imágenes rotas
+    const fallbackImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="200"%3E%3Crect width="300" height="200" fill="%23f3f4f6"/%3E%3Ctext x="150" y="105" font-family="Arial" font-size="16" fill="%239ca3af" text-anchor="middle"%3ESin imagen%3C/text%3E%3C/svg%3E';
+    
     grid.innerHTML = filtered.map(p => {
         const isSoldOut = p.available === false || p.stock <= 0;
         const isLowStock = p.stock > 0 && p.stock <= 5;
         const stockClass = isSoldOut ? 'soldout' : (isLowStock ? 'low-stock' : 'in-stock');
         const stockText = isSoldOut ? '❌ Agotado' : `📦 ${p.stock} unidades`;
         
+        // 🔧 Usar imagen del producto o fallback
+        const imgSrc = p.image && p.image.startsWith('http') ? p.image : fallbackImage;
+        
         return `
             <div class="product-card">
                 <div class="image-wrap" onclick="openQuickView('${p.id}')">
-                    <img src="${p.image || 'https://via.placeholder.com/300x200?text=Sin+Imagen'}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/300x200?text=Error'">
+                    <img src="${imgSrc}" alt="${p.name}" onerror="this.src='${fallbackImage}'">
                     ${p.feat ? '<span class="badge badge-featured"><i class="fas fa-star mr-1"></i>Destacado</span>' : ''}
                     ${isSoldOut ? '<span class="badge badge-soldout">❌ Agotado</span>' : `<span class="badge badge-stock">${stockText}</span>`}
                     <span class="badge-category">${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}</span>
@@ -328,9 +331,14 @@ function openQuickView(id) {
     const isAvailable = p.available !== false && p.stock > 0;
     const content = safeElement('quick-view-content');
     if (!content) return;
+    
+    // 🔧 SVG de respaldo para imágenes rotas
+    const fallbackImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect width="400" height="400" fill="%23f3f4f6"/%3E%3Ctext x="200" y="205" font-family="Arial" font-size="20" fill="%239ca3af" text-anchor="middle"%3ESin imagen%3C/text%3E%3C/svg%3E';
+    const imgSrc = p.image && p.image.startsWith('http') ? p.image : fallbackImage;
+    
     content.innerHTML = `
         <div class="grid md:grid-cols-2 gap-6 p-6">
-            <div><img src="${p.image || 'https://via.placeholder.com/400'}" class="w-full h-96 object-cover rounded-2xl" onerror="this.src='https://via.placeholder.com/400?text=Error'"></div>
+            <div><img src="${imgSrc}" class="w-full h-96 object-cover rounded-2xl" onerror="this.src='${fallbackImage}'"></div>
             <div>
                 <button onclick="closeQuickView()" class="float-right w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center"><i class="fas fa-times"></i></button>
                 <span class="inline-block bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-sm font-semibold mb-3">${p.category}</span>
