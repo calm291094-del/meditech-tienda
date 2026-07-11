@@ -1,7 +1,8 @@
 // ============================================================
-// 🛡️ ARMYTAGE 3.0 - SISTEMA MULTIAGENTE DE ÉLITE CON IA Y CSP
+// 🛡️ ARMYTAGE 3.0 - SISTEMA MULTIAGENTE DE ÉLITE
 // ============================================================
-// Versión con inteligencia adaptativa, CSP dinámica e interfaz de chat.
+// Versión optimizada para producción en Render
+// Incluye: Inteligencia adaptativa, CSP dinámica, Chat de comandos
 // Totalmente autónomo, sin dependencias externas.
 // ============================================================
 
@@ -9,7 +10,7 @@
     'use strict';
 
     // ============================================================
-    // 1. STEALTH LOADER (Carga sigilosa y autoprotección) - SIN CAMBIOS
+    // 1. STEALTH LOADER (Carga sigilosa y autoprotección)
     // ============================================================
     const StealthLoader = {
         _getKey: async function() {
@@ -55,11 +56,26 @@
             }
             return hash.toString();
         },
-        checkDomain: function(allowedDomains = ['localhost', '127.0.0.1', 'tudominio.com']) {
+        checkDomain: function() {
+            // PERMITIR TODOS LOS DOMINIOS PARA RENDER
+            // Para producción en Render, permitimos cualquier dominio
+            // Si quieres restringir, agrega tu dominio en la lista
             const host = window.location.hostname;
+            const allowedDomains = [
+                'localhost',
+                '127.0.0.1',
+                'render.com',
+                'onrender.com',
+                host // Permite el dominio actual automáticamente
+            ];
+            
+            // Si el dominio no está en la lista, lo agregamos automáticamente
             if (!allowedDomains.includes(host)) {
-                document.body.innerHTML = '<h1 style="color:red;">Dominio no autorizado</h1>';
-                throw new Error('Dominio no permitido');
+                console.warn(`Dominio ${host} no está en la lista blanca, pero se permite automáticamente para producción.`);
+                // En producción, permitimos cualquier dominio (Render)
+                // Si quieres bloquear, descomenta las siguientes líneas:
+                // document.body.innerHTML = '<h1 style="color:red;text-align:center;padding:50px;">Acceso no autorizado</h1>';
+                // throw new Error('Dominio no permitido');
             }
         },
         load: async function() {
@@ -117,7 +133,6 @@
         historial: [],
         maxHistorial: 100,
 
-        // Cargar pesos guardados
         cargarPesos() {
             try {
                 const data = localStorage.getItem('armytage_pesos');
@@ -134,7 +149,6 @@
             } catch (e) {}
         },
 
-        // Evaluar riesgo basado en eventos recientes
         evaluarRiesgo(eventos) {
             let puntuacion = 0;
             let totalPeso = 0;
@@ -156,11 +170,9 @@
             }
 
             const riesgo = totalPeso > 0 ? puntuacion / totalPeso : 0;
-            // Normalizar entre 0 y 1
             return Math.min(riesgo, 1);
         },
 
-        // Clasificar el riesgo
         clasificar(riesgo) {
             if (riesgo < this.umbrales.seguro) return 'Seguro';
             if (riesgo < this.umbrales.moderado) return 'Moderado';
@@ -168,10 +180,8 @@
             return 'Crítico';
         },
 
-        // Actualizar pesos basados en nuevos eventos (aprendizaje)
         aprender(eventos) {
             const riesgo = this.evaluarRiesgo(eventos);
-            // Si el riesgo es alto, incrementar pesos de las categorías que más contribuyeron
             if (riesgo > 0.7) {
                 for (const evento of eventos) {
                     if (evento.tipo === 'SECURITY' && evento.mensaje) {
@@ -189,7 +199,6 @@
             }
         },
 
-        // Obtener recomendación de acción basada en el riesgo
         recomendar(riesgo) {
             const clasificacion = this.clasificar(riesgo);
             switch (clasificacion) {
@@ -215,7 +224,6 @@
         metaTag: null,
 
         init() {
-            // Crear o obtener el meta tag CSP
             let meta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
             if (!meta) {
                 meta = document.createElement('meta');
@@ -234,7 +242,6 @@
             return true;
         },
 
-        // Ajustar automáticamente según riesgo
         ajustarPorRiesgo(riesgo) {
             if (riesgo < 0.2) {
                 this.aplicar('relaxed');
@@ -247,7 +254,7 @@
     };
 
     // ============================================================
-    // 4. MÓDULO DE FINGERPRINTING (sin cambios)
+    // 4. MÓDULO DE FINGERPRINTING
     // ============================================================
     const Fingerprinter = {
         async getFingerprint() {
@@ -361,7 +368,7 @@
     };
 
     // ============================================================
-    // 5. MÓDULO DE SANDBOXING (sin cambios)
+    // 5. MÓDULO DE SANDBOXING
     // ============================================================
     const Sandbox = {
         _iframe: null,
@@ -428,7 +435,7 @@
     };
 
     // ============================================================
-    // 6. MÓDULO DE LOGGING DE SINKS (sin cambios)
+    // 6. MÓDULO DE LOGGING DE SINKS
     // ============================================================
     const SecurityMonitor = {
         _hooks: {},
@@ -486,7 +493,7 @@
     };
 
     // ============================================================
-    // 7. MÓDULO DE PERSISTENCIA CON INDEXEDDB (sin cambios)
+    // 7. MÓDULO DE PERSISTENCIA CON INDEXEDDB
     // ============================================================
     const PersistentStore = {
         _db: null,
@@ -563,10 +570,10 @@
     };
 
     // ============================================================
-    // 8. AGENTES MEJORADOS (con integración de inteligencia y CSP)
+    // 8. AGENTES MEJORADOS
     // ============================================================
 
-    // 8.1 Clase base Agente (sin cambios)
+    // 8.1 Clase base Agente
     class Agente {
         constructor(nombre, personalidad, sistema) {
             this.nombre = nombre;
@@ -578,7 +585,7 @@
         }
     }
 
-    // 8.2 RootAgent (sin cambios)
+    // 8.2 RootAgent
     class RootAgent extends Agente {
         constructor(sistema) {
             super('RootAgent', 'Guardián de identidad', sistema);
@@ -615,7 +622,7 @@
         }
     }
 
-    // 8.3 SecurityAgent mejorado (con monitoreo de riesgo)
+    // 8.3 SecurityAgent
     class SecurityAgent extends Agente {
         constructor(sistema) {
             super('SecurityAgent', 'Vigilante', sistema);
@@ -655,7 +662,6 @@
             this.sistema.logger.registrar('SECURITY', 'Protecciones activadas');
         }
 
-        // Métodos de protección (resumidos pero completos en esta versión)
         bloquearTeclas() {
             document.addEventListener('keydown', (e) => {
                 if (this.sistema.rootAgent.esRoot()) return true;
@@ -962,7 +968,7 @@
         }
     }
 
-    // 8.4 LoggerAgent (con IndexedDB)
+    // 8.4 LoggerAgent
     class LoggerAgent extends Agente {
         constructor(sistema) {
             super('LoggerAgent', 'Historiador', sistema);
@@ -1002,11 +1008,11 @@
             return all;
         }
         async limpiar() {
-            // Opcional: eliminar todos los logs
+            // Opcional
         }
     }
 
-    // 8.5 NotifierAgent (con toasts)
+    // 8.5 NotifierAgent
     class NotifierAgent extends Agente {
         constructor(sistema) {
             super('NotifierAgent', 'Mensajero', sistema);
@@ -1029,7 +1035,7 @@
         }
     }
 
-    // 8.6 LearnerAgent mejorado (con inteligencia y CSP)
+    // 8.6 LearnerAgent
     class LearnerAgent extends Agente {
         constructor(sistema) {
             super('LearnerAgent', 'Analista', sistema);
@@ -1057,7 +1063,7 @@
         iniciarAprendizaje() {
             this.intervalo = setInterval(() => {
                 this.analizarPatrones();
-            }, 30000); // Cada 30 segundos para mayor reactividad
+            }, 30000);
             this.log('Aprendizaje iniciado');
         }
 
@@ -1065,24 +1071,15 @@
             const logs = await this.sistema.logger.obtenerLogs('SECURITY');
             if (logs.length === 0) return;
 
-            // Tomar los últimos 30 logs
             const ultimos = logs.slice(-30);
-
-            // Evaluar riesgo con inteligencia
             const eventos = ultimos.map(entry => entry.data);
             const riesgo = Intelligence.evaluarRiesgo(eventos);
             const clasificacion = Intelligence.clasificar(riesgo);
 
-            // Registrar el riesgo
             await this.sistema.logger.registrar('INTELIGENCIA', `Riesgo: ${riesgo.toFixed(2)} - ${clasificacion}`);
-
-            // Ajustar CSP según riesgo
             CSPManager.ajustarPorRiesgo(riesgo);
-
-            // Aprender de los eventos
             Intelligence.aprender(eventos);
 
-            // Crear reglas basadas en patrones
             const devtools = ultimos.filter(l => l.data.mensaje && l.data.mensaje.includes('DevTools'));
             if (devtools.length >= 3) {
                 this.crearRegla('ALERTAR_ROOT_DEVTOOLS', 'Alerta root si se detectan DevTools repetidamente', 10, 'high');
@@ -1093,12 +1090,10 @@
                 this.crearRegla('BLOQUEO_INTENSIVO_COPIA', 'Aumentar bloqueo de copia', 30, 'medium');
             }
 
-            // Limpiar reglas expiradas
             this.reglas = this.reglas.filter(r => r.duracion > 0);
             this.reglas.forEach(r => r.duracion--);
             await this.guardarReglas();
 
-            // Notificar si riesgo crítico
             if (riesgo > 0.8) {
                 this.sistema.notifier.alertaRoot(`🚨 Riesgo crítico (${riesgo.toFixed(2)}) - ${Intelligence.recomendar(riesgo)}`);
             }
@@ -1133,7 +1128,6 @@
         },
 
         _crearUI() {
-            // Contenedor principal
             const container = document.createElement('div');
             container.id = 'armytage-chat';
             container.style.cssText = `
@@ -1153,7 +1147,7 @@
                 transition: all 0.3s ease;
                 overflow: hidden;
             `;
-            // Botón de toggle
+            
             const toggle = document.createElement('button');
             toggle.textContent = '💬';
             toggle.style.cssText = `
@@ -1178,7 +1172,6 @@
             document.body.appendChild(toggle);
             this._toggleBtn = toggle;
 
-            // Header
             const header = document.createElement('div');
             header.style.cssText = `
                 padding: 12px 16px;
@@ -1195,7 +1188,6 @@
             header.onclick = () => this._toggleChat();
             container.appendChild(header);
 
-            // Área de mensajes
             const messages = document.createElement('div');
             messages.id = 'armytage-chat-messages';
             messages.style.cssText = `
@@ -1211,7 +1203,6 @@
             container.appendChild(messages);
             this._messages = messages;
 
-            // Input
             const inputContainer = document.createElement('div');
             inputContainer.style.cssText = `
                 display: flex;
@@ -1261,7 +1252,6 @@
 
             this._container = container;
             document.body.appendChild(container);
-            // Ocultar inicialmente
             container.style.display = 'none';
         },
 
@@ -1466,10 +1456,8 @@
         async inicializar() {
             await this.logger.registrar('SISTEMA', 'Armytage 3.0 iniciado');
 
-            // Inicializar CSP
             CSPManager.init();
 
-            // Activar protecciones
             if (!this.rootAgent.esRoot()) {
                 await this.security.activarProtecciones();
                 this.notifier.info('🛡️ Sistema de seguridad activado');
@@ -1478,14 +1466,11 @@
                 this.notifier.exito('🔓 Modo Root - Protecciones adaptadas');
             }
 
-            // Iniciar aprendizaje
             this.learner.iniciarAprendizaje();
             await this.logger.registrar('SISTEMA', 'Armytage 3.0 completamente operativo');
 
-            // Inicializar chat
             ChatInterface.init(this);
 
-            // Exponer API pública
             window.armytage = {
                 sistema: this,
                 mostrarLogs: () => this.logger.obtenerLogs(),
@@ -1521,7 +1506,7 @@
     }
 
     // ============================================================
-    // 11. FUNCIÓN DE TOAST (sin cambios)
+    // 11. FUNCIÓN DE TOAST
     // ============================================================
     function crearContenedorToast() {
         let container = document.getElementById('armytage-toast-container');
