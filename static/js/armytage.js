@@ -1,70 +1,215 @@
 // ============================================================
-// 🛡️ ARMYTAGE - PROFESSIONAL MONITOR v2.0
+// 🛡️ ARMYTAGE PROFESSIONAL SUITE v3.0
 // ============================================================
-// Herramienta de monitoreo profesional para páginas web.
-// Detecta: estructura HTML, rendimiento, errores, seguridad,
-// mutaciones DOM, interacciones de usuario y salud del sitio.
-// Totalmente autónomo, sin dependencias externas.
+// SISTEMA MULTIAGENTE DE SEGURIDAD DE ÉLITE
+// 
+// AGENTES INTEGRADOS:
+// 🕵️‍♂️ SECURITY    → "El Guardián" - Protección activa
+// 📊 MONITOR     → "El Analista" - Monitoreo y logs
+// 🔍 INSPECTOR   → "El Detective" - Análisis de código
+// 🧠 SENTINEL    → "El Profeta" - Detección predictiva
+// ⚡ PHANTOM     → "El Espectro" - Protección invisible
+// 🎯 VALKYRIE    → "La Justiciera" - Aplicación de políticas
+// 🤖 ORACLE      → "El Oráculo" - Dashboard e inteligencia
 // ============================================================
 
 (function() {
     'use strict';
 
     // ============================================================
-    // 1. CONFIGURACIÓN
+    // 1. CONFIGURACIÓN GLOBAL
     // ============================================================
     const CONFIG = {
+        version: '3.0',
+        debug: false,
         maxLogs: 500,
-        mutationDebounce: 100,
-        performanceSampleRate: 0.1,
-        enableCSP: true,
-        enableXSSDetection: true,
-        enableInteractionTracking: true,
-        enableNetworkMonitoring: true
+        enableAllAgents: true,
+        agentTimeout: 5000,
+        dashboardEnabled: true,
+        oracleUpdateInterval: 3000,
+        sentinelMLThreshold: 0.7,
+        phantomStealthMode: true,
+        valkyrieAutoBlock: true,
+        inspectorDeepScan: true
     };
 
     // ============================================================
-    // 2. SISTEMA DE LOGS (con persistencia)
+    // 2. SISTEMA CENTRAL DE COMUNICACIÓN (BUS DE AGENTES)
     // ============================================================
-    const LogStore = {
+    const AgentBus = {
+        _agents: {},
+        _events: {},
+        _messageHistory: [],
+        _maxHistory: 100,
+
+        // Registrar un agente
+        register(agentName, agentInstance) {
+            this._agents[agentName] = agentInstance;
+            this._agents[agentName].name = agentName;
+            this._log(`🤝 Agente "${agentName}" registrado exitosamente`);
+            return this;
+        },
+
+        // Enviar mensaje a todos los agentes
+        broadcast(message, data = {}, sender = 'system') {
+            const event = {
+                id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                timestamp: new Date().toISOString(),
+                sender,
+                message,
+                data
+            };
+
+            this._messageHistory.push(event);
+            if (this._messageHistory.length > this._maxHistory) {
+                this._messageHistory.shift();
+            }
+
+            // Enviar a todos los agentes que tengan método receive
+            Object.values(this._agents).forEach(agent => {
+                if (agent && typeof agent.receive === 'function') {
+                    try {
+                        agent.receive(event);
+                    } catch (e) {
+                        console.warn(`[AgentBus] Error al enviar a ${agent.name}:`, e);
+                    }
+                }
+            });
+
+            // Emitir evento local
+            if (this._events[message]) {
+                this._events[message].forEach(callback => {
+                    try {
+                        callback(event);
+                    } catch (e) {}
+                });
+            }
+
+            this._log(`📨 Broadcast: "${message}" desde ${sender}`);
+            return event;
+        },
+
+        // Suscribirse a eventos
+        on(eventName, callback) {
+            if (!this._events[eventName]) {
+                this._events[eventName] = [];
+            }
+            this._events[eventName].push(callback);
+            return this;
+        },
+
+        // Enviar mensaje a un agente específico
+        sendTo(agentName, message, data = {}) {
+            const agent = this._agents[agentName];
+            if (!agent) {
+                this._log(`❌ Agente "${agentName}" no encontrado`);
+                return false;
+            }
+            if (typeof agent.receive === 'function') {
+                agent.receive({
+                    sender: 'system',
+                    message,
+                    data,
+                    timestamp: new Date().toISOString()
+                });
+                return true;
+            }
+            return false;
+        },
+
+        // Obtener historial de mensajes
+        getHistory() {
+            return this._messageHistory;
+        },
+
+        // Obtener lista de agentes activos
+        getActiveAgents() {
+            return Object.keys(this._agents);
+        },
+
+        _log(msg) {
+            if (CONFIG.debug) {
+                console.log(`[AgentBus] ${msg}`);
+            }
+        }
+    };
+
+    // ============================================================
+    // 3. SISTEMA DE LOGS UNIFICADO
+    // ============================================================
+    const LogSystem = {
         _logs: [],
         _maxLogs: CONFIG.maxLogs,
+        _subscribers: [],
 
         init() {
             try {
-                const data = localStorage.getItem('armytage_logs');
+                const data = localStorage.getItem('armytage_logs_v3');
                 if (data) {
                     this._logs = JSON.parse(data);
                 }
             } catch (e) {}
+            return this;
         },
 
-        async registrar(tipo, mensaje, datos = {}) {
+        log(tipo, mensaje, datos = {}, agente = 'system') {
             const entry = {
                 id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
                 timestamp: new Date().toISOString(),
                 tipo,
                 mensaje,
                 datos,
+                agente,
                 url: window.location.href,
-                usuario: this._obtenerUsuario()
+                usuario: this._getUser()
             };
+
             this._logs.push(entry);
             if (this._logs.length > this._maxLogs) {
-                this._logs = this._logs.slice(-this._maxLogs);
+                this._logs.shift();
             }
-            // Guardar en localStorage
+
+            // Persistir
             try {
-                localStorage.setItem('armytage_logs', JSON.stringify(this._logs));
+                localStorage.setItem('armytage_logs_v3', JSON.stringify(this._logs));
             } catch (e) {}
-            // Notificar en consola (solo en desarrollo)
-            if (window.armytage?.debug) {
-                console.log(`[${tipo}] ${mensaje}`, datos);
+
+            // Notificar suscriptores
+            this._subscribers.forEach(callback => {
+                try { callback(entry); } catch (e) {}
+            });
+
+            // Log en consola si debug
+            if (CONFIG.debug) {
+                console.log(`[${agente}][${tipo}] ${mensaje}`, datos);
             }
+
             return entry;
         },
 
-        _obtenerUsuario() {
+        subscribe(callback) {
+            this._subscribers.push(callback);
+            return () => {
+                this._subscribers = this._subscribers.filter(cb => cb !== callback);
+            };
+        },
+
+        getLogs(tipo = null, limite = 100) {
+            let logs = this._logs;
+            if (tipo) {
+                logs = logs.filter(l => l.tipo === tipo);
+            }
+            return logs.slice(-limite);
+        },
+
+        search(query) {
+            return this._logs.filter(l => 
+                l.mensaje.toLowerCase().includes(query.toLowerCase()) ||
+                JSON.stringify(l.datos).toLowerCase().includes(query.toLowerCase())
+            );
+        },
+
+        _getUser() {
             try {
                 const session = localStorage.getItem('session');
                 if (session) {
@@ -75,654 +220,241 @@
             return 'anon';
         },
 
-        obtenerLogs(tipo = null, limite = 100) {
-            let logs = this._logs;
-            if (tipo) {
-                logs = logs.filter(l => l.tipo === tipo);
-            }
-            return logs.slice(-limite);
+        clear() {
+            this._logs = [];
+            localStorage.removeItem('armytage_logs_v3');
         },
 
-        limpiar() {
-            this._logs = [];
-            localStorage.removeItem('armytage_logs');
+        getStats() {
+            const stats = { total: this._logs.length, porTipo: {}, porAgente: {} };
+            for (const log of this._logs) {
+                stats.porTipo[log.tipo] = (stats.porTipo[log.tipo] || 0) + 1;
+                stats.porAgente[log.agente] = (stats.porAgente[log.agente] || 0) + 1;
+            }
+            return stats;
         }
     };
 
     // ============================================================
-    // 3. SISTEMA DE NOTIFICACIONES
+    // 4. SISTEMA DE NOTIFICACIONES
     // ============================================================
-    function showToast(message, type = 'info', duration = 4000) {
-        let container = document.getElementById('armytage-toast-container');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'armytage-toast-container';
-            container.style.cssText = `
-                position: fixed;
-                bottom: 80px;
-                left: 50%;
-                transform: translateX(-50%);
-                z-index: 999999;
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                max-width: 450px;
-                width: 90%;
-                pointer-events: none;
-                align-items: center;
+    const ToastSystem = {
+        _container: null,
+
+        show(message, type = 'info', duration = 4000) {
+            if (!this._container) {
+                this._container = document.createElement('div');
+                this._container.id = 'armytage-toast-container';
+                this._container.style.cssText = `
+                    position: fixed;
+                    bottom: 80px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 999999;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    max-width: 450px;
+                    width: 90%;
+                    pointer-events: none;
+                    align-items: center;
+                `;
+                document.body.appendChild(this._container);
+            }
+
+            const toast = document.createElement('div');
+            const colors = {
+                info: '#3b82f6',
+                success: '#22c55e',
+                warning: '#f59e0b',
+                error: '#ef4444',
+                critical: '#dc2626',
+                security: '#8b5cf6'
+            };
+            const bg = colors[type] || colors.info;
+            
+            toast.style.cssText = `
+                background: #1e293b;
+                color: #f1f5f9;
+                padding: 12px 18px;
+                border-radius: 8px;
+                border-left: 4px solid ${bg};
+                box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4);
+                font-family: system-ui, -apple-system, sans-serif;
+                font-size: 13px;
+                line-height: 1.5;
+                pointer-events: auto;
+                opacity: 0;
+                transform: translateY(-20px);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                width: 100%;
+                text-align: center;
+                max-width: 100%;
             `;
-            document.body.appendChild(container);
+            toast.textContent = message;
+            this._container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            });
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    if (toast.parentNode) toast.remove();
+                }, 300);
+            }, duration);
+        },
+
+        success(msg) { this.show(`✅ ${msg}`, 'success', 3000); },
+        error(msg) { this.show(`❌ ${msg}`, 'error', 5000); },
+        warning(msg) { this.show(`⚠️ ${msg}`, 'warning', 4000); },
+        info(msg) { this.show(`ℹ️ ${msg}`, 'info', 3000); },
+        security(msg) { this.show(`🔒 ${msg}`, 'security', 5000); }
+    };
+
+    // ============================================================
+    // 5. CLASE BASE PARA AGENTES
+    // ============================================================
+    class Agent {
+        constructor(name, personality, emoji) {
+            this.name = name;
+            this.personality = personality;
+            this.emoji = emoji;
+            this.activated = false;
+            this.stats = { messagesReceived: 0, messagesSent: 0, errors: 0 };
         }
 
-        const toast = document.createElement('div');
-        const colors = {
-            info: '#3b82f6',
-            success: '#22c55e',
-            warning: '#f59e0b',
-            error: '#ef4444',
-            critical: '#dc2626'
-        };
-        const bg = colors[type] || colors.info;
-        toast.style.cssText = `
-            background: #1e293b;
-            color: #f1f5f9;
-            padding: 12px 18px;
-            border-radius: 8px;
-            border-left: 4px solid ${bg};
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4);
-            font-family: system-ui, -apple-system, sans-serif;
-            font-size: 13px;
-            line-height: 1.5;
-            pointer-events: auto;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            width: 100%;
-            text-align: center;
-            max-width: 100%;
-        `;
-        toast.textContent = message;
-        container.appendChild(toast);
-        requestAnimationFrame(() => {
-            toast.style.opacity = '1';
-            toast.style.transform = 'translateY(0)';
-        });
-        setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(-20px)';
-            setTimeout(() => {
-                if (toast.parentNode) toast.remove();
-            }, 300);
-        }, duration);
+        // Método que todos los agentes deben implementar
+        receive(event) {
+            this.stats.messagesReceived++;
+            this.log(`📨 Recibido: ${event.message} de ${event.sender}`);
+        }
+
+        // Enviar mensaje al bus
+        send(message, data = {}) {
+            this.stats.messagesSent++;
+            return AgentBus.broadcast(message, data, this.name);
+        }
+
+        // Loggear
+        log(msg, data = {}) {
+            return LogSystem.log('AGENT', `[${this.emoji} ${this.personality}] ${msg}`, data, this.name);
+        }
+
+        // Notificar
+        notify(msg, type = 'info') {
+            ToastSystem.show(`[${this.emoji}] ${msg}`, type);
+            return this.log(msg, { type });
+        }
+
+        // Obtener estado
+        getStatus() {
+            return {
+                name: this.name,
+                personality: this.personality,
+                emoji: this.emoji,
+                activated: this.activated,
+                stats: this.stats
+            };
+        }
+
+        // Inicializar (sobrescribir en cada agente)
+        async activate() {
+            this.activated = true;
+            this.log('🟢 Agente activado');
+            return this;
+        }
+
+        // Desactivar
+        deactivate() {
+            this.activated = false;
+            this.log('🔴 Agente desactivado');
+            return this;
+        }
     }
 
     // ============================================================
-    // 4. ANALIZADOR ESTRUCTURAL DEL HTML
+    // 6. AGENTE: SECURITY - "El Guardián" 🕵️‍♂️
     // ============================================================
-    const StructureAnalyzer = {
-        _cache: null,
-
-        analizar() {
-            const start = performance.now();
-            const result = {
-                timestamp: new Date().toISOString(),
-                totalElements: 0,
-                elementos: {},
-                atributos: {},
-                clases: {},
-                ids: [],
-                recursos: {
-                    scripts: [],
-                    styles: [],
-                    images: [],
-                    fonts: [],
-                    iframes: []
-                },
-                elementosInseguros: [],
-                elementosObsoletos: [],
-                profundidadMaxima: 0,
-                formularios: [],
-                enlaces: [],
-                metaTags: {}
+    class SecurityAgent extends Agent {
+        constructor() {
+            super('SecurityAgent', 'El Guardián', '🕵️‍♂️');
+            this.protecciones = {
+                teclas: false,
+                contextMenu: false,
+                copyPaste: false,
+                devtools: false,
+                clickjacking: false
             };
-
-            // Recorrer todo el DOM
-            const walker = document.createTreeWalker(
-                document.body || document.documentElement,
-                NodeFilter.SHOW_ELEMENT,
-                null,
-                false
-            );
-
-            let node;
-            let profundidadActual = 0;
-            const profundidades = [];
-
-            while (node = walker.nextNode()) {
-                const tag = node.tagName.toLowerCase();
-                result.totalElements++;
-
-                // Contar elementos por etiqueta
-                result.elementos[tag] = (result.elementos[tag] || 0) + 1;
-
-                // Analizar atributos
-                for (const attr of node.attributes) {
-                    const name = attr.name;
-                    result.atributos[name] = (result.atributos[name] || 0) + 1;
-
-                    // Detectar atributos inseguros
-                    if (name.startsWith('on') && CONFIG.enableXSSDetection) {
-                        result.elementosInseguros.push({
-                            tag,
-                            atributo: name,
-                            valor: attr.value.substring(0, 50)
-                        });
-                    }
-
-                    // Clases
-                    if (name === 'class') {
-                        const classes = attr.value.split(/\s+/);
-                        for (const cls of classes) {
-                            if (cls) {
-                                result.clases[cls] = (result.clases[cls] || 0) + 1;
-                            }
-                        }
-                    }
-
-                    // ID
-                    if (name === 'id' && attr.value) {
-                        result.ids.push(attr.value);
-                    }
-                }
-
-                // Recursos externos
-                if (tag === 'script' && node.src) {
-                    result.recursos.scripts.push(node.src);
-                }
-                if (tag === 'link' && node.rel === 'stylesheet' && node.href) {
-                    result.recursos.styles.push(node.href);
-                }
-                if (tag === 'img' && node.src) {
-                    result.recursos.images.push(node.src);
-                }
-                if (tag === 'link' && node.rel === 'preconnect' && node.href) {
-                    // fuentes
-                }
-                if (tag === 'iframe') {
-                    result.recursos.iframes.push(node.src || 'about:blank');
-                }
-
-                // Elementos obsoletos
-                if (['font', 'center', 'marquee', 'blink', 'frame', 'frameset'].includes(tag)) {
-                    result.elementosObsoletos.push(tag);
-                }
-
-                // Formularios
-                if (tag === 'form') {
-                    result.formularios.push({
-                        action: node.action || '',
-                        method: node.method || 'GET',
-                        inputs: node.querySelectorAll('input, textarea, select').length
-                    });
-                }
-
-                // Enlaces
-                if (tag === 'a' && node.href) {
-                    result.enlaces.push({
-                        href: node.href,
-                        target: node.target || '_self',
-                        rel: node.rel || ''
-                    });
-                }
-
-                // Meta tags
-                if (tag === 'meta') {
-                    const name = node.getAttribute('name') || node.getAttribute('property') || '';
-                    const content = node.getAttribute('content') || '';
-                    if (name) {
-                        result.metaTags[name] = content;
-                    }
-                }
-
-                // Profundidad
-                let depth = 0;
-                let parent = node.parentNode;
-                while (parent && parent !== document.documentElement) {
-                    depth++;
-                    parent = parent.parentNode;
-                }
-                profundidades.push(depth);
-                if (depth > result.profundidadMaxima) {
-                    result.profundidadMaxima = depth;
-                }
-            }
-
-            // Profundidad promedio
-            result.profundidadPromedio = profundidades.length > 0 ?
-                profundidades.reduce((a, b) => a + b, 0) / profundidades.length :
-                0;
-
-            result.tiempoAnalisis = (performance.now() - start).toFixed(2) + 'ms';
-            this._cache = result;
-            return result;
-        },
-
-        obtenerReporte() {
-            if (!this._cache) {
-                this.analizar();
-            }
-            return this._cache;
-        },
-
-        generarResumen() {
-            const data = this.obtenerReporte();
-            return {
-                totalElementos: data.totalElements,
-                totalEtiquetas: Object.keys(data.elementos).length,
-                totalClases: Object.keys(data.clases).length,
-                totalIds: data.ids.length,
-                totalScripts: data.recursos.scripts.length,
-                totalStyles: data.recursos.styles.length,
-                totalImages: data.recursos.images.length,
-                profundidadMaxima: data.profundidadMaxima,
-                profundidadPromedio: data.profundidadPromedio.toFixed(1),
-                elementosInseguros: data.elementosInseguros.length,
-                elementosObsoletos: data.elementosObsoletos.length,
-                formularios: data.formularios.length,
-                enlaces: data.enlaces.length
-            };
+            this.devToolsDetected = false;
         }
-    };
 
-    // ============================================================
-    // 5. MONITOR DE MUTACIONES DOM
-    // ============================================================
-    const DOMWatcher = {
-        _observer: null,
-        _mutations: [],
-        _timeout: null,
-        _enabled: true,
+        async activate() {
+            await super.activate();
+            this._activarProtecciones();
+            this._detectarDevTools();
+            this._monitorearSinks();
+            this.log('🛡️ Protecciones activadas');
+            this.send('SECURITY_ACTIVATED', { protecciones: this.protecciones });
+            return this;
+        }
 
-        iniciar() {
-            if (!this._enabled) return;
-
-            this._observer = new MutationObserver((mutations) => {
-                this._mutations = this._mutations.concat(mutations);
-                // Debounce para no saturar
-                clearTimeout(this._timeout);
-                this._timeout = setTimeout(() => {
-                    this._procesarMutations();
-                }, CONFIG.mutationDebounce);
+        _activarProtecciones() {
+            // Solo protección contra F12 y DevTools (sin bloquear formularios)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'F12') {
+                    e.preventDefault();
+                    this.notify('Herramientas de desarrollador deshabilitadas', 'warning');
+                    LogSystem.log('SECURITY', 'Intento de F12 bloqueado', {}, this.name);
+                }
+                return true;
             });
 
-            this._observer.observe(document.documentElement || document.body, {
-                childList: true,
-                attributes: true,
-                subtree: true,
-                characterData: true,
-                attributeOldValue: true,
-                characterDataOldValue: true
-            });
-
-            LogStore.registrar('DOM_WATCHER', 'Monitoreo de DOM iniciado');
-        },
-
-        _procesarMutations() {
-            const mutations = this._mutations;
-            this._mutations = [];
-
-            if (mutations.length === 0) return;
-
-            const resumen = {
-                total: mutations.length,
-                added: 0,
-                removed: 0,
-                attributes: 0,
-                characterData: 0,
-                elementosAgregados: [],
-                elementosEliminados: [],
-                atributosModificados: [],
-                timestamp: new Date().toISOString()
-            };
-
-            for (const mutation of mutations) {
-                if (mutation.type === 'childList') {
-                    resumen.added += mutation.addedNodes.length;
-                    resumen.removed += mutation.removedNodes.length;
-
-                    for (const node of mutation.addedNodes) {
-                        if (node.nodeType === Node.ELEMENT_NODE) {
-                            const tag = node.tagName?.toLowerCase() || 'unknown';
-                            resumen.elementosAgregados.push({
-                                tag,
-                                id: node.id || '',
-                                classes: node.className || ''
-                            });
-                            // Detectar inyección de scripts
-                            if (tag === 'script') {
-                                LogStore.registrar('SECURITY', 'Script inyectado en DOM', {
-                                    src: node.src || 'inline',
-                                    html: node.innerHTML?.substring(0, 100)
-                                });
-                                showToast('⚠️ Script detectado en el DOM', 'warning', 3000);
-                            }
-                        }
-                    }
-
-                    for (const node of mutation.removedNodes) {
-                        if (node.nodeType === Node.ELEMENT_NODE) {
-                            resumen.elementosEliminados.push({
-                                tag: node.tagName?.toLowerCase() || 'unknown',
-                                id: node.id || ''
-                            });
-                        }
-                    }
-                } else if (mutation.type === 'attributes') {
-                    resumen.attributes++;
-                    resumen.atributosModificados.push({
-                        element: mutation.target.tagName?.toLowerCase() || 'unknown',
-                        attribute: mutation.attributeName,
-                        oldValue: mutation.oldValue,
-                        newValue: mutation.target.getAttribute(mutation.attributeName)
-                    });
-
-                    // Detectar cambios sospechosos
-                    if (mutation.attributeName === 'src' && mutation.target.tagName === 'SCRIPT') {
-                        LogStore.registrar('SECURITY', 'Script src modificado', {
-                            old: mutation.oldValue,
-                            new: mutation.target.getAttribute('src')
-                        });
-                    }
-                    if (mutation.attributeName && mutation.attributeName.startsWith('on')) {
-                        LogStore.registrar('SECURITY', 'Atributo de evento modificado', {
-                            element: mutation.target.tagName,
-                            attribute: mutation.attributeName,
-                            value: mutation.target.getAttribute(mutation.attributeName)
-                        });
-                    }
-                } else if (mutation.type === 'characterData') {
-                    resumen.characterData++;
-                }
-            }
-
-            // Guardar resumen
-            LogStore.registrar('DOM_MUTATION', `DOM mutado: ${resumen.total} cambios`, resumen);
-
-            // Alertar si hay muchos cambios sospechosos
-            if (resumen.elementosAgregados.length > 20) {
-                showToast(`📦 ${resumen.elementosAgregados.length} elementos añadidos al DOM`, 'info', 3000);
-            }
-
-            return resumen;
-        },
-
-        detener() {
-            if (this._observer) {
-                this._observer.disconnect();
-                this._observer = null;
-            }
-            this._enabled = false;
-            LogStore.registrar('DOM_WATCHER', 'Monitoreo de DOM detenido');
-        },
-
-        obtenerEstadisticas() {
-            return {
-                totalMutations: this._mutations.length,
-                enabled: this._enabled
-            };
-        }
-    };
-
-    // ============================================================
-    // 6. MONITOR DE RENDIMIENTO (PerformanceObserver)
-    // ============================================================
-    const PerformanceMonitor = {
-        _observers: [],
-        _metrics: {},
-
-        iniciar() {
-            if (!window.PerformanceObserver) {
-                LogStore.registrar('PERFORMANCE', 'PerformanceObserver no soportado');
-                return;
-            }
-
-            // 1. Métricas de navegación
-            try {
-                const navObserver = new PerformanceObserver((list) => {
-                    for (const entry of list.getEntries()) {
-                        if (entry.entryType === 'navigation') {
-                            this._metrics.navigation = {
-                                ttfb: entry.responseStart - entry.requestStart,
-                                domContentLoaded: entry.domContentLoadedEventEnd - entry.startTime,
-                                loadComplete: entry.loadEventEnd - entry.startTime,
-                                domInteractive: entry.domInteractive - entry.startTime
-                            };
-                            LogStore.registrar('PERFORMANCE', 'Métrica de navegación', this._metrics.navigation);
-                        }
-                    }
-                });
-                navObserver.observe({ entryTypes: ['navigation'] });
-                this._observers.push(navObserver);
-            } catch (e) {}
-
-            // 2. Paint metrics (FCP, LCP)
-            try {
-                const paintObserver = new PerformanceObserver((list) => {
-                    for (const entry of list.getEntries()) {
-                        if (entry.entryType === 'paint') {
-                            this._metrics[entry.name] = entry.startTime;
-                            LogStore.registrar('PERFORMANCE', `Paint: ${entry.name}`, { time: entry.startTime });
-                        }
-                    }
-                });
-                paintObserver.observe({ entryTypes: ['paint'] });
-                this._observers.push(paintObserver);
-            } catch (e) {}
-
-            // 3. Largest Contentful Paint (LCP)
-            try {
-                const lcpObserver = new PerformanceObserver((list) => {
-                    const entries = list.getEntries();
-                    const last = entries[entries.length - 1];
-                    if (last) {
-                        this._metrics.lcp = last.startTime;
-                        this._metrics.lcpElement = last.element?.tagName || 'unknown';
-                        LogStore.registrar('PERFORMANCE', 'LCP actualizado', {
-                            time: last.startTime,
-                            element: this._metrics.lcpElement
-                        });
-                    }
-                });
-                lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
-                this._observers.push(lcpObserver);
-            } catch (e) {}
-
-            // 4. Layout Shift (CLS)
-            try {
-                let clsValue = 0;
-                const clsObserver = new PerformanceObserver((list) => {
-                    for (const entry of list.getEntries()) {
-                        if (!entry.hadRecentInput) {
-                            clsValue += entry.value;
-                        }
-                    }
-                    this._metrics.cls = clsValue;
-                    LogStore.registrar('PERFORMANCE', 'CLS actualizado', { value: clsValue });
-                });
-                clsObserver.observe({ entryTypes: ['layout-shift'] });
-                this._observers.push(clsObserver);
-            } catch (e) {}
-
-            // 5. Event Timing (interacciones lentas)
-            try {
-                const eventObserver = new PerformanceObserver((list) => {
-                    for (const entry of list.getEntries()) {
-                        if (entry.duration > 100) { // Eventos > 100ms
-                            LogStore.registrar('PERFORMANCE', 'Evento lento detectado', {
-                                type: entry.name,
-                                duration: entry.duration,
-                                target: entry.target?.tagName || 'unknown'
-                            });
-                        }
-                    }
-                });
-                eventObserver.observe({ entryTypes: ['event'] });
-                this._observers.push(eventObserver);
-            } catch (e) {}
-
-            // 6. Tamaño del DOM
+            // Detectar DevTools
             setInterval(() => {
-                const totalElements = document.querySelectorAll('*').length;
-                this._metrics.domSize = totalElements;
-                if (totalElements > 2000) {
-                    LogStore.registrar('PERFORMANCE', 'DOM grande detectado', { size: totalElements });
+                const diffWidth = window.outerWidth - window.innerWidth;
+                const diffHeight = window.outerHeight - window.innerHeight;
+                if (diffWidth > 160 || diffHeight > 160) {
+                    if (!this.devToolsDetected) {
+                        this.devToolsDetected = true;
+                        this.notify('DevTools detectadas', 'security');
+                        LogSystem.log('SECURITY', 'DevTools abiertas', {}, this.name);
+                        this.send('DEVTOOLS_DETECTED', { timestamp: new Date().toISOString() });
+                    }
+                } else {
+                    this.devToolsDetected = false;
                 }
-            }, 30000);
+            }, 2000);
 
-            LogStore.registrar('PERFORMANCE', 'Monitoreo de rendimiento iniciado');
-        },
-
-        obtenerMetricas() {
-            return {
-                ...this._metrics,
-                timestamp: new Date().toISOString()
-            };
-        },
-
-        detener() {
-            for (const observer of this._observers) {
-                try {
-                    observer.disconnect();
-                } catch (e) {}
-            }
-            this._observers = [];
+            this.protecciones.teclas = true;
+            this.protecciones.devtools = true;
         }
-    };
 
-    // ============================================================
-    // 7. MONITOR DE ERRORES
-    // ============================================================
-    const ErrorMonitor = {
-        _errores: [],
-        _maxErrors: 100,
-
-        iniciar() {
-            // Errores globales
-            window.addEventListener('error', (event) => {
-                const error = {
-                    tipo: 'error',
-                    mensaje: event.message,
-                    archivo: event.filename,
-                    linea: event.lineno,
-                    columna: event.colno,
-                    stack: event.error?.stack,
-                    timestamp: new Date().toISOString()
-                };
-                this._errores.push(error);
-                if (this._errores.length > this._maxErrors) {
-                    this._errores.shift();
+        _detectarDevTools() {
+            // Método debugger
+            setInterval(() => {
+                const start = performance.now();
+                debugger;
+                if (performance.now() - start > 100) {
+                    if (!this.devToolsDetected) {
+                        this.devToolsDetected = true;
+                        this.send('DEVTOOLS_DETECTED', { method: 'debugger' });
+                        LogSystem.log('SECURITY', 'DevTools detectadas (debugger)', {}, this.name);
+                    }
                 }
-                LogStore.registrar('ERROR', event.message, {
-                    archivo: event.filename,
-                    linea: event.lineno,
-                    columna: event.colno
-                });
-                showToast(`❌ Error: ${event.message.substring(0, 60)}`, 'error', 5000);
-            });
-
-            // Promesas rechazadas
-            window.addEventListener('unhandledrejection', (event) => {
-                const error = {
-                    tipo: 'unhandledrejection',
-                    mensaje: event.reason?.message || String(event.reason),
-                    stack: event.reason?.stack,
-                    timestamp: new Date().toISOString()
-                };
-                this._errores.push(error);
-                if (this._errores.length > this._maxErrors) {
-                    this._errores.shift();
-                }
-                LogStore.registrar('ERROR', 'Promesa rechazada: ' + error.mensaje, {
-                    reason: event.reason
-                });
-                showToast(`⚠️ Promesa rechazada: ${error.mensaje.substring(0, 60)}`, 'warning', 4000);
-            });
-
-            // Errores de recursos (imágenes, scripts, etc.)
-            window.addEventListener('error', (event) => {
-                if (event.target && (event.target.tagName === 'IMG' || event.target.tagName === 'SCRIPT' || event.target.tagName === 'LINK')) {
-                    LogStore.registrar('ERROR', `Error al cargar recurso: ${event.target.src || event.target.href}`, {
-                        tag: event.target.tagName,
-                        url: event.target.src || event.target.href
-                    });
-                    showToast(`❌ Error al cargar: ${event.target.tagName}`, 'error', 3000);
-                }
-            }, true);
-
-            LogStore.registrar('ERROR_MONITOR', 'Monitoreo de errores iniciado');
-        },
-
-        obtenerErrores() {
-            return this._errores;
-        },
-
-        obtenerResumen() {
-            const errores = this._errores;
-            const porTipo = {};
-            for (const e of errores) {
-                porTipo[e.tipo] = (porTipo[e.tipo] || 0) + 1;
-            }
-            return {
-                total: errores.length,
-                porTipo,
-                ultimo: errores[errores.length - 1] || null
-            };
+            }, 5000);
         }
-    };
 
-    // ============================================================
-    // 8. MONITOR DE SEGURIDAD (CSP + XSS)
-    // ============================================================
-    const SecurityMonitor = {
-        _violaciones: [],
-
-        iniciar() {
-            // 1. CSP Violations
-            if (CONFIG.enableCSP) {
-                document.addEventListener('securitypolicyviolation', (e) => {
-                    const violation = {
-                        tipo: 'csp',
-                        policy: e.violatedDirective,
-                        resource: e.blockedURI,
-                        document: e.documentURI,
-                        timestamp: new Date().toISOString()
-                    };
-                    this._violaciones.push(violation);
-                    LogStore.registrar('SECURITY', `Violación de CSP: ${e.violatedDirective}`, violation);
-                    showToast(`🔒 Violación de CSP: ${e.violatedDirective}`, 'critical', 5000);
-                });
-            }
-
-            // 2. Detección de funciones peligrosas (XSS)
-            if (CONFIG.enableXSSDetection) {
-                this._hookDangerousFunctions();
-            }
-
-            // 3. Detección de DevTools (avanzada)
-            this._detectDevTools();
-
-            LogStore.registrar('SECURITY_MONITOR', 'Monitoreo de seguridad iniciado');
-        },
-
-        _hookDangerousFunctions() {
+        _monitorearSinks() {
             // Hook eval
             const originalEval = window.eval;
             window.eval = function(code) {
-                const stack = new Error().stack;
-                LogStore.registrar('SECURITY', 'eval() ejecutado', {
-                    code: typeof code === 'string' ? code.substring(0, 100) : 'non-string',
-                    stack: stack?.split('\n').slice(1, 4).join('\n')
-                });
+                LogSystem.log('SECURITY', 'eval() ejecutado', { 
+                    code: typeof code === 'string' ? code.substring(0, 100) : 'non-string'
+                }, 'SecurityAgent');
                 return originalEval(code);
             };
 
@@ -731,369 +463,919 @@
             if (descriptor) {
                 const originalSetter = descriptor.set;
                 descriptor.set = function(value) {
-                    if (typeof value === 'string' && (value.includes('<script') || value.includes('javascript:'))) {
-                        LogStore.registrar('SECURITY', 'innerHTML con contenido sospechoso', {
+                    if (typeof value === 'string' && value.includes('<script')) {
+                        LogSystem.log('SECURITY', 'innerHTML con script detectado', {
                             value: value.substring(0, 100),
                             element: this.tagName
-                        });
-                        showToast('⚠️ Contenido sospechoso detectado en innerHTML', 'warning', 4000);
+                        }, 'SecurityAgent');
                     }
                     return originalSetter.call(this, value);
                 };
                 Object.defineProperty(Element.prototype, 'innerHTML', descriptor);
             }
+        }
 
-            // Hook document.write
-            const originalWrite = document.write;
-            document.write = function(...args) {
-                const content = args.join('');
-                if (content.includes('<script')) {
-                    LogStore.registrar('SECURITY', 'document.write con script', {
-                        content: content.substring(0, 100)
+        receive(event) {
+            super.receive(event);
+            if (event.message === 'SECURITY_SCAN_REQUEST') {
+                this.send('SECURITY_SCAN_RESPONSE', {
+                    devToolsDetected: this.devToolsDetected,
+                    protecciones: this.protecciones
+                });
+            }
+        }
+    }
+
+    // ============================================================
+    // 7. AGENTE: INSPECTOR - "El Detective" 🔍
+    // ============================================================
+    class InspectorAgent extends Agent {
+        constructor() {
+            super('InspectorAgent', 'El Detective', '🔍');
+            this.scanResults = null;
+            this.secretsFound = [];
+            this.vulnerabilities = [];
+            this.endpoints = [];
+        }
+
+        async activate() {
+            await super.activate();
+            await this._realizarEscaneoCompleto();
+            this._monitorearNuevosScripts();
+            this.log('🔍 Escaneo completado', { 
+                secrets: this.secretsFound.length,
+                vulns: this.vulnerabilities.length,
+                endpoints: this.endpoints.length
+            });
+            this.send('INSPECTOR_SCAN_COMPLETE', {
+                secrets: this.secretsFound.length,
+                vulns: this.vulnerabilities.length,
+                endpoints: this.endpoints.length
+            });
+            return this;
+        }
+
+        async _realizarEscaneoCompleto() {
+            const results = {
+                secrets: [],
+                vulnerabilities: [],
+                endpoints: [],
+                suspicious: [],
+                scripts: []
+            };
+
+            // Escanear todos los scripts
+            const scripts = document.querySelectorAll('script');
+            for (const script of scripts) {
+                const content = script.src ? await this._fetchScript(script.src) : script.innerHTML;
+                if (content) {
+                    this._findSecrets(content, results);
+                    this._findEndpoints(content, results);
+                    this._checkVulnerabilities(content, results);
+                    this._analyzeBehavior(script, results);
+                    results.scripts.push({
+                        src: script.src || 'inline',
+                        length: content.length,
+                        hasSecrets: this._hasSecrets(content)
                     });
-                    showToast('⚠️ document.write con script detectado', 'warning', 4000);
                 }
-                return originalWrite.apply(this, args);
-            };
-        },
-
-        _detectDevTools() {
-            let devtoolsAbiertos = false;
-
-            // Método 1: Tamaño de ventana
-            setInterval(() => {
-                const diffWidth = window.outerWidth - window.innerWidth;
-                const diffHeight = window.outerHeight - window.innerHeight;
-                const threshold = 160;
-
-                if ((diffWidth > threshold || diffHeight > threshold) && !devtoolsAbiertos) {
-                    devtoolsAbiertos = true;
-                    LogStore.registrar('SECURITY', 'DevTools detectadas (tamaño)');
-                    showToast('🔍 DevTools detectadas', 'warning', 3000);
-                } else if (diffWidth <= threshold && diffHeight <= threshold && devtoolsAbiertos) {
-                    devtoolsAbiertos = false;
-                    LogStore.registrar('SECURITY', 'DevTools cerradas');
-                }
-            }, 2000);
-
-            // Método 2: Debugger
-            const debuggerCheck = () => {
-                const start = performance.now();
-                debugger;
-                const duration = performance.now() - start;
-                if (duration > 100 && !devtoolsAbiertos) {
-                    devtoolsAbiertos = true;
-                    LogStore.registrar('SECURITY', 'DevTools detectadas (debugger)');
-                    showToast('🔍 DevTools detectadas', 'warning', 3000);
-                }
-            };
-            setInterval(debuggerCheck, 5000);
-        },
-
-        obtenerViolaciones() {
-            return this._violaciones;
-        }
-    };
-
-    // ============================================================
-    // 9. MONITOR DE INTERACCIONES DE USUARIO
-    // ============================================================
-    const InteractionMonitor = {
-        _interacciones: [],
-        _maxInteracciones: 200,
-        _enabled: CONFIG.enableInteractionTracking,
-
-        iniciar() {
-            if (!this._enabled) return;
-
-            const events = ['click', 'keydown', 'scroll', 'mousemove', 'input', 'submit'];
-
-            for (const eventType of events) {
-                document.addEventListener(eventType, (e) => {
-                    const interaccion = {
-                        tipo: eventType,
-                        target: e.target?.tagName || 'unknown',
-                        id: e.target?.id || '',
-                        classes: e.target?.className || '',
-                        timestamp: new Date().toISOString(),
-                        timeSinceLoad: performance.now()
-                    };
-
-                    // Para clicks, guardar posición
-                    if (eventType === 'click' && e.clientX) {
-                        interaccion.x = e.clientX;
-                        interaccion.y = e.clientY;
-                    }
-
-                    // Para inputs, guardar valor (truncado)
-                    if (eventType === 'input' && e.target?.value) {
-                        interaccion.value = e.target.value.substring(0, 50);
-                    }
-
-                    this._interacciones.push(interaccion);
-                    if (this._interacciones.length > this._maxInteracciones) {
-                        this._interacciones.shift();
-                    }
-
-                    // Log solo para eventos importantes
-                    if (['click', 'submit', 'keydown'].includes(eventType)) {
-                        LogStore.registrar('INTERACTION', `${eventType} en ${interaccion.target}`, interaccion);
-                    }
-                }, { passive: true });
             }
 
-            LogStore.registrar('INTERACTION_MONITOR', 'Monitoreo de interacciones iniciado');
-        },
+            // Analizar atributos inline
+            this._scanInlineAttributes(results);
 
-        obtenerInteracciones(ultimas = 50) {
-            return this._interacciones.slice(-ultimas);
-        },
+            this.scanResults = results;
+            this.secretsFound = results.secrets;
+            this.vulnerabilities = results.vulnerabilities;
+            this.endpoints = results.endpoints;
 
-        obtenerEstadisticas() {
-            const stats = {
-                total: this._interacciones.length,
-                porTipo: {}
-            };
-            for (const i of this._interacciones) {
-                stats.porTipo[i.tipo] = (stats.porTipo[i.tipo] || 0) + 1;
+            // Loggear hallazgos importantes
+            if (results.secrets.length > 0) {
+                LogSystem.log('INSPECTOR', `🔑 ${results.secrets.length} secretos encontrados`, {
+                    secrets: results.secrets.map(s => s.type + ': ' + s.value.substring(0, 20))
+                }, this.name);
             }
-            return stats;
+            if (results.vulnerabilities.length > 0) {
+                LogSystem.log('INSPECTOR', `⚠️ ${results.vulnerabilities.length} vulnerabilidades encontradas`, {
+                    vulns: results.vulnerabilities
+                }, this.name);
+            }
         }
-    };
 
-    // ============================================================
-    // 10. MONITOR DE RED
-    // ============================================================
-    const NetworkMonitor = {
-        _peticiones: [],
-        _maxPeticiones: 200,
+        _findSecrets(content, results) {
+            const patterns = {
+                'API Key': /(api[_-]?key|apikey)\s*[:=]\s*['"]([a-zA-Z0-9_-]{16,})['"]/gi,
+                'Token JWT': /eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/g,
+                'Password': /password\s*[:=]\s*['"][^'"]+['"]/gi,
+                'AWS Key': /AKIA[0-9A-Z]{16}/g,
+                'GitHub Token': /gh[pousr]_[a-zA-Z0-9]{36,}/g,
+                'Bearer Token': /Bearer\s+[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/gi
+            };
 
-        iniciar() {
-            if (!CONFIG.enableNetworkMonitoring) return;
+            for (const [type, pattern] of Object.entries(patterns)) {
+                let match;
+                while ((match = pattern.exec(content)) !== null) {
+                    const value = match[1] || match[0];
+                    results.secrets.push({
+                        type,
+                        value: value.substring(0, 50),
+                        position: match.index,
+                        context: content.substring(Math.max(0, match.index - 30), match.index + 50)
+                    });
+                }
+            }
+        }
 
-            // Hook fetch
-            const originalFetch = window.fetch;
-            window.fetch = function(...args) {
-                const start = performance.now();
-                const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || 'unknown';
-                const method = args[1]?.method || 'GET';
+        _findEndpoints(content, results) {
+            const patterns = [
+                /https?:\/\/[^\s"']+/g,
+                /\/api\/[^\s"']+/g,
+                /\/v\d\/[^\s"']+/g,
+                /\/graphql/g,
+                /\/auth\/[^\s"']+/g
+            ];
 
-                return originalFetch.apply(this, args)
-                    .then(response => {
-                        const duration = performance.now() - start;
-                        const peticion = {
-                            url,
-                            method,
-                            status: response.status,
-                            statusText: response.statusText,
-                            duration: duration,
-                            timestamp: new Date().toISOString(),
-                            type: 'fetch'
-                        };
-                        NetworkMonitor._registrar(peticion);
-                        if (duration > 1000) {
-                            LogStore.registrar('NETWORK', `Petición lenta: ${url} (${duration.toFixed(0)}ms)`, peticion);
-                            showToast(`🐢 Petición lenta: ${url.split('/').pop()}`, 'warning', 3000);
+            for (const pattern of patterns) {
+                let match;
+                while ((match = pattern.exec(content)) !== null) {
+                    const endpoint = match[0];
+                    if (!results.endpoints.some(e => e === endpoint)) {
+                        results.endpoints.push(endpoint);
+                    }
+                }
+            }
+        }
+
+        _checkVulnerabilities(content, results) {
+            const vulns = {
+                'jQuery < 3.0': /jquery[\/-]?([0-2]\.\d+)/gi,
+                'Angular < 1.8': /angular[\/-]?([0-1]\.\d+)/gi,
+                'React < 16.8': /react[\/-]?([0-9]\.\d+)/gi,
+                'Vue < 2.6': /vue[\/-]?([0-2]\.\d+)/gi,
+                'eval()': /eval\s*\(/g,
+                'document.write': /document\.write\s*\(/g
+            };
+
+            for (const [vuln, pattern] of Object.entries(vulns)) {
+                if (pattern.test(content)) {
+                    results.vulnerabilities.push({
+                        type: vuln,
+                        severity: vuln.includes('eval') || vuln.includes('document.write') ? 'high' : 'medium',
+                        detected: new Date().toISOString()
+                    });
+                }
+            }
+        }
+
+        _analyzeBehavior(script, results) {
+            // Detectar comportamientos sospechosos
+            const content = script.src ? '' : script.innerHTML;
+            const suspiciousPatterns = [
+                { pattern: /localStorage\.(get|set)Item/, desc: 'Acceso a localStorage' },
+                { pattern: /document\.cookie/, desc: 'Acceso a cookies' },
+                { pattern: /navigator\.sendBeacon/, desc: 'Beacon API' },
+                { pattern: /fetch\s*\(/, desc: 'Fetch API' }
+            ];
+
+            for (const {pattern, desc} of suspiciousPatterns) {
+                if (pattern.test(content)) {
+                    results.suspicious.push({
+                        desc,
+                        script: script.src || 'inline',
+                        match: content.match(pattern)?.[0] || ''
+                    });
+                }
+            }
+        }
+
+        _scanInlineAttributes(results) {
+            document.querySelectorAll('[onclick], [onerror], [onload], [onmouseover]').forEach(el => {
+                results.suspicious.push({
+                    desc: `Atributo de evento inline: ${el.tagName}`,
+                    script: 'inline attribute',
+                    match: el.outerHTML.substring(0, 100)
+                });
+            });
+        }
+
+        _hasSecrets(content) {
+            const patterns = [
+                /api[_-]?key/i,
+                /secret/i,
+                /token/i,
+                /password/i,
+                /AKIA[0-9A-Z]{16}/
+            ];
+            return patterns.some(p => p.test(content));
+        }
+
+        async _fetchScript(url) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    return await response.text();
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        _monitorearNuevosScripts() {
+            const observer = new MutationObserver((mutations) => {
+                for (const mutation of mutations) {
+                    for (const node of mutation.addedNodes) {
+                        if (node.tagName === 'SCRIPT') {
+                            const src = node.src || 'inline';
+                            LogSystem.log('INSPECTOR', `Nuevo script detectado: ${src}`, {
+                                src,
+                                length: node.innerHTML?.length || 0
+                            }, this.name);
+                            this.send('NEW_SCRIPT_DETECTED', { src, length: node.innerHTML?.length || 0 });
                         }
-                        return response;
-                    })
-                    .catch(error => {
-                        const duration = performance.now() - start;
-                        const peticion = {
-                            url,
-                            method,
-                            error: error.message,
-                            duration,
-                            timestamp: new Date().toISOString(),
-                            type: 'fetch'
-                        };
-                        NetworkMonitor._registrar(peticion);
-                        LogStore.registrar('NETWORK', `Error en fetch: ${url}`, { error: error.message });
-                        showToast(`❌ Error de red: ${url.split('/').pop()}`, 'error', 4000);
-                        throw error;
-                    });
-            };
-
-            // Hook XMLHttpRequest
-            const originalXHROpen = XMLHttpRequest.prototype.open;
-            const originalXHRSend = XMLHttpRequest.prototype.send;
-
-            XMLHttpRequest.prototype.open = function(method, url, ...rest) {
-                this._armytageUrl = url;
-                this._armytageMethod = method;
-                this._armytageStart = performance.now();
-                return originalXHROpen.call(this, method, url, ...rest);
-            };
-
-            XMLHttpRequest.prototype.send = function(...args) {
-                this.addEventListener('load', function() {
-                    const duration = performance.now() - this._armytageStart;
-                    const peticion = {
-                        url: this._armytageUrl,
-                        method: this._armytageMethod,
-                        status: this.status,
-                        statusText: this.statusText,
-                        duration: duration,
-                        timestamp: new Date().toISOString(),
-                        type: 'xhr'
-                    };
-                    NetworkMonitor._registrar(peticion);
-                    if (duration > 1000) {
-                        LogStore.registrar('NETWORK', `XHR lento: ${this._armytageUrl} (${duration.toFixed(0)}ms)`, peticion);
                     }
-                });
-                this.addEventListener('error', function() {
-                    const duration = performance.now() - this._armytageStart;
-                    const peticion = {
-                        url: this._armytageUrl,
-                        method: this._armytageMethod,
-                        error: 'Network error',
-                        duration,
-                        timestamp: new Date().toISOString(),
-                        type: 'xhr'
-                    };
-                    NetworkMonitor._registrar(peticion);
-                    LogStore.registrar('NETWORK', `Error XHR: ${this._armytageUrl}`, { error: 'Network error' });
-                });
-                return originalXHRSend.call(this, ...args);
-            };
-
-            LogStore.registrar('NETWORK_MONITOR', 'Monitoreo de red iniciado');
-        },
-
-        _registrar(peticion) {
-            this._peticiones.push(peticion);
-            if (this._peticiones.length > this._maxPeticiones) {
-                this._peticiones.shift();
-            }
-        },
-
-        obtenerPeticiones(ultimas = 50) {
-            return this._peticiones.slice(-ultimas);
-        },
-
-        obtenerEstadisticas() {
-            const stats = {
-                total: this._peticiones.length,
-                exitosas: 0,
-                fallidas: 0,
-                avgDuration: 0,
-                lentas: 0
-            };
-            let totalDuration = 0;
-            for (const p of this._peticiones) {
-                if (p.status && p.status < 400) {
-                    stats.exitosas++;
-                } else {
-                    stats.fallidas++;
                 }
-                if (p.duration) {
-                    totalDuration += p.duration;
-                    if (p.duration > 1000) stats.lentas++;
+            });
+            observer.observe(document.documentElement, { childList: true, subtree: true });
+        }
+
+        receive(event) {
+            super.receive(event);
+            if (event.message === 'FULL_SCAN_REQUEST') {
+                this._realizarEscaneoCompleto();
+                this.send('FULL_SCAN_RESPONSE', this.scanResults);
+            }
+        }
+    }
+
+    // ============================================================
+    // 8. AGENTE: SENTINEL - "El Profeta" 🧠
+    // ============================================================
+    class SentinelAgent extends Agent {
+        constructor() {
+            super('SentinelAgent', 'El Profeta', '🧠');
+            this.behavioralProfile = null;
+            this.threatPredictions = [];
+            this.anomalies = [];
+            this.trainingData = [];
+            this.threshold = CONFIG.sentinelMLThreshold;
+        }
+
+        async activate() {
+            await super.activate();
+            this._buildBehavioralProfile();
+            this._startPredictionEngine();
+            this._monitorUserBehavior();
+            this.log('🔮 Sistema predictivo activado');
+            this.send('SENTINEL_ACTIVATED', { threshold: this.threshold });
+            return this;
+        }
+
+        _buildBehavioralProfile() {
+            // Construir perfil de comportamiento normal
+            this.behavioralProfile = {
+                clicks: 0,
+                keypresses: 0,
+                scrolls: 0,
+                timeOnPage: 0,
+                mouseMovements: 0,
+                interactions: 0,
+                averageSessionTime: 0,
+                typicalPath: []
+            };
+
+            // Registrar comportamiento normal durante 10 segundos
+            let startTime = Date.now();
+            let clicks = 0, keys = 0, scrolls = 0, movements = 0;
+
+            const handlers = {
+                click: () => clicks++,
+                keydown: () => keys++,
+                scroll: () => scrolls++,
+                mousemove: () => movements++
+            };
+
+            Object.entries(handlers).forEach(([event, handler]) => {
+                document.addEventListener(event, handler);
+            });
+
+            setTimeout(() => {
+                const duration = (Date.now() - startTime) / 1000;
+                this.behavioralProfile.clicks = clicks / duration;
+                this.behavioralProfile.keypresses = keys / duration;
+                this.behavioralProfile.scrolls = scrolls / duration;
+                this.behavioralProfile.mouseMovements = movements / duration;
+                this.behavioralProfile.averageSessionTime = duration;
+
+                Object.entries(handlers).forEach(([event, handler]) => {
+                    document.removeEventListener(event, handler);
+                });
+
+                LogSystem.log('SENTINEL', 'Perfil de comportamiento construido', this.behavioralProfile, this.name);
+            }, 10000);
+        }
+
+        _startPredictionEngine() {
+            setInterval(() => {
+                this._analyzeCurrentBehavior();
+            }, 5000);
+        }
+
+        _monitorUserBehavior() {
+            document.addEventListener('click', () => {
+                this.trainingData.push({ type: 'click', timestamp: Date.now() });
+            });
+            document.addEventListener('keydown', (e) => {
+                this.trainingData.push({ type: 'keydown', key: e.key, timestamp: Date.now() });
+                // Detectar patrones sospechosos de tecleo
+                if (e.key === 'F12' || (e.ctrlKey && e.key === 'u')) {
+                    this.threatPredictions.push({
+                        threat: 'Intento de acceso a DevTools',
+                        confidence: 0.9,
+                        timestamp: new Date().toISOString()
+                    });
+                    this.send('THREAT_PREDICTED', { threat: 'DevTools access', confidence: 0.9 });
+                }
+            });
+            document.addEventListener('scroll', () => {
+                this.trainingData.push({ type: 'scroll', timestamp: Date.now() });
+            });
+        }
+
+        _analyzeCurrentBehavior() {
+            const now = Date.now();
+            const recent = this.trainingData.filter(d => now - d.timestamp < 5000);
+            
+            // Detectar anomalías
+            if (recent.length > 20) {
+                this.anomalies.push({
+                    type: 'Actividad excesiva',
+                    count: recent.length,
+                    timestamp: new Date().toISOString()
+                });
+                this.send('ANOMALY_DETECTED', { type: 'excessive_activity', count: recent.length });
+                LogSystem.log('SENTINEL', '⚠️ Actividad anómala detectada', { count: recent.length }, this.name);
+            }
+
+            // Detectar patrones de bot
+            const patterns = this._detectBotPatterns(recent);
+            if (patterns.length > 0) {
+                for (const pattern of patterns) {
+                    this.threatPredictions.push({
+                        threat: 'Posible bot detectado',
+                        pattern,
+                        confidence: 0.8,
+                        timestamp: new Date().toISOString()
+                    });
                 }
             }
-            stats.avgDuration = stats.total > 0 ? (totalDuration / stats.total).toFixed(0) : 0;
-            return stats;
+
+            // Limpiar predicciones viejas
+            this.threatPredictions = this.threatPredictions.filter(p => 
+                Date.now() - new Date(p.timestamp).getTime() < 60000
+            );
         }
-    };
+
+        _detectBotPatterns(recent) {
+            const patterns = [];
+            // Detectar clics en la misma posición
+            const positions = recent.filter(d => d.type === 'click');
+            if (positions.length > 5) {
+                patterns.push('Múltiples clics en corto tiempo');
+            }
+            return patterns;
+        }
+
+        receive(event) {
+            super.receive(event);
+            if (event.message === 'PREDICT_THREAT') {
+                const prediction = {
+                    threat: event.data.type || 'unknown',
+                    confidence: Math.random() * 0.5 + 0.5,
+                    timestamp: new Date().toISOString()
+                };
+                this.threatPredictions.push(prediction);
+                this.send('PREDICTION_RESPONSE', prediction);
+            }
+        }
+    }
 
     // ============================================================
-    // 11. GENERADOR DE INFORME DE SALUD
+    // 9. AGENTE: PHANTOM - "El Espectro" ⚡
     // ============================================================
-    const HealthReport = {
-        generar() {
-            const estructura = StructureAnalyzer.obtenerReporte();
-            const resumenEstructura = StructureAnalyzer.generarResumen();
-            const performance = PerformanceMonitor.obtenerMetricas();
-            const errores = ErrorMonitor.obtenerResumen();
-            const interacciones = InteractionMonitor.obtenerEstadisticas();
-            const red = NetworkMonitor.obtenerEstadisticas();
-            const domWatcher = DOMWatcher.obtenerEstadisticas();
+    class PhantomAgent extends Agent {
+        constructor() {
+            super('PhantomAgent', 'El Espectro', '⚡');
+            this.watermarkActive = false;
+            this.antiDebugActive = false;
+            this.protectionLevel = 'stealth';
+        }
 
-            // Calcular puntuación de salud (0-100)
-            let score = 100;
+        async activate() {
+            await super.activate();
+            if (CONFIG.phantomStealthMode) {
+                this._embedWatermark();
+                this._activateAntiDebug();
+                this._monitorScreenCapture();
+                this._protectDOM();
+                this.log('👻 Protecciones invisibles activadas');
+                this.send('PHANTOM_ACTIVATED', { 
+                    watermark: this.watermarkActive,
+                    antiDebug: this.antiDebugActive
+                });
+            }
+            return this;
+        }
 
-            // Penalizaciones por estructura
-            if (resumenEstructura.elementosInseguros > 5) score -= 5;
-            if (resumenEstructura.elementosObsoletos > 3) score -= 3;
-            if (resumenEstructura.profundidadMaxima > 20) score -= 5;
-            if (resumenEstructura.totalElementos > 5000) score -= 10;
+        _embedWatermark() {
+            // Watermark invisible con datos del usuario
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 150;
+            const ctx = canvas.getContext('2d');
+            
+            let user = 'anonymous';
+            try {
+                const session = localStorage.getItem('session');
+                if (session) {
+                    const data = JSON.parse(session);
+                    user = data.username || 'anonymous';
+                }
+            } catch (e) {}
 
-            // Penalizaciones por rendimiento
-            if (performance.lcp && performance.lcp > 2500) score -= 10;
-            if (performance.cls && performance.cls > 0.1) score -= 5;
-            if (performance.domSize && performance.domSize > 3000) score -= 5;
+            ctx.font = '12px Arial';
+            ctx.fillStyle = 'rgba(0,0,0,0.001)';
+            ctx.textAlign = 'center';
+            const text = `Armytage © ${new Date().getFullYear()} | ${user} | ${window.location.hostname}`;
+            ctx.fillText(text, 150, 75);
+            
+            const watermark = document.createElement('div');
+            watermark.style.cssText = `
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                pointer-events: none;
+                z-index: -1;
+                background-image: url(${canvas.toDataURL()});
+                background-repeat: repeat;
+                opacity: 0.01;
+            `;
+            document.body.appendChild(watermark);
+            this.watermarkActive = true;
+            LogSystem.log('PHANTOM', 'Watermark invisible incrustado', { user }, this.name);
+        }
 
-            // Penalizaciones por errores
-            if (errores.total > 10) score -= 10;
-            if (errores.total > 50) score -= 15;
-
-            // Penalizaciones por red
-            if (red.fallidas > 5) score -= 5;
-            if (red.lentas > 10) score -= 5;
-
-            // Asegurar que score esté entre 0 y 100
-            score = Math.max(0, Math.min(100, score));
-
-            const nivel = score >= 80 ? 'Excelente' :
-                score >= 60 ? 'Bueno' :
-                score >= 40 ? 'Regular' : 'Crítico';
-
-            const color = score >= 80 ? '#22c55e' :
-                score >= 60 ? '#f59e0b' :
-                score >= 40 ? '#f97316' : '#ef4444';
-
-            return {
-                score,
-                nivel,
-                color,
-                timestamp: new Date().toISOString(),
-                estructura: resumenEstructura,
-                performance,
-                errores: errores,
-                interacciones,
-                red,
-                domWatcher,
-                recomendaciones: this._generarRecomendaciones(score, resumenEstructura, performance, errores)
+        _activateAntiDebug() {
+            // Anti-debugging avanzado
+            const originalConsoleLog = console.log;
+            console.log = function() {
+                if (arguments.length > 0 && typeof arguments[0] === 'string') {
+                    if (arguments[0].includes('debugger') || arguments[0].includes('devtools')) {
+                        LogSystem.log('PHANTOM', 'Intento de debug detectado', { args: arguments[0] }, 'PhantomAgent');
+                    }
+                }
+                return originalConsoleLog.apply(this, arguments);
             };
-        },
 
-        _generarRecomendaciones(score, estructura, performance, errores) {
-            const recomendaciones = [];
-
-            if (estructura.elementosInseguros > 0) {
-                recomendaciones.push('🔒 Eliminar atributos de evento inline (onclick, etc.)');
-            }
-            if (estructura.elementosObsoletos > 0) {
-                recomendaciones.push('📦 Reemplazar elementos obsoletos (font, center, etc.)');
-            }
-            if (estructura.profundidadMaxima > 15) {
-                recomendaciones.push('📐 Reducir la profundidad del DOM (anidación excesiva)');
-            }
-            if (estructura.totalElementos > 3000) {
-                recomendaciones.push('📊 Reducir el número total de elementos DOM');
-            }
-            if (performance.lcp && performance.lcp > 2500) {
-                recomendaciones.push('⚡ Optimizar LCP (cargar imágenes críticas antes)');
-            }
-            if (performance.cls && performance.cls > 0.1) {
-                recomendaciones.push('📐 Reducir cambios de layout (CLS)');
-            }
-            if (errores.total > 5) {
-                recomendaciones.push('🐛 Corregir los errores de JavaScript');
-            }
-            if (recomendaciones.length === 0) {
-                recomendaciones.push('✅ El sitio está en buen estado. ¡Sigue así!');
-            }
-
-            return recomendaciones;
+            // Detectar depuración con console.log
+            this.antiDebugActive = true;
         }
-    };
+
+        _monitorScreenCapture() {
+            // Detectar captura de pantalla
+            const originalGetUserMedia = navigator.mediaDevices?.getUserMedia;
+            if (originalGetUserMedia) {
+                navigator.mediaDevices.getUserMedia = function(constraints) {
+                    if (constraints.video && constraints.video.displaySurface) {
+                        LogSystem.log('PHANTOM', 'Intento de captura de pantalla detectado', {
+                            constraints: constraints
+                        }, 'PhantomAgent');
+                        ToastSystem.security('🛡️ Captura de pantalla detectada');
+                    }
+                    return originalGetUserMedia.call(this, constraints);
+                };
+            }
+
+            // Detectar PrintScreen
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'PrintScreen') {
+                    LogSystem.log('PHANTOM', 'Intento de PrintScreen detectado', {}, 'PhantomAgent');
+                    ToastSystem.warning('📸 Tecla PrintScreen detectada');
+                }
+            });
+        }
+
+        _protectDOM() {
+            // Prevenir modificaciones no autorizadas del DOM
+            const observer = new MutationObserver((mutations) => {
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                        for (const node of mutation.addedNodes) {
+                            if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SCRIPT') {
+                                LogSystem.log('PHANTOM', 'Script añadido al DOM', {
+                                    src: node.src || 'inline',
+                                    html: node.innerHTML?.substring(0, 100)
+                                }, 'PhantomAgent');
+                            }
+                        }
+                    }
+                }
+            });
+            observer.observe(document.documentElement, { childList: true, subtree: true });
+        }
+
+        receive(event) {
+            super.receive(event);
+            if (event.message === 'ACTIVATE_STEALTH') {
+                this.protectionLevel = 'maximum';
+                this._embedWatermark();
+                this._activateAntiDebug();
+                this.send('STEALTH_ACTIVATED', { level: 'maximum' });
+            }
+        }
+    }
 
     // ============================================================
-    // 12. INTERFAZ DE CHAT (con comandos avanzados)
+    // 10. AGENTE: VALKYRIE - "La Justiciera" 🎯
     // ============================================================
-    const ChatInterface = {
+    class ValkyrieAgent extends Agent {
+        constructor() {
+            super('ValkyrieAgent', 'La Justiciera', '🎯');
+            this.policies = [];
+            this.blockedDomains = [];
+            this.suspiciousElements = [];
+            this.autoBlock = CONFIG.valkyrieAutoBlock;
+        }
+
+        async activate() {
+            await super.activate();
+            this._loadPolicies();
+            this._startEnforcement();
+            this._monitorThreats();
+            this.log('⚔️ Políticas de seguridad aplicadas', { policies: this.policies.length });
+            this.send('VALKYRIE_ACTIVATED', { policies: this.policies.length, autoBlock: this.autoBlock });
+            return this;
+        }
+
+        _loadPolicies() {
+            this.policies = [
+                {
+                    name: 'No eval',
+                    condition: (el) => el.tagName === 'SCRIPT' && el.innerHTML.includes('eval('),
+                    action: 'remove',
+                    severity: 'high'
+                },
+                {
+                    name: 'No unsafe inline',
+                    condition: (el) => el.hasAttribute('onclick') || el.hasAttribute('onerror'),
+                    action: 'remove_attr',
+                    severity: 'medium'
+                },
+                {
+                    name: 'Block suspicious domains',
+                    condition: (el) => {
+                        if (el.tagName === 'SCRIPT' && el.src) {
+                            const domains = ['malicious.com', 'evil.net', 'bad.org'];
+                            return domains.some(d => el.src.includes(d));
+                        }
+                        return false;
+                    },
+                    action: 'block',
+                    severity: 'critical'
+                }
+            ];
+            LogSystem.log('VALKYRIE', 'Políticas cargadas', { count: this.policies.length }, this.name);
+        }
+
+        _startEnforcement() {
+            // Aplicar políticas a elementos existentes
+            this._enforcePolicies(document.documentElement);
+
+            // Monitorear nuevos elementos
+            const observer = new MutationObserver((mutations) => {
+                for (const mutation of mutations) {
+                    for (const node of mutation.addedNodes) {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            this._enforcePolicies(node);
+                        }
+                    }
+                }
+            });
+            observer.observe(document.documentElement, { childList: true, subtree: true });
+        }
+
+        _enforcePolicies(root) {
+            const elements = root.querySelectorAll('*');
+            for (const el of elements) {
+                for (const policy of this.policies) {
+                    try {
+                        if (policy.condition(el)) {
+                            this._applyAction(el, policy);
+                        }
+                    } catch (e) {
+                        LogSystem.log('VALKYRIE', 'Error aplicando política', { error: e.message }, this.name);
+                    }
+                }
+            }
+        }
+
+        _applyAction(el, policy) {
+            this.suspiciousElements.push({
+                element: el.tagName,
+                policy: policy.name,
+                action: policy.action,
+                timestamp: new Date().toISOString()
+            });
+
+            LogSystem.log('VALKYRIE', `⚠️ Aplicando política: ${policy.name}`, {
+                action: policy.action,
+                element: el.tagName,
+                severity: policy.severity
+            }, this.name);
+
+            switch (policy.action) {
+                case 'remove':
+                    el.remove();
+                    if (this.autoBlock) {
+                        ToastSystem.security(`🔒 Elemento eliminado: ${policy.name}`);
+                    }
+                    break;
+                case 'remove_attr':
+                    const attrs = ['onclick', 'onerror', 'onload', 'onmouseover'];
+                    for (const attr of attrs) {
+                        el.removeAttribute(attr);
+                    }
+                    break;
+                case 'block':
+                    el.style.display = 'none';
+                    el.style.pointerEvents = 'none';
+                    break;
+            }
+        }
+
+        _monitorThreats() {
+            AgentBus.on('THREAT_DETECTED', (event) => {
+                if (this.autoBlock) {
+                    const threat = event.data;
+                    LogSystem.log('VALKYRIE', `🚨 Amenaza detectada: ${threat.type}`, threat, this.name);
+                    this._respondToThreat(threat);
+                }
+            });
+        }
+
+        _respondToThreat(threat) {
+            switch (threat.type) {
+                case 'xss_attempt':
+                    this._blockXSS(threat);
+                    break;
+                case 'malicious_script':
+                    this._blockScript(threat);
+                    break;
+                case 'data_exfiltration':
+                    this._blockExfiltration(threat);
+                    break;
+                default:
+                    ToastSystem.error(`🚨 Amenaza detectada: ${threat.type}`);
+            }
+        }
+
+        _blockXSS(threat) {
+            ToastSystem.critical('🚨 Ataque XSS detectado y bloqueado');
+            LogSystem.log('VALKYRIE', 'XSS bloqueado', threat, this.name);
+            this.send('XSS_BLOCKED', threat);
+        }
+
+        _blockScript(threat) {
+            ToastSystem.critical('⚠️ Script malicioso bloqueado');
+            LogSystem.log('VALKYRIE', 'Script malicioso bloqueado', threat, this.name);
+            this.send('MALICIOUS_SCRIPT_BLOCKED', threat);
+        }
+
+        _blockExfiltration(threat) {
+            ToastSystem.critical('🔒 Intento de exfiltración de datos bloqueado');
+            LogSystem.log('VALKYRIE', 'Exfiltración bloqueada', threat, this.name);
+        }
+
+        receive(event) {
+            super.receive(event);
+            if (event.message === 'NEW_POLICY') {
+                this.policies.push(event.data);
+                LogSystem.log('VALKYRIE', 'Nueva política agregada', event.data, this.name);
+                this.send('POLICY_ADDED', event.data);
+            }
+            if (event.message === 'SET_AUTO_BLOCK') {
+                this.autoBlock = event.data.enabled;
+                LogSystem.log('VALKYRIE', `Auto-block ${event.data.enabled ? 'activado' : 'desactivado'}`, {}, this.name);
+            }
+        }
+    }
+
+    // ============================================================
+    // 11. AGENTE: ORACLE - "El Oráculo" 🤖
+    // ============================================================
+    class OracleAgent extends Agent {
+        constructor() {
+            super('OracleAgent', 'El Oráculo', '🤖');
+            this.dashboard = null;
+            this.metrics = {
+                health: 0,
+                threats: 0,
+                logs: 0,
+                agents: 0,
+                uptime: 0
+            };
+            this.history = [];
+            this.insights = [];
+        }
+
+        async activate() {
+            await super.activate();
+            if (CONFIG.dashboardEnabled) {
+                this._createDashboard();
+            }
+            this._startAnalytics();
+            this.log('📊 Dashboard e inteligencia activados');
+            this.send('ORACLE_ACTIVATED', { dashboard: CONFIG.dashboardEnabled });
+            return this;
+        }
+
+        _createDashboard() {
+            const dashboard = document.createElement('div');
+            dashboard.id = 'armytage-oracle-dashboard';
+            dashboard.style.cssText = `
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.85);
+                backdrop-filter: blur(10px);
+                color: #00ff41;
+                font-family: 'Courier New', monospace;
+                font-size: 11px;
+                padding: 12px 16px;
+                border-radius: 8px;
+                z-index: 999997;
+                min-width: 240px;
+                border: 1px solid rgba(0, 255, 65, 0.2);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+                pointer-events: none;
+                user-select: none;
+                transition: opacity 0.5s ease;
+            `;
+
+            // Botón para toggle dashboard
+            const toggleBtn = document.createElement('button');
+            toggleBtn.textContent = '📊';
+            toggleBtn.style.cssText = `
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                background: rgba(0,0,0,0.7);
+                color: #00ff41;
+                border: 1px solid #00ff4144;
+                border-radius: 4px;
+                padding: 4px 8px;
+                cursor: pointer;
+                z-index: 999998;
+                font-size: 16px;
+                display: none;
+            `;
+            toggleBtn.onclick = () => {
+                dashboard.style.display = dashboard.style.display === 'none' ? 'block' : 'none';
+                toggleBtn.style.display = dashboard.style.display === 'none' ? 'block' : 'none';
+            };
+            document.body.appendChild(toggleBtn);
+            this._toggleBtn = toggleBtn;
+
+            document.body.appendChild(dashboard);
+            this.dashboard = dashboard;
+            this._toggleBtn = toggleBtn;
+
+            // Actualizar periódicamente
+            setInterval(() => {
+                this._updateDashboard();
+            }, CONFIG.oracleUpdateInterval);
+
+            // Mostrar toggle después de 5 segundos
+            setTimeout(() => {
+                toggleBtn.style.display = 'block';
+            }, 5000);
+
+            LogSystem.log('ORACLE', 'Dashboard creado', {}, this.name);
+        }
+
+        _updateDashboard() {
+            if (!this.dashboard) return;
+
+            const health = this.metrics.health || 0;
+            const healthColor = health > 80 ? '#00ff41' : health > 50 ? '#ffa500' : '#ff0040';
+            
+            this.dashboard.innerHTML = `
+                🛡️ ARMYTAGE ORACLE v${CONFIG.version}
+                ────────────────────────────
+                🟢 Salud:     ${health}%
+                👾 Amenazas:  ${this.metrics.threats || 0}
+                📝 Logs:      ${this.metrics.logs || 0}
+                🤖 Agentes:   ${this.metrics.agents || 0}
+                ⏱️ Uptime:    ${this._formatUptime()}
+                ────────────────────────────
+                ${this.insights.length > 0 ? '💡 ' + this.insights[this.insights.length - 1] : ''}
+            `;
+        }
+
+        _formatUptime() {
+            if (!this._startTime) {
+                this._startTime = Date.now();
+            }
+            const seconds = Math.floor((Date.now() - this._startTime) / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            if (hours > 0) return `${hours}h ${minutes % 60}m`;
+            if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
+            return `${seconds}s`;
+        }
+
+        _startAnalytics() {
+            // Actualizar métricas cada 5 segundos
+            setInterval(() => {
+                this._gatherMetrics();
+                this._generateInsights();
+            }, 5000);
+
+            // Suscribirse a logs
+            LogSystem.subscribe((entry) => {
+                this.history.push(entry);
+                if (this.history.length > 100) {
+                    this.history.shift();
+                }
+                this.metrics.logs = LogSystem.getLogs().length;
+            });
+
+            // Suscribirse a eventos del bus
+            AgentBus.on('THREAT_DETECTED', (event) => {
+                this.metrics.threats++;
+            });
+        }
+
+        _gatherMetrics() {
+            const agents = AgentBus.getActiveAgents();
+            this.metrics.agents = agents.length;
+
+            // Calcular salud basada en múltiples factores
+            const logs = LogSystem.getLogs(null, 20);
+            const errors = logs.filter(l => l.tipo === 'ERROR').length;
+            const threats = this.metrics.threats;
+            
+            let health = 100;
+            health -= errors * 3;
+            health -= threats * 2;
+            health = Math.max(0, Math.min(100, health));
+            
+            this.metrics.health = Math.round(health);
+        }
+
+        _generateInsights() {
+            const insights = [];
+            const logs = LogSystem.getLogs(null, 50);
+            
+            // Análisis de errores
+            const errors = logs.filter(l => l.tipo === 'ERROR');
+            if (errors.length > 10) {
+                insights.push(`⚠️ ${errors.length} errores recientes`);
+            }
+
+            // Análisis de seguridad
+            const securityEvents = logs.filter(l => l.tipo === 'SECURITY');
+            if (securityEvents.length > 5) {
+                insights.push(`🔒 ${securityEvents.length} eventos de seguridad`);
+            }
+
+            // Análisis de rendimiento
+            const slowEvents = logs.filter(l => l.mensaje.includes('lento') || l.mensaje.includes('slow'));
+            if (slowEvents.length > 3) {
+                insights.push(`🐢 ${slowEvents.length} eventos lentos detectados`);
+            }
+
+            if (insights.length === 0) {
+                insights.push('✅ Todo en orden');
+            }
+
+            this.insights = insights;
+        }
+
+        receive(event) {
+            super.receive(event);
+            if (event.message === 'GET_ANALYTICS') {
+                this.send('ANALYTICS_RESPONSE', {
+                    metrics: this.metrics,
+                    insights: this.insights,
+                    history: this.history.slice(-10)
+                });
+            }
+        }
+    }
+
+    // ============================================================
+    // 12. SISTEMA DE CHAT (Interfaz de Comandos)
+    // ============================================================
+    const ChatSystem = {
         _container: null,
         _messages: null,
         _input: null,
@@ -1101,8 +1383,9 @@
 
         init() {
             this._crearUI();
-            this._agregarMensaje('sistema', '🧠 Armytage Professional Monitor v2.0');
-            this._agregarMensaje('sistema', '💡 Escribe /help para ver todos los comandos');
+            this._agregarMensaje('sistema', '🛡️ Armytage Professional Suite v' + CONFIG.version);
+            this._agregarMensaje('sistema', '💡 7 agentes activos. Escribe /help para ver comandos');
+            this._agregarMensaje('sistema', '🔍 Haz clic en la flecha ◀ para abrir/cerrar');
         },
 
         _crearUI() {
@@ -1138,7 +1421,7 @@
                 transform: translateY(-50%);
                 width: 32px;
                 height: 60px;
-                background: #0d9488;
+                background: linear-gradient(135deg, #0d9488, #0891b2);
                 color: white;
                 border: none;
                 border-radius: 8px 0 0 8px;
@@ -1151,10 +1434,10 @@
                 justify-content: center;
                 padding: 0;
                 transition: all 0.3s ease;
-                border-right: 2px solid #0d9488;
+                border-right: 2px solid rgba(255,255,255,0.1);
             `;
-            toggleBtn.onmouseover = () => toggleBtn.style.background = '#0f766e';
-            toggleBtn.onmouseout = () => toggleBtn.style.background = '#0d9488';
+            toggleBtn.onmouseover = () => toggleBtn.style.transform = 'scale(1.05)';
+            toggleBtn.onmouseout = () => toggleBtn.style.transform = 'scale(1)';
             toggleBtn.onclick = () => this._toggleChat();
             document.body.appendChild(toggleBtn);
             this._toggleBtn = toggleBtn;
@@ -1162,7 +1445,7 @@
             const header = document.createElement('div');
             header.style.cssText = `
                 padding: 10px 14px;
-                background: #0f172a;
+                background: linear-gradient(135deg, #0f172a, #1e293b);
                 color: #f1f5f9;
                 font-weight: bold;
                 font-size: 13px;
@@ -1174,7 +1457,7 @@
                 user-select: none;
                 flex-shrink: 0;
             `;
-            header.innerHTML = `<span>🛡️ Armytage Pro</span><span style="font-size:11px;color:#0d9488;">● Monitor</span>`;
+            header.innerHTML = `<span>🛡️ Armytage Suite</span><span style="font-size:11px;color:#0d9488;">v${CONFIG.version}</span>`;
             header.onclick = () => this._toggleChat();
             container.appendChild(header);
 
@@ -1234,7 +1517,10 @@
                 cursor: pointer;
                 font-size: 13px;
                 flex-shrink: 0;
+                transition: background 0.2s;
             `;
+            sendBtn.onmouseover = () => sendBtn.style.background = '#0f766e';
+            sendBtn.onmouseout = () => sendBtn.style.background = '#0d9488';
             sendBtn.onclick = () => {
                 this._procesarComando(input.value);
                 input.value = '';
@@ -1281,11 +1567,14 @@
                 msg.style.color = '#94a3b8';
                 msg.style.fontSize = '11px';
                 msg.style.textAlign = 'center';
+                msg.style.borderBottom = '1px solid #334155';
+                msg.style.padding = '6px';
             } else if (tipo === 'comando') {
                 msg.style.background = '#2d3748';
                 msg.style.alignSelf = 'flex-end';
                 msg.style.color = '#e2e8f0';
                 msg.style.fontSize = '12px';
+                msg.style.borderRadius = '8px 8px 4px 8px';
             } else if (tipo === 'respuesta') {
                 msg.style.background = '#1e293b';
                 msg.style.borderLeft = '2px solid #0d9488';
@@ -1294,16 +1583,25 @@
                 msg.style.whiteSpace = 'pre-wrap';
                 msg.style.fontSize = '12px';
                 msg.style.maxWidth = '95%';
+                msg.style.borderRadius = '8px 8px 8px 4px';
             } else if (tipo === 'error') {
                 msg.style.background = '#450a0a';
                 msg.style.borderLeft = '2px solid #ef4444';
                 msg.style.color = '#fca5a5';
                 msg.style.fontSize = '12px';
+                msg.style.borderRadius = '8px 8px 8px 4px';
             } else if (tipo === 'success') {
                 msg.style.background = '#064e3b';
                 msg.style.borderLeft = '2px solid #22c55e';
                 msg.style.color = '#86efac';
                 msg.style.fontSize = '12px';
+                msg.style.borderRadius = '8px 8px 8px 4px';
+            } else if (tipo === 'agent') {
+                msg.style.background = '#1e1b4b';
+                msg.style.borderLeft = '2px solid #8b5cf6';
+                msg.style.color = '#c4b5fd';
+                msg.style.fontSize = '11px';
+                msg.style.borderRadius = '8px 8px 8px 4px';
             }
             msg.textContent = texto;
             this._messages.appendChild(msg);
@@ -1331,11 +1629,11 @@
                         break;
 
                     case '/health':
-                        respuesta = await this._getHealth();
+                        respuesta = this._getHealth();
                         break;
 
-                    case '/structure':
-                        respuesta = this._getStructure();
+                    case '/agents':
+                        respuesta = this._getAgents();
                         break;
 
                     case '/logs':
@@ -1343,24 +1641,17 @@
                         respuesta = this._getLogs(n);
                         break;
 
-                    case '/errors':
-                        respuesta = this._getErrors();
+                    case '/secrets':
+                        respuesta = this._getSecrets();
                         break;
 
-                    case '/performance':
-                        respuesta = this._getPerformance();
+                    case '/threats':
+                        respuesta = this._getThreats();
                         break;
 
-                    case '/network':
-                        respuesta = this._getNetwork();
-                        break;
-
-                    case '/security':
-                        respuesta = this._getSecurity();
-                        break;
-
-                    case '/interactions':
-                        respuesta = this._getInteractions();
+                    case '/dashboard':
+                        this._toggleDashboard();
+                        respuesta = '📊 Dashboard toggled';
                         break;
 
                     case '/clear':
@@ -1369,7 +1660,7 @@
                         break;
 
                     default:
-                        respuesta = `❌ Comando desconocido. Escribe /help para ver la lista.`;
+                        respuesta = `❌ Comando desconocido. Escribe /help.`;
                 }
 
                 if (respuesta) {
@@ -1381,256 +1672,237 @@
         },
 
         _getHelp() {
-            return `📋 COMANDOS DISPONIBLES:
+            return `📋 COMANDOS ARMYTAGE SUITE v${CONFIG.version}
 
-🟢 /status - Estado general del sistema
-📊 /health - Informe completo de salud del sitio
-📐 /structure - Análisis estructural del HTML
-📋 /logs [n] - Últimos n logs (def: 10)
-🐛 /errors - Resumen de errores
-⚡ /performance - Métricas de rendimiento
-🌐 /network - Estadísticas de red
-🔒 /security - Violaciones de seguridad y alertas
-👆 /interactions - Estadísticas de interacciones
-🧹 /clear - Limpiar el chat
-❓ /help - Esta ayuda`;
+🟢 /status     - Estado global del sistema
+📊 /health     - Informe de salud completo
+🤖 /agents     - Lista de agentes activos
+📝 /logs [n]   - Últimos n logs
+🔑 /secrets    - Secretos encontrados por Inspector
+👾 /threats    - Amenazas detectadas
+📊 /dashboard  - Mostrar/ocultar dashboard
+🧹 /clear      - Limpiar chat
+❓ /help       - Esta ayuda
+
+AGENTES ACTIVOS:
+🕵️‍♂️ Security  - El Guardián
+🔍 Inspector  - El Detective  
+🧠 Sentinel   - El Profeta
+⚡ Phantom    - El Espectro
+🎯 Valkyrie   - La Justiciera
+🤖 Oracle     - El Oráculo`;
         },
 
         async _getStatus() {
-            const health = HealthReport.generar();
-            const logs = LogStore.obtenerLogs(null, 5);
-            const ultimoLog = logs.length > 0 ? logs[logs.length - 1] : null;
+            const agents = AgentBus.getActiveAgents();
+            const logs = LogSystem.getLogs();
+            const stats = LogSystem.getStats();
 
-            return `📊 ESTADO DE ARMYTAGE PRO
+            return `📊 ESTADO GLOBAL ARMYTAGE v${CONFIG.version}
 
-🟢 Salud: ${health.score}/100 (${health.nivel})
-📝 Logs registrados: ${LogStore._logs.length}
-🐛 Errores: ${health.errores.total}
-🌐 Peticiones de red: ${health.red.total}
-👆 Interacciones: ${health.interacciones.total}
+🤖 Agentes activos: ${agents.length}
+📝 Logs totales: ${logs.length}
+🔒 Eventos de seguridad: ${stats.porTipo?.SECURITY || 0}
+⚠️ Errores: ${stats.porTipo?.ERROR || 0}
 
-Último evento: ${ultimoLog ? `${ultimoLog.tipo}: ${ultimoLog.mensaje}` : 'Ninguno'}
+AGENTES:
+${agents.map(a => '  • ' + a).join('\n')}
+
 ⏰ ${new Date().toISOString()}`;
         },
 
-        async _getHealth() {
-            const health = HealthReport.generar();
-            let respuesta = `📊 INFORME DE SALUD
+        _getHealth() {
+            const agents = AgentBus.getActiveAgents();
+            const logs = LogSystem.getLogs();
+            const stats = LogSystem.getStats();
 
-🔵 Puntuación: ${health.score}/100
-🟢 Nivel: ${health.nivel}
+            const errors = stats.porTipo?.ERROR || 0;
+            const security = stats.porTipo?.SECURITY || 0;
+            
+            let score = 100;
+            score -= errors * 2;
+            score -= security * 1;
+            score = Math.max(0, Math.min(100, score));
 
-📐 ESTRUCTURA:
-• Elementos totales: ${health.estructura.totalElementos}
-• Etiquetas únicas: ${health.estructura.totalEtiquetas}
-• Clases únicas: ${health.estructura.totalClases}
-• Profundidad máx: ${health.estructura.profundidadMaxima}
-• Elementos inseguros: ${health.estructura.elementosInseguros}
-• Elementos obsoletos: ${health.estructura.elementosObsoletos}
+            const level = score > 80 ? 'Excelente' : score > 60 ? 'Bueno' : score > 40 ? 'Regular' : 'Crítico';
 
-⚡ RENDIMIENTO:
-• LCP: ${health.performance.lcp ? health.performance.lcp.toFixed(0) + 'ms' : 'N/A'}
-• CLS: ${health.performance.cls ? health.performance.cls.toFixed(3) : 'N/A'}
-• Tamaño DOM: ${health.performance.domSize || 'N/A'} elementos
+            return `📊 INFORME DE SALUD
 
-🐛 ERRORES: ${health.errores.total}
+🔵 Puntuación: ${score}/100
+🟢 Nivel: ${level}
 
-🌐 RED: ${health.red.exitosas} OK / ${health.red.fallidas} FAIL
+📊 ESTADÍSTICAS:
+• Agentes: ${agents.length}
+• Logs: ${logs.length}
+• Errores: ${errors}
+• Eventos de seguridad: ${security}
 
-💡 RECOMENDACIONES:
-${health.recomendaciones.map(r => '  • ' + r).join('\n')}`;
-            return respuesta;
+🤖 AGENTES ACTIVOS:
+${agents.map(a => '  • ' + a).join('\n')}
+
+💡 Recomendación: ${score > 80 ? '✅ Sistema en excelente estado' : '⚠️ Revisar logs para más detalles'}`;
         },
 
-        _getStructure() {
-            const estructura = StructureAnalyzer.obtenerReporte();
-            const resumen = StructureAnalyzer.generarResumen();
+        _getAgents() {
+            const agents = AgentBus.getActiveAgents();
+            const agentStatus = [];
+            
+            for (const name of agents) {
+                const agent = AgentBus._agents[name];
+                if (agent && typeof agent.getStatus === 'function') {
+                    const status = agent.getStatus();
+                    agentStatus.push(`${status.emoji} ${status.name} - ${status.activated ? '🟢 Activo' : '🔴 Inactivo'} (${status.stats.messagesReceived} msgs)`);
+                }
+            }
 
-            // Top 10 etiquetas más comunes
-            const topTags = Object.entries(estructura.elementos)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10)
-                .map(([tag, count]) => `  • ${tag}: ${count}`)
-                .join('\n');
+            return `🤖 AGENTES ACTIVOS (${agents.length})
 
-            return `📐 ANÁLISIS ESTRUCTURAL
+${agentStatus.join('\n')}
 
-📊 Resumen:
-• Total elementos: ${resumen.totalElementos}
-• Etiquetas únicas: ${resumen.totalEtiquetas}
-• Clases únicas: ${resumen.totalClases}
-• IDs: ${resumen.totalIds}
-• Profundidad máxima: ${resumen.profundidadMaxima}
-• Profundidad promedio: ${resumen.profundidadPromedio}
-
-📦 Recursos:
-• Scripts: ${resumen.totalScripts}
-• Estilos: ${resumen.totalStyles}
-• Imágenes: ${resumen.totalImages}
-• Formularios: ${resumen.formularios}
-• Enlaces: ${resumen.enlaces}
-
-🔒 Seguridad:
-• Elementos inseguros: ${resumen.elementosInseguros}
-• Elementos obsoletos: ${resumen.elementosObsoletos}
-
-🏷️ Top etiquetas:
-${topTags}
-
-⏱️ Tiempo análisis: ${estructura.tiempoAnalisis}`;
+📊 Total mensajes procesados: ${Object.values(AgentBus._agents).reduce((sum, a) => sum + (a.stats?.messagesReceived || 0), 0)}`;
         },
 
         _getLogs(n) {
-            const logs = LogStore.obtenerLogs(null, n);
+            const logs = LogSystem.getLogs(null, n);
             if (logs.length === 0) {
-                return '📋 No hay logs disponibles.';
+                return '📝 No hay logs disponibles.';
             }
-            return `📋 ÚLTIMOS ${logs.length} LOGS:\n\n` +
-                logs.map(l => `[${l.timestamp.split('T')[1].slice(0,8)}] ${l.tipo}: ${l.mensaje}`).join('\n');
+            return `📝 ÚLTIMOS ${logs.length} LOGS:\n\n` +
+                logs.map(l => `[${l.timestamp.split('T')[1].slice(0,8)}] ${l.agente}: ${l.mensaje}`).join('\n');
         },
 
-        _getErrors() {
-            const errores = ErrorMonitor.obtenerResumen();
-            const lista = ErrorMonitor.obtenerErrores().slice(-10);
-
-            let respuesta = `🐛 RESUMEN DE ERRORES
-
-• Total: ${errores.total}
-• Por tipo: ${Object.entries(errores.porTipo).map(([tipo, count]) => `${tipo}: ${count}`).join(', ')}
-
-${lista.length > 0 ? '\n📋 Últimos errores:\n' + lista.map(e => `  • ${e.mensaje.substring(0, 60)}`).join('\n') : ''}`;
-            return respuesta;
+        _getSecrets() {
+            const inspector = AgentBus._agents['InspectorAgent'];
+            if (!inspector) {
+                return '❌ Inspector no disponible';
+            }
+            const secrets = inspector.secretsFound || [];
+            if (secrets.length === 0) {
+                return '🔑 No se encontraron secretos';
+            }
+            return `🔑 SECRETOS ENCONTRADOS (${secrets.length}):\n\n` +
+                secrets.map((s, i) => `${i+1}. ${s.type}: ${s.value}`).join('\n');
         },
 
-        _getPerformance() {
-            const metrics = PerformanceMonitor.obtenerMetricas();
-            return `⚡ MÉTRICAS DE RENDIMIENTO
-
-🖥️ Navegación:
-• TTFB: ${metrics.navigation?.ttfb ? metrics.navigation.ttfb.toFixed(0) + 'ms' : 'N/A'}
-• DOM Interactive: ${metrics.navigation?.domInteractive ? metrics.navigation.domInteractive.toFixed(0) + 'ms' : 'N/A'}
-• DOM Content Loaded: ${metrics.navigation?.domContentLoaded ? metrics.navigation.domContentLoaded.toFixed(0) + 'ms' : 'N/A'}
-• Load Complete: ${metrics.navigation?.loadComplete ? metrics.navigation.loadComplete.toFixed(0) + 'ms' : 'N/A'}
-
-🎨 Paint:
-• FCP: ${metrics['first-contentful-paint'] ? metrics['first-contentful-paint'].toFixed(0) + 'ms' : 'N/A'}
-• LCP: ${metrics.lcp ? metrics.lcp.toFixed(0) + 'ms' : 'N/A'}
-• LCP Element: ${metrics.lcpElement || 'N/A'}
-
-📐 Layout:
-• CLS: ${metrics.cls ? metrics.cls.toFixed(3) : 'N/A'}
-• Tamaño DOM: ${metrics.domSize || 'N/A'} elementos
-
-⏱️ ${new Date().toISOString()}`;
+        _getThreats() {
+            const sentinel = AgentBus._agents['SentinelAgent'];
+            if (!sentinel) {
+                return '❌ Sentinel no disponible';
+            }
+            const threats = sentinel.threatPredictions || [];
+            if (threats.length === 0) {
+                return '👾 No se detectaron amenazas';
+            }
+            return `👾 AMENAZAS DETECTADAS (${threats.length}):\n\n` +
+                threats.map((t, i) => `${i+1}. ${t.threat} (${(t.confidence * 100).toFixed(0)}%)`).join('\n');
         },
 
-        _getNetwork() {
-            const stats = NetworkMonitor.obtenerEstadisticas();
-            const peticiones = NetworkMonitor.obtenerPeticiones(5);
-
-            return `🌐 ESTADÍSTICAS DE RED
-
-📊 Total peticiones: ${stats.total}
-✅ Exitosas: ${stats.exitosas}
-❌ Fallidas: ${stats.fallidas}
-🐢 Lentas (>1s): ${stats.lentas}
-⏱️ Duración promedio: ${stats.avgDuration}ms
-
-${peticiones.length > 0 ? '\n📋 Últimas peticiones:\n' + peticiones.map(p =>
-    `  • ${p.method} ${p.url.split('/').pop()} → ${p.status || 'Error'} (${p.duration ? p.duration.toFixed(0) + 'ms' : 'N/A'})`
-).join('\n') : ''}`;
-        },
-
-        _getSecurity() {
-            const violaciones = SecurityMonitor.obtenerViolaciones();
-            return `🔒 MONITOREO DE SEGURIDAD
-
-🛡️ Violaciones CSP: ${violaciones.length}
-
-${violaciones.length > 0 ? '\n📋 Últimas violaciones:\n' + violaciones.slice(-5).map(v =>
-    `  • ${v.policy}: ${v.resource || 'N/A'}`
-).join('\n') : '✅ No se detectaron violaciones CSP'}
-
-🔍 Monitoreo activo:
-• eval() hook: ✅
-• innerHTML hook: ✅
-• document.write hook: ✅
-• DevTools detection: ✅
-
-⚠️ Recomendación: Mantener CSP habilitado y revisar regularmente.`;
-        },
-
-        _getInteractions() {
-            const stats = InteractionMonitor.obtenerEstadisticas();
-            const interacciones = InteractionMonitor.obtenerInteracciones(5);
-
-            return `👆 ESTADÍSTICAS DE INTERACCIONES
-
-📊 Total: ${stats.total}
-
-📈 Por tipo:
-${Object.entries(stats.porTipo).map(([tipo, count]) => `  • ${tipo}: ${count}`).join('\n')}
-
-${interacciones.length > 0 ? '\n📋 Últimas interacciones:\n' + interacciones.map(i =>
-    `  • ${i.tipo} en ${i.target}${i.id ? '#' + i.id : ''}`
-).join('\n') : ''}`;
+        _toggleDashboard() {
+            const dashboard = document.getElementById('armytage-oracle-dashboard');
+            if (dashboard) {
+                dashboard.style.display = dashboard.style.display === 'none' ? 'block' : 'none';
+                const toggleBtn = document.querySelector('[style*="armytage-oracle-dashboard"] ~ button');
+                if (toggleBtn) {
+                    toggleBtn.style.display = dashboard.style.display === 'none' ? 'block' : 'none';
+                }
+            }
         }
     };
 
     // ============================================================
     // 13. INICIALIZACIÓN PRINCIPAL
     // ============================================================
-    function initArmytage() {
-        // Inicializar LogStore
-        LogStore.init();
+    async function initArmytage() {
+        console.log('🛡️ Inicializando Armytage Professional Suite v' + CONFIG.version);
+        console.log('🤖 Cargando agentes...');
 
-        // Iniciar todos los monitores
-        StructureAnalyzer.analizar();
-        DOMWatcher.iniciar();
-        PerformanceMonitor.iniciar();
-        ErrorMonitor.iniciar();
-        SecurityMonitor.iniciar();
-        InteractionMonitor.iniciar();
-        NetworkMonitor.iniciar();
+        try {
+            // 1. Inicializar sistemas base
+            LogSystem.init();
 
-        // Registrar inicio
-        LogStore.registrar('SISTEMA', 'Armytage Professional Monitor v2.0 iniciado');
+            // 2. Registrar agentes en el bus
+            const security = new SecurityAgent();
+            const inspector = new InspectorAgent();
+            const sentinel = new SentinelAgent();
+            const phantom = new PhantomAgent();
+            const valkyrie = new ValkyrieAgent();
+            const oracle = new OracleAgent();
 
-        // Iniciar chat
-        setTimeout(() => {
-            ChatInterface.init();
-        }, 500);
+            AgentBus
+                .register('SecurityAgent', security)
+                .register('InspectorAgent', inspector)
+                .register('SentinelAgent', sentinel)
+                .register('PhantomAgent', phantom)
+                .register('ValkyrieAgent', valkyrie)
+                .register('OracleAgent', oracle);
 
-        // Exponer API pública
-        window.armytage = {
-            version: '2.0',
-            // Monitores
-            estructura: () => StructureAnalyzer.obtenerReporte(),
-            salud: () => HealthReport.generar(),
-            logs: (tipo = null, n = 100) => LogStore.obtenerLogs(tipo, n),
-            errores: () => ErrorMonitor.obtenerErrores(),
-            performance: () => PerformanceMonitor.obtenerMetricas(),
-            red: () => NetworkMonitor.obtenerPeticiones(50),
-            seguridad: () => SecurityMonitor.obtenerViolaciones(),
-            interacciones: () => InteractionMonitor.obtenerInteracciones(50),
-            // Utilidades
-            limpiarLogs: () => LogStore.limpiar(),
-            detener: () => {
-                DOMWatcher.detener();
-                PerformanceMonitor.detener();
-                LogStore.registrar('SISTEMA', 'Monitores detenidos');
-            },
-            debug: false
-        };
+            // 3. Activar todos los agentes
+            await Promise.all([
+                security.activate(),
+                inspector.activate(),
+                sentinel.activate(),
+                phantom.activate(),
+                valkyrie.activate(),
+                oracle.activate()
+            ]);
 
-        // Mostrar mensaje de bienvenida
-        const salud = HealthReport.generar();
-        showToast(`🛡️ Armytage Pro v2.0 | Salud: ${salud.score}% (${salud.nivel})`, 'success', 4000);
+            // 4. Iniciar chat
+            setTimeout(() => {
+                ChatSystem.init();
+            }, 500);
 
-        console.log('🛡️ Armytage Professional Monitor v2.0');
-        console.log('📊 Salud del sitio:', salud.score + '% (' + salud.nivel + ')');
-        console.log('💬 Haz clic en la flecha ◀ en el borde derecho para abrir el chat');
-        console.log('📖 Escribe /help en el chat para ver todos los comandos');
+            // 5. Log de inicio
+            LogSystem.log('SISTEMA', '🚀 Armytage Professional Suite v' + CONFIG.version + ' iniciado', {
+                agents: AgentBus.getActiveAgents().length,
+                version: CONFIG.version,
+                timestamp: new Date().toISOString()
+            });
+
+            // 6. Exponer API pública
+            window.armytage = {
+                version: CONFIG.version,
+                agents: AgentBus._agents,
+                bus: AgentBus,
+                logs: LogSystem,
+                toast: ToastSystem,
+                status: () => {
+                    const agents = AgentBus.getActiveAgents();
+                    return {
+                        version: CONFIG.version,
+                        agents: agents,
+                        totalAgents: agents.length,
+                        logs: LogSystem.getLogs().length,
+                        uptime: Math.floor((Date.now() - window._armytageStart) / 1000) + 's'
+                    };
+                },
+                health: () => {
+                    const stats = LogSystem.getStats();
+                    const errors = stats.porTipo?.ERROR || 0;
+                    let score = 100 - errors * 2;
+                    score = Math.max(0, Math.min(100, score));
+                    return {
+                        score,
+                        level: score > 80 ? 'Excelente' : score > 60 ? 'Bueno' : score > 40 ? 'Regular' : 'Crítico',
+                        stats
+                    };
+                },
+                debug: CONFIG.debug
+            };
+
+            window._armytageStart = Date.now();
+
+            // 7. Mensaje de bienvenida
+            const agentCount = AgentBus.getActiveAgents().length;
+            ToastSystem.success(`🛡️ Armytage Suite v${CONFIG.version} | ${agentCount} agentes activos`);
+            
+            console.log(`✅ Armytage inicializado correctamente (${agentCount} agentes)`);
+            console.log('💡 Haz clic en la flecha ◀ en el borde derecho para abrir el chat');
+            console.log('📖 Escribe /help en el chat para ver todos los comandos');
+
+        } catch (error) {
+            console.error('❌ Error al inicializar Armytage:', error);
+            ToastSystem.error('❌ Error al inicializar Armytage');
+        }
     }
 
     // ============================================================
