@@ -307,9 +307,9 @@ async function enviarPedidoPorCorreo() {
     });
 
     // ✅ Configuración de EmailJS
-    const EMAILJS_PUBLIC_KEY = 'TU_PUBLIC_KEY'; // Reemplaza con tu clave
-    const EMAILJS_SERVICE_ID = 'TU_SERVICE_ID'; // Reemplaza con tu Service ID
-    const EMAILJS_TEMPLATE_ID = 'TU_TEMPLATE_ID'; // Reemplaza con tu Template ID
+    const EMAILJS_PUBLIC_KEY = '-oSvhsO6mZn5cdCz6'; // Reemplaza con tu clave
+    const EMAILJS_SERVICE_ID = 'service_v1tiylh'; // Reemplaza con tu Service ID
+    const EMAILJS_TEMPLATE_ID = 'template_edjk1yg'; // Reemplaza con tu Template ID
 
     try {
         emailjs.init(EMAILJS_PUBLIC_KEY);
