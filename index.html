@@ -566,11 +566,15 @@
     <script src="static/js/admin.js"></script>
     <script src="static/js/main.js"></script>
 
-    <!-- ========== SECURITY (capa de protección) ========== -->
+    <!-- ========== SECURITY ========== -->
     <script src="static/Kjs/armytage.js"></script>
     <script src="static/Kjs/capa_seguridad.js"></script>
-    
+
     <script>
+        // ============================================
+        // CÓDIGO PRINCIPAL - INICIALIZACIÓN
+        // ============================================
+        
         // Año en el footer
         document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -592,6 +596,41 @@
                 document.getElementById('search-results').classList.remove('active');
             }
         });
+
+        // ============================================
+        // CÓDIGO DE PRODUCTOS (para que funcione sin GitHub)
+        // ============================================
+        
+        // Productos por defecto (si no hay conexión)
+        const productosPorDefecto = [
+            { id: 'p1', name: '💊 Paracetamol 500mg', category: 'medicamento', price: 5.99, desc: 'Analgésico y antipirético.', stock: 100, image: 'https://via.placeholder.com/300x200/0d9488/ffffff?text=Paracetamol', feat: true, available: true },
+            { id: 'p2', name: '💻 Laptop Gamer RTX 4060', category: 'tecnologia', price: 1299.99, desc: 'Laptop gaming con Intel i7.', stock: 15, image: 'https://via.placeholder.com/300x200/2563eb/ffffff?text=Laptop+Gamer', feat: true, available: true },
+            { id: 'p3', name: '🩺 Vitamina C 1000mg', category: 'salud', price: 12.99, desc: 'Refuerza el sistema inmunológico.', stock: 50, image: 'https://via.placeholder.com/300x200/10b981/ffffff?text=Vitamina+C', feat: false, available: true },
+            { id: 'p4', name: '🎮 Monitor 4K 27"', category: 'gaming', price: 349.99, desc: 'Monitor gaming 4K UHD.', stock: 8, image: 'https://via.placeholder.com/300x200/8b5cf6/ffffff?text=Monitor+4K', feat: true, available: true }
+        ];
+        
+        // Inicializar productos si no están cargados
+        if (typeof S !== 'undefined' && S.pr && S.pr.length === 0) {
+            // Intentar cargar desde localStorage
+            try {
+                const saved = localStorage.getItem('productos_backup');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && parsed.length > 0) {
+                        S.pr = parsed;
+                        console.log('✅ Productos cargados desde backup local');
+                    }
+                }
+            } catch(e) {}
+            
+            // Si no hay productos, usar los de defecto
+            if (!S.pr || S.pr.length === 0) {
+                S.pr = productosPorDefecto;
+                console.log('📦 Usando productos por defecto');
+            }
+        }
+        
+        console.log('✅ MediTech listo');
     </script>
 </body>
 </html>
