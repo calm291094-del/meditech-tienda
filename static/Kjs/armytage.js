@@ -1,7 +1,7 @@
 // ============================================================
-// 🛡️ ARMYTAGE PROFESSIONAL SUITE v3.1 - VERSIÓN COMPLETA
+// 🛡️ ARMYTAGE PROFESSIONAL SUITE v3.1 - VERSIÓN DEFINITIVA
 // ============================================================
-// MODO COMPATIBILIDAD: CLICS PERMITIDOS + CHAT INTEGRADO
+// TODOS LOS COMANDOS FUNCIONALES - SIN DUPLICADOS
 // ============================================================
 
 (function() {
@@ -11,17 +11,9 @@
     // 1. CONFIGURACIÓN
     // ============================================================
     const CONFIG = {
-        version: '3.1-compat',
+        version: '3.1',
         debug: true,
-        maxLogs: 100,
-        enableAllAgents: true,
-        agentTimeout: 5000,
-        dashboardEnabled: false,
-        oracleUpdateInterval: 5000,
-        sentinelMLThreshold: 0.9,
-        phantomStealthMode: false,
-        valkyrieAutoBlock: false,
-        inspectorDeepScan: false
+        maxLogs: 500
     };
 
     // ============================================================
@@ -138,17 +130,80 @@
     };
 
     // ============================================================
-    // 4. TOAST SYSTEM - SILENCIOSO
+    // 4. TOAST SYSTEM
     // ============================================================
     const ToastSystem = {
+        _container: null,
+
         show(message, type = 'info', duration = 3000) {
-            console.log(`[Toast] ${message}`);
+            if (!this._container) {
+                this._container = document.createElement('div');
+                this._container.id = 'armytage-toast';
+                this._container.style.cssText = `
+                    position: fixed;
+                    bottom: 80px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    z-index: 999999;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    max-width: 450px;
+                    width: 90%;
+                    pointer-events: none;
+                    align-items: center;
+                `;
+                document.body.appendChild(this._container);
+            }
+
+            const toast = document.createElement('div');
+            const colors = {
+                info: '#3b82f6',
+                success: '#22c55e',
+                warning: '#f59e0b',
+                error: '#ef4444',
+                security: '#8b5cf6'
+            };
+            const bg = colors[type] || colors.info;
+            
+            toast.style.cssText = `
+                background: #1e293b;
+                color: #f1f5f9;
+                padding: 10px 16px;
+                border-radius: 8px;
+                border-left: 4px solid ${bg};
+                box-shadow: 0 10px 15px -3px rgba(0,0,0,0.4);
+                font-family: system-ui, -apple-system, sans-serif;
+                font-size: 13px;
+                pointer-events: auto;
+                opacity: 0;
+                transform: translateY(-20px);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+                width: 100%;
+                text-align: center;
+            `;
+            toast.textContent = message;
+            this._container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            });
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                setTimeout(() => {
+                    if (toast.parentNode) toast.remove();
+                }, 300);
+            }, duration);
         },
-        success(msg) { this.show(`✅ ${msg}`, 'success'); },
-        error(msg) { this.show(`❌ ${msg}`, 'error'); },
-        warning(msg) { this.show(`⚠️ ${msg}`, 'warning'); },
-        info(msg) { this.show(`ℹ️ ${msg}`, 'info'); },
-        security(msg) { this.show(`🔒 ${msg}`, 'security'); }
+
+        success(msg) { this.show(`✅ ${msg}`, 'success', 3000); },
+        error(msg) { this.show(`❌ ${msg}`, 'error', 5000); },
+        warning(msg) { this.show(`⚠️ ${msg}`, 'warning', 4000); },
+        info(msg) { this.show(`ℹ️ ${msg}`, 'info', 3000); },
+        security(msg) { this.show(`🔒 ${msg}`, 'security', 5000); }
     };
 
     // ============================================================
@@ -157,7 +212,6 @@
     class ValkyrieAgent {
         constructor() {
             this.name = 'ValkyrieAgent';
-            this.personality = 'La Justiciera (Modo Compatibilidad)';
             this.emoji = '🎯';
             this.activated = false;
             this.stats = { messagesReceived: 0, messagesSent: 0 };
@@ -165,7 +219,6 @@
             this.policies = [];
             this.blockedDomains = [];
             this.suspiciousElements = [];
-            this._elementosPermitidos = ['*'];
         }
 
         activate() {
@@ -186,16 +239,10 @@
         getStatus() {
             return {
                 name: this.name,
-                personality: this.personality,
                 emoji: this.emoji,
                 activated: this.activated,
                 stats: this.stats
             };
-        }
-
-        aplicarPoliticas(config) {
-            console.log('🎯 Políticas ignoradas (modo compatibilidad)');
-            return true;
         }
 
         obtenerPoliticas() {
@@ -204,14 +251,8 @@
                 bloquearScriptsExternos: false,
                 bloquearEval: false,
                 bloquearInnerHTMLMalicioso: false,
-                bloquearDocumentWrite: false,
-                bloquearAccesoDatos: false
+                bloquearDocumentWrite: false
             };
-        }
-
-        agregarRegla(regla) {
-            console.log('🎯 Regla agregada (solo log):', regla.nombre);
-            return { id: 'regla-' + Date.now(), ...regla, accion: 'log' };
         }
 
         evaluar(elemento, tipo) {
@@ -224,22 +265,20 @@
     }
 
     // ============================================================
-    // 6. AGENTE: SECURITY - PASIVO
+    // 6. AGENTE: SECURITY
     // ============================================================
     class SecurityAgent {
         constructor() {
             this.name = 'SecurityAgent';
-            this.personality = 'El Guardián (Modo Pasivo)';
             this.emoji = '🕵️';
             this.activated = false;
             this.stats = { messagesReceived: 0, messagesSent: 0 };
-            this.protecciones = { teclas: false, devtools: false };
             this.devToolsDetected = false;
         }
 
         activate() {
             this.activated = true;
-            console.log('🕵️ Security activado - MODO PASIVO');
+            console.log('🕵️ Security activado');
             return this;
         }
 
@@ -255,21 +294,26 @@
         getStatus() {
             return {
                 name: this.name,
-                personality: this.personality,
                 emoji: this.emoji,
                 activated: this.activated,
                 stats: this.stats
             };
         }
+
+        // Detectar DevTools real
+        detectDevTools() {
+            const diffWidth = window.outerWidth - window.innerWidth;
+            const diffHeight = window.outerHeight - window.innerHeight;
+            return (diffWidth > 160 || diffHeight > 160);
+        }
     }
 
     // ============================================================
-    // 7. AGENTE: INSPECTOR - PASIVO
+    // 7. AGENTE: INSPECTOR - FUNCIONAL
     // ============================================================
     class InspectorAgent {
         constructor() {
             this.name = 'InspectorAgent';
-            this.personality = 'El Detective (Modo Pasivo)';
             this.emoji = '🔍';
             this.activated = false;
             this.stats = { messagesReceived: 0, messagesSent: 0 };
@@ -282,7 +326,7 @@
 
         activate() {
             this.activated = true;
-            console.log('🔍 Inspector activado - MODO PASIVO');
+            console.log('🔍 Inspector activado');
             return this;
         }
 
@@ -298,32 +342,177 @@
         getStatus() {
             return {
                 name: this.name,
-                personality: this.personality,
                 emoji: this.emoji,
                 activated: this.activated,
                 stats: this.stats
             };
         }
+
+        // ============================================================
+        // ESCANEO REAL - FUNCIONAL
+        // ============================================================
+        async scan() {
+            const results = {
+                secrets: [],
+                vulnerabilities: [],
+                endpoints: [],
+                suspicious: [],
+                scripts: []
+            };
+
+            const scripts = document.querySelectorAll('script');
+            
+            for (const script of scripts) {
+                const content = script.src ? await this._fetchScript(script.src) : script.innerHTML;
+                if (!content) continue;
+
+                // Buscar secretos
+                this._findSecrets(content, results);
+                
+                // Buscar endpoints
+                this._findEndpoints(content, results);
+                
+                // Buscar vulnerabilidades
+                this._findVulnerabilities(content, results);
+                
+                // Buscar comportamientos sospechosos
+                this._findSuspicious(content, script, results);
+
+                results.scripts.push({
+                    src: script.src || 'inline',
+                    length: content.length
+                });
+            }
+
+            this.scanResults = results;
+            this.secretsFound = results.secrets;
+            this.vulnerabilities = results.vulnerabilities;
+            this.endpoints = results.endpoints;
+            this.suspicious = results.suspicious;
+
+            LogSystem.log('INSPECTOR', `Escaneo completado: ${results.secrets.length} secretos, ${results.vulnerabilities.length} vulns`, results, this.name);
+            
+            return results;
+        }
+
+        _findSecrets(content, results) {
+            const patterns = {
+                'API Key': /(api[_-]?key|apikey)\s*[:=]\s*['"]([a-zA-Z0-9_-]{16,})['"]/gi,
+                'JWT Token': /eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/g,
+                'Password': /password\s*[:=]\s*['"][^'"]+['"]/gi,
+                'AWS Key': /AKIA[0-9A-Z]{16}/g,
+                'GitHub Token': /gh[pousr]_[a-zA-Z0-9]{36,}/g,
+                'Bearer Token': /Bearer\s+[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+/gi
+            };
+
+            for (const [type, pattern] of Object.entries(patterns)) {
+                let match;
+                while ((match = pattern.exec(content)) !== null) {
+                    const value = match[1] || match[0];
+                    results.secrets.push({
+                        type,
+                        value: value.substring(0, 50),
+                        position: match.index
+                    });
+                }
+            }
+        }
+
+        _findEndpoints(content, results) {
+            const patterns = [
+                /https?:\/\/[^\s"']+/g,
+                /\/api\/[^\s"']+/g,
+                /\/v\d\/[^\s"']+/g,
+                /\/graphql/g,
+                /\/auth\/[^\s"']+/g,
+                /\/admin\/[^\s"']+/g,
+                /\/user\/[^\s"']+/g
+            ];
+
+            for (const pattern of patterns) {
+                let match;
+                while ((match = pattern.exec(content)) !== null) {
+                    const endpoint = match[0];
+                    if (!results.endpoints.some(e => e === endpoint)) {
+                        results.endpoints.push(endpoint);
+                    }
+                }
+            }
+        }
+
+        _findVulnerabilities(content, results) {
+            const vulns = {
+                'eval()': /eval\s*\(/g,
+                'document.write': /document\.write\s*\(/g,
+                'innerHTML (suspicious)': /\.innerHTML\s*=\s*[^'"]+(?:['"]|[^;])/g,
+                'setTimeout (string)': /setTimeout\s*\(\s*["']/g,
+                'setInterval (string)': /setInterval\s*\(\s*["']/g,
+                'Function constructor': /new\s+Function\s*\(/g,
+                'debugger': /\bdebugger\b/g
+            };
+
+            for (const [type, pattern] of Object.entries(vulns)) {
+                if (pattern.test(content)) {
+                    results.vulnerabilities.push({
+                        type: type,
+                        severity: type.includes('eval') || type.includes('document.write') ? 'high' : 'medium'
+                    });
+                }
+            }
+        }
+
+        _findSuspicious(content, script, results) {
+            const suspiciousPatterns = [
+                { pattern: /localStorage\.(get|set)Item/, desc: 'Acceso a localStorage' },
+                { pattern: /sessionStorage\.(get|set)Item/, desc: 'Acceso a sessionStorage' },
+                { pattern: /document\.cookie/, desc: 'Acceso a cookies' },
+                { pattern: /navigator\.sendBeacon/, desc: 'Beacon API' },
+                { pattern: /fetch\s*\(/, desc: 'Fetch API' },
+                { pattern: /XMLHttpRequest/, desc: 'XMLHttpRequest' },
+                { pattern: /WebSocket/, desc: 'WebSocket' }
+            ];
+
+            for (const {pattern, desc} of suspiciousPatterns) {
+                if (pattern.test(content)) {
+                    results.suspicious.push({
+                        desc,
+                        script: script.src || 'inline'
+                    });
+                }
+            }
+        }
+
+        async _fetchScript(url) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    return await response.text();
+                }
+            } catch (e) {}
+            return null;
+        }
     }
 
     // ============================================================
-    // 8. AGENTE: SENTINEL - PASIVO
+    // 8. AGENTE: SENTINEL - FUNCIONAL
     // ============================================================
     class SentinelAgent {
         constructor() {
             this.name = 'SentinelAgent';
-            this.personality = 'El Profeta (Modo Pasivo)';
             this.emoji = '🧠';
             this.activated = false;
             this.stats = { messagesReceived: 0, messagesSent: 0 };
             this.threatPredictions = [];
             this.anomalies = [];
             this.behavioralProfile = null;
+            this._eventos = [];
         }
 
         activate() {
             this.activated = true;
-            console.log('🧠 Sentinel activado - MODO PASIVO');
+            console.log('🧠 Sentinel activado');
+            this._construirPerfil();
+            this._monitorearComportamiento();
             return this;
         }
 
@@ -339,31 +528,163 @@
         getStatus() {
             return {
                 name: this.name,
-                personality: this.personality,
                 emoji: this.emoji,
                 activated: this.activated,
                 stats: this.stats
             };
         }
+
+        _construirPerfil() {
+            this.behavioralProfile = {
+                clicks: 0,
+                keypresses: 0,
+                scrolls: 0,
+                mouseMovements: 0
+            };
+
+            let startTime = Date.now();
+            let clicks = 0, keys = 0, scrolls = 0, movements = 0;
+
+            const handlers = {
+                click: () => clicks++,
+                keydown: () => keys++,
+                scroll: () => scrolls++,
+                mousemove: () => movements++
+            };
+
+            Object.entries(handlers).forEach(([event, handler]) => {
+                document.addEventListener(event, handler);
+            });
+
+            setTimeout(() => {
+                const duration = (Date.now() - startTime) / 1000;
+                this.behavioralProfile.clicks = clicks / duration;
+                this.behavioralProfile.keypresses = keys / duration;
+                this.behavioralProfile.scrolls = scrolls / duration;
+                this.behavioralProfile.mouseMovements = movements / duration;
+
+                Object.entries(handlers).forEach(([event, handler]) => {
+                    document.removeEventListener(event, handler);
+                });
+
+                LogSystem.log('SENTINEL', 'Perfil construido', this.behavioralProfile, this.name);
+            }, 10000);
+        }
+
+        _monitorearComportamiento() {
+            const startTime = Date.now();
+
+            document.addEventListener('click', (e) => {
+                this._eventos.push({
+                    type: 'click',
+                    time: Date.now() - startTime,
+                    target: e.target.tagName
+                });
+            });
+
+            document.addEventListener('keydown', (e) => {
+                this._eventos.push({
+                    type: 'keypress',
+                    time: Date.now() - startTime,
+                    key: e.key
+                });
+            });
+
+            document.addEventListener('scroll', () => {
+                this._eventos.push({
+                    type: 'scroll',
+                    time: Date.now() - startTime
+                });
+            });
+
+            // Analizar cada 5 segundos
+            setInterval(() => {
+                this._analizarComportamiento();
+            }, 5000);
+        }
+
+        _analizarComportamiento() {
+            const eventos = this._eventos.slice(-20);
+            if (eventos.length < 10) return;
+
+            const clicks = eventos.filter(e => e.type === 'click').length;
+            const keys = eventos.filter(e => e.type === 'keypress').length;
+            const scrolls = eventos.filter(e => e.type === 'scroll').length;
+
+            // Detectar anomalías
+            if (clicks > 10) {
+                this.anomalies.push({
+                    type: 'Clics excesivos',
+                    count: clicks,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            if (keys > 30) {
+                this.anomalies.push({
+                    type: 'Tecleo excesivo',
+                    count: keys,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            if (scrolls > 15) {
+                this.anomalies.push({
+                    type: 'Scroll excesivo',
+                    count: scrolls,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            // Mantener solo últimas 100 anomalías
+            if (this.anomalies.length > 100) {
+                this.anomalies = this.anomalies.slice(-100);
+            }
+
+            // Generar predicciones
+            if (this.anomalies.length > 5) {
+                this.threatPredictions.push({
+                    threat: 'Posible actividad de bot',
+                    confidence: 0.7,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            // Mantener solo últimas 50 predicciones
+            if (this.threatPredictions.length > 50) {
+                this.threatPredictions = this.threatPredictions.slice(-50);
+            }
+        }
+
+        obtenerPredicciones() {
+            return this.threatPredictions;
+        }
+
+        obtenerAnomalias() {
+            return this.anomalies;
+        }
+
+        obtenerPerfil() {
+            return this.behavioralProfile;
+        }
     }
 
     // ============================================================
-    // 9. AGENTE: PHANTOM - DESACTIVADO
+    // 9. AGENTE: PHANTOM - FUNCIONAL
     // ============================================================
     class PhantomAgent {
         constructor() {
             this.name = 'PhantomAgent';
-            this.personality = 'El Espectro (Desactivado)';
             this.emoji = '⚡';
             this.activated = false;
             this.stats = { messagesReceived: 0, messagesSent: 0 };
             this.watermarkActive = false;
-            this.protectionLevel = 'off';
         }
 
         activate() {
             this.activated = true;
-            console.log('⚡ Phantom desactivado');
+            console.log('⚡ Phantom activado');
+            this._embedWatermark();
             return this;
         }
 
@@ -379,56 +700,59 @@
         getStatus() {
             return {
                 name: this.name,
-                personality: this.personality,
                 emoji: this.emoji,
                 activated: this.activated,
                 stats: this.stats
             };
         }
+
+        _embedWatermark() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 150;
+            const ctx = canvas.getContext('2d');
+            
+            let user = 'anonymous';
+            try {
+                const session = localStorage.getItem('session');
+                if (session) {
+                    const data = JSON.parse(session);
+                    user = data.username || 'anonymous';
+                }
+            } catch (e) {}
+
+            ctx.font = '12px Arial';
+            ctx.fillStyle = 'rgba(0,0,0,0.001)';
+            ctx.textAlign = 'center';
+            const text = `Armytage © ${new Date().getFullYear()} | ${user}`;
+            ctx.fillText(text, 150, 75);
+            
+            const watermark = document.createElement('div');
+            watermark.style.cssText = `
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100%;
+                pointer-events: none;
+                z-index: -1;
+                background-image: url(${canvas.toDataURL()});
+                background-repeat: repeat;
+                opacity: 0.01;
+            `;
+            document.body.appendChild(watermark);
+            this.watermarkActive = true;
+        }
+
+        regenerarWatermark() {
+            const existing = document.querySelector('[style*="background-image: url(data:image/png;base64"]');
+            if (existing) existing.remove();
+            this.watermarkActive = false;
+            this._embedWatermark();
+            return '🌊 Watermark regenerado';
+        }
     }
 
     // ============================================================
-    // 10. AGENTE: ORACLE - SIMPLIFICADO
-    // ============================================================
-    class OracleAgent {
-        constructor() {
-            this.name = 'OracleAgent';
-            this.personality = 'El Oráculo (Simplificado)';
-            this.emoji = '🤖';
-            this.activated = false;
-            this.stats = { messagesReceived: 0, messagesSent: 0 };
-            this.metrics = { health: 100, threats: 0, logs: 0, agents: 0 };
-            this.insights = ['✅ Sistema en modo compatibilidad'];
-        }
-
-        activate() {
-            this.activated = true;
-            console.log('🤖 Oracle activado');
-            return this;
-        }
-
-        receive(event) {
-            this.stats.messagesReceived++;
-        }
-
-        send(message, data = {}) {
-            this.stats.messagesSent++;
-            return AgentBus.broadcast(message, data, this.name);
-        }
-
-        getStatus() {
-            return {
-                name: this.name,
-                personality: this.personality,
-                emoji: this.emoji,
-                activated: this.activated,
-                stats: this.stats
-            };
-        }
-    }
-
-    // ============================================================
-    // 11. CHAT SYSTEM - COMPLETO
+    // 10. CHAT SYSTEM - COMPLETO Y FUNCIONAL
     // ============================================================
     const ChatSystem = {
         _container: null,
@@ -442,10 +766,17 @@
             this._crearUI();
             this._agregarMensaje('sistema', '🛡️ Armytage Suite v' + CONFIG.version);
             this._agregarMensaje('sistema', '💡 Escribe /help para ver comandos');
-            this._agregarMensaje('sistema', '✅ Modo Compatibilidad - Clics habilitados');
+            this._agregarMensaje('sistema', '✅ Todos los comandos son funcionales');
         },
 
         _crearUI() {
+            // Eliminar chat existente
+            const existing = document.getElementById('armytage-chat');
+            if (existing) existing.remove();
+            
+            const existingBtn = document.getElementById('armytage-toggle-btn');
+            if (existingBtn) existingBtn.remove();
+
             // Contenedor del chat
             const container = document.createElement('div');
             container.id = 'armytage-chat';
@@ -666,7 +997,10 @@
             this._messages.scrollTop = this._messages.scrollHeight;
         },
 
-        _procesarComando(input) {
+        // ============================================================
+        // PROCESAR COMANDOS - TODOS FUNCIONALES
+        // ============================================================
+        async _procesarComando(input) {
             const trimmed = input.trim();
             if (!trimmed) return;
             
@@ -676,155 +1010,387 @@
             const cmd = args[0].toLowerCase();
             let respuesta = '';
 
-            switch (cmd) {
-                case '/help':
-                    respuesta = `📋 COMANDOS DISPONIBLES
+            try {
+                switch (cmd) {
+                    case '/help':
+                        respuesta = this._help();
+                        break;
 
-📊 /status     - Estado del sistema
-📊 /health     - Salud del sistema
-🤖 /agents     - Agentes activos
-📝 /logs [n]   - Últimos logs
-🧹 /clear      - Limpiar chat
+                    case '/status':
+                        respuesta = this._status();
+                        break;
 
-🔍 /scan       - Escanear scripts (pasivo)
-🔑 /secrets    - Secretos encontrados
-⚠️ /vulns      - Vulnerabilidades
-🌐 /endpoints  - Endpoints
+                    case '/health':
+                        respuesta = this._health();
+                        break;
 
-🧠 /predict    - Predicciones
-⚠️ /anomalies  - Anomalías
+                    case '/agents':
+                        respuesta = this._agents();
+                        break;
 
-🎯 /policies   - Políticas activas
-🚫 /block <d>  - Bloquear dominio (simulado)
-✅ /unblock <d>- Desbloquear dominio (simulado)
+                    case '/logs':
+                        const n = parseInt(args[1]) || 10;
+                        respuesta = this._logs(n);
+                        break;
 
-❓ /help       - Esta ayuda`;
-                    break;
+                    case '/clear':
+                        if (this._messages) this._messages.innerHTML = '';
+                        respuesta = null;
+                        break;
 
-                case '/status':
-                    const agents = Object.keys(AgentBus._agents);
-                    respuesta = `📊 ESTADO
+                    case '/scan':
+                        respuesta = await this._scan();
+                        break;
 
-⏰ ${new Date().toLocaleTimeString()}
-🤖 Agentes: ${agents.length}
-📝 Logs: ${LogSystem.getLogs().length}
-🛡️ Modo: COMPATIBILIDAD - SIN BLOQUEOS
-✅ Clics: HABILITADOS
+                    case '/secrets':
+                        respuesta = this._secrets();
+                        break;
 
-Agentes activos:
-${agents.map(a => '  • ' + a).join('\n')}`;
-                    break;
+                    case '/vulns':
+                        respuesta = this._vulns();
+                        break;
 
-                case '/health':
-                    respuesta = `📊 SALUD
+                    case '/endpoints':
+                        respuesta = this._endpoints();
+                        break;
 
-🟢 Estado: Excelente (100%)
-🛡️ Modo: Compatibilidad
-✅ Clics: Habilitados
-🔒 Seguridad: Pasiva (sin bloqueos)
-📝 Logs: ${LogSystem.getLogs().length}`;
-                    break;
+                    case '/suspicious':
+                        respuesta = this._suspicious();
+                        break;
 
-                case '/agents':
-                    const agentList = Object.keys(AgentBus._agents);
-                    const agentStatus = agentList.map(name => {
-                        const agent = AgentBus._agents[name];
-                        return `  ${agent?.emoji || '🤖'} ${name} - ${agent?.activated ? '🟢 Activo' : '🔴 Inactivo'}`;
-                    }).join('\n');
-                    respuesta = `🤖 AGENTES ACTIVOS (${agentList.length})\n\n${agentStatus}`;
-                    break;
+                    case '/predict':
+                        respuesta = this._predict();
+                        break;
 
-                case '/logs':
-                    const n = parseInt(args[1]) || 5;
-                    const logs = LogSystem.getLogs(null, n);
-                    if (logs.length === 0) {
-                        respuesta = '📝 No hay logs disponibles';
-                    } else {
-                        respuesta = `📝 ÚLTIMOS ${logs.length} LOGS:\n\n` +
-                            logs.map(l => `[${l.timestamp?.split('T')[1]?.slice(0,8) || '--:--:--'}] ${l.agente}: ${l.mensaje}`).join('\n');
-                    }
-                    break;
+                    case '/anomalies':
+                        respuesta = this._anomalies();
+                        break;
 
-                case '/clear':
-                    if (this._messages) this._messages.innerHTML = '';
-                    respuesta = null;
-                    break;
+                    case '/profile':
+                        respuesta = this._profile();
+                        break;
 
-                case '/scan':
-                    respuesta = '🔍 Modo pasivo: escaneo simulado (sin bloqueos)';
-                    break;
+                    case '/watermark':
+                        respuesta = this._watermark();
+                        break;
 
-                case '/secrets':
-                    respuesta = '🔑 No se encontraron secretos (modo pasivo)';
-                    break;
+                    case '/devtools':
+                        respuesta = this._devtools();
+                        break;
 
-                case '/vulns':
-                    respuesta = '✅ No se encontraron vulnerabilidades';
-                    break;
+                    case '/policies':
+                        respuesta = this._policies();
+                        break;
 
-                case '/endpoints':
-                    respuesta = '🌐 No se encontraron endpoints';
-                    break;
-
-                case '/predict':
-                    respuesta = '🧠 Sin predicciones (modo pasivo)';
-                    break;
-
-                case '/anomalies':
-                    respuesta = '✅ Sin anomalías detectadas';
-                    break;
-
-                case '/policies':
-                    respuesta = `📋 POLÍTICAS ACTIVAS
-
-• eliminarEventosInline: false
-• bloquearScriptsExternos: false
-• bloquearEval: false
-• bloquearInnerHTMLMalicioso: false
-• bloquearDocumentWrite: false
-
-✅ Todas las interacciones están permitidas`;
-                    break;
-
-                case '/block':
-                    if (args[1]) {
-                        respuesta = `🚫 Dominio ${args[1]} bloqueado (simulado)`;
-                    } else {
-                        respuesta = '❌ Uso: /block <dominio>';
-                    }
-                    break;
-
-                case '/unblock':
-                    if (args[1]) {
-                        respuesta = `✅ Dominio ${args[1]} desbloqueado (simulado)`;
-                    } else {
-                        respuesta = '❌ Uso: /unblock <dominio>';
-                    }
-                    break;
-
-                default:
-                    respuesta = `❌ Comando desconocido. Escribe /help`;
+                    default:
+                        respuesta = `❌ Comando desconocido. Escribe /help`;
+                }
+            } catch (e) {
+                respuesta = `❌ Error: ${e.message}`;
             }
 
             if (respuesta) {
                 this._agregarMensaje('respuesta', respuesta);
             }
+        },
+
+        // ============================================================
+        // COMANDOS - TODOS FUNCIONALES
+        // ============================================================
+
+        _help() {
+            return `📋 COMANDOS DISPONIBLES
+
+═══════════════════════════════════
+📊 GENERALES
+═══════════════════════════════════
+/status     - Estado del sistema
+/health     - Salud del sistema
+/agents     - Agentes activos
+/logs [n]   - Últimos n logs
+/clear      - Limpiar chat
+
+═══════════════════════════════════
+🔍 INSPECTOR
+═══════════════════════════════════
+/scan       - Escanear scripts
+/secrets    - Secretos encontrados
+/vulns      - Vulnerabilidades
+/endpoints  - Endpoints
+/suspicious - Comportamiento sospechoso
+
+═══════════════════════════════════
+🧠 SENTINEL
+═══════════════════════════════════
+/predict    - Predicciones
+/anomalies  - Anomalías
+/profile    - Perfil de comportamiento
+
+═══════════════════════════════════
+⚡ PHANTOM
+═══════════════════════════════════
+/watermark  - Regenerar watermark
+
+═══════════════════════════════════
+🕵️ SECURITY
+═══════════════════════════════════
+/devtools   - Estado DevTools
+
+═══════════════════════════════════
+🎯 VALKYRIE
+═══════════════════════════════════
+/policies   - Políticas activas
+
+═══════════════════════════════════
+❓ /help    - Esta ayuda`;
+        },
+
+        _status() {
+            const agents = Object.keys(AgentBus._agents);
+            const logs = LogSystem.getLogs().length;
+            
+            let agentStatus = '';
+            for (const name of agents) {
+                const agent = AgentBus._agents[name];
+                if (agent) {
+                    agentStatus += `  ${agent.emoji || '🤖'} ${name} - ${agent.activated ? '🟢 Activo' : '🔴 Inactivo'}\n`;
+                }
+            }
+
+            return `📊 ESTADO DEL SISTEMA
+
+⏰ ${new Date().toLocaleString()}
+🤖 Agentes: ${agents.length}
+📝 Logs: ${logs}
+🛡️ Modo: COMPATIBILIDAD
+✅ Clics: HABILITADOS
+
+AGENTES:
+${agentStatus}`;
+        },
+
+        _health() {
+            const stats = LogSystem.getStats();
+            const errors = stats.porTipo?.ERROR || 0;
+            const security = stats.porTipo?.SECURITY || 0;
+            
+            let score = 100 - errors * 2 - security * 1;
+            score = Math.max(0, Math.min(100, score));
+
+            const level = score > 80 ? '🟢 Excelente' : score > 60 ? '🟡 Bueno' : score > 40 ? '🟠 Regular' : '🔴 Crítico';
+
+            return `📊 SALUD DEL SISTEMA
+
+🔵 Puntuación: ${score}/100
+${level}
+
+📊 ESTADÍSTICAS:
+• Agentes: ${Object.keys(AgentBus._agents).length}
+• Logs: ${LogSystem.getLogs().length}
+• Errores: ${errors}
+• Eventos de seguridad: ${security}
+
+💡 ${score > 80 ? '✅ Todo en orden' : '⚠️ Revisar logs'}`;
+        },
+
+        _agents() {
+            const agents = Object.keys(AgentBus._agents);
+            let result = `🤖 AGENTES ACTIVOS (${agents.length})\n\n`;
+
+            for (const name of agents) {
+                const agent = AgentBus._agents[name];
+                if (agent) {
+                    result += `${agent.emoji || '🤖'} ${name}\n`;
+                    result += `   📨 Mensajes: ${agent.stats?.messagesReceived || 0}\n`;
+                    result += `   📤 Enviados: ${agent.stats?.messagesSent || 0}\n`;
+                    result += `   ${agent.activated ? '🟢 Activo' : '🔴 Inactivo'}\n\n`;
+                }
+            }
+
+            return result;
+        },
+
+        _logs(n) {
+            const logs = LogSystem.getLogs(null, n);
+            if (logs.length === 0) {
+                return '📝 No hay logs disponibles';
+            }
+            return `📝 ÚLTIMOS ${logs.length} LOGS:\n\n` +
+                logs.map(l => `[${l.timestamp?.split('T')[1]?.slice(0,8) || '--:--:--'}] ${l.agente}: ${l.mensaje}`).join('\n');
+        },
+
+        async _scan() {
+            const inspector = AgentBus._agents['InspectorAgent'];
+            if (!inspector) {
+                return '❌ Inspector no disponible';
+            }
+            
+            this._agregarMensaje('sistema', '🔍 Escaneando scripts...');
+            const results = await inspector.scan();
+            
+            return `🔍 ESCANEO COMPLETADO
+
+📊 RESULTADOS:
+• Secretos: ${results.secrets.length}
+• Vulnerabilidades: ${results.vulnerabilities.length}
+• Endpoints: ${results.endpoints.length}
+• Sospechosos: ${results.suspicious.length}
+• Scripts analizados: ${results.scripts.length}
+
+Usa /secrets, /vulns, /endpoints o /suspicious para detalles.`;
+        },
+
+        _secrets() {
+            const inspector = AgentBus._agents['InspectorAgent'];
+            if (!inspector) {
+                return '❌ Inspector no disponible';
+            }
+            const secrets = inspector.secretsFound || [];
+            if (secrets.length === 0) {
+                return '🔑 No se encontraron secretos';
+            }
+            return `🔑 SECRETOS (${secrets.length}):\n\n` +
+                secrets.map((s, i) => `${i+1}. ${s.type}: ${s.value}`).join('\n');
+        },
+
+        _vulns() {
+            const inspector = AgentBus._agents['InspectorAgent'];
+            if (!inspector) {
+                return '❌ Inspector no disponible';
+            }
+            const vulns = inspector.vulnerabilities || [];
+            if (vulns.length === 0) {
+                return '✅ No se encontraron vulnerabilidades';
+            }
+            return `⚠️ VULNERABILIDADES (${vulns.length}):\n\n` +
+                vulns.map((v, i) => `${i+1}. ${v.type} - ${v.severity}`).join('\n');
+        },
+
+        _endpoints() {
+            const inspector = AgentBus._agents['InspectorAgent'];
+            if (!inspector) {
+                return '❌ Inspector no disponible';
+            }
+            const endpoints = inspector.endpoints || [];
+            if (endpoints.length === 0) {
+                return '🌐 No se encontraron endpoints';
+            }
+            return `🌐 ENDPOINTS (${endpoints.length}):\n\n` +
+                endpoints.map((e, i) => `${i+1}. ${e}`).join('\n');
+        },
+
+        _suspicious() {
+            const inspector = AgentBus._agents['InspectorAgent'];
+            if (!inspector) {
+                return '❌ Inspector no disponible';
+            }
+            const suspicious = inspector.suspicious || [];
+            if (suspicious.length === 0) {
+                return '✅ No se encontraron comportamientos sospechosos';
+            }
+            return `🚨 SOSPECHOSOS (${suspicious.length}):\n\n` +
+                suspicious.map((s, i) => `${i+1}. ${s.desc} (${s.script})`).join('\n');
+        },
+
+        _predict() {
+            const sentinel = AgentBus._agents['SentinelAgent'];
+            if (!sentinel) {
+                return '❌ Sentinel no disponible';
+            }
+            const predictions = sentinel.obtenerPredicciones();
+            if (predictions.length === 0) {
+                return '🧠 No hay predicciones';
+            }
+            return `🧠 PREDICCIONES (${predictions.length}):\n\n` +
+                predictions.map((p, i) => `${i+1}. ${p.threat} (${(p.confidence * 100).toFixed(0)}%)`).join('\n');
+        },
+
+        _anomalies() {
+            const sentinel = AgentBus._agents['SentinelAgent'];
+            if (!sentinel) {
+                return '❌ Sentinel no disponible';
+            }
+            const anomalies = sentinel.obtenerAnomalias();
+            if (anomalies.length === 0) {
+                return '✅ No hay anomalías';
+            }
+            return `⚠️ ANOMALÍAS (${anomalies.length}):\n\n` +
+                anomalies.map((a, i) => `${i+1}. ${a.type} (${a.count || 0} eventos)`).join('\n');
+        },
+
+        _profile() {
+            const sentinel = AgentBus._agents['SentinelAgent'];
+            if (!sentinel) {
+                return '❌ Sentinel no disponible';
+            }
+            const profile = sentinel.obtenerPerfil();
+            if (!profile) {
+                return '📊 Perfil no disponible';
+            }
+            return `📊 PERFIL DE COMPORTAMIENTO
+
+🖱️ Clicks/min: ${profile.clicks?.toFixed(1) || 0}
+⌨️ Teclas/min: ${profile.keypresses?.toFixed(1) || 0}
+📜 Scroll/min: ${profile.scrolls?.toFixed(1) || 0}
+🖱️ Movimientos/min: ${profile.mouseMovements?.toFixed(1) || 0}`;
+        },
+
+        _watermark() {
+            const phantom = AgentBus._agents['PhantomAgent'];
+            if (!phantom) {
+                return '❌ Phantom no disponible';
+            }
+            return phantom.regenerarWatermark();
+        },
+
+        _devtools() {
+            const security = AgentBus._agents['SecurityAgent'];
+            if (!security) {
+                return '❌ Security no disponible';
+            }
+            const detected = security.detectDevTools ? security.detectDevTools() : false;
+            return `🕵️ DevTools: ${detected ? '🔴 DETECTADAS' : '🟢 NO DETECTADAS'}`;
+        },
+
+        _policies() {
+            const valkyrie = AgentBus._agents['ValkyrieAgent'];
+            if (!valkyrie) {
+                return '❌ Valkyrie no disponible';
+            }
+            const policies = valkyrie.obtenerPoliticas ? valkyrie.obtenerPoliticas() : {};
+            return `📋 POLÍTICAS ACTIVAS
+
+• eliminarEventosInline: ${policies.eliminarEventosInline !== false ? '❌ ACTIVADO' : '✅ DESACTIVADO'}
+• bloquearScriptsExternos: ${policies.bloquearScriptsExternos !== false ? '❌ ACTIVADO' : '✅ DESACTIVADO'}
+• bloquearEval: ${policies.bloquearEval !== false ? '❌ ACTIVADO' : '✅ DESACTIVADO'}
+• bloquearInnerHTMLMalicioso: ${policies.bloquearInnerHTMLMalicioso !== false ? '❌ ACTIVADO' : '✅ DESACTIVADO'}
+• bloquearDocumentWrite: ${policies.bloquearDocumentWrite !== false ? '❌ ACTIVADO' : '✅ DESACTIVADO'}
+
+✅ Todas las interacciones están permitidas`;
         }
     };
 
     // ============================================================
-    // 12. BADGE ÚNICO - SIN DUPLICADOS
+    // 11. BADGE ÚNICO
     // ============================================================
     function crearBadge() {
-        // Eliminar badges existentes
-        document.querySelectorAll('#armytage-status-badge, [style*="Modo Interactivo"]').forEach(el => {
+        // Eliminar TODOS los badges existentes
+        document.querySelectorAll('[id*="badge"], [style*="Modo Interactivo"], [style*="Modo"]').forEach(el => {
             if (el.id !== 'armytage-toggle-btn' && el.id !== 'armytage-chat') {
                 el.remove();
             }
         });
 
+        // Eliminar también por texto
+        document.querySelectorAll('div').forEach(el => {
+            if (el.textContent && el.textContent.includes('Modo Interactivo') && 
+                el.id !== 'armytage-toggle-btn' && el.id !== 'armytage-chat') {
+                el.remove();
+            }
+        });
+
         const badge = document.createElement('div');
-        badge.id = 'armytage-status-badge';
+        badge.id = 'armytage-badge';
         badge.style.cssText = `
             position: fixed;
             bottom: 10px;
@@ -845,11 +1411,10 @@ ${agents.map(a => '  • ' + a).join('\n')}`;
     }
 
     // ============================================================
-    // 13. INICIALIZACIÓN PRINCIPAL
+    // 12. INICIALIZACIÓN
     // ============================================================
     async function initArmytage() {
         console.log('🛡️ Inicializando Armytage v' + CONFIG.version);
-        console.log('📋 MODO COMPATIBILIDAD - SIN BLOQUEOS');
 
         try {
             LogSystem.init();
@@ -859,32 +1424,27 @@ ${agents.map(a => '  • ' + a).join('\n')}`;
             const inspector = new InspectorAgent();
             const sentinel = new SentinelAgent();
             const phantom = new PhantomAgent();
-            const oracle = new OracleAgent();
 
             AgentBus
                 .register('ValkyrieAgent', valkyrie)
                 .register('SecurityAgent', security)
                 .register('InspectorAgent', inspector)
                 .register('SentinelAgent', sentinel)
-                .register('PhantomAgent', phantom)
-                .register('OracleAgent', oracle);
+                .register('PhantomAgent', phantom);
 
             await Promise.all([
                 valkyrie.activate(),
                 security.activate(),
                 inspector.activate(),
                 sentinel.activate(),
-                phantom.activate(),
-                oracle.activate()
+                phantom.activate()
             ]);
 
-            // Iniciar chat
             ChatSystem.init();
 
-            // Crear badge único
-            setTimeout(crearBadge, 100);
+            // Badge único después de un delay
+            setTimeout(crearBadge, 200);
 
-            // Exponer API
             window.armytage = {
                 version: CONFIG.version,
                 agents: AgentBus._agents,
@@ -892,17 +1452,15 @@ ${agents.map(a => '  • ' + a).join('\n')}`;
                 logs: LogSystem,
                 toast: ToastSystem,
                 valkyrie: valkyrie,
+                inspector: inspector,
+                sentinel: sentinel,
+                phantom: phantom,
+                security: security,
                 status: () => ({
                     version: CONFIG.version,
                     agents: Object.keys(AgentBus._agents),
                     totalAgents: Object.keys(AgentBus._agents).length,
-                    logs: LogSystem.getLogs().length,
-                    modo: 'COMPATIBILIDAD - SIN BLOQUEOS'
-                }),
-                health: () => ({
-                    score: 100,
-                    level: 'Excelente (Modo Compatibilidad)',
-                    stats: LogSystem.getStats()
+                    logs: LogSystem.getLogs().length
                 })
             };
 
@@ -917,9 +1475,6 @@ ${agents.map(a => '  • ' + a).join('\n')}`;
         }
     }
 
-    // ============================================================
-    // 14. INICIALIZACIÓN AUTOMÁTICA
-    // ============================================================
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initArmytage);
     } else {
