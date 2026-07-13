@@ -390,7 +390,6 @@ window.cargarCarrito = cargarCarrito;
 window.guardarCarrito = guardarCarrito;
 window.renderCartItems = renderCartItems;
 window.showNotif = showNotif;
-window.sincronizarCarrito = sincronizarCarrito;
 
 console.log('✅ Cart.js cargado correctamente');
 console.log('🔧 enviarPedidoPorCorreo disponible:', typeof window.enviarPedidoPorCorreo);
