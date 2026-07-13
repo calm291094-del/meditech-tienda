@@ -26,15 +26,19 @@ async function apiRequest(endpoint, options = {}) {
         headers['Authorization'] = `Bearer ${token}`;
     }
     try {
+        console.log(`📡 Llamando a: ${API_URL}${endpoint}`);
         const response = await fetch(`${API_URL}${endpoint}`, {
             ...options,
             headers
         });
+        console.log(`📡 Status: ${response.status}`);
         if (!response.ok) {
             const error = await response.json().catch(() => ({ error: 'Error en la petición' }));
             throw new Error(error.error || `Error ${response.status}`);
         }
-        return response.json();
+        const data = await response.json();
+        console.log(`📡 Respuesta:`, data);
+        return data;
     } catch (error) {
         console.error('❌ Error en API:', error.message);
         throw error;
