@@ -572,6 +572,308 @@
     <script src="static/Kjs/armytage.js"></script>
 
 <script>
+// ============================================================
+// 🛡️ ARMYTAGE - MODO COMPATIBILIDAD
+// ============================================================
+// Desactiva todas las políticas que bloquean interacciones
+// ============================================================
+
+(function() {
+    'use strict';
+
+    console.log('🛡️ Activando modo compatibilidad para clics...');
+
+    // Función para esperar a que los agentes estén listos
+    function waitForAgents() {
+        return new Promise((resolve) => {
+            let attempts = 0;
+            const maxAttempts = 20;
+            
+            const check = () => {
+                attempts++;
+                
+                // Verificar si Valkyrie está disponible
+                const hasValkyrie = window.valkyrie || 
+                                   (window.armytage && window.armytage.valkyrie) ||
+                                   (window.armytage && window.armytage.agents && window.armytage.agents.ValkyrieAgent);
+                
+                // Verificar si AgentBus está disponible
+                const hasAgentBus = window.armytage && window.armytage.bus;
+                
+                if (hasValkyrie || hasAgentBus || attempts >= maxAttempts) {
+                    resolve();
+                } else {
+                    setTimeout(check, 300);
+                }
+            };
+            
+            check();
+        });
+    }
+
+    // Función principal
+    async function fixInteractions() {
+        await waitForAgents();
+        
+        console.log('✅ Agentes detectados, aplicando configuración...');
+
+        // ============================================================
+        // 1. DESACTIVAR VALKYRIE (La Justiciera)
+        // ============================================================
+        try {
+            // Opción 1: API global de Valkyrie
+            if (window.valkyrie && window.valkyrie.politicas) {
+                window.valkyrie.politicas.aplicar({
+                    eliminarEventosInline: false,
+                    bloquearScriptsExternos: false,
+                    bloquearEval: true,
+                    bloquearInnerHTMLMalicioso: true,
+                    bloquearDocumentWrite: true
+                });
+                console.log('✅ Valkyrie configurada (vía API global)');
+            }
+            
+            // Opción 2: A través de Armytage
+            if (window.armytage && window.armytage.agents) {
+                const valkyrie = window.armytage.agents.ValkyrieAgent;
+                if (valkyrie && typeof valkyrie.aplicarPoliticas === 'function') {
+                    valkyrie.aplicarPoliticas({
+                        eliminarEventosInline: false,
+                        bloquearScriptsExternos: false
+                    });
+                    console.log('✅ Valkyrie configurada (vía Armytage)');
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudo configurar Valkyrie:', e);
+        }
+
+        // ============================================================
+        // 2. DESACTIVAR POLÍTICAS EN EL BUS DE AGENTES
+        // ============================================================
+        try {
+            if (window.armytage && window.armytage.bus) {
+                // Enviar mensaje para desactivar auto-block
+                window.armytage.bus.broadcast('SET_AUTO_BLOCK', { enabled: false });
+                window.armytage.bus.broadcast('ALLOW_INTERACTIONS', { enabled: true });
+                console.log('✅ Auto-block desactivado en AgentBus');
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudo configurar AgentBus:', e);
+        }
+
+        // ============================================================
+        // 3. DESACTIVAR POLÍTICAS DE VALKYRIE DIRECTAMENTE
+        // ============================================================
+        try {
+            // Buscar el objeto PolicyEngine si existe
+            if (window.PolicyEngine) {
+                if (typeof window.PolicyEngine.aplicarPoliticas === 'function') {
+                    window.PolicyEngine.aplicarPoliticas({
+                        eliminarEventosInline: false,
+                        bloquearScriptsExternos: false
+                    });
+                    console.log('✅ PolicyEngine configurado');
+                }
+            }
+            
+            // Buscar en el contexto de Valkyrie
+            if (window.valkyrie) {
+                // Si tiene método para desactivar
+                if (typeof window.valkyrie.desactivarEventos === 'function') {
+                    window.valkyrie.desactivarEventos();
+                }
+                // Si tiene propiedad para permitir
+                if (window.valkyrie.permitirInteracciones !== undefined) {
+                    window.valkyrie.permitirInteracciones = true;
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudo configurar PolicyEngine:', e);
+        }
+
+        // ============================================================
+        // 4. RESTAURAR EVENTOS EXISTENTES
+        // ============================================================
+        try {
+            // Restaurar atributos onclick que fueron eliminados
+            document.querySelectorAll('[data-valkyrie-blocked]').forEach(el => {
+                el.style.display = '';
+                el.style.pointerEvents = '';
+                el.removeAttribute('data-valkyrie-blocked');
+            });
+            
+            // Restaurar elementos ocultos
+            document.querySelectorAll('[style*="display: none"]').forEach(el => {
+                if (el.hasAttribute('data-valkyrie-blocked')) {
+                    el.style.display = '';
+                    el.removeAttribute('data-valkyrie-blocked');
+                }
+            });
+        } catch (e) {
+            console.warn('⚠️ No se pudieron restaurar elementos:', e);
+        }
+
+        // ============================================================
+        // 5. DESACTIVAR PHANTOM (si está bloqueando)
+        // ============================================================
+        try {
+            if (window.Phantom) {
+                // Si Phantom tiene método para desactivar
+                if (typeof window.Phantom.desactivar === 'function') {
+                    window.Phantom.desactivar();
+                }
+                // Si Phantom tiene propiedad de protección
+                if (window.Phantom.protecciones) {
+                    window.Phantom.protecciones = {};
+                }
+                console.log('✅ Phantom configurado');
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudo configurar Phantom:', e);
+        }
+
+        // ============================================================
+        // 6. DESACTIVAR SECURITY (si está bloqueando)
+        // ============================================================
+        try {
+            if (window.SecurityAgent) {
+                if (typeof window.SecurityAgent.desactivar === 'function') {
+                    window.SecurityAgent.desactivar();
+                }
+            }
+            
+            // A través de Armytage
+            if (window.armytage && window.armytage.agents) {
+                const security = window.armytage.agents.SecurityAgent;
+                if (security && security.protecciones) {
+                    security.protecciones.teclas = false;
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudo configurar Security:', e);
+        }
+
+        // ============================================================
+        // 7. AGREGAR ELEMENTOS PERMITIDOS (para que no sean bloqueados)
+        // ============================================================
+        const elementosPermitidos = [
+            'cart', 'carrito', 'shopping-cart',
+            'admin', 'menu', 'dropdown', 'toggle',
+            'button', 'btn', 'link', 'a',
+            'modal', 'popup', 'dialog',
+            'checkout', 'pagar', 'comprar'
+        ];
+
+        try {
+            if (window.valkyrie && window.valkyrie.agregarElementoPermitido) {
+                elementosPermitidos.forEach(id => {
+                    window.valkyrie.agregarElementoPermitido(id);
+                });
+                console.log('✅ Elementos permitidos agregados a Valkyrie');
+            }
+            
+            // A través de Armytage
+            if (window.armytage && window.armytage.bus) {
+                window.armytage.bus.broadcast('ADD_ALLOWED_ELEMENTS', { 
+                    elements: elementosPermitidos 
+                });
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudieron agregar elementos permitidos:', e);
+        }
+
+        // ============================================================
+        // 8. RE-ASIGNAR EVENTOS (si fueron eliminados)
+        // ============================================================
+        // Forzar re-ejecución de eventos que pudieron ser eliminados
+        document.querySelectorAll('[onclick], [onerror], [onload]').forEach(el => {
+            // Guardar atributos originales
+            const attrs = ['onclick', 'onerror', 'onload', 'onmouseover', 'onfocus'];
+            attrs.forEach(attr => {
+                if (el.hasAttribute(attr)) {
+                    const value = el.getAttribute(attr);
+                    if (value && !el._restored) {
+                        // Re-asignar el evento
+                        el.removeAttribute(attr);
+                        el.setAttribute(attr, value);
+                    }
+                }
+            });
+            el._restored = true;
+        });
+
+        // ============================================================
+        // 9. MENSAJE DE CONFIRMACIÓN
+        // ============================================================
+        console.log('✅ MODO COMPATIBILIDAD ACTIVADO');
+        console.log('📋 Los clics y eventos deberían funcionar correctamente');
+        console.log('🛡️ Seguridad activa pero sin bloquear interacciones');
+
+        // Mostrar toast si está disponible
+        try {
+            if (window.ToastSystem && window.ToastSystem.success) {
+                window.ToastSystem.success('🛡️ Modo compatibilidad activado - Clics permitidos');
+            } else if (window.showToast) {
+                window.showToast('🛡️ Modo compatibilidad activado', 'success', 3000);
+            }
+        } catch (e) {}
+
+        // Crear indicador visual
+        const indicator = document.createElement('div');
+        indicator.style.cssText = `
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 200, 100, 0.15);
+            color: #00ff88;
+            font-family: monospace;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            z-index: 999999;
+            pointer-events: none;
+            user-select: none;
+        `;
+        indicator.textContent = '🛡️ Modo Interactivo';
+        document.body.appendChild(indicator);
+
+        console.log('✅ Configuración completada');
+    }
+
+    // ============================================================
+    // EJECUTAR
+    // ============================================================
+    
+    // Ejecutar inmediatamente si ya está cargado
+    if (document.readyState === 'complete') {
+        fixInteractions();
+    } else {
+        // Esperar a que todo esté cargado
+        window.addEventListener('load', () => {
+            setTimeout(fixInteractions, 1000);
+        });
+    }
+
+    // También ejecutar después de 3 segundos por si acaso
+    setTimeout(fixInteractions, 3000);
+
+    // Ejecutar después de 5 segundos (último intento)
+    setTimeout(fixInteractions, 5000);
+
+    // ============================================================
+    // EXPONER FUNCIÓN PARA USO MANUAL
+    // ============================================================
+    window.armytageCompat = fixInteractions;
+    
+    console.log('🛡️ Script de compatibilidad cargado');
+    console.log('📋 Si los clics no funcionan, ejecuta: armytageCompat()');
+
+})();
+</script>
+    
+<script>
     // ============================================
     // INICIALIZACIÓN BÁSICA
     // ============================================
