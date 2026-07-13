@@ -1,8 +1,9 @@
 // ============================================================
-// ⚔️ VALKYRIE.JS - "La Justiciera"
+// ⚔️ VALKYRIE.JS - "La Justiciera" (VERSIÓN MODIFICADA)
 // ============================================================
 // Sistema de aplicación de políticas de seguridad y respuesta automática.
 // Detecta, bloquea y aísla comportamientos maliciosos en tiempo real.
+// MODIFICADO: Permite eventos click y menús sin bloqueos
 // ============================================================
 
 (function() {
@@ -27,7 +28,7 @@
             bloquearInnerHTMLMalicioso: true,
             // Bloquear document.write
             bloquearDocumentWrite: true,
-            // Eliminar elementos con atributos onclick/inline
+            // Eliminar elementos con atributos onclick/inline - MODIFICADO: false por defecto
             eliminarEventosInline: false,
             // Bloquear acceso a localStorage/cookies no autorizado
             bloquearAccesoDatos: false,
@@ -175,6 +176,7 @@
         _reglasActivas: [],
         _elementosAislados: [],
         _dominiosBloqueados: [],
+        _elementosPermitidos: ['cart', 'admin-menu', 'menu-toggle', 'dropdown', 'modal'], // ELEMENTOS PERMITIDOS
 
         // ============================================================
         // 4.1 Gestión de Políticas
@@ -218,9 +220,15 @@
         },
 
         // ============================================================
-        // 4.3 Evaluación de Amenazas
+        // 4.3 Evaluación de Amenazas - MODIFICADO
         // ============================================================
         evaluar(elemento, tipo = 'script') {
+            // VERIFICAR SI EL ELEMENTO ESTÁ PERMITIDO
+            if (this._elementoPermitido(elemento)) {
+                Logger.registrar('ALLOW', `Elemento permitido: ${elemento?.id || elemento?.className || 'unknown'}`);
+                return 'allow';
+            }
+
             // Evaluar contra reglas activas
             for (const regla of this._reglasActivas) {
                 if (!regla.activa) continue;
@@ -248,6 +256,45 @@
             }
 
             return 'allow';
+        },
+
+        // NUEVO: Verificar si el elemento está permitido
+        _elementoPermitido(elemento) {
+            if (!elemento) return false;
+            
+            // Verificar por ID
+            if (elemento.id && this._elementosPermitidos.some(p => elemento.id.includes(p))) {
+                return true;
+            }
+            
+            // Verificar por clase
+            if (elemento.className && typeof elemento.className === 'string') {
+                const clases = elemento.className.split(' ');
+                for (const clase of clases) {
+                    if (this._elementosPermitidos.some(p => clase.includes(p))) {
+                        return true;
+                    }
+                }
+            }
+            
+            // Verificar si está dentro de un elemento permitido
+            let parent = elemento.parentElement;
+            while (parent) {
+                if (parent.id && this._elementosPermitidos.some(p => parent.id.includes(p))) {
+                    return true;
+                }
+                if (parent.className && typeof parent.className === 'string') {
+                    const clases = parent.className.split(' ');
+                    for (const clase of clases) {
+                        if (this._elementosPermitidos.some(p => clase.includes(p))) {
+                            return true;
+                        }
+                    }
+                }
+                parent = parent.parentElement;
+            }
+            
+            return false;
         },
 
         _evaluarScript(elemento, regla) {
@@ -301,7 +348,7 @@
         },
 
         // ============================================================
-        // 4.4 Aplicación de Políticas Generales
+        // 4.4 Aplicación de Políticas Generales - MODIFICADO
         // ============================================================
         _aplicarPoliticasScript(elemento) {
             const src = elemento.src || '';
@@ -329,6 +376,11 @@
         },
 
         _aplicarPoliticasDOM(elemento) {
+            // MODIFICADO: Solo bloquear si el elemento no está permitido
+            if (this._elementoPermitido(elemento)) {
+                return 'allow';
+            }
+
             // Verificar elementos con atributos inline peligrosos
             if (this._politicas.eliminarEventosInline) {
                 const atributosPeligrosos = ['onclick', 'onerror', 'onload', 'onmouseover', 'onfocus'];
@@ -456,9 +508,11 @@
                 this.evaluar(script, 'script');
             });
             
-            // Escanear elementos peligrosos
+            // Escanear elementos peligrosos - MODIFICADO: menos restrictivo
             document.querySelectorAll('[onclick], [onerror], [onload], [onmouseover]').forEach(el => {
-                this.evaluar(el, 'dom');
+                if (!this._elementoPermitido(el)) {
+                    this.evaluar(el, 'dom');
+                }
             });
         }
     };
@@ -514,7 +568,7 @@
     };
 
     // ============================================================
-    // 6. MONITOR DE DOM (Para detectar elementos sospechosos)
+    // 6. MONITOR DE DOM - MODIFICADO
     // ============================================================
     const DOMScanner = {
         _observer: null,
@@ -536,10 +590,13 @@
                     // Atributos modificados
                     if (mutation.type === 'attributes') {
                         const el = mutation.target;
+                        // MODIFICADO: No bloquear atributos onclick de elementos permitidos
                         if (el.tagName === 'SCRIPT') {
                             PolicyEngine.evaluar(el, 'script');
                         } else if (mutation.attributeName && mutation.attributeName.startsWith('on')) {
-                            PolicyEngine.evaluar(el, 'dom');
+                            if (!PolicyEngine._elementoPermitido(el)) {
+                                PolicyEngine.evaluar(el, 'dom');
+                            }
                         }
                     }
                 }
@@ -569,12 +626,15 @@
                 PolicyEngine.evaluar(node, 'dom');
             }
             
-            // Analizar elementos con atributos inline
-            if (node.hasAttributes && node.hasAttributes()) {
-                for (const attr of node.attributes) {
-                    if (attr.name.startsWith('on')) {
-                        PolicyEngine.evaluar(node, 'dom');
-                        break;
+            // MODIFICADO: Solo analizar elementos no permitidos
+            if (!PolicyEngine._elementoPermitido(node)) {
+                // Analizar elementos con atributos inline
+                if (node.hasAttributes && node.hasAttributes()) {
+                    for (const attr of node.attributes) {
+                        if (attr.name.startsWith('on')) {
+                            PolicyEngine.evaluar(node, 'dom');
+                            break;
+                        }
                     }
                 }
             }
@@ -598,9 +658,11 @@
                 PolicyEngine.evaluar(el, 'dom');
             });
             
-            // Escanear elementos con atributos inline
+            // MODIFICADO: Solo escanear elementos no permitidos
             document.querySelectorAll('[onclick], [onerror], [onload], [onmouseover], [onfocus]').forEach(el => {
-                PolicyEngine.evaluar(el, 'dom');
+                if (!PolicyEngine._elementoPermitido(el)) {
+                    PolicyEngine.evaluar(el, 'dom');
+                }
             });
         },
 
@@ -615,7 +677,7 @@
     };
 
     // ============================================================
-    // 7. MODOS DE SEGURIDAD
+    // 7. MODOS DE SEGURIDAD - MODIFICADO
     // ============================================================
     const SecurityModes = {
         _modoActual: CONFIG.nivelSeguridad,
@@ -631,11 +693,11 @@
                     bloquearAccesoDatos: false
                 },
                 'medium': {
-                    bloquearScriptsExternos: true,
+                    bloquearScriptsExternos: false, // MODIFICADO: false para permitir scripts
                     bloquearEval: true,
                     bloquearInnerHTMLMalicioso: true,
                     bloquearDocumentWrite: true,
-                    eliminarEventosInline: false,
+                    eliminarEventosInline: false, // MODIFICADO: false para permitir clicks
                     bloquearAccesoDatos: false
                 },
                 'high': {
@@ -643,7 +705,7 @@
                     bloquearEval: true,
                     bloquearInnerHTMLMalicioso: true,
                     bloquearDocumentWrite: true,
-                    eliminarEventosInline: true,
+                    eliminarEventosInline: false, // MODIFICADO: false para permitir clicks
                     bloquearAccesoDatos: true
                 },
                 'lockdown': {
@@ -651,7 +713,7 @@
                     bloquearEval: true,
                     bloquearInnerHTMLMalicioso: true,
                     bloquearDocumentWrite: true,
-                    eliminarEventosInline: true,
+                    eliminarEventosInline: false, // MODIFICADO: false para permitir clicks
                     bloquearAccesoDatos: true
                 }
             };
@@ -742,7 +804,7 @@
             };
 
             this._elemento.innerHTML = `
-                ⚔️ VALKYRIE
+                ⚔️ VALKYRIE (Modo Interactivo)
                 ├─ Modo: ${stats.modo.toUpperCase()}
                 ├─ Reglas: ${stats.reglas}
                 ├─ Bloqueos: ${stats.bloqueos}
@@ -757,15 +819,21 @@
     // ============================================================
     const Valkyrie = {
         // ============================================================
-        // 9.1 Inicialización
+        // 9.1 Inicialización - MODIFICADO
         // ============================================================
         iniciar(config = {}) {
-            Logger.registrar('SYSTEM', 'Valkyrie iniciando...');
+            Logger.registrar('SYSTEM', 'Valkyrie iniciando (Modo Interactivo)...');
 
             // Aplicar configuración
             if (config.politicas) {
                 PolicyEngine.aplicarPoliticas(config.politicas);
             }
+            
+            // Por defecto, asegurar que eliminarEventosInline sea false
+            PolicyEngine.aplicarPoliticas({
+                eliminarEventosInline: false
+            });
+            
             if (config.modo) {
                 SecurityModes.cambiarModo(config.modo);
             }
@@ -782,8 +850,8 @@
                 Dashboard.mostrar();
             }
 
-            Logger.registrar('SYSTEM', 'Valkyrie iniciada');
-            showToast('⚔️ Valkyrie activa - Modo: ' + CONFIG.nivelSeguridad.toUpperCase(), 'success');
+            Logger.registrar('SYSTEM', 'Valkyrie iniciada (Modo Interactivo)');
+            showToast('⚔️ Valkyrie activa - Modo Interactivo', 'success');
 
             // Exponer API global
             window.valkyrie = this;
@@ -845,6 +913,12 @@
             PolicyEngine._dominiosBloqueados = PolicyEngine._dominiosBloqueados.filter(d => d !== dominio);
             Logger.registrar('DOMAIN', `Dominio desbloqueado: ${dominio}`);
         },
+        
+        // NUEVO: Agregar elementos permitidos
+        agregarElementoPermitido: (id) => {
+            PolicyEngine._elementosPermitidos.push(id);
+            Logger.registrar('ALLOW', `Elemento permitido agregado: ${id}`);
+        },
 
         // ============================================================
         // 9.8 Detener Valkyrie
@@ -859,14 +933,39 @@
     };
 
     // ============================================================
-    // 10. INICIALIZACIÓN AUTOMÁTICA
+    // 10. INICIALIZACIÓN AUTOMÁTICA - MODIFICADO
     // ============================================================
     function initValkyrie() {
-        // Iniciar con configuración predeterminada
+        // Iniciar con configuración para permitir interacciones
         Valkyrie.iniciar({
-            modo: CONFIG.nivelSeguridad,
-            dashboard: false // Cambiar a true para mostrar el dashboard
+            modo: 'medium',
+            dashboard: false,
+            politicas: {
+                eliminarEventosInline: false,  // IMPORTANTE: Permitir clicks
+                bloquearScriptsExternos: false, // Permitir scripts externos
+                bloquearEval: true,
+                bloquearInnerHTMLMalicioso: true,
+                bloquearDocumentWrite: true,
+                bloquearAccesoDatos: false
+            }
         });
+
+        // Agregar elementos comunes de UI como permitidos
+        setTimeout(() => {
+            if (window.valkyrie) {
+                // Elementos típicos de carrito y menú
+                window.valkyrie.agregarElementoPermitido('cart');
+                window.valkyrie.agregarElementoPermitido('menu');
+                window.valkyrie.agregarElementoPermitido('admin');
+                window.valkyrie.agregarElementoPermitido('toggle');
+                window.valkyrie.agregarElementoPermitido('dropdown');
+                window.valkyrie.agregarElementoPermitido('modal');
+                window.valkyrie.agregarElementoPermitido('button');
+                window.valkyrie.agregarElementoPermitido('link');
+                
+                console.log('✅ Valkyrie configurada para permitir interacciones');
+            }
+        }, 100);
     }
 
     // Esperar a que el DOM esté listo
