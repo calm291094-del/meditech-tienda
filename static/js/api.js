@@ -2,6 +2,7 @@
 // API.JS - PETICIONES AL BACKEND
 // ============================================
 
+// 🔥 URL CORRECTA del backend
 const API_URL = 'https://meditech-tienda-node.onrender.com/api';
 const GITHUB_USER = "calm291094-del";
 const GITHUB_REPO = "meditech-tienda";
