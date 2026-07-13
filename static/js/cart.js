@@ -275,57 +275,60 @@ function closeCart() {
 }
 
 // ============================================================
-// FUNCIÓN PARA ENVIAR PEDIDO POR CORREO (USANDO EMAILJS)
+// FUNCIÓN PARA ENVIAR PEDIDO POR CORREO (EMAILJS)
 // ============================================================
 async function enviarPedidoPorCorreo() {
     console.log('📤 enviarPedidoPorCorreo llamada (EmailJS)');
     
-    // 1. Verificar que el carrito no esté vacío
     if (!S.cart || S.cart.length === 0) {
         showNotif('⚠️ El carrito está vacío', 'warning');
         return;
     }
 
-    // 2. Obtener datos del usuario
     const user = S.currentUser || JSON.parse(localStorage.getItem('session') || '{}');
     const userEmail = user?.email || 'cliente@meditech.com';
     const userName = user?.name || 'Cliente';
 
-    // 3. Calcular el total y preparar el pedido
     let total = 0;
+    let subtotal = 0;
     const pedidoData = S.cart.map(item => {
         const producto = item.producto || {};
         const precio = parseFloat(producto.price) || 0;
         const cantidad = item.cantidad || 1;
-        total += precio * cantidad;
+        const itemSubtotal = precio * cantidad;
+        subtotal += itemSubtotal;
+        total += itemSubtotal;
         return {
             nombre: producto.name || 'Producto',
             cantidad: cantidad,
-            precio: precio
+            precio: precio.toFixed(2),
+            subtotal: itemSubtotal.toFixed(2)
         };
     });
 
-    // 4. Configurar EmailJS
-    const EMAILJS_PUBLIC_KEY = '-oSvhsO6mZn5cdCz6'; // Reemplaza con tu clave pública
-    const EMAILJS_SERVICE_ID = 'service_v1tiylh'; // Reemplaza con tu Service ID
-    const EMAILJS_TEMPLATE_ID = 'template_edjk1yg'; // Reemplaza con tu Template ID
+    // ✅ Configuración de EmailJS
+    const EMAILJS_PUBLIC_KEY = 'TU_PUBLIC_KEY'; // Reemplaza con tu clave
+    const EMAILJS_SERVICE_ID = 'TU_SERVICE_ID'; // Reemplaza con tu Service ID
+    const EMAILJS_TEMPLATE_ID = 'TU_TEMPLATE_ID'; // Reemplaza con tu Template ID
 
     try {
-        // Inicializar EmailJS
         emailjs.init(EMAILJS_PUBLIC_KEY);
 
-        // Preparar el payload
         const payload = {
+            // ✅ Variables que espera la plantilla
             nombre: userName,
             email: userEmail,
+            order_id: 'PED-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
+            fecha: new Date().toLocaleString(),
+            items: pedidoData,
+            subtotal: subtotal.toFixed(2),
+            shipping: 'Gratis',
             total: total.toFixed(2),
-            items: pedidoData.map(p => `${p.nombre} x${p.cantidad} = $${(p.precio * p.cantidad).toFixed(2)}`).join('\n'),
-            fecha: new Date().toLocaleString()
+            notes: 'Gracias por tu compra. Te contactaremos pronto.'
         };
 
         console.log('📤 Enviando pedido con EmailJS:', payload);
 
-        // Enviar el correo
         showNotif('📤 Enviando pedido...', 'info');
 
         const response = await emailjs.send(
@@ -335,11 +338,8 @@ async function enviarPedidoPorCorreo() {
         );
 
         console.log('✅ EmailJS respuesta:', response);
-
-        // Éxito
         showNotif('✅ Pedido enviado correctamente', 'success');
         
-        // Vaciar carrito
         S.cart = [];
         guardarCarrito();
         actualizarContadorCarrito();
@@ -347,7 +347,7 @@ async function enviarPedidoPorCorreo() {
         renderCartItems();
 
     } catch (error) {
-        console.error('❌ Error enviando pedido con EmailJS:', error);
+        console.error('❌ Error con EmailJS:', error);
         showNotif(`❌ Error al enviar: ${error.text || error.message}`, 'error');
     }
 }
