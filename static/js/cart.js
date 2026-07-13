@@ -356,6 +356,21 @@ async function enviarPedidoPorCorreo() {
 }
 
 // ============================================================
+// NOTIFICACIONES
+// ============================================================
+function showNotif(msg, type = 'info') {
+    // Eliminar notificaciones existentes
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    
+    const n = document.createElement('div');
+    n.className = `toast ${type}`;
+    n.textContent = msg;
+    document.body.appendChild(n);
+    setTimeout(() => n.remove(), 3000);
+}
+
+// ============================================================
 // INICIALIZACIÓN
 // ============================================================
 cargarCarrito();
