@@ -300,69 +300,91 @@ app.get('/api/pedidos', authenticateToken, esAdmin, async (req, res) => {
     }
 });
 
-// ---- ENVIAR PEDIDO POR CORREO (RUTA CORREGIDA Y ROBUSTA) ----
+// ============================================================
+// 📧 ENVIAR PEDIDO POR CORREO (VERSIÓN SIMPLIFICADA)
+// ============================================================
 app.post('/api/enviar-pedido', (req, res) => {
     console.log('📧 POST /api/enviar-pedido recibido');
     console.log('📦 Body:', req.body);
-
-    // ✅ Siempre responder con un JSON, incluso en caso de error
+    
+    // Siempre responder con JSON, incluso en error
     try {
         const { email, nombre, pedido, total } = req.body;
-
+        
         // Validación simple
         if (!pedido || !Array.isArray(pedido) || pedido.length === 0) {
-            return res.status(400).json({
-                success: false,
-                error: 'El pedido está vacío o no es un array'
+            return res.status(400).json({ 
+                success: false, 
+                error: 'El pedido está vacío' 
             });
         }
-
-        // 1. Procesar los items
+        
+        // Procesar items
         const itemsProcesados = pedido.map(p => ({
             nombre: p.nombre || 'Producto',
             cantidad: parseInt(p.cantidad) || 1,
             precio: parseFloat(p.precio) || 0
         }));
-
-        // 2. Calcular total si no viene
-        let totalCalculado = parseFloat(total) || 0;
-        if (!total || total === 0) {
-            totalCalculado = itemsProcesados.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
-        }
-
-        // 3. Crear el objeto del pedido
+        
+        // Crear pedido
         const nuevoPedido = {
             id: 'PED-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-            cliente: nombre || 'Cliente anónimo',
+            cliente: nombre || 'Cliente',
             email: email || 'cliente@meditech.com',
             fecha: new Date().toISOString(),
             items: itemsProcesados,
-            total: totalCalculado,
+            total: parseFloat(total) || itemsProcesados.reduce((sum, item) => sum + (item.precio * item.cantidad), 0),
             estado: 'pendiente'
         };
-
-        // 4. Guardar en pedidos.json
-        const pedidos = leerJSON('pedidos.json') || [];
-        pedidos.push(nuevoPedido);
-        escribirJSON('pedidos.json', pedidos);
-
-        console.log('✅ Pedido guardado correctamente:', nuevoPedido.id);
-
-        // 5. RESPONDER CON ÉXITO
+        
+        // Guardar en pedidos.json
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const filePath = path.join(__dirname, 'pedidos.json');
+            let pedidos = [];
+            
+            if (fs.existsSync(filePath)) {
+                const data = fs.readFileSync(filePath, 'utf8');
+                pedidos = JSON.parse(data);
+                if (!Array.isArray(pedidos)) pedidos = [];
+            }
+            
+            pedidos.push(nuevoPedido);
+            fs.writeFileSync(filePath, JSON.stringify(pedidos, null, 2));
+            console.log('✅ Pedido guardado:', nuevoPedido.id);
+        } catch (fileError) {
+            console.error('❌ Error guardando archivo:', fileError.message);
+        }
+        
+        // Responder con éxito
         return res.status(200).json({
             success: true,
             message: 'Pedido recibido correctamente',
             pedido: nuevoPedido
         });
-
+        
     } catch (error) {
-        // Capturar cualquier error inesperado
-        console.error('❌ Error crítico en /api/enviar-pedido:', error);
+        console.error('❌ Error crítico:', error);
         return res.status(500).json({
             success: false,
             error: 'Error interno del servidor',
             details: error.message
         });
+    }
+});
+
+// ============================================================
+// 🔑 TOKEN DE GITHUB - RUTA PÚBLICA
+// ============================================================
+app.get('/api/config/github-token-public', (req, res) => {
+    try {
+        // Leer token desde archivo o usar el de localStorage
+        const token = process.env.GITHUB_TOKEN || '';
+        res.json({ token: token });
+    } catch (error) {
+        console.error('Error al obtener token público:', error);
+        res.status(500).json({ error: 'Error al obtener token' });
     }
 });
 
