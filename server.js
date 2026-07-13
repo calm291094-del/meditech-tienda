@@ -22,12 +22,50 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 
 // ============================================================
-// IMPORTAR BASE DE DATOS
+// IMPORTAR BASE DE DATOS (eliminar dependencia de PostgreSQL)
 // ============================================================
-const { query, getOne, getAll, initTables } = require('./db');
+// ❌ Elimina estas líneas:
+// const { query, getOne, getAll, initTables } = require('./db');
+// initTables().catch(console.error);
 
-// Inicializar tablas al iniciar
-initTables().catch(console.error);
+// ✅ En su lugar, usa archivos JSON directamente:
+const fs = require('fs');
+const path = require('path');
+
+// Funciones para leer/escribir archivos JSON
+function leerJSON(nombre) {
+    try {
+        const data = fs.readFileSync(path.join(__dirname, nombre), 'utf8');
+        return JSON.parse(data);
+    } catch (e) {
+        return null;
+    }
+}
+
+function escribirJSON(nombre, datos) {
+    fs.writeFileSync(path.join(__dirname, nombre), JSON.stringify(datos, null, 2));
+}
+
+// Funciones de base de datos simuladas (para mantener compatibilidad)
+const query = async (text, params) => {
+    console.log('📝 Consulta SQL simulada:', text, params);
+    return { rows: [] };
+};
+
+const getOne = async (text, params) => {
+    console.log('📝 getOne SQL simulada:', text, params);
+    return null;
+};
+
+const getAll = async (text, params) => {
+    console.log('📝 getAll SQL simulada:', text, params);
+    return [];
+};
+
+const initTables = async () => {
+    console.log('📝 initTables simulada - usando JSON files');
+    return Promise.resolve();
+};
 
 // ============================================================
 // CONFIGURACIÓN DEL BOT DE TELEGRAM
