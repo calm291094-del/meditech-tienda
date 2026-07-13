@@ -190,58 +190,58 @@
     // ============================================================
     // 6. DETECCIÓN DE DEVTOOLS ABIERTOS (MÉTODO 1: TAMAÑO DE VENTANA)
     // ============================================================
-    let devtoolsAbiertos = false;
-    let intervaloDeteccion = null;
+    //let devtoolsAbiertos = false;
+    //let intervaloDeteccion = null;
 
-    function detectarDevtoolsPorTamano() {
-        const umbral = 160; // Diferencia en píxeles sospechosa
-        const diffWidth = window.outerWidth - window.innerWidth;
-        const diffHeight = window.outerHeight - window.innerHeight;
+    //function detectarDevtoolsPorTamano() {
+    //    const umbral = 160; // Diferencia en píxeles sospechosa
+    //    const diffWidth = window.outerWidth - window.innerWidth;
+    //    const diffHeight = window.outerHeight - window.innerHeight;
 
-        if ((diffWidth > umbral || diffHeight > umbral) && !devtoolsAbiertos) {
-            devtoolsAbiertos = true;
-            onDevtoolsAbiertos();
-        } else if (diffWidth <= umbral && diffHeight <= umbral && devtoolsAbiertos) {
-            devtoolsAbiertos = false;
-            onDevtoolsCerrados();
-        }
-    }
+    //    if ((diffWidth > umbral || diffHeight > umbral) && !devtoolsAbiertos) {
+    //        devtoolsAbiertos = true;
+    //        onDevtoolsAbiertos();
+    //    } else if (diffWidth <= umbral && diffHeight <= umbral && devtoolsAbiertos) {
+    //         devtoolsAbiertos = false;
+    //        onDevtoolsCerrados();
+    //    }
+    //}
 
-    function onDevtoolsAbiertos() {
-        console.clear();
-        console.log('%c⚠️ DEVTOOLS DETECTADOS', 'background: red; color: white; font-size: 30px; padding: 10px;');
-        console.log('%cEsta acción está siendo monitoreada y registrada.', 'color: orange; font-size: 16px;');
+    //function onDevtoolsAbiertos() {
+    //    console.clear();
+    //    console.log('%c⚠️ DEVTOOLS DETECTADOS', 'background: red; color: white; font-size: 30px; padding: 10px;');
+    //    console.log('%cEsta acción está siendo monitoreada y registrada.', 'color: orange; font-size: 16px;');
         
         // Opcional: Desenfocar la página o mostrar overlay
-        document.body.style.filter = 'blur(4px)';
-        document.body.style.pointerEvents = 'none';
+    //    document.body.style.filter = 'blur(4px)';
+    //    document.body.style.pointerEvents = 'none';
         
         // Mostrar notificación si existe showNotif
-        if (typeof showNotif === 'function') {
-            showNotif('🔍 Se detectaron herramientas de desarrollador. La sesión está siendo monitoreada.', 'error', 5000);
-        } else {
-            alert('⚠️ Herramientas de desarrollador detectadas. La sesión está siendo monitoreada.');
-        }
-    }
+    //    if (typeof showNotif === 'function') {
+    //        showNotif('🔍 Se detectaron herramientas de desarrollador. La sesión está siendo monitoreada.', 'error', 5000);
+    //    } else {
+    //        alert('⚠️ Herramientas de desarrollador detectadas. La sesión está siendo monitoreada.');
+    //    }
+    //}
 
-    function onDevtoolsCerrados() {
-        document.body.style.filter = '';
-        document.body.style.pointerEvents = '';
-    }
+    //function onDevtoolsCerrados() {
+    //    document.body.style.filter = '';
+    //    document.body.style.pointerEvents = '';
+    //}
 
     // ============================================================
     // 7. DETECCIÓN DE DEVTOOLS CON DEBUGGER
     // ============================================================
-    function detectarDevtoolsConDebugger() {
-        const element = new Image();
-        Object.defineProperty(element, 'id', {
-            get: function() {
-                devtoolsAbiertos = true;
-                onDevtoolsAbiertos();
-            }
-        });
-        console.log('%c', element);
-    }
+    //function detectarDevtoolsConDebugger() {
+    //    const element = new Image();
+    //    Object.defineProperty(element, 'id', {
+    //        get: function() {
+    //            devtoolsAbiertos = true;
+    //            onDevtoolsAbiertos();
+    //        }
+    //    });
+    //    console.log('%c', element);
+    //}
 
     // ============================================================
     // 8. WATERMARK DINÁMICO CON DATOS DEL USUARIO
