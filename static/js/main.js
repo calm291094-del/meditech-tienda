@@ -518,6 +518,9 @@ function verificarNotificaciones() {
 // ============================================
 // INICIALIZACIÓN
 // ============================================
+// ============================================
+// INICIALIZACIÓN
+// ============================================
 async function init() {
     console.log('🚀 Iniciando MediTech...');
     try {
@@ -552,13 +555,6 @@ async function init() {
         renderOfertas();
         applyTexts();
         initCarousel();
-        
-        // 🔧 CORRECCIÓN: Usar el nombre correcto de la función
-        if (typeof actualizarContadorCarrito === 'function') {
-            actualizarContadorCarrito();
-        } else {
-            console.warn('⚠️ actualizarContadorCarrito no está disponible');
-        }
         
         console.log('🎉 MediTech iniciado correctamente');
     } catch (error) {
