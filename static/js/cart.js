@@ -1,10 +1,8 @@
 // ============================================================
-// CART.JS - CARRITO DE COMPRAS (CON CORRECCIÓN DE PRECIO)
+// CART.JS - CARRITO DE COMPRAS
 // ============================================================
 
-// ============================================================
-// INICIALIZAR
-// ============================================================
+// ✅ Usar el S global, no crear uno nuevo
 if (typeof S === 'undefined') {
     window.S = { cart: [], currentUser: null, pr: [] };
 }
@@ -20,7 +18,7 @@ function cargarCarrito() {
         if (saved) {
             S.cart = JSON.parse(saved);
             
-            // 🔧 CORRECCIÓN: Convertir price a número en cada item
+            // Convertir precios a números
             S.cart = S.cart.map(item => {
                 if (item.producto && item.producto.price) {
                     item.producto.price = parseFloat(item.producto.price) || 0;
@@ -32,12 +30,6 @@ function cargarCarrito() {
         } else {
             S.cart = [];
             console.log('📦 No hay carrito guardado, iniciando vacío');
-        }
-        
-        if (S.cart.length > 0) {
-            console.log('🛒 Carrito con items:', S.cart.map(i => `${i.producto?.name || 'unknown'} x${i.cantidad}`));
-        } else {
-            localStorage.removeItem('meditech_carrito');
         }
         
         actualizarContadorCarrito();
@@ -89,11 +81,19 @@ function actualizarContadorCarrito() {
 // ============================================================
 function addToCart(productId) {
     console.log('🛒 addToCart llamado con ID:', productId);
+    console.log('📦 S.pr:', S.pr);
     
     if (!S.currentUser) { 
         showNotif('⚠️ Inicia sesión para agregar productos', 'warning'); 
         if (typeof openLoginModal === 'function') openLoginModal();
         return; 
+    }
+    
+    // ✅ Asegurar que S.pr existe y es un array
+    if (!S.pr || !Array.isArray(S.pr) || S.pr.length === 0) {
+        console.error('❌ S.pr está vacío o no es un array:', S.pr);
+        showNotif('❌ No hay productos cargados. Recarga la página.', 'error');
+        return;
     }
     
     const producto = S.pr.find(p => p.id === productId || p.id == productId);
@@ -103,7 +103,6 @@ function addToCart(productId) {
         return; 
     }
     
-    // 🔧 CORRECCIÓN: Asegurar que price sea número
     if (producto.price) {
         producto.price = parseFloat(producto.price) || 0;
     }
@@ -148,7 +147,6 @@ function updateCartQuantity(productId, change) {
     const item = S.cart.find(i => i.producto?.id === productId || i.producto?.id == productId);
     if (!item) return;
     
-    // 🔧 CORRECCIÓN: Asegurar que price sea número
     if (item.producto && item.producto.price) {
         item.producto.price = parseFloat(item.producto.price) || 0;
     }
@@ -181,14 +179,7 @@ function renderCartItems() {
         return;
     }
     
-    // 🔧 CORRECCIÓN: Validar y convertir precios
-    S.cart = S.cart.filter(item => item && item.producto && item.producto.id);
-    S.cart.forEach(item => {
-        if (item.producto && item.producto.price) {
-            item.producto.price = parseFloat(item.producto.price) || 0;
-        }
-    });
-    
+    // ✅ No filtrar ni modificar S.cart aquí
     if (S.cart.length === 0) {
         console.log('📦 Carrito vacío, mostrando mensaje');
         container.innerHTML = `
@@ -199,22 +190,20 @@ function renderCartItems() {
             </div>
         `;
         if (totalElement) totalElement.textContent = '$0.00';
-        localStorage.removeItem('meditech_carrito');
         return;
     }
     
     let total = 0;
     let html = '';
     
-    S.cart.forEach((item, index) => {
-        // 🔧 CORRECCIÓN: Asegurar que price sea número antes de usarlo
+    S.cart.forEach((item) => {
         const price = parseFloat(item.producto.price) || 0;
         const subtotal = price * item.cantidad;
         total += subtotal;
         
         html += `
             <div class="flex items-center gap-4 py-4 border-b border-gray-200">
-                <img src="${item.producto.image || 'https://via.placeholder.com/100'}" alt="${item.producto.name}" class="w-16 h-16 object-cover rounded-lg" onerror="this.src='https://via.placeholder.com/100'">
+                <img src="${item.producto.image || 'https://via.placeholder.com/100'}" alt="${item.producto.name}" class="w-16 h-16 object-cover rounded-lg">
                 <div class="flex-1">
                     <h4 class="font-semibold">${item.producto.name}</h4>
                     <p class="text-sm text-gray-500">$${price.toFixed(2)} c/u</p>
@@ -270,26 +259,6 @@ function openCart() {
         return;
     }
     
-    // 🔧 CORRECCIÓN: Sincronizar y convertir precios al abrir
-    const saved = localStorage.getItem('meditech_carrito');
-    if (saved) {
-        try {
-            const parsed = JSON.parse(saved);
-            if (parsed.length > 0) {
-                // Convertir precios a números
-                parsed.forEach(item => {
-                    if (item.producto && item.producto.price) {
-                        item.producto.price = parseFloat(item.producto.price) || 0;
-                    }
-                });
-                S.cart = parsed;
-                guardarCarrito();
-            }
-        } catch (e) {
-            console.error('Error al sincronizar:', e);
-        }
-    }
-    
     renderCartItems();
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -306,124 +275,9 @@ function closeCart() {
 }
 
 // ============================================================
-// FUNCIÓN PARA ENVIAR PEDIDO POR CORREO
-// ============================================================
-async function enviarPedidoPorCorreo() {
-    // 1. Verificar que el carrito no esté vacío
-    if (!S.cart || S.cart.length === 0) {
-        showNotif('⚠️ El carrito está vacío', 'warning');
-        return;
-    }
-
-    // 2. Obtener datos del usuario
-    const user = S.currentUser || JSON.parse(localStorage.getItem('session') || '{}');
-    const userEmail = user?.email || 'cliente@meditech.com';
-    const userName = user?.name || 'Cliente';
-
-    // 3. Calcular el total y preparar el pedido
-    let total = 0;
-    const pedidoData = S.cart.map(item => {
-        const producto = item.producto || {};
-        const precio = parseFloat(producto.price) || 0;
-        const cantidad = item.cantidad || 1;
-        const subtotal = precio * cantidad;
-        total += subtotal;
-        return {
-            nombre: producto.name || 'Producto',
-            cantidad: cantidad,
-            precio: precio
-        };
-    });
-
-    const payload = {
-        email: userEmail,
-        nombre: userName,
-        pedido: pedidoData,
-        total: total
-    };
-
-    console.log('📤 Enviando pedido:', payload);
-
-    try {
-        showNotif('📤 Procesando pedido...', 'info');
-
-        // 4. Enviar la petición al servidor
-        const response = await fetch('/api/enviar-pedido', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-
-        // 5. Leer la respuesta (como texto primero para depuración)
-        const responseText = await response.text();
-        console.log('📥 Respuesta del servidor (texto):', responseText);
-
-        // 6. Intentar parsear como JSON
-        let data;
-        try {
-            data = JSON.parse(responseText);
-        } catch (parseError) {
-            console.error('❌ Error parseando JSON:', parseError);
-            throw new Error('El servidor devolvió una respuesta inválida');
-        }
-
-        // 7. Verificar si la respuesta fue exitosa
-        if (!response.ok || !data.success) {
-            throw new Error(data.error || data.message || `Error ${response.status}`);
-        }
-
-        // 8. Éxito: mostrar mensaje y vaciar carrito
-        showNotif('✅ Pedido enviado correctamente', 'success');
-
-        // Vaciar carrito
-        S.cart = [];
-        guardarCarrito();
-        actualizarContadorCarrito();
-        closeCart();
-        renderCartItems();
-
-        if (data.pedido) {
-            console.log('📋 Pedido creado:', data.pedido.id);
-            showNotif(`📋 Pedido #${data.pedido.id} creado`, 'success');
-        }
-
-    } catch (error) {
-        console.error('❌ Error enviando pedido:', error);
-        showNotif(`❌ ${error.message}`, 'error');
-    }
-}
-
-// ============================================================
-// NOTIFICACIONES
-// ============================================================
-function showNotif(msg, type = 'info') {
-    const existing = document.querySelector('.toast');
-    if (existing) existing.remove();
-    
-    const n = document.createElement('div');
-    n.className = `toast ${type}`;
-    n.textContent = msg;
-    document.body.appendChild(n);
-    setTimeout(() => n.remove(), 3000);
-}
-
-// ============================================================
-// FUNCIÓN DE SINCRONIZACIÓN
-// ============================================================
-function sincronizarCarrito() {
-    console.log('🔄 Forzando sincronización...');
-    cargarCarrito();
-    renderCartItems();
-    actualizarContadorCarrito();
-    console.log('✅ Carrito sincronizado');
-}
-
-// ============================================================
 // INICIALIZACIÓN
 // ============================================================
+// ✅ Solo cargar el carrito, no renderizar todavía
 cargarCarrito();
 
 // ============================================================
@@ -443,5 +297,4 @@ window.renderCartItems = renderCartItems;
 window.showNotif = showNotif;
 window.sincronizarCarrito = sincronizarCarrito;
 
-console.log('✅ Cart.js cargado (con corrección de precio)');
-console.log('🔧 Usa sincronizarCarrito() para forzar sincronización');
+console.log('✅ Cart.js cargado correctamente');
