@@ -2,7 +2,7 @@
 // API.JS - PETICIONES AL BACKEND
 // ============================================
 
-const API_URL = 'https://meditech-bot.onrender.com/api';
+const API_URL = 'https://meditech-tienda-node.onrender.com/api';
 const GITHUB_USER = "calm291094-del";
 const GITHUB_REPO = "meditech-tienda";
 let GITHUB_TOKEN = '';
