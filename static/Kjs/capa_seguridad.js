@@ -93,19 +93,19 @@
             // return false;
         }
 
-        // Ctrl+R / F5 - Recargar (prevenir recarga accidental)
-        if ((ctrl && key.toLowerCase() === 'r') || key === 'F5') {
-            e.preventDefault();
-            mostrarAlerta('⚠️ No se permite recargar la página');
-            return false;
-        }
+        // Ctrl+R / F5 - Recargar (permitido)
+        // if ((ctrl && key.toLowerCase() === 'r') || key === 'F5') {
+        //     e.preventDefault();
+        //     mostrarAlerta('⚠️ No se permite recargar la página');
+        //     return false;
+        // }
 
-        // Ctrl+Shift+R - Recarga forzada
-        if (ctrl && shift && key.toLowerCase() === 'r') {
-            e.preventDefault();
-            mostrarAlerta('⚠️ No se permite recargar la página');
-            return false;
-        }
+        // Ctrl+Shift+R - Recarga forzada (permitida)
+        // if (ctrl && shift && key.toLowerCase() === 'r') {
+        //     e.preventDefault();
+        //     mostrarAlerta('⚠️ No se permite recargar la página');
+        //     return false;
+        // }
 
         // Alt+F4 - Cerrar ventana (solo en Windows)
         if (alt && key === 'F4') {
