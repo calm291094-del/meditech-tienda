@@ -1,5 +1,5 @@
 // ============================================================
-// 🛡️ SECURITY.JS - CAPA DE PROTECCIÓN COMPLETA
+// 🛡️ SECURITY.JS - CAPA DE PROTECCIÓN COMPLETA (CORREGIDA)
 // ============================================================
 // Este archivo implementa múltiples capas de seguridad a nivel de navegador
 // para disuadir inspección, copia, capturas y acciones maliciosas.
@@ -86,70 +86,62 @@
             return false;
         }
 
-        // Ctrl+W - Cerrar pestaña (puede ser usado para salir)
-        if (ctrl && key.toLowerCase() === 'w') {
-            // Permitimos cerrar, pero prevenimos si hay formularios sin guardar
-            // e.preventDefault();
-            // return false;
-        }
-
-        // Ctrl+R / F5 - Recargar (permitido)
-        // if ((ctrl && key.toLowerCase() === 'r') || key === 'F5') {
-        //     e.preventDefault();
-        //     mostrarAlerta('⚠️ No se permite recargar la página');
-        //     return false;
-        // }
-
-        // Ctrl+Shift+R - Recarga forzada (permitida)
-        // if (ctrl && shift && key.toLowerCase() === 'r') {
-        //     e.preventDefault();
-        //     mostrarAlerta('⚠️ No se permite recargar la página');
-        //     return false;
-        // }
-
         // Alt+F4 - Cerrar ventana (solo en Windows)
         if (alt && key === 'F4') {
             e.preventDefault();
             return false;
         }
 
-        // Ctrl+Tab / Ctrl+Shift+Tab - Cambiar pestaña
-        if (ctrl && (key === 'Tab' || key === 'Escape')) {
-            // Permitir cambio de pestaña, pero podríamos bloquear si es necesario
-        }
-
         return true;
     }
 
     // ============================================================
-    // 2. BLOQUEO DE CLICK DERECHO (MENÚ CONTEXTUAL)
+    // 2. BLOQUEO DE CLICK DERECHO (CON EXCEPCIONES)
     // ============================================================
     function bloquearContextMenu(e) {
+        const target = e.target;
+        // ✅ Permitir clic derecho en elementos interactivos
+        if (target && (target.tagName === 'INPUT' || 
+                       target.tagName === 'TEXTAREA' || 
+                       target.tagName === 'BUTTON' ||
+                       target.closest('.product-card') ||
+                       target.closest('.add-btn') ||
+                       target.closest('#cart-btn') ||
+                       target.closest('.btn-primary'))) {
+            return true;
+        }
         e.preventDefault();
         mostrarAlerta('⚠️ El menú contextual está deshabilitado');
         return false;
     }
 
     // ============================================================
-    // 3. BLOQUEO DE COPIADO, CORTADO Y PEGADO
+    // 3. BLOQUEO DE COPIADO, CORTADO Y PEGADO (CON EXCEPCIONES)
     // ============================================================
     function bloquearCopiado(e) {
+        const target = e.target;
+        // ✅ Permitir copiar en inputs y textareas
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+            return true;
+        }
         e.preventDefault();
         mostrarAlerta('📋 La copia de contenido está deshabilitada');
         return false;
     }
 
     function bloquearCortado(e) {
+        const target = e.target;
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
+            return true;
+        }
         e.preventDefault();
         mostrarAlerta('✂️ El cortado de contenido está deshabilitado');
         return false;
     }
 
     function bloquearPegado(e) {
-        // Permitimos pegar en campos de formulario, pero podemos bloquear globalmente
         const target = e.target;
-        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
-            // Permitir pegar en campos de formulario (opcional)
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) {
             return true;
         }
         e.preventDefault();
@@ -160,13 +152,12 @@
     // ============================================================
     // 4. BLOQUEO DE SELECCIÓN DE TEXTO (USER-SELECT)
     // ============================================================
-    function bloquearSeleccion(e) {
-        // Prevenir selección de texto en toda la página
+    function bloquearSeleccion() {
         document.body.style.userSelect = 'none';
         document.body.style.webkitUserSelect = 'none';
         document.body.style.mozUserSelect = 'none';
         document.body.style.msUserSelect = 'none';
-        // Pero permitimos selección en inputs y textareas
+        // ✅ Permitir selección en inputs y textareas
         const inputs = document.querySelectorAll('input, textarea, [contenteditable="true"]');
         inputs.forEach(el => {
             el.style.userSelect = 'text';
@@ -188,66 +179,64 @@
     }
 
     // ============================================================
-    // 6. DETECCIÓN DE DEVTOOLS ABIERTOS (MÉTODO 1: TAMAÑO DE VENTANA)
+    // 6. DETECCIÓN DE DEVTOOLS ABIERTOS (DESACTIVADA)
     // ============================================================
-    //let devtoolsAbiertos = false;
-    //let intervaloDeteccion = null;
+    // ✅ Desactivado para evitar interferencias con la UI
+    /*
+    let devtoolsAbiertos = false;
+    let intervaloDeteccion = null;
 
-    //function detectarDevtoolsPorTamano() {
-    //    const umbral = 160; // Diferencia en píxeles sospechosa
-    //    const diffWidth = window.outerWidth - window.innerWidth;
-    //    const diffHeight = window.outerHeight - window.innerHeight;
+    function detectarDevtoolsPorTamano() {
+        const umbral = 160;
+        const diffWidth = window.outerWidth - window.innerWidth;
+        const diffHeight = window.outerHeight - window.innerHeight;
 
-    //    if ((diffWidth > umbral || diffHeight > umbral) && !devtoolsAbiertos) {
-    //        devtoolsAbiertos = true;
-    //        onDevtoolsAbiertos();
-    //    } else if (diffWidth <= umbral && diffHeight <= umbral && devtoolsAbiertos) {
-    //         devtoolsAbiertos = false;
-    //        onDevtoolsCerrados();
-    //    }
-    //}
+        if ((diffWidth > umbral || diffHeight > umbral) && !devtoolsAbiertos) {
+            devtoolsAbiertos = true;
+            onDevtoolsAbiertos();
+        } else if (diffWidth <= umbral && diffHeight <= umbral && devtoolsAbiertos) {
+            devtoolsAbiertos = false;
+            onDevtoolsCerrados();
+        }
+    }
 
-    //function onDevtoolsAbiertos() {
-    //    console.clear();
-    //    console.log('%c⚠️ DEVTOOLS DETECTADOS', 'background: red; color: white; font-size: 30px; padding: 10px;');
-    //    console.log('%cEsta acción está siendo monitoreada y registrada.', 'color: orange; font-size: 16px;');
-        
-        // Opcional: Desenfocar la página o mostrar overlay
-    //    document.body.style.filter = 'blur(4px)';
-    //    document.body.style.pointerEvents = 'none';
-        
-        // Mostrar notificación si existe showNotif
-    //    if (typeof showNotif === 'function') {
-    //        showNotif('🔍 Se detectaron herramientas de desarrollador. La sesión está siendo monitoreada.', 'error', 5000);
-    //    } else {
-    //        alert('⚠️ Herramientas de desarrollador detectadas. La sesión está siendo monitoreada.');
-    //    }
-    //}
+    function onDevtoolsAbiertos() {
+        console.clear();
+        console.log('%c⚠️ DEVTOOLS DETECTADOS', 'background: red; color: white; font-size: 30px; padding: 10px;');
+        console.log('%cEsta acción está siendo monitoreada y registrada.', 'color: orange; font-size: 16px;');
+        document.body.style.filter = 'blur(4px)';
+        document.body.style.pointerEvents = 'none';
+        if (typeof showNotif === 'function') {
+            showNotif('🔍 Se detectaron herramientas de desarrollador. La sesión está siendo monitoreada.', 'error', 5000);
+        }
+    }
 
-    //function onDevtoolsCerrados() {
-    //    document.body.style.filter = '';
-    //    document.body.style.pointerEvents = '';
-    //}
+    function onDevtoolsCerrados() {
+        document.body.style.filter = '';
+        document.body.style.pointerEvents = '';
+    }
+    */
 
     // ============================================================
-    // 7. DETECCIÓN DE DEVTOOLS CON DEBUGGER
+    // 7. DETECCIÓN DE DEVTOOLS CON DEBUGGER (DESACTIVADA)
     // ============================================================
-    //function detectarDevtoolsConDebugger() {
-    //    const element = new Image();
-    //    Object.defineProperty(element, 'id', {
-    //        get: function() {
-    //            devtoolsAbiertos = true;
-    //            onDevtoolsAbiertos();
-    //        }
-    //    });
-    //    console.log('%c', element);
-    //}
+    /*
+    function detectarDevtoolsConDebugger() {
+        const element = new Image();
+        Object.defineProperty(element, 'id', {
+            get: function() {
+                devtoolsAbiertos = true;
+                onDevtoolsAbiertos();
+            }
+        });
+        console.log('%c', element);
+    }
+    */
 
     // ============================================================
     // 8. WATERMARK DINÁMICO CON DATOS DEL USUARIO
     // ============================================================
     function crearWatermark() {
-        // Obtener datos del usuario desde localStorage o sesión
         let usuario = 'Invitado';
         let nombre = 'Invitado';
         try {
@@ -257,35 +246,27 @@
                 usuario = user.username || 'Invitado';
                 nombre = user.name || 'Invitado';
             }
-        } catch (e) {
-            // No hacer nada
-        }
+        } catch (e) {}
 
         const fecha = new Date().toLocaleString('es-ES');
-        const ip = 'cliente'; // No podemos obtener IP real del cliente
 
-        // Crear canvas para el watermark
         const canvas = document.createElement('canvas');
         canvas.width = 300;
         canvas.height = 150;
         const ctx = canvas.getContext('2d');
 
-        // Configurar texto
         ctx.font = '14px Arial';
-        ctx.fillStyle = 'rgba(0, 80, 158, 0.06)'; // Muy transparente
+        ctx.fillStyle = 'rgba(0, 80, 158, 0.06)';
         ctx.textAlign = 'center';
         ctx.rotate(-25 * Math.PI / 180);
 
-        // Dibujar texto en varias líneas
         ctx.fillText('MediTech - Sistema Seguro', 150, 50);
         ctx.fillText(`Usuario: ${usuario}`, 150, 80);
         ctx.fillText(`Nombre: ${nombre}`, 150, 105);
         ctx.fillText(`Fecha: ${fecha}`, 150, 130);
 
-        // Convertir a imagen
         const watermarkURL = canvas.toDataURL('image/png');
 
-        // Crear elemento overlay
         const overlay = document.createElement('div');
         overlay.id = 'watermark-overlay';
         overlay.style.cssText = `
@@ -311,7 +292,6 @@
         if (window.top !== window.self) {
             try {
                 if (window.top.location.hostname !== window.self.location.hostname) {
-                    // Diferente dominio = posible clickjacking
                     document.body.innerHTML = `
                         <div style="display:flex;align-items:center;justify-content:center;
                                     height:100vh;background:#1a1d29;color:#fff;
@@ -328,7 +308,6 @@
                     `;
                 }
             } catch (e) {
-                // Error de cross-origin = está embebido
                 document.body.innerHTML = '<h1>Acceso bloqueado</h1>';
             }
         }
@@ -341,9 +320,18 @@
     const MAX_LOGS = 100;
 
     function registrarAccionSeguridad(tipo, detalle) {
+        let usuario = 'anon';
+        try {
+            const session = localStorage.getItem('session');
+            if (session) {
+                const user = JSON.parse(session);
+                usuario = user.username || 'anon';
+            }
+        } catch (e) {}
+        
         const registro = {
             timestamp: new Date().toISOString(),
-            usuario: localStorage.getItem('session') ? JSON.parse(localStorage.getItem('session')).username || 'anon' : 'anon',
+            usuario: usuario,
             tipo: tipo,
             detalle: detalle,
             url: window.location.href,
@@ -352,11 +340,6 @@
         auditLog.push(registro);
         if (auditLog.length > MAX_LOGS) auditLog.shift();
         console.warn('🔍 [AUDIT]', registro);
-        
-        // Opcional: enviar al backend si existe
-        // if (typeof apiRequest === 'function') {
-        //     apiRequest('/audit', { method: 'POST', body: JSON.stringify(registro) }).catch(() => {});
-        // }
     }
 
     // ============================================================
@@ -365,12 +348,17 @@
     function protegerImagenes() {
         const imagenes = document.querySelectorAll('img');
         imagenes.forEach(img => {
-            img.addEventListener('contextmenu', e => e.preventDefault());
+            img.addEventListener('contextmenu', function(e) {
+                // ✅ No prevenir el evento si es un botón de producto
+                if (this.closest('.product-card') || this.closest('.add-btn')) {
+                    return true;
+                }
+                e.preventDefault();
+                return false;
+            });
             img.addEventListener('dragstart', e => e.preventDefault());
             img.addEventListener('selectstart', e => e.preventDefault());
             img.setAttribute('draggable', 'false');
-            // Opcional: agregar un overlay transparente para evitar guardar con clic
-            // img.style.pointerEvents = 'none';
         });
     }
 
@@ -378,8 +366,6 @@
     // 12. BLOQUEO DE CAPTURAS DE PANTALLA (LIMITADO)
     // ============================================================
     function bloquearCaptura() {
-        // No es posible bloquear completamente las capturas de pantalla.
-        // Podemos intentar detectar la combinación de teclas de captura
         document.addEventListener('keydown', function(e) {
             if (e.key === 'PrintScreen') {
                 e.preventDefault();
@@ -389,8 +375,6 @@
             }
         });
 
-        // También podemos detectar el evento 'visibilitychange' que se dispara
-        // cuando la página deja de ser visible (posible captura con apps externas)
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
                 registrarAccionSeguridad('VISIBILITY_CHANGE', 'La página perdió visibilidad (posible captura)');
@@ -398,60 +382,40 @@
         });
     }
 
-// ============================================================
-// 13. FUNCIÓN DE ALERTA (TOAST O ALERT NATIVO)
-// ============================================================
-function mostrarAlerta(mensaje) {
-    // ✅ No usar alert() que bloquea la UI
-    // Intentar usar showNotif si existe (sistema de toasts)
-    if (typeof showNotif === 'function') {
-        showNotif(mensaje, 'warning', 3000);
-    } else {
-        // ✅ Usar console.warn en lugar de alert
+    // ============================================================
+    // 13. FUNCIÓN DE ALERTA (SIN BLOQUEAR UI)
+    // ============================================================
+    function mostrarAlerta(mensaje) {
+        // ✅ Usar solo console.warn, no bloquear la UI
         console.warn('🔒 Seguridad:', mensaje);
-        // Si existe un elemento para notificaciones, usarlo
-        const notifEl = document.getElementById('notification-area');
-        if (notifEl) {
-            notifEl.innerHTML = `<div class="toast warning">${mensaje}</div>`;
-            setTimeout(() => { notifEl.innerHTML = ''; }, 3000);
+        
+        // Intentar usar showNotif si existe (no bloqueante)
+        if (typeof showNotif === 'function') {
+            showNotif(mensaje, 'warning', 3000);
         }
+        
+        registrarAccionSeguridad('ALERTA', mensaje);
     }
-    // Registrar en auditoría
-    registrarAccionSeguridad('ALERTA', mensaje);
-}
 
     // ============================================================
-    // 14. BLOQUEO DE CONSOLA
+    // 14. BLOQUEO DE CONSOLA (SOLO MONITOREO)
     // ============================================================
     function bloquearConsola() {
-        // Prevenir que se ejecute código en la consola
-        // Esto no es 100% efectivo, pero añade otra capa
-        // Object.defineProperty(window, 'console', {
-        //     value: {
-        //         log: function() {},
-        //         warn: function() {},
-        //         error: function() {},
-        //         info: function() {},
-        //         debug: function() {}
-        //     },
-        //     writable: false,
-        //     configurable: false
-        // });
-        // La consola se puede restaurar, así que es mejor no bloquearla completamente
-        // y en su lugar monitorear su uso.
         console.log('%c🛡️ MediTech Security Active', 'color: #0d9488; font-size: 20px; font-weight: bold;');
         console.log('%c⚠️ Cualquier intento de inyección será registrado.', 'color: #f59e0b; font-size: 14px;');
     }
 
     // ============================================================
-    // 15. PREVENIR INYECCIÓN DE SCRIPTS (XSS)
+    // 15. PREVENIR INYECCIÓN DE SCRIPTS (XSS) - SIN INTERFERIR
     // ============================================================
     function prevenirXSS() {
-        // Sanitizar entradas de usuario en formularios (opcional)
+        // ✅ Solo sanitizar sin interferir con la entrada del usuario
         document.querySelectorAll('input, textarea').forEach(el => {
             el.addEventListener('input', function() {
-                // Reemplazar caracteres peligrosos
-                this.value = this.value.replace(/<script/g, '&lt;script').replace(/<\/script>/g, '&lt;/script&gt;');
+                // No modificar el valor, solo verificar
+                if (this.value && this.value.includes('<script')) {
+                    console.warn('⚠️ Posible intento de XSS detectado en:', this);
+                }
             });
         });
     }
@@ -472,10 +436,10 @@ function mostrarAlerta(mensaje) {
             }
         });
 
-        // 2. Contexto (clic derecho)
+        // 2. Contexto (clic derecho) - con excepciones
         document.addEventListener('contextmenu', bloquearContextMenu);
 
-        // 3. Copiar, cortar, pegar
+        // 3. Copiar, cortar, pegar - con excepciones
         document.addEventListener('copy', bloquearCopiado);
         document.addEventListener('cut', bloquearCortado);
         document.addEventListener('paste', bloquearPegado);
@@ -486,11 +450,7 @@ function mostrarAlerta(mensaje) {
         // 5. Arrastre
         document.addEventListener('dragstart', bloquearArrastre);
 
-        // 6. DevTools por tamaño
-        intervaloDeteccion = setInterval(detectarDevtoolsPorTamano, 1000);
-
-        // 7. Debugger para detectar DevTools
-        setInterval(detectarDevtoolsConDebugger, 3000);
+        // 6-7. DevTools - DESACTIVADO (comentado)
 
         // 8. Watermark
         crearWatermark();
@@ -498,7 +458,7 @@ function mostrarAlerta(mensaje) {
         // 9. Clickjacking
         antiClickjacking();
 
-        // 10. Imágenes
+        // 10. Imágenes (con excepciones)
         protegerImagenes();
 
         // 11. Captura de pantalla
@@ -507,22 +467,21 @@ function mostrarAlerta(mensaje) {
         // 12. Consola
         bloquearConsola();
 
-        // 13. XSS
+        // 13. XSS (sin interferir)
         prevenirXSS();
 
-        // 14. Auditoría de eventos sospechosos adicionales
+        // 14. Auditoría
         document.addEventListener('beforeunload', function() {
             registrarAccionSeguridad('BEFORE_UNLOAD', 'Intento de cerrar o recargar página');
         });
 
-        // Registrar inicio
         registrarAccionSeguridad('SECURITY_INIT', 'Capa de protección activada');
 
         console.log('✅ Todas las protecciones están activas');
     }
 
     // ============================================================
-    // 17. EXPONER FUNCIONES PARA USO EXTERNO (OPCIONAL)
+    // 17. EXPONER FUNCIONES PARA USO EXTERNO
     // ============================================================
     window.seguridad = {
         registrarAccion: registrarAccionSeguridad,
@@ -531,7 +490,9 @@ function mostrarAlerta(mensaje) {
         auditoria: auditLog
     };
 
-    // Iniciar cuando el DOM esté listo
+    // ============================================================
+    // 18. INICIALIZACIÓN AUTOMÁTICA
+    // ============================================================
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', iniciarProtecciones);
     } else {
@@ -539,20 +500,17 @@ function mostrarAlerta(mensaje) {
     }
 
     // ============================================================
-    // 18. RECARGAR PROTECCIONES DESPUÉS DE CAMBIOS DINÁMICOS
+    // 19. RECARGAR PROTECCIONES DESPUÉS DE CAMBIOS DINÁMICOS
     // ============================================================
-    // Observar cambios en el DOM para re-aplicar protecciones a nuevos elementos
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'childList') {
-                // Re-proteger imágenes nuevas
                 protegerImagenes();
-                // Re-aplicar bloqueo de selección a nuevos inputs
                 bloquearSeleccion();
             }
         });
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    console.log('🛡️ Security.js cargado correctamente');
+    console.log('🛡️ Security.js cargado correctamente (modo compatible)');
 })();
