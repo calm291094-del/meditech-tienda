@@ -445,5 +445,93 @@
         window.guardarToken = guardarToken;
         window.probarToken = probarToken;
     </script>
+
+<script>
+// ============================================================
+// ⏰ KEEP-ALIVE - Mantén tu Web en Render siempre activa
+// ============================================================
+// Envía pings automáticos a tu propia URL cada 10 minutos
+// para evitar que el plan gratuito de Render entre en "sueño".
+// ============================================================
+
+(function() {
+    'use strict';
+
+    // ============================================================
+    // 1. CONFIGURACIÓN
+    // ============================================================
+    const CONFIG = {
+        // URL de tu sitio en Render (cámbiala por la tuya)
+        // Ejemplo: 'https://tu-app.onrender.com'
+        url: window.location.origin,
+        // Intervalo entre pings (en milisegundos)
+        // 10 minutos = 600000 ms
+        intervalo: 600000,
+        // Mostrar logs en consola
+        debug: true
+    };
+
+    // ============================================================
+    // 2. FUNCIÓN DE PING
+    // ============================================================
+    async function ping() {
+        try {
+            const response = await fetch(CONFIG.url, {
+                method: 'HEAD',
+                cache: 'no-cache',
+                headers: {
+                    'X-Keep-Alive': 'true'
+                }
+            });
+
+            if (CONFIG.debug) {
+                console.log(`⏰ Keep-Alive: ${response.status} - ${new Date().toLocaleTimeString()}`);
+            }
+            return response.ok;
+        } catch (error) {
+            if (CONFIG.debug) {
+                console.warn('⏰ Keep-Alive: Error al pingear', error.message);
+            }
+            return false;
+        }
+    }
+
+    // ============================================================
+    // 3. INICIALIZACIÓN
+    // ============================================================
+    function iniciarKeepAlive() {
+        // Ping inicial
+        ping();
+
+        // Programar pings periódicos
+        setInterval(ping, CONFIG.intervalo);
+
+        console.log(`⏰ Keep-Alive activado: ping a ${CONFIG.url} cada ${CONFIG.intervalo / 60000} minutos`);
+
+        // Exponer API
+        window.keepAlive = {
+            ping: ping,
+            config: CONFIG,
+            detener: () => {
+                console.warn('⏰ Keep-Alive detenido');
+                // No podemos detener el intervalo fácilmente, pero podemos desactivar logs
+                CONFIG.debug = false;
+            }
+        };
+    }
+
+    // ============================================================
+    // 4. INICIALIZACIÓN AUTOMÁTICA
+    // ============================================================
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', iniciarKeepAlive);
+    } else {
+        iniciarKeepAlive();
+    }
+
+})();
+</script>
+
+
 </body>
 </html>
