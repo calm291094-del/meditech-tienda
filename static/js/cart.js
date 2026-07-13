@@ -1,5 +1,5 @@
 // ============================================================
-// CART.JS - CARRITO DE COMPRAS
+// CART.JS - CARRITO DE COMPRAS (VERSIÓN CORREGIDA)
 // ============================================================
 
 // ✅ Usar el S global, no crear uno nuevo
@@ -275,13 +275,93 @@ function closeCart() {
 }
 
 // ============================================================
+// FUNCIÓN PARA ENVIAR PEDIDO POR CORREO (DEFINIDA ANTES DE EXPONER)
+// ============================================================
+async function enviarPedidoPorCorreo() {
+    console.log('📤 enviarPedidoPorCorreo llamada');
+    
+    if (!S.cart || S.cart.length === 0) {
+        showNotif('⚠️ El carrito está vacío', 'warning');
+        return;
+    }
+
+    const user = S.currentUser || JSON.parse(localStorage.getItem('session') || '{}');
+    const userEmail = user?.email || 'cliente@meditech.com';
+    const userName = user?.name || 'Cliente';
+
+    let total = 0;
+    const pedidoData = S.cart.map(item => {
+        const producto = item.producto || {};
+        const precio = parseFloat(producto.price) || 0;
+        const cantidad = item.cantidad || 1;
+        total += precio * cantidad;
+        return {
+            nombre: producto.name || 'Producto',
+            cantidad: cantidad,
+            precio: precio
+        };
+    });
+
+    const payload = {
+        email: userEmail,
+        nombre: userName,
+        pedido: pedidoData,
+        total: total
+    };
+
+    console.log('📤 Enviando pedido:', payload);
+
+    try {
+        showNotif('📤 Procesando pedido...', 'info');
+
+        const response = await fetch('/api/enviar-pedido', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const responseText = await response.text();
+        console.log('📥 Respuesta del servidor:', responseText);
+
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            throw new Error('El servidor devolvió una respuesta inválida');
+        }
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || data.message || `Error ${response.status}`);
+        }
+
+        showNotif('✅ Pedido enviado correctamente', 'success');
+        S.cart = [];
+        guardarCarrito();
+        actualizarContadorCarrito();
+        closeCart();
+        renderCartItems();
+
+        if (data.pedido) {
+            console.log('📋 Pedido creado:', data.pedido.id);
+            showNotif(`📋 Pedido #${data.pedido.id} creado`, 'success');
+        }
+
+    } catch (error) {
+        console.error('❌ Error enviando pedido:', error);
+        showNotif(`❌ ${error.message}`, 'error');
+    }
+}
+
+// ============================================================
 // INICIALIZACIÓN
 // ============================================================
-// ✅ Solo cargar el carrito, no renderizar todavía
 cargarCarrito();
 
 // ============================================================
-// EXPONER FUNCIONES GLOBALMENTE
+// ✅ EXPONER FUNCIONES GLOBALMENTE (DESPUÉS DE DEFINIRLAS)
 // ============================================================
 window.addToCart = addToCart;
 window.agregarAlCarrito = addToCart;
@@ -298,3 +378,4 @@ window.showNotif = showNotif;
 window.sincronizarCarrito = sincronizarCarrito;
 
 console.log('✅ Cart.js cargado correctamente');
+console.log('🔧 enviarPedidoPorCorreo disponible:', typeof window.enviarPedidoPorCorreo);
