@@ -104,7 +104,6 @@ function renderProducts() {
         return;
     }
     
-    // 🔧 SVG de respaldo para imágenes rotas
     const fallbackImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="200"%3E%3Crect width="300" height="200" fill="%23f3f4f6"/%3E%3Ctext x="150" y="105" font-family="Arial" font-size="16" fill="%239ca3af" text-anchor="middle"%3ESin imagen%3C/text%3E%3C/svg%3E';
     
     grid.innerHTML = filtered.map(p => {
@@ -112,31 +111,31 @@ function renderProducts() {
         const isLowStock = p.stock > 0 && p.stock <= 5;
         const stockClass = isSoldOut ? 'soldout' : (isLowStock ? 'low-stock' : 'in-stock');
         const stockText = isSoldOut ? '❌ Agotado' : `📦 ${p.stock} unidades`;
-        
-        // 🔧 Usar imagen del producto o fallback
         const imgSrc = p.image && p.image.startsWith('http') ? p.image : fallbackImage;
         
         return `
-            <div class="product-card">
-                <div class="image-wrap" onclick="openQuickView('${p.id}')">
-                    <img src="${imgSrc}" alt="${p.name}" onerror="this.src='${fallbackImage}'">
-                    ${p.feat ? '<span class="badge badge-featured"><i class="fas fa-star mr-1"></i>Destacado</span>' : ''}
-                    ${isSoldOut ? '<span class="badge badge-soldout">❌ Agotado</span>' : `<span class="badge badge-stock">${stockText}</span>`}
-                    <span class="badge-category">${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}</span>
+            <div class="product-card" style="background:white;border-radius:16px;overflow:hidden;border:1px solid #f1f5f9;box-shadow:0 4px 20px rgba(0,0,0,0.06);transition:all 0.3s cubic-bezier(0.4,0,0.2,1);">
+                <div class="image-wrap" style="position:relative;height:200px;overflow:hidden;background:#f8fafc;cursor:pointer;" onclick="openQuickView('${p.id}')">
+                    <img src="${imgSrc}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s ease;" onerror="this.src='${fallbackImage}'">
+                    ${p.feat ? `<span style="position:absolute;top:10px;right:10px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:white;padding:3px 12px;border-radius:9999px;font-size:0.5rem;font-weight:700;text-transform:uppercase;z-index:2;"><i class="fas fa-star mr-1"></i>Destacado</span>` : ''}
+                    ${isSoldOut ? `<span style="position:absolute;top:10px;left:10px;background:rgba(220,38,38,0.9);color:white;padding:3px 12px;border-radius:9999px;font-size:0.5rem;font-weight:700;text-transform:uppercase;z-index:2;">❌ Agotado</span>` : `<span style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.7);color:white;padding:3px 12px;border-radius:9999px;font-size:0.5rem;font-weight:700;text-transform:uppercase;z-index:2;">${stockText}</span>`}
+                    <span style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);color:white;padding:2px 12px;border-radius:9999px;font-size:0.5rem;font-weight:600;z-index:2;">
+                        ${p.category === 'medicamento' ? '💊' : p.category === 'tecnologia' ? '💻' : p.category === 'salud' ? '🩺' : '🎮'} ${p.category}
+                    </span>
                 </div>
-                <div class="body">
-                    <div class="name" title="${p.name}">${p.name}</div>
-                    <div class="desc">${p.desc || ''}</div>
-                    <div class="footer">
+                <div style="padding:14px 16px 16px;">
+                    <div style="font-weight:700;font-size:0.95rem;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${p.name}">${p.name}</div>
+                    <div style="font-size:0.75rem;color:#475569;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:34px;line-height:1.5;margin-bottom:10px;">${p.desc || ''}</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid #f1f5f9;">
                         <div>
-                            <span class="price">$${parseFloat(p.price).toFixed(2)} <small>MN</small></span>
-                            ${!isSoldOut ? `<div class="stock-info"><span class="dot ${stockClass}"></span> ${p.stock} disponibles</div>` : ''}
+                            <span style="font-size:1.2rem;font-weight:700;color:#0d9488;">$${parseFloat(p.price).toFixed(2)} <small style="font-size:0.55rem;font-weight:400;color:#94a3b8;">MN</small></span>
+                            ${!isSoldOut ? `<div style="display:flex;align-items:center;gap:4px;font-size:0.6rem;color:#94a3b8;margin-top:2px;"><span style="width:6px;height:6px;border-radius:50%;display:inline-block;background:${stockClass === 'in-stock' ? '#10b981' : '#f59e0b'};${stockClass === 'low-stock' ? 'animation:pulse 1.5s infinite;' : ''}"></span> ${p.stock} disponibles</div>` : ''}
                         </div>
                         ${S.currentUser ? 
                             (isSoldOut ? 
-                                `<button class="add-btn" disabled><i class="fas fa-ban"></i></button>` :
-                                `<button class="add-btn" onclick="addToCart('${p.id}')"><i class="fas fa-plus"></i></button>`) :
-                            `<button class="add-btn" onclick="openLoginModal(); return false;"><i class="fas fa-lock"></i></button>`
+                                `<button disabled style="width:38px;height:38px;border-radius:50%;background:#94a3b8;color:white;border:none;cursor:not-allowed;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;opacity:0.4;"><i class="fas fa-ban"></i></button>` :
+                                `<button onclick="addToCart('${p.id}')" style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#06b6d4);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;box-shadow:0 4px 12px rgba(13,148,136,0.25);transition:all 0.3s cubic-bezier(0.4,0,0.2,1);"><i class="fas fa-plus"></i></button>`) :
+                            `<a href="#" onclick="if(typeof openLoginModal === 'function') openLoginModal(); return false;" style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#0d9488,#06b6d4);color:white;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;box-shadow:0 4px 12px rgba(13,148,136,0.25);transition:all 0.3s cubic-bezier(0.4,0,0.2,1);" title="Inicia sesión"><i class="fas fa-lock"></i></a>`
                         }
                     </div>
                 </div>
