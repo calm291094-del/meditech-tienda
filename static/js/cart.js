@@ -308,7 +308,7 @@ async function enviarPedidoPorCorreo() {
     // 4. Configurar EmailJS
     const EMAILJS_PUBLIC_KEY = '-oSvhsO6mZn5cdCz6'; // Reemplaza con tu clave pública
     const EMAILJS_SERVICE_ID = 'service_v1tiylh'; // Reemplaza con tu Service ID
-    const EMAILJS_TEMPLATE_ID = 'service_v1tiylh'; // Reemplaza con tu Template ID
+    const EMAILJS_TEMPLATE_ID = 'template_edjk1yg'; // Reemplaza con tu Template ID
 
     try {
         // Inicializar EmailJS
