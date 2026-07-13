@@ -23,11 +23,6 @@ app.use(express.json({ limit: '10mb' }));
 
 // ============================================================
 // IMPORTAR BASE DE DATOS (CON FALLBACK A JSON)
-// ============================================================
-// const fs = require('fs');
-const path = require('path');
-
-// ============================================================
 // FUNCIONES PARA ARCHIVOS JSON (FALLBACK)
 // ============================================================
 function leerJSON(nombre) {
