@@ -15,7 +15,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_change_me';
 // MIDDLEWARES
 // ============================================================
 app.use(cors({
-    origin: '*',
+    origin: '*',  // ✅ Permite todas las solicitudes (para pruebas)
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
