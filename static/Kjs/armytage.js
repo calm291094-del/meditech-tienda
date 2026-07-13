@@ -1,5 +1,5 @@
 // ============================================================
-// 🛡️ ARMYTAGE PROFESSIONAL SUITE v3.0
+// 🛡️ ARMYTAGE PROFESSIONAL SUITE v3.1 - VERSIÓN COMPLETA
 // ============================================================
 // SISTEMA MULTIAGENTE DE SEGURIDAD DE ÉLITE
 // 
@@ -20,7 +20,7 @@
     // 1. CONFIGURACIÓN GLOBAL
     // ============================================================
     const CONFIG = {
-        version: '3.0',
+        version: '3.1',
         debug: false,
         maxLogs: 500,
         enableAllAgents: true,
@@ -42,7 +42,6 @@
         _messageHistory: [],
         _maxHistory: 100,
 
-        // Registrar un agente
         register(agentName, agentInstance) {
             this._agents[agentName] = agentInstance;
             this._agents[agentName].name = agentName;
@@ -50,7 +49,6 @@
             return this;
         },
 
-        // Enviar mensaje a todos los agentes
         broadcast(message, data = {}, sender = 'system') {
             const event = {
                 id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
@@ -65,7 +63,6 @@
                 this._messageHistory.shift();
             }
 
-            // Enviar a todos los agentes que tengan método receive
             Object.values(this._agents).forEach(agent => {
                 if (agent && typeof agent.receive === 'function') {
                     try {
@@ -76,7 +73,6 @@
                 }
             });
 
-            // Emitir evento local
             if (this._events[message]) {
                 this._events[message].forEach(callback => {
                     try {
@@ -89,7 +85,6 @@
             return event;
         },
 
-        // Suscribirse a eventos
         on(eventName, callback) {
             if (!this._events[eventName]) {
                 this._events[eventName] = [];
@@ -98,7 +93,6 @@
             return this;
         },
 
-        // Enviar mensaje a un agente específico
         sendTo(agentName, message, data = {}) {
             const agent = this._agents[agentName];
             if (!agent) {
@@ -117,12 +111,10 @@
             return false;
         },
 
-        // Obtener historial de mensajes
         getHistory() {
             return this._messageHistory;
         },
 
-        // Obtener lista de agentes activos
         getActiveAgents() {
             return Object.keys(this._agents);
         },
@@ -169,17 +161,14 @@
                 this._logs.shift();
             }
 
-            // Persistir
             try {
                 localStorage.setItem('armytage_logs_v3', JSON.stringify(this._logs));
             } catch (e) {}
 
-            // Notificar suscriptores
             this._subscribers.forEach(callback => {
                 try { callback(entry); } catch (e) {}
             });
 
-            // Log en consola si debug
             if (CONFIG.debug) {
                 console.log(`[${agente}][${tipo}] ${mensaje}`, datos);
             }
@@ -327,30 +316,25 @@
             this.stats = { messagesReceived: 0, messagesSent: 0, errors: 0 };
         }
 
-        // Método que todos los agentes deben implementar
         receive(event) {
             this.stats.messagesReceived++;
             this.log(`📨 Recibido: ${event.message} de ${event.sender}`);
         }
 
-        // Enviar mensaje al bus
         send(message, data = {}) {
             this.stats.messagesSent++;
             return AgentBus.broadcast(message, data, this.name);
         }
 
-        // Loggear
         log(msg, data = {}) {
             return LogSystem.log('AGENT', `[${this.emoji} ${this.personality}] ${msg}`, data, this.name);
         }
 
-        // Notificar
         notify(msg, type = 'info') {
             ToastSystem.show(`[${this.emoji}] ${msg}`, type);
             return this.log(msg, { type });
         }
 
-        // Obtener estado
         getStatus() {
             return {
                 name: this.name,
@@ -361,14 +345,12 @@
             };
         }
 
-        // Inicializar (sobrescribir en cada agente)
         async activate() {
             this.activated = true;
             this.log('🟢 Agente activado');
             return this;
         }
 
-        // Desactivar
         deactivate() {
             this.activated = false;
             this.log('🔴 Agente desactivado');
@@ -403,7 +385,6 @@
         }
 
         _activarProtecciones() {
-            // Solo protección contra F12 y DevTools (sin bloquear formularios)
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'F12') {
                     e.preventDefault();
@@ -413,7 +394,6 @@
                 return true;
             });
 
-            // Detectar DevTools
             setInterval(() => {
                 const diffWidth = window.outerWidth - window.innerWidth;
                 const diffHeight = window.outerHeight - window.innerHeight;
@@ -434,7 +414,6 @@
         }
 
         _detectarDevTools() {
-            // Método debugger
             setInterval(() => {
                 const start = performance.now();
                 debugger;
@@ -449,7 +428,6 @@
         }
 
         _monitorearSinks() {
-            // Hook eval
             const originalEval = window.eval;
             window.eval = function(code) {
                 LogSystem.log('SECURITY', 'eval() ejecutado', { 
@@ -458,7 +436,6 @@
                 return originalEval(code);
             };
 
-            // Hook innerHTML
             const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
             if (descriptor) {
                 const originalSetter = descriptor.set;
@@ -496,6 +473,7 @@
             this.secretsFound = [];
             this.vulnerabilities = [];
             this.endpoints = [];
+            this.suspicious = [];
         }
 
         async activate() {
@@ -524,7 +502,6 @@
                 scripts: []
             };
 
-            // Escanear todos los scripts
             const scripts = document.querySelectorAll('script');
             for (const script of scripts) {
                 const content = script.src ? await this._fetchScript(script.src) : script.innerHTML;
@@ -541,15 +518,14 @@
                 }
             }
 
-            // Analizar atributos inline
             this._scanInlineAttributes(results);
 
             this.scanResults = results;
             this.secretsFound = results.secrets;
             this.vulnerabilities = results.vulnerabilities;
             this.endpoints = results.endpoints;
+            this.suspicious = results.suspicious;
 
-            // Loggear hallazgos importantes
             if (results.secrets.length > 0) {
                 LogSystem.log('INSPECTOR', `🔑 ${results.secrets.length} secretos encontrados`, {
                     secrets: results.secrets.map(s => s.type + ': ' + s.value.substring(0, 20))
@@ -608,19 +584,21 @@
 
         _checkVulnerabilities(content, results) {
             const vulns = {
-                'jQuery < 3.0': /jquery[\/-]?([0-2]\.\d+)/gi,
-                'Angular < 1.8': /angular[\/-]?([0-1]\.\d+)/gi,
-                'React < 16.8': /react[\/-]?([0-9]\.\d+)/gi,
-                'Vue < 2.6': /vue[\/-]?([0-2]\.\d+)/gi,
                 'eval()': /eval\s*\(/g,
-                'document.write': /document\.write\s*\(/g
+                'document.write': /document\.write\s*\(/g,
+                'innerHTML (suspicious)': /\.innerHTML\s*=\s*[^'"]+(?:['"]|[^;])/g,
+                'setTimeout (string)': /setTimeout\s*\(\s*["']/g,
+                'setInterval (string)': /setInterval\s*\(\s*["']/g,
+                'Function constructor': /new\s+Function\s*\(/g,
+                'with()': /\bwith\s*\(/g,
+                'debugger': /\bdebugger\b/g
             };
 
-            for (const [vuln, pattern] of Object.entries(vulns)) {
+            for (const [type, pattern] of Object.entries(vulns)) {
                 if (pattern.test(content)) {
                     results.vulnerabilities.push({
-                        type: vuln,
-                        severity: vuln.includes('eval') || vuln.includes('document.write') ? 'high' : 'medium',
+                        type: type,
+                        severity: type.includes('eval') || type.includes('document.write') ? 'high' : 'medium',
                         detected: new Date().toISOString()
                     });
                 }
@@ -628,7 +606,6 @@
         }
 
         _analyzeBehavior(script, results) {
-            // Detectar comportamientos sospechosos
             const content = script.src ? '' : script.innerHTML;
             const suspiciousPatterns = [
                 { pattern: /localStorage\.(get|set)Item/, desc: 'Acceso a localStorage' },
@@ -730,7 +707,6 @@
         }
 
         _buildBehavioralProfile() {
-            // Construir perfil de comportamiento normal
             this.behavioralProfile = {
                 clicks: 0,
                 keypresses: 0,
@@ -742,7 +718,6 @@
                 typicalPath: []
             };
 
-            // Registrar comportamiento normal durante 10 segundos
             let startTime = Date.now();
             let clicks = 0, keys = 0, scrolls = 0, movements = 0;
 
@@ -785,7 +760,6 @@
             });
             document.addEventListener('keydown', (e) => {
                 this.trainingData.push({ type: 'keydown', key: e.key, timestamp: Date.now() });
-                // Detectar patrones sospechosos de tecleo
                 if (e.key === 'F12' || (e.ctrlKey && e.key === 'u')) {
                     this.threatPredictions.push({
                         threat: 'Intento de acceso a DevTools',
@@ -804,7 +778,6 @@
             const now = Date.now();
             const recent = this.trainingData.filter(d => now - d.timestamp < 5000);
             
-            // Detectar anomalías
             if (recent.length > 20) {
                 this.anomalies.push({
                     type: 'Actividad excesiva',
@@ -815,7 +788,6 @@
                 LogSystem.log('SENTINEL', '⚠️ Actividad anómala detectada', { count: recent.length }, this.name);
             }
 
-            // Detectar patrones de bot
             const patterns = this._detectBotPatterns(recent);
             if (patterns.length > 0) {
                 for (const pattern of patterns) {
@@ -828,7 +800,6 @@
                 }
             }
 
-            // Limpiar predicciones viejas
             this.threatPredictions = this.threatPredictions.filter(p => 
                 Date.now() - new Date(p.timestamp).getTime() < 60000
             );
@@ -836,7 +807,6 @@
 
         _detectBotPatterns(recent) {
             const patterns = [];
-            // Detectar clics en la misma posición
             const positions = recent.filter(d => d.type === 'click');
             if (positions.length > 5) {
                 patterns.push('Múltiples clics en corto tiempo');
@@ -886,7 +856,6 @@
         }
 
         _embedWatermark() {
-            // Watermark invisible con datos del usuario
             const canvas = document.createElement('canvas');
             canvas.width = 300;
             canvas.height = 150;
@@ -924,7 +893,6 @@
         }
 
         _activateAntiDebug() {
-            // Anti-debugging avanzado
             const originalConsoleLog = console.log;
             console.log = function() {
                 if (arguments.length > 0 && typeof arguments[0] === 'string') {
@@ -934,13 +902,10 @@
                 }
                 return originalConsoleLog.apply(this, arguments);
             };
-
-            // Detectar depuración con console.log
             this.antiDebugActive = true;
         }
 
         _monitorScreenCapture() {
-            // Detectar captura de pantalla
             const originalGetUserMedia = navigator.mediaDevices?.getUserMedia;
             if (originalGetUserMedia) {
                 navigator.mediaDevices.getUserMedia = function(constraints) {
@@ -954,7 +919,6 @@
                 };
             }
 
-            // Detectar PrintScreen
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'PrintScreen') {
                     LogSystem.log('PHANTOM', 'Intento de PrintScreen detectado', {}, 'PhantomAgent');
@@ -964,7 +928,6 @@
         }
 
         _protectDOM() {
-            // Prevenir modificaciones no autorizadas del DOM
             const observer = new MutationObserver((mutations) => {
                 for (const mutation of mutations) {
                     if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
@@ -1046,10 +1009,8 @@
         }
 
         _startEnforcement() {
-            // Aplicar políticas a elementos existentes
             this._enforcePolicies(document.documentElement);
 
-            // Monitorear nuevos elementos
             const observer = new MutationObserver((mutations) => {
                 for (const mutation of mutations) {
                     for (const node of mutation.addedNodes) {
@@ -1124,34 +1085,17 @@
         _respondToThreat(threat) {
             switch (threat.type) {
                 case 'xss_attempt':
-                    this._blockXSS(threat);
+                    ToastSystem.critical('🚨 Ataque XSS detectado y bloqueado');
                     break;
                 case 'malicious_script':
-                    this._blockScript(threat);
+                    ToastSystem.critical('⚠️ Script malicioso bloqueado');
                     break;
                 case 'data_exfiltration':
-                    this._blockExfiltration(threat);
+                    ToastSystem.critical('🔒 Intento de exfiltración de datos bloqueado');
                     break;
                 default:
                     ToastSystem.error(`🚨 Amenaza detectada: ${threat.type}`);
             }
-        }
-
-        _blockXSS(threat) {
-            ToastSystem.critical('🚨 Ataque XSS detectado y bloqueado');
-            LogSystem.log('VALKYRIE', 'XSS bloqueado', threat, this.name);
-            this.send('XSS_BLOCKED', threat);
-        }
-
-        _blockScript(threat) {
-            ToastSystem.critical('⚠️ Script malicioso bloqueado');
-            LogSystem.log('VALKYRIE', 'Script malicioso bloqueado', threat, this.name);
-            this.send('MALICIOUS_SCRIPT_BLOCKED', threat);
-        }
-
-        _blockExfiltration(threat) {
-            ToastSystem.critical('🔒 Intento de exfiltración de datos bloqueado');
-            LogSystem.log('VALKYRIE', 'Exfiltración bloqueada', threat, this.name);
         }
 
         receive(event) {
@@ -1202,7 +1146,7 @@
             dashboard.id = 'armytage-oracle-dashboard';
             dashboard.style.cssText = `
                 position: fixed;
-                top: 10px;
+                bottom: 10px;
                 left: 10px;
                 background: rgba(0, 0, 0, 0.85);
                 backdrop-filter: blur(10px);
@@ -1220,43 +1164,12 @@
                 transition: opacity 0.5s ease;
             `;
 
-            // Botón para toggle dashboard
-            const toggleBtn = document.createElement('button');
-            toggleBtn.textContent = '📊';
-            toggleBtn.style.cssText = `
-                position: fixed;
-                top: 10px;
-                left: 10px;
-                background: rgba(0,0,0,0.7);
-                color: #00ff41;
-                border: 1px solid #00ff4144;
-                border-radius: 4px;
-                padding: 4px 8px;
-                cursor: pointer;
-                z-index: 999998;
-                font-size: 16px;
-                display: none;
-            `;
-            toggleBtn.onclick = () => {
-                dashboard.style.display = dashboard.style.display === 'none' ? 'block' : 'none';
-                toggleBtn.style.display = dashboard.style.display === 'none' ? 'block' : 'none';
-            };
-            document.body.appendChild(toggleBtn);
-            this._toggleBtn = toggleBtn;
-
             document.body.appendChild(dashboard);
             this.dashboard = dashboard;
-            this._toggleBtn = toggleBtn;
 
-            // Actualizar periódicamente
             setInterval(() => {
                 this._updateDashboard();
             }, CONFIG.oracleUpdateInterval);
-
-            // Mostrar toggle después de 5 segundos
-            setTimeout(() => {
-                toggleBtn.style.display = 'block';
-            }, 5000);
 
             LogSystem.log('ORACLE', 'Dashboard creado', {}, this.name);
         }
@@ -1293,13 +1206,11 @@
         }
 
         _startAnalytics() {
-            // Actualizar métricas cada 5 segundos
             setInterval(() => {
                 this._gatherMetrics();
                 this._generateInsights();
             }, 5000);
 
-            // Suscribirse a logs
             LogSystem.subscribe((entry) => {
                 this.history.push(entry);
                 if (this.history.length > 100) {
@@ -1308,7 +1219,6 @@
                 this.metrics.logs = LogSystem.getLogs().length;
             });
 
-            // Suscribirse a eventos del bus
             AgentBus.on('THREAT_DETECTED', (event) => {
                 this.metrics.threats++;
             });
@@ -1318,7 +1228,6 @@
             const agents = AgentBus.getActiveAgents();
             this.metrics.agents = agents.length;
 
-            // Calcular salud basada en múltiples factores
             const logs = LogSystem.getLogs(null, 20);
             const errors = logs.filter(l => l.tipo === 'ERROR').length;
             const threats = this.metrics.threats;
@@ -1335,19 +1244,16 @@
             const insights = [];
             const logs = LogSystem.getLogs(null, 50);
             
-            // Análisis de errores
             const errors = logs.filter(l => l.tipo === 'ERROR');
             if (errors.length > 10) {
                 insights.push(`⚠️ ${errors.length} errores recientes`);
             }
 
-            // Análisis de seguridad
             const securityEvents = logs.filter(l => l.tipo === 'SECURITY');
             if (securityEvents.length > 5) {
                 insights.push(`🔒 ${securityEvents.length} eventos de seguridad`);
             }
 
-            // Análisis de rendimiento
             const slowEvents = logs.filter(l => l.mensaje.includes('lento') || l.mensaje.includes('slow'));
             if (slowEvents.length > 3) {
                 insights.push(`🐢 ${slowEvents.length} eventos lentos detectados`);
@@ -1373,7 +1279,7 @@
     }
 
     // ============================================================
-    // 12. SISTEMA DE CHAT (Interfaz de Comandos)
+    // 12. SISTEMA DE CHAT - VERSIÓN COMPLETA CON TODOS LOS COMANDOS
     // ============================================================
     const ChatSystem = {
         _container: null,
@@ -1396,8 +1302,8 @@
                 top: 50%;
                 right: 0;
                 transform: translateY(-50%) translateX(100%);
-                width: 380px;
-                max-height: 520px;
+                width: 420px;
+                max-height: 560px;
                 background: #1e293b;
                 border-radius: 12px 0 0 12px;
                 box-shadow: -5px 0 30px rgba(0,0,0,0.6);
@@ -1472,7 +1378,7 @@
                 gap: 4px;
                 background: #0f172a;
                 min-height: 200px;
-                max-height: 360px;
+                max-height: 380px;
             `;
             container.appendChild(messages);
             this._messages = messages;
@@ -1541,7 +1447,7 @@
                 this._container.style.transform = 'translateY(-50%) translateX(0)';
                 this._toggleBtn.textContent = '▶';
                 this._toggleBtn.style.borderRadius = '0 8px 8px 0';
-                this._toggleBtn.style.right = '380px';
+                this._toggleBtn.style.right = '420px';
                 setTimeout(() => this._input.focus(), 300);
             } else {
                 this._container.style.transform = 'translateY(-50%) translateX(100%)';
@@ -1620,6 +1526,7 @@
                 let respuesta = '';
 
                 switch (cmd) {
+                    // ===== COMANDOS GENERALES =====
                     case '/help':
                         respuesta = this._getHelp();
                         break;
@@ -1641,22 +1548,95 @@
                         respuesta = this._getLogs(n);
                         break;
 
+                    case '/clear':
+                        this._messages.innerHTML = '';
+                        respuesta = null;
+                        break;
+
+                    // ===== COMANDOS DE INSPECTOR =====
+                    case '/scan':
+                        respuesta = await this._runScan();
+                        break;
+
                     case '/secrets':
                         respuesta = this._getSecrets();
                         break;
 
-                    case '/threats':
-                        respuesta = this._getThreats();
+                    case '/vulns':
+                        respuesta = this._getVulnerabilities();
                         break;
 
+                    case '/endpoints':
+                        respuesta = this._getEndpoints();
+                        break;
+
+                    case '/suspicious':
+                        respuesta = this._getSuspicious();
+                        break;
+
+                    // ===== COMANDOS DE SENTINEL =====
+                    case '/predict':
+                        respuesta = this._getPredictions();
+                        break;
+
+                    case '/anomalies':
+                        respuesta = this._getAnomalies();
+                        break;
+
+                    case '/profile':
+                        respuesta = this._getProfile();
+                        break;
+
+                    // ===== COMANDOS DE PHANTOM =====
+                    case '/watermark':
+                        respuesta = this._regenerateWatermark();
+                        break;
+
+                    case '/stealth':
+                        respuesta = this._toggleStealth();
+                        break;
+
+                    // ===== COMANDOS DE VALKYRIE =====
+                    case '/policies':
+                        respuesta = this._getPolicies();
+                        break;
+
+                    case '/block':
+                        if (args[1]) {
+                            respuesta = this._blockDomain(args[1]);
+                        } else {
+                            respuesta = '❌ Uso: /block <dominio>';
+                        }
+                        break;
+
+                    case '/unblock':
+                        if (args[1]) {
+                            respuesta = this._unblockDomain(args[1]);
+                        } else {
+                            respuesta = '❌ Uso: /unblock <dominio>';
+                        }
+                        break;
+
+                    case '/autoblock':
+                        respuesta = this._toggleAutoBlock();
+                        break;
+
+                    // ===== COMANDOS DE SECURITY =====
+                    case '/devtools':
+                        respuesta = this._checkDevTools();
+                        break;
+
+                    // ===== COMANDOS DE ORACLE =====
                     case '/dashboard':
-                        this._toggleDashboard();
-                        respuesta = '📊 Dashboard toggled';
+                        respuesta = this._toggleDashboard();
                         break;
 
-                    case '/clear':
-                        this._messages.innerHTML = '';
-                        respuesta = null;
+                    case '/metrics':
+                        respuesta = this._getMetrics();
+                        break;
+
+                    case '/insights':
+                        respuesta = this._getInsights();
                         break;
 
                     default:
@@ -1668,49 +1648,101 @@
                 }
             } catch (e) {
                 this._agregarMensaje('error', `❌ Error: ${e.message}`);
+                console.error('Error en comando:', e);
             }
         },
 
+        // ===== HELP COMPLETO =====
         _getHelp() {
             return `📋 COMANDOS ARMYTAGE SUITE v${CONFIG.version}
 
-🟢 /status     - Estado global del sistema
-📊 /health     - Informe de salud completo
-🤖 /agents     - Lista de agentes activos
-📝 /logs [n]   - Últimos n logs
-🔑 /secrets    - Secretos encontrados por Inspector
-👾 /threats    - Amenazas detectadas
-📊 /dashboard  - Mostrar/ocultar dashboard
-🧹 /clear      - Limpiar chat
-❓ /help       - Esta ayuda
+═══════════════════════════════════════
+📊 GENERALES
+═══════════════════════════════════════
+/status     - Estado global del sistema
+/health     - Informe de salud completo
+/agents     - Lista de agentes activos
+/logs [n]   - Últimos n logs
+/clear      - Limpiar chat
 
-AGENTES ACTIVOS:
-🕵️‍♂️ Security  - El Guardián
-🔍 Inspector  - El Detective  
-🧠 Sentinel   - El Profeta
-⚡ Phantom    - El Espectro
-🎯 Valkyrie   - La Justiciera
-🤖 Oracle     - El Oráculo`;
+═══════════════════════════════════════
+🔍 INSPECTOR - El Detective
+═══════════════════════════════════════
+/scan       - Ejecutar escaneo completo
+/secrets    - Secretos encontrados
+/vulns      - Vulnerabilidades detectadas
+/endpoints  - Endpoints descubiertos
+/suspicious - Comportamiento sospechoso
+
+═══════════════════════════════════════
+🧠 SENTINEL - El Profeta
+═══════════════════════════════════════
+/predict    - Predicciones de amenazas
+/anomalies  - Anomalías detectadas
+/profile    - Perfil de comportamiento
+
+═══════════════════════════════════════
+⚡ PHANTOM - El Espectro
+═══════════════════════════════════════
+/watermark  - Regenerar watermark
+/stealth    - Toggle modo sigiloso
+
+═══════════════════════════════════════
+🎯 VALKYRIE - La Justiciera
+═══════════════════════════════════════
+/policies   - Ver políticas activas
+/block <d>  - Bloquear dominio
+/unblock <d>- Desbloquear dominio
+/autoblock  - Toggle auto-block
+
+═══════════════════════════════════════
+🕵️ SECURITY - El Guardián
+═══════════════════════════════════════
+/devtools   - Estado de DevTools
+
+═══════════════════════════════════════
+🤖 ORACLE - El Oráculo
+═══════════════════════════════════════
+/dashboard  - Mostrar/ocultar dashboard
+/metrics    - Métricas del sistema
+/insights   - Insights generados
+
+═══════════════════════════════════════
+❓ /help    - Esta ayuda
+═══════════════════════════════════════`;
         },
 
+        // ===== STATUS =====
         async _getStatus() {
             const agents = AgentBus.getActiveAgents();
             const logs = LogSystem.getLogs();
             const stats = LogSystem.getStats();
 
+            // Obtener estado de cada agente
+            let agentStatus = '';
+            for (const name of agents) {
+                const agent = AgentBus._agents[name];
+                if (agent && typeof agent.getStatus === 'function') {
+                    const status = agent.getStatus();
+                    agentStatus += `  ${status.emoji} ${status.name} - ${status.activated ? '🟢 Activo' : '🔴 Inactivo'}\n`;
+                }
+            }
+
             return `📊 ESTADO GLOBAL ARMYTAGE v${CONFIG.version}
 
+⏰ ${new Date().toISOString()}
+
 🤖 Agentes activos: ${agents.length}
+${agentStatus}
+
 📝 Logs totales: ${logs.length}
 🔒 Eventos de seguridad: ${stats.porTipo?.SECURITY || 0}
 ⚠️ Errores: ${stats.porTipo?.ERROR || 0}
 
-AGENTES:
-${agents.map(a => '  • ' + a).join('\n')}
-
-⏰ ${new Date().toISOString()}`;
+💡 Escribe /health para más detalles`;
         },
 
+        // ===== HEALTH =====
         _getHealth() {
             const agents = AgentBus.getActiveAgents();
             const logs = LogSystem.getLogs();
@@ -1724,12 +1756,12 @@ ${agents.map(a => '  • ' + a).join('\n')}
             score -= security * 1;
             score = Math.max(0, Math.min(100, score));
 
-            const level = score > 80 ? 'Excelente' : score > 60 ? 'Bueno' : score > 40 ? 'Regular' : 'Crítico';
+            const level = score > 80 ? '🟢 Excelente' : score > 60 ? '🟡 Bueno' : score > 40 ? '🟠 Regular' : '🔴 Crítico';
 
             return `📊 INFORME DE SALUD
 
 🔵 Puntuación: ${score}/100
-🟢 Nivel: ${level}
+${level}
 
 📊 ESTADÍSTICAS:
 • Agentes: ${agents.length}
@@ -1737,31 +1769,32 @@ ${agents.map(a => '  • ' + a).join('\n')}
 • Errores: ${errors}
 • Eventos de seguridad: ${security}
 
-🤖 AGENTES ACTIVOS:
-${agents.map(a => '  • ' + a).join('\n')}
-
-💡 Recomendación: ${score > 80 ? '✅ Sistema en excelente estado' : '⚠️ Revisar logs para más detalles'}`;
+💡 ${score > 80 ? '✅ Sistema en excelente estado' : '⚠️ Revisar logs para más detalles'}`;
         },
 
+        // ===== AGENTS =====
         _getAgents() {
             const agents = AgentBus.getActiveAgents();
-            const agentStatus = [];
-            
+            let result = `🤖 AGENTES ACTIVOS (${agents.length})\n\n`;
+
             for (const name of agents) {
                 const agent = AgentBus._agents[name];
                 if (agent && typeof agent.getStatus === 'function') {
                     const status = agent.getStatus();
-                    agentStatus.push(`${status.emoji} ${status.name} - ${status.activated ? '🟢 Activo' : '🔴 Inactivo'} (${status.stats.messagesReceived} msgs)`);
+                    result += `${status.emoji} ${status.name} - ${status.activated ? '🟢 Activo' : '🔴 Inactivo'}\n`;
+                    result += `   📨 Mensajes: ${status.stats.messagesReceived}\n`;
+                    result += `   📤 Enviados: ${status.stats.messagesSent}\n`;
+                    if (status.personality) {
+                        result += `   💬 "${status.personality}"\n`;
+                    }
+                    result += '\n';
                 }
             }
 
-            return `🤖 AGENTES ACTIVOS (${agents.length})
-
-${agentStatus.join('\n')}
-
-📊 Total mensajes procesados: ${Object.values(AgentBus._agents).reduce((sum, a) => sum + (a.stats?.messagesReceived || 0), 0)}`;
+            return result;
         },
 
+        // ===== LOGS =====
         _getLogs(n) {
             const logs = LogSystem.getLogs(null, n);
             if (logs.length === 0) {
@@ -1771,6 +1804,32 @@ ${agentStatus.join('\n')}
                 logs.map(l => `[${l.timestamp.split('T')[1].slice(0,8)}] ${l.agente}: ${l.mensaje}`).join('\n');
         },
 
+        // ===== SCAN =====
+        async _runScan() {
+            const inspector = AgentBus._agents['InspectorAgent'];
+            if (!inspector) {
+                return '❌ Inspector no disponible';
+            }
+            
+            await inspector._realizarEscaneoCompleto();
+            const results = inspector.scanResults;
+            
+            if (!results) {
+                return '❌ No se pudo completar el escaneo';
+            }
+
+            return `🔍 ESCANEO COMPLETADO
+
+📊 RESULTADOS:
+• Secretos encontrados: ${results.secrets.length}
+• Vulnerabilidades: ${results.vulnerabilities.length}
+• Endpoints: ${results.endpoints.length}
+• Sospechosos: ${results.suspicious.length}
+
+Usa /secrets, /vulns, /endpoints o /suspicious para detalles.`;
+        },
+
+        // ===== SECRETS =====
         _getSecrets() {
             const inspector = AgentBus._agents['InspectorAgent'];
             if (!inspector) {
@@ -1784,28 +1843,228 @@ ${agentStatus.join('\n')}
                 secrets.map((s, i) => `${i+1}. ${s.type}: ${s.value}`).join('\n');
         },
 
-        _getThreats() {
+        // ===== VULNERABILITIES =====
+        _getVulnerabilities() {
+            const inspector = AgentBus._agents['InspectorAgent'];
+            if (!inspector) {
+                return '❌ Inspector no disponible';
+            }
+            const vulns = inspector.vulnerabilities || [];
+            if (vulns.length === 0) {
+                return '✅ No se encontraron vulnerabilidades';
+            }
+            return `⚠️ VULNERABILIDADES (${vulns.length}):\n\n` +
+                vulns.map((v, i) => `${i+1}. ${v.type} - ${v.severity}`).join('\n');
+        },
+
+        // ===== ENDPOINTS =====
+        _getEndpoints() {
+            const inspector = AgentBus._agents['InspectorAgent'];
+            if (!inspector) {
+                return '❌ Inspector no disponible';
+            }
+            const endpoints = inspector.endpoints || [];
+            if (endpoints.length === 0) {
+                return '🌐 No se encontraron endpoints';
+            }
+            return `🌐 ENDPOINTS (${endpoints.length}):\n\n` +
+                endpoints.map((e, i) => `${i+1}. ${e}`).join('\n');
+        },
+
+        // ===== SUSPICIOUS =====
+        _getSuspicious() {
+            const inspector = AgentBus._agents['InspectorAgent'];
+            if (!inspector) {
+                return '❌ Inspector no disponible';
+            }
+            const suspicious = inspector.suspicious || [];
+            if (suspicious.length === 0) {
+                return '✅ No se encontraron comportamientos sospechosos';
+            }
+            return `🚨 SOSPECHOSOS (${suspicious.length}):\n\n` +
+                suspicious.map((s, i) => `${i+1}. ${s.desc} (${s.script})`).join('\n');
+        },
+
+        // ===== PREDICTIONS =====
+        _getPredictions() {
             const sentinel = AgentBus._agents['SentinelAgent'];
             if (!sentinel) {
                 return '❌ Sentinel no disponible';
             }
-            const threats = sentinel.threatPredictions || [];
-            if (threats.length === 0) {
-                return '👾 No se detectaron amenazas';
+            const predictions = sentinel.threatPredictions || [];
+            if (predictions.length === 0) {
+                return '👾 No hay predicciones de amenazas';
             }
-            return `👾 AMENAZAS DETECTADAS (${threats.length}):\n\n` +
-                threats.map((t, i) => `${i+1}. ${t.threat} (${(t.confidence * 100).toFixed(0)}%)`).join('\n');
+            return `👾 PREDICCIONES (${predictions.length}):\n\n` +
+                predictions.map((p, i) => `${i+1}. ${p.threat} (${(p.confidence * 100).toFixed(0)}%)`).join('\n');
         },
 
+        // ===== ANOMALIES =====
+        _getAnomalies() {
+            const sentinel = AgentBus._agents['SentinelAgent'];
+            if (!sentinel) {
+                return '❌ Sentinel no disponible';
+            }
+            const anomalies = sentinel.anomalies || [];
+            if (anomalies.length === 0) {
+                return '✅ No se detectaron anomalías';
+            }
+            return `⚠️ ANOMALÍAS (${anomalies.length}):\n\n` +
+                anomalies.map((a, i) => `${i+1}. ${a.type} (${a.count || 0} eventos)`).join('\n');
+        },
+
+        // ===== PROFILE =====
+        _getProfile() {
+            const sentinel = AgentBus._agents['SentinelAgent'];
+            if (!sentinel) {
+                return '❌ Sentinel no disponible';
+            }
+            const profile = sentinel.behavioralProfile;
+            if (!profile) {
+                return '📊 Perfil no disponible (aún construyendo)';
+            }
+            return `📊 PERFIL DE COMPORTAMIENTO
+
+🖱️ Clicks/min: ${profile.clicks?.toFixed(1) || 0}
+⌨️ Teclas/min: ${profile.keypresses?.toFixed(1) || 0}
+📜 Scroll/min: ${profile.scrolls?.toFixed(1) || 0}
+🖱️ Movimientos/min: ${profile.mouseMovements?.toFixed(1) || 0}
+⏱️ Sesión promedio: ${profile.averageSessionTime?.toFixed(0) || 0}s`;
+        },
+
+        // ===== WATERMARK =====
+        _regenerateWatermark() {
+            const phantom = AgentBus._agents['PhantomAgent'];
+            if (!phantom) {
+                return '❌ Phantom no disponible';
+            }
+            if (typeof phantom._embedWatermark === 'function') {
+                const existing = document.getElementById('armytage-phantom-watermark');
+                if (existing) existing.remove();
+                phantom.watermarkActive = false;
+                phantom._embedWatermark();
+                return '🌊 Watermark regenerado correctamente';
+            }
+            return '❌ No se pudo regenerar el watermark';
+        },
+
+        // ===== STEALTH =====
+        _toggleStealth() {
+            const phantom = AgentBus._agents['PhantomAgent'];
+            if (!phantom) {
+                return '❌ Phantom no disponible';
+            }
+            phantom.protectionLevel = phantom.protectionLevel === 'stealth' ? 'maximum' : 'stealth';
+            return `⚡ Modo sigiloso: ${phantom.protectionLevel.toUpperCase()}`;
+        },
+
+        // ===== POLICIES =====
+        _getPolicies() {
+            const valkyrie = AgentBus._agents['ValkyrieAgent'];
+            if (!valkyrie) {
+                return '❌ Valkyrie no disponible';
+            }
+            const policies = valkyrie.policies || [];
+            if (policies.length === 0) {
+                return '📋 No hay políticas configuradas';
+            }
+            return `📋 POLÍTICAS ACTIVAS (${policies.length}):\n\n` +
+                policies.map((p, i) => `${i+1}. ${p.name} - ${p.severity} (${p.action})`).join('\n');
+        },
+
+        // ===== BLOCK DOMAIN =====
+        _blockDomain(domain) {
+            const valkyrie = AgentBus._agents['ValkyrieAgent'];
+            if (!valkyrie) {
+                return '❌ Valkyrie no disponible';
+            }
+            if (!valkyrie.blockedDomains) {
+                valkyrie.blockedDomains = [];
+            }
+            if (valkyrie.blockedDomains.includes(domain)) {
+                return `⚠️ Dominio ${domain} ya está bloqueado`;
+            }
+            valkyrie.blockedDomains.push(domain);
+            LogSystem.log('VALKYRIE', `Dominio bloqueado: ${domain}`, {}, 'ValkyrieAgent');
+            return `🚫 Dominio ${domain} bloqueado correctamente`;
+        },
+
+        // ===== UNBLOCK DOMAIN =====
+        _unblockDomain(domain) {
+            const valkyrie = AgentBus._agents['ValkyrieAgent'];
+            if (!valkyrie) {
+                return '❌ Valkyrie no disponible';
+            }
+            if (!valkyrie.blockedDomains) {
+                return '⚠️ No hay dominios bloqueados';
+            }
+            const index = valkyrie.blockedDomains.indexOf(domain);
+            if (index === -1) {
+                return `⚠️ Dominio ${domain} no está bloqueado`;
+            }
+            valkyrie.blockedDomains.splice(index, 1);
+            LogSystem.log('VALKYRIE', `Dominio desbloqueado: ${domain}`, {}, 'ValkyrieAgent');
+            return `✅ Dominio ${domain} desbloqueado correctamente`;
+        },
+
+        // ===== TOGGLE AUTOBLOCK =====
+        _toggleAutoBlock() {
+            const valkyrie = AgentBus._agents['ValkyrieAgent'];
+            if (!valkyrie) {
+                return '❌ Valkyrie no disponible';
+            }
+            valkyrie.autoBlock = !valkyrie.autoBlock;
+            return `⚙️ Auto-block: ${valkyrie.autoBlock ? '🟢 ACTIVADO' : '🔴 DESACTIVADO'}`;
+        },
+
+        // ===== CHECK DEVTOOLS =====
+        _checkDevTools() {
+            const security = AgentBus._agents['SecurityAgent'];
+            if (!security) {
+                return '❌ Security no disponible';
+            }
+            const detected = security.devToolsDetected || false;
+            return `🕵️ DevTools detectadas: ${detected ? '🔴 SÍ' : '🟢 NO'}`;
+        },
+
+        // ===== TOGGLE DASHBOARD =====
         _toggleDashboard() {
             const dashboard = document.getElementById('armytage-oracle-dashboard');
             if (dashboard) {
-                dashboard.style.display = dashboard.style.display === 'none' ? 'block' : 'none';
-                const toggleBtn = document.querySelector('[style*="armytage-oracle-dashboard"] ~ button');
-                if (toggleBtn) {
-                    toggleBtn.style.display = dashboard.style.display === 'none' ? 'block' : 'none';
-                }
+                const display = dashboard.style.display;
+                dashboard.style.display = display === 'none' ? 'block' : 'none';
+                return `📊 Dashboard ${dashboard.style.display === 'none' ? 'oculto' : 'visible'}`;
             }
+            return '❌ Dashboard no encontrado';
+        },
+
+        // ===== METRICS =====
+        _getMetrics() {
+            const oracle = AgentBus._agents['OracleAgent'];
+            if (!oracle) {
+                return '❌ Oracle no disponible';
+            }
+            const metrics = oracle.metrics || {};
+            return `📊 MÉTRICAS DEL SISTEMA
+
+🟢 Salud: ${metrics.health || 0}%
+👾 Amenazas: ${metrics.threats || 0}
+📝 Logs: ${metrics.logs || 0}
+🤖 Agentes: ${metrics.agents || 0}
+⏱️ Uptime: ${oracle._formatUptime ? oracle._formatUptime() : 'N/A'}`;
+        },
+
+        // ===== INSIGHTS =====
+        _getInsights() {
+            const oracle = AgentBus._agents['OracleAgent'];
+            if (!oracle) {
+                return '❌ Oracle no disponible';
+            }
+            const insights = oracle.insights || [];
+            if (insights.length === 0) {
+                return '💡 No hay insights disponibles';
+            }
+            return `💡 INSIGHTS:\n\n` + insights.map((i, idx) => `${idx+1}. ${i}`).join('\n');
         }
     };
 
@@ -1817,10 +2076,8 @@ ${agentStatus.join('\n')}
         console.log('🤖 Cargando agentes...');
 
         try {
-            // 1. Inicializar sistemas base
             LogSystem.init();
 
-            // 2. Registrar agentes en el bus
             const security = new SecurityAgent();
             const inspector = new InspectorAgent();
             const sentinel = new SentinelAgent();
@@ -1836,7 +2093,6 @@ ${agentStatus.join('\n')}
                 .register('ValkyrieAgent', valkyrie)
                 .register('OracleAgent', oracle);
 
-            // 3. Activar todos los agentes
             await Promise.all([
                 security.activate(),
                 inspector.activate(),
@@ -1846,19 +2102,16 @@ ${agentStatus.join('\n')}
                 oracle.activate()
             ]);
 
-            // 4. Iniciar chat
             setTimeout(() => {
                 ChatSystem.init();
             }, 500);
 
-            // 5. Log de inicio
             LogSystem.log('SISTEMA', '🚀 Armytage Professional Suite v' + CONFIG.version + ' iniciado', {
                 agents: AgentBus.getActiveAgents().length,
                 version: CONFIG.version,
                 timestamp: new Date().toISOString()
             });
 
-            // 6. Exponer API pública
             window.armytage = {
                 version: CONFIG.version,
                 agents: AgentBus._agents,
@@ -1886,18 +2139,63 @@ ${agentStatus.join('\n')}
                         stats
                     };
                 },
-                debug: CONFIG.debug
+                debug: CONFIG.debug,
+                // Comandos de los agentes
+                inspector: {
+                    scan: () => inspector._realizarEscaneoCompleto(),
+                    secrets: () => inspector.secretsFound,
+                    vulns: () => inspector.vulnerabilities,
+                    endpoints: () => inspector.endpoints,
+                    suspicious: () => inspector.suspicious
+                },
+                sentinel: {
+                    predict: () => sentinel.threatPredictions,
+                    anomalies: () => sentinel.anomalies,
+                    profile: () => sentinel.behavioralProfile
+                },
+                phantom: {
+                    watermark: () => phantom._embedWatermark(),
+                    stealth: () => phantom.protectionLevel
+                },
+                valkyrie: {
+                    policies: () => valkyrie.policies,
+                    block: (domain) => {
+                        if (!valkyrie.blockedDomains) valkyrie.blockedDomains = [];
+                        valkyrie.blockedDomains.push(domain);
+                    },
+                    unblock: (domain) => {
+                        if (valkyrie.blockedDomains) {
+                            const idx = valkyrie.blockedDomains.indexOf(domain);
+                            if (idx > -1) valkyrie.blockedDomains.splice(idx, 1);
+                        }
+                    },
+                    autoblock: () => valkyrie.autoBlock
+                },
+                security: {
+                    devtools: () => security.devToolsDetected
+                },
+                oracle: {
+                    metrics: () => oracle.metrics,
+                    insights: () => oracle.insights,
+                    dashboard: () => oracle.dashboard
+                }
             };
 
             window._armytageStart = Date.now();
 
-            // 7. Mensaje de bienvenida
             const agentCount = AgentBus.getActiveAgents().length;
             ToastSystem.success(`🛡️ Armytage Suite v${CONFIG.version} | ${agentCount} agentes activos`);
             
             console.log(`✅ Armytage inicializado correctamente (${agentCount} agentes)`);
             console.log('💡 Haz clic en la flecha ◀ en el borde derecho para abrir el chat');
             console.log('📖 Escribe /help en el chat para ver todos los comandos');
+            console.log('📋 Comandos disponibles:');
+            console.log('   🔍 /scan, /secrets, /vulns, /endpoints, /suspicious');
+            console.log('   🧠 /predict, /anomalies, /profile');
+            console.log('   ⚡ /watermark, /stealth');
+            console.log('   🎯 /policies, /block, /unblock, /autoblock');
+            console.log('   🕵️ /devtools');
+            console.log('   🤖 /metrics, /insights, /dashboard');
 
         } catch (error) {
             console.error('❌ Error al inicializar Armytage:', error);
