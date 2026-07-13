@@ -129,7 +129,7 @@ function renderProducts() {
                     <div class="desc">${p.desc || ''}</div>
                     <div class="footer">
                         <div>
-                            <span class="price">$${parseFloat(p.price).toFixed(2)} <small>MXN</small></span>
+                            <span class="price">$${parseFloat(p.price).toFixed(2)} <small>MN</small></span>
                             ${!isSoldOut ? `<div class="stock-info"><span class="dot ${stockClass}"></span> ${p.stock} disponibles</div>` : ''}
                         </div>
                         ${S.currentUser ? 
