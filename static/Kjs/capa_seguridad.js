@@ -398,20 +398,27 @@
         });
     }
 
-    // ============================================================
-    // 13. FUNCIÓN DE ALERTA (TOAST O ALERT NATIVO)
-    // ============================================================
-    function mostrarAlerta(mensaje) {
-        // Intentar usar showNotif si existe (sistema de toasts)
-        if (typeof showNotif === 'function') {
-            showNotif(mensaje, 'warning', 3000);
-        } else {
-            // Fallback: alert nativo
-            alert(mensaje);
+// ============================================================
+// 13. FUNCIÓN DE ALERTA (TOAST O ALERT NATIVO)
+// ============================================================
+function mostrarAlerta(mensaje) {
+    // ✅ No usar alert() que bloquea la UI
+    // Intentar usar showNotif si existe (sistema de toasts)
+    if (typeof showNotif === 'function') {
+        showNotif(mensaje, 'warning', 3000);
+    } else {
+        // ✅ Usar console.warn en lugar de alert
+        console.warn('🔒 Seguridad:', mensaje);
+        // Si existe un elemento para notificaciones, usarlo
+        const notifEl = document.getElementById('notification-area');
+        if (notifEl) {
+            notifEl.innerHTML = `<div class="toast warning">${mensaje}</div>`;
+            setTimeout(() => { notifEl.innerHTML = ''; }, 3000);
         }
-        // Registrar en auditoría
-        registrarAccionSeguridad('ALERTA', mensaje);
     }
+    // Registrar en auditoría
+    registrarAccionSeguridad('ALERTA', mensaje);
+}
 
     // ============================================================
     // 14. BLOQUEO DE CONSOLA
