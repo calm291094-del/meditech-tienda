@@ -644,23 +644,46 @@
 
 <script>
     // ============================================
-    // ✅ FALLBACK: Definir enviarPedidoPorCorreo directamente
+    // CÓDIGO PRINCIPAL - INICIALIZACIÓN
+    // ============================================
+    
+    // Año en el footer
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Cerrar modales con Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.active, .admin-panel-overlay.active, .quick-view-overlay.active')
+                .forEach(el => el.classList.remove('active'));
+            document.getElementById('user-menu').classList.remove('open');
+        }
+    });
+
+    // Cerrar menú al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#user-section')) {
+            document.getElementById('user-menu').classList.remove('open');
+        }
+        if (!e.target.closest('.search-container')) {
+            document.getElementById('search-results').classList.remove('active');
+        }
+    });
+
+    // ============================================
+    // ✅ SOBRESCRIBIR enviarPedidoPorCorreo CON EMAILJS
     // ============================================
     window.enviarPedidoPorCorreo = async function() {
-        console.log('📤 enviarPedidoPorCorreo llamada desde fallback');
+        console.log('📤 enviarPedidoPorCorreo llamada (EmailJS)');
         
-        // 1. Verificar que el carrito no esté vacío
         if (!S.cart || S.cart.length === 0) {
             showNotif('⚠️ El carrito está vacío', 'warning');
             return;
         }
 
-        // 2. Obtener datos del usuario
         const user = S.currentUser || JSON.parse(localStorage.getItem('session') || '{}');
         const userEmail = user?.email || 'cliente@meditech.com';
         const userName = user?.name || 'Cliente';
 
-        // 3. Calcular el total y preparar el pedido
         let total = 0;
         const pedidoData = S.cart.map(item => {
             const producto = item.producto || {};
@@ -674,61 +697,75 @@
             };
         });
 
-        const payload = {
-            email: userEmail,
-            nombre: userName,
-            pedido: pedidoData,
-            total: total
-        };
+        // ✅ Configuración de EmailJS (REEMPLAZA CON TUS CREDENCIALES)
+        const EMAILJS_PUBLIC_KEY = '-oSvhsO6mZn5cdCz6';
+        const EMAILJS_SERVICE_ID = 'service_v1tiylh';
+        const EMAILJS_TEMPLATE_ID = 'template_edjk1yg;
 
-        console.log('📤 Enviando pedido:', payload);
+        // ✅ Verificar que las credenciales no estén vacías
+        if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === 'TU_PUBLIC_KEY') {
+            showNotif('⚠️ Configura EmailJS en el código', 'warning');
+            console.error('❌ EmailJS no configurado');
+            return;
+        }
 
         try {
-            showNotif('📤 Procesando pedido...', 'info');
-
-            const response = await fetch('/api/enviar-pedido', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const responseText = await response.text();
-            console.log('📥 Respuesta del servidor:', responseText);
-
-            let data;
-            try {
-                data = JSON.parse(responseText);
-            } catch (parseError) {
-                throw new Error('El servidor devolvió una respuesta inválida');
+            // Inicializar EmailJS
+            if (typeof emailjs === 'undefined') {
+                throw new Error('EmailJS no está cargado');
             }
+            
+            emailjs.init(EMAILJS_PUBLIC_KEY);
 
-            if (!response.ok || !data.success) {
-                throw new Error(data.error || data.message || `Error ${response.status}`);
-            }
+            const payload = {
+                nombre: userName,
+                email: userEmail,
+                total: total.toFixed(2),
+                items: pedidoData.map(p => 
+                    `${p.nombre} x${p.cantidad} = $${(p.precio * p.cantidad).toFixed(2)}`
+                ).join('\n'),
+                fecha: new Date().toLocaleString()
+            };
 
+            showNotif('📤 Enviando pedido...', 'info');
+
+            const response = await emailjs.send(
+                EMAILJS_SERVICE_ID,
+                EMAILJS_TEMPLATE_ID,
+                payload
+            );
+
+            console.log('✅ EmailJS respuesta:', response);
             showNotif('✅ Pedido enviado correctamente', 'success');
+            
             S.cart = [];
             guardarCarrito();
             actualizarContadorCarrito();
             closeCart();
             renderCartItems();
 
-            if (data.pedido) {
-                console.log('📋 Pedido creado:', data.pedido.id);
-                showNotif(`📋 Pedido #${data.pedido.id} creado`, 'success');
-            }
-
         } catch (error) {
-            console.error('❌ Error enviando pedido:', error);
-            showNotif(`❌ ${error.message}`, 'error');
+            console.error('❌ Error con EmailJS:', error);
+            showNotif(`❌ Error al enviar: ${error.text || error.message}`, 'error');
         }
     };
 
-    console.log('✅ enviarPedidoPorCorreo definida desde fallback');
-    console.log('🔍 typeof enviarPedidoPorCorreo:', typeof enviarPedidoPorCorreo);
+    // ============================================
+    // ✅ FUNCIÓN PARA RECARGAR PRODUCTOS MANUALMENTE
+    // ============================================
+    window.forzarRecarga = function() {
+        if (typeof cargarProductos === 'function') {
+            cargarProductos();
+        }
+        showNotif('🔄 Productos recargados', 'info');
+    };
+
+    console.log('✅ MediTech listo');
+    console.log('🔍 Para depuración, ejecuta:');
+    console.log('  - S.pr (productos cargados)');
+    console.log('  - addToCart (función para agregar al carrito)');
+    console.log('  - renderProducts() (renderizar productos)');
+    console.log('  - enviarPedidoPorCorreo (función EmailJS)');
 </script>
     
 </body>
