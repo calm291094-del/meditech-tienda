@@ -531,88 +531,6 @@ app.put('/api/pedidos/:id', authenticateToken, esAdmin, async (req, res) => {
     }
 });
 
-// ---- ENVIAR PEDIDO POR CORREO (sin autenticación, para el frontend) ----
-app.post('/api/enviar-pedido', async (req, res) => {
-    try {
-        const { email, nombre, pedido, total } = req.body;
-        
-        console.log('📧 Recibido pedido de:', nombre, 'Email:', email);
-        console.log('📦 Productos:', JSON.stringify(pedido, null, 2));
-        console.log('💰 Total:', total);
-        
-        // Validar que llegaron los datos
-        if (!pedido || pedido.length === 0) {
-            return res.status(400).json({ error: 'El pedido está vacío' });
-        }
-        
-        // Leer pedidos existentes desde el archivo JSON
-        const fs = require('fs');
-        const path = require('path');
-        let pedidos = [];
-        try {
-            const data = fs.readFileSync('pedidos.json', 'utf8');
-            pedidos = JSON.parse(data);
-        } catch (e) {
-            // Si no existe, empezar vacío
-            pedidos = [];
-        }
-        
-        // Crear nuevo pedido
-        const nuevoPedido = {
-            id: 'PED-' + Date.now(),
-            cliente: nombre || 'Cliente',
-            email: email || 'cliente@meditech.com',
-            fecha: new Date().toISOString(),
-            items: pedido.map(p => ({
-                nombre: p.nombre || p.producto?.name || 'Producto',
-                cantidad: p.cantidad || 1,
-                precio: p.precio || p.producto?.price || 0
-            })),
-            total: total || pedido.reduce((sum, p) => sum + (p.precio || p.producto?.price || 0) * (p.cantidad || 1), 0),
-            estado: 'pendiente'
-        };
-        
-        // Guardar en el array
-        pedidos.push(nuevoPedido);
-        fs.writeFileSync('pedidos.json', JSON.stringify(pedidos, null, 2));
-        
-        console.log('✅ Pedido guardado en pedidos.json:', nuevoPedido.id);
-        
-        // También guardar en PostgreSQL si tienes la tabla
-        try {
-            await query(
-                `INSERT INTO pedidos (id, usuario, email, items, total, estado, created_at)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-                [
-                    nuevoPedido.id,
-                    nuevoPedido.cliente,
-                    nuevoPedido.email,
-                    JSON.stringify(nuevoPedido.items),
-                    nuevoPedido.total,
-                    nuevoPedido.estado,
-                    nuevoPedido.fecha
-                ]
-            );
-            console.log('✅ Pedido guardado en PostgreSQL');
-        } catch (dbError) {
-            console.warn('⚠️ No se pudo guardar en PostgreSQL:', dbError.message);
-        }
-        
-        // Responder al frontend
-        res.json({
-            success: true,
-            message: 'Pedido recibido correctamente',
-            pedido: nuevoPedido
-        });
-        
-    } catch (error) {
-        console.error('❌ Error en /api/enviar-pedido:', error);
-        res.status(500).json({ 
-            error: 'Error al procesar el pedido',
-            details: error.message 
-        });
-    }
-});
 
 // ---- CONFIGURACIÓN (para la tienda) ----
 app.get('/api/config', (req, res) => {
@@ -1068,15 +986,16 @@ app.get('/run-migration', async (req, res) => {
 
 
 // ============================================================
-// 📧 ENVIAR PEDIDO POR CORREO
+// 📧 ENVIAR PEDIDO POR CORREO (VERSIÓN UNIFICADA Y CORREGIDA)
 // ============================================================
-app.post('/api/enviar-pedido', (req, res) => {
-    console.log('🔥 POST /api/enviar-pedido recibido');
-    console.log('📦 Body:', req.body);
+app.post('/api/enviar-pedido', async (req, res) => {
+    console.log('📧 POST /api/enviar-pedido recibido');
+    console.log('📦 Body:', JSON.stringify(req.body, null, 2));
     
     try {
         const { email, nombre, pedido, total } = req.body;
         
+        // Validar que llegaron los datos
         if (!pedido || pedido.length === 0) {
             return res.status(400).json({ 
                 success: false, 
@@ -1084,7 +1003,9 @@ app.post('/api/enviar-pedido', (req, res) => {
             });
         }
         
+        // 1. Guardar en pedidos.json
         const fs = require('fs');
+        const path = require('path');
         let pedidos = [];
         try {
             const data = fs.readFileSync('pedidos.json', 'utf8');
@@ -1093,32 +1014,62 @@ app.post('/api/enviar-pedido', (req, res) => {
             pedidos = [];
         }
         
+        // ✅ CORREGIDO: Procesar correctamente los items
+        const itemsProcesados = pedido.map(p => ({
+            nombre: p.nombre || 'Producto',
+            cantidad: p.cantidad || 1,
+            precio: parseFloat(p.precio) || 0
+        }));
+        
         const nuevoPedido = {
-            id: 'PED-' + Date.now(),
+            id: 'PED-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
             cliente: nombre || 'Cliente',
             email: email || 'cliente@meditech.com',
             fecha: new Date().toISOString(),
-            items: pedido,
-            total: total || 0,
-            estado: 'pendiente'
+            items: itemsProcesados,
+            total: parseFloat(total) || itemsProcesados.reduce((sum, item) => sum + (item.precio * item.cantidad), 0),
+            estado: 'pendiente',
+            origen: 'web'
         };
         
         pedidos.push(nuevoPedido);
         fs.writeFileSync('pedidos.json', JSON.stringify(pedidos, null, 2));
         
-        console.log('✅ Pedido guardado:', nuevoPedido.id);
+        console.log('✅ Pedido guardado en pedidos.json:', nuevoPedido.id);
         
-        return res.status(200).json({
+        // 2. Intentar guardar en PostgreSQL (si existe la tabla)
+        try {
+            await query(
+                `INSERT INTO pedidos (id, usuario, email, items, total, estado, created_at)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                [
+                    nuevoPedido.id,
+                    nuevoPedido.cliente,
+                    nuevoPedido.email,
+                    JSON.stringify(nuevoPedido.items),
+                    nuevoPedido.total,
+                    nuevoPedido.estado,
+                    nuevoPedido.fecha
+                ]
+            );
+            console.log('✅ Pedido guardado en PostgreSQL');
+        } catch (dbError) {
+            console.warn('⚠️ No se pudo guardar en PostgreSQL:', dbError.message);
+        }
+        
+        // 3. Responder al frontend
+        res.status(200).json({
             success: true,
             message: 'Pedido recibido correctamente',
             pedido: nuevoPedido
         });
         
     } catch (error) {
-        console.error('❌ Error:', error);
-        return res.status(500).json({
+        console.error('❌ Error en /api/enviar-pedido:', error);
+        res.status(500).json({
             success: false,
-            error: error.message
+            error: 'Error interno del servidor',
+            details: error.message
         });
     }
 });
