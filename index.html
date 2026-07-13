@@ -10,7 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -562,6 +561,7 @@
     <script src="static/js/api.js"></script>
     <script src="static/js/token.js"></script>
     <script src="static/js/auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="static/js/cart.js"></script>
     <script src="static/js/chat.js"></script>
     <script src="static/js/admin.js"></script>
@@ -571,7 +571,7 @@
 
 <script>
     // ============================================
-    // CÓDIGO PRINCIPAL - INICIALIZACIÓN
+    // INICIALIZACIÓN BÁSICA
     // ============================================
     
     // Año en el footer
@@ -596,177 +596,23 @@
         }
     });
 
-    // ============================================
-    // ✅ CORREGIDO: No sobrescribir funciones existentes
-    // ============================================
-    // En lugar de sobrescribir renderProducts, solo asegurar que la descripción se muestre
-    setTimeout(function() {
-        // Verificar que S.pr tenga productos
-        if (typeof S !== 'undefined' && S.pr && S.pr.length > 0) {
-            console.log('✅ Productos cargados:', S.pr.length);
-            
-            // ✅ Verificar que addToCart existe
-            if (typeof addToCart !== 'function') {
-                console.error('❌ addToCart no está definida');
-            } else {
-                console.log('✅ addToCart está disponible');
-            }
-            
-            // ✅ Si renderProducts existe, ejecutarla
-            if (typeof renderProducts === 'function') {
-                renderProducts();
-            }
-        } else {
-            console.warn('⚠️ S.pr está vacío, esperando carga...');
-            // Intentar cargar productos nuevamente
-            if (typeof cargarProductos === 'function') {
-                cargarProductos();
-            }
-        }
-    }, 1500);
-
-    // ============================================
-    // ✅ FUNCIÓN PARA RECARGAR PRODUCTOS MANUALMENTE
-    // ============================================
+    // ✅ Función para recargar productos manualmente
     window.forzarRecarga = function() {
         if (typeof cargarProductos === 'function') {
             cargarProductos();
         }
-        showNotif('🔄 Productos recargados', 'info');
+        if (typeof showNotif === 'function') {
+            showNotif('🔄 Productos recargados', 'info');
+        }
     };
 
     console.log('✅ MediTech listo');
     console.log('🔍 Para depuración, ejecuta:');
     console.log('  - S.pr (productos cargados)');
     console.log('  - addToCart (función para agregar al carrito)');
-    console.log('  - renderProducts() (renderizar productos)');
+    console.log('  - enviarPedidoPorCorreo (EmailJS)');
 </script>
-
-<script>
-    // ============================================
-    // CÓDIGO PRINCIPAL - INICIALIZACIÓN
-    // ============================================
     
-    // Año en el footer
-    document.getElementById('year').textContent = new Date().getFullYear();
-
-    // Cerrar modales con Escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.modal-overlay.active, .admin-panel-overlay.active, .quick-view-overlay.active')
-                .forEach(el => el.classList.remove('active'));
-            document.getElementById('user-menu').classList.remove('open');
-        }
-    });
-
-    // Cerrar menú al hacer clic fuera
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('#user-section')) {
-            document.getElementById('user-menu').classList.remove('open');
-        }
-        if (!e.target.closest('.search-container')) {
-            document.getElementById('search-results').classList.remove('active');
-        }
-    });
-
-    // ============================================
-    // ✅ SOBRESCRIBIR enviarPedidoPorCorreo CON EMAILJS
-    // ============================================
-    window.enviarPedidoPorCorreo = async function() {
-        console.log('📤 enviarPedidoPorCorreo llamada (EmailJS)');
-        
-        if (!S.cart || S.cart.length === 0) {
-            showNotif('⚠️ El carrito está vacío', 'warning');
-            return;
-        }
-
-        const user = S.currentUser || JSON.parse(localStorage.getItem('session') || '{}');
-        const userEmail = user?.email || 'cliente@meditech.com';
-        const userName = user?.name || 'Cliente';
-
-        let total = 0;
-        const pedidoData = S.cart.map(item => {
-            const producto = item.producto || {};
-            const precio = parseFloat(producto.price) || 0;
-            const cantidad = item.cantidad || 1;
-            total += precio * cantidad;
-            return {
-                nombre: producto.name || 'Producto',
-                cantidad: cantidad,
-                precio: precio
-            };
-        });
-
-        // ✅ Configuración de EmailJS (REEMPLAZA CON TUS CREDENCIALES)
-        const EMAILJS_PUBLIC_KEY = '-oSvhsO6mZn5cdCz6';
-        const EMAILJS_SERVICE_ID = 'service_v1tiylh';
-        const EMAILJS_TEMPLATE_ID = 'template_edjk1yg;
-
-        // ✅ Verificar que las credenciales no estén vacías
-        if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === 'TU_PUBLIC_KEY') {
-            showNotif('⚠️ Configura EmailJS en el código', 'warning');
-            console.error('❌ EmailJS no configurado');
-            return;
-        }
-
-        try {
-            // Inicializar EmailJS
-            if (typeof emailjs === 'undefined') {
-                throw new Error('EmailJS no está cargado');
-            }
-            
-            emailjs.init(EMAILJS_PUBLIC_KEY);
-
-            const payload = {
-                nombre: userName,
-                email: userEmail,
-                total: total.toFixed(2),
-                items: pedidoData.map(p => 
-                    `${p.nombre} x${p.cantidad} = $${(p.precio * p.cantidad).toFixed(2)}`
-                ).join('\n'),
-                fecha: new Date().toLocaleString()
-            };
-
-            showNotif('📤 Enviando pedido...', 'info');
-
-            const response = await emailjs.send(
-                EMAILJS_SERVICE_ID,
-                EMAILJS_TEMPLATE_ID,
-                payload
-            );
-
-            console.log('✅ EmailJS respuesta:', response);
-            showNotif('✅ Pedido enviado correctamente', 'success');
-            
-            S.cart = [];
-            guardarCarrito();
-            actualizarContadorCarrito();
-            closeCart();
-            renderCartItems();
-
-        } catch (error) {
-            console.error('❌ Error con EmailJS:', error);
-            showNotif(`❌ Error al enviar: ${error.text || error.message}`, 'error');
-        }
-    };
-
-    // ============================================
-    // ✅ FUNCIÓN PARA RECARGAR PRODUCTOS MANUALMENTE
-    // ============================================
-    window.forzarRecarga = function() {
-        if (typeof cargarProductos === 'function') {
-            cargarProductos();
-        }
-        showNotif('🔄 Productos recargados', 'info');
-    };
-
-    console.log('✅ MediTech listo');
-    console.log('🔍 Para depuración, ejecuta:');
-    console.log('  - S.pr (productos cargados)');
-    console.log('  - addToCart (función para agregar al carrito)');
-    console.log('  - renderProducts() (renderizar productos)');
-    console.log('  - enviarPedidoPorCorreo (función EmailJS)');
-</script>
     
 </body>
 </html>
