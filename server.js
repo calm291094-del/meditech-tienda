@@ -22,17 +22,14 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 
 // ============================================================
-// IMPORTAR BASE DE DATOS (eliminar dependencia de PostgreSQL)
+// IMPORTAR BASE DE DATOS (CON FALLBACK A JSON)
 // ============================================================
-// ❌ Elimina estas líneas:
-// const { query, getOne, getAll, initTables } = require('./db');
-// initTables().catch(console.error);
-
-// ✅ En su lugar, usa archivos JSON directamente:
 const fs = require('fs');
 const path = require('path');
 
-// Funciones para leer/escribir archivos JSON
+// ============================================================
+// FUNCIONES PARA ARCHIVOS JSON (FALLBACK)
+// ============================================================
 function leerJSON(nombre) {
     try {
         const data = fs.readFileSync(path.join(__dirname, nombre), 'utf8');
@@ -46,26 +43,182 @@ function escribirJSON(nombre, datos) {
     fs.writeFileSync(path.join(__dirname, nombre), JSON.stringify(datos, null, 2));
 }
 
-// Funciones de base de datos simuladas (para mantener compatibilidad)
+// ============================================================
+// INTENTAR CONECTAR A POSTGRESQL, SI FALLA USAR JSON
+// ============================================================
+let usarPostgres = true;
+let db = null;
+
+try {
+    // Intentar importar PostgreSQL
+    const pg = require('pg');
+    const { Pool } = pg;
+    
+    const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+        connectionTimeoutMillis: 3000 // Timeout rápido para no bloquear
+    });
+
+    // Probar conexión
+    db = {
+        query: async (text, params) => {
+            try {
+                const result = await pool.query(text, params);
+                return result;
+            } catch (error) {
+                console.warn('⚠️ Error en PostgreSQL, usando JSON fallback:', error.message);
+                usarPostgres = false;
+                return { rows: [] };
+            }
+        },
+        getOne: async (text, params) => {
+            try {
+                const result = await pool.query(text, params);
+                return result.rows[0] || null;
+            } catch (error) {
+                console.warn('⚠️ Error en PostgreSQL (getOne), usando JSON fallback:', error.message);
+                usarPostgres = false;
+                return null;
+            }
+        },
+        getAll: async (text, params) => {
+            try {
+                const result = await pool.query(text, params);
+                return result.rows;
+            } catch (error) {
+                console.warn('⚠️ Error en PostgreSQL (getAll), usando JSON fallback:', error.message);
+                usarPostgres = false;
+                return [];
+            }
+        },
+        initTables: async () => {
+            try {
+                const createTables = `
+                    CREATE TABLE IF NOT EXISTS usuarios (
+                        id SERIAL PRIMARY KEY,
+                        username VARCHAR(100) UNIQUE NOT NULL,
+                        password_hash TEXT NOT NULL,
+                        name VARCHAR(200) NOT NULL,
+                        email VARCHAR(200),
+                        role VARCHAR(20) DEFAULT 'user',
+                        refresh_token TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                    CREATE TABLE IF NOT EXISTS productos (
+                        id SERIAL PRIMARY KEY,
+                        name VARCHAR(200) NOT NULL,
+                        category VARCHAR(50) NOT NULL,
+                        price DECIMAL(10,2) NOT NULL,
+                        description TEXT,
+                        stock INTEGER DEFAULT 0,
+                        image TEXT,
+                        feat INTEGER DEFAULT 0,
+                        available INTEGER DEFAULT 1,
+                        created_by VARCHAR(100),
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                    CREATE TABLE IF NOT EXISTS pedidos (
+                        id VARCHAR(50) PRIMARY KEY,
+                        usuario VARCHAR(100) NOT NULL,
+                        email VARCHAR(200),
+                        items JSONB,
+                        total DECIMAL(10,2) NOT NULL,
+                        estado VARCHAR(20) DEFAULT 'pendiente',
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                `;
+                await pool.query(createTables);
+                console.log('✅ PostgreSQL conectado y tablas creadas');
+                usarPostgres = true;
+                return true;
+            } catch (error) {
+                console.warn('⚠️ Error inicializando PostgreSQL:', error.message);
+                usarPostgres = false;
+                return false;
+            }
+        }
+    };
+
+    // Probar conexión rápidamente
+    pool.query('SELECT 1').catch(() => {
+        console.warn('⚠️ PostgreSQL no disponible, usando JSON fallback');
+        usarPostgres = false;
+    });
+
+} catch (error) {
+    console.warn('⚠️ PostgreSQL no disponible (módulo no instalado), usando JSON fallback:', error.message);
+    usarPostgres = false;
+    db = null;
+}
+
+// ============================================================
+// FUNCIONES DE BASE DE DATOS CON FALLBACK
+// ============================================================
 const query = async (text, params) => {
-    console.log('📝 Consulta SQL simulada:', text, params);
+    if (db && usarPostgres) {
+        try {
+            return await db.query(text, params);
+        } catch (e) {
+            usarPostgres = false;
+            console.warn('⚠️ Fallback a JSON para query');
+        }
+    }
+    // Fallback JSON
+    console.log('📝 [JSON Fallback] query:', text, params);
     return { rows: [] };
 };
 
 const getOne = async (text, params) => {
-    console.log('📝 getOne SQL simulada:', text, params);
+    if (db && usarPostgres) {
+        try {
+            return await db.getOne(text, params);
+        } catch (e) {
+            usarPostgres = false;
+            console.warn('⚠️ Fallback a JSON para getOne');
+        }
+    }
+    // Fallback JSON
+    console.log('📝 [JSON Fallback] getOne:', text, params);
     return null;
 };
 
 const getAll = async (text, params) => {
-    console.log('📝 getAll SQL simulada:', text, params);
+    if (db && usarPostgres) {
+        try {
+            return await db.getAll(text, params);
+        } catch (e) {
+            usarPostgres = false;
+            console.warn('⚠️ Fallback a JSON para getAll');
+        }
+    }
+    // Fallback JSON
+    console.log('📝 [JSON Fallback] getAll:', text, params);
     return [];
 };
 
 const initTables = async () => {
-    console.log('📝 initTables simulada - usando JSON files');
+    if (db && usarPostgres) {
+        try {
+            return await db.initTables();
+        } catch (e) {
+            usarPostgres = false;
+            console.warn('⚠️ Fallback a JSON para initTables');
+        }
+    }
+    console.log('📝 [JSON Fallback] initTables - usando JSON files');
     return Promise.resolve();
 };
+
+// Función para verificar el estado de la base de datos
+function getDBStatus() {
+    return {
+        usarPostgres: usarPostgres,
+        dbConectado: db !== null && usarPostgres
+    };
+}
+
+console.log('🔧 Estado de la base de datos:', getDBStatus());
 
 // ============================================================
 // CONFIGURACIÓN DEL BOT DE TELEGRAM
@@ -538,12 +691,11 @@ app.post('/api/pedidos', authenticateToken, async (req, res) => {
 
 app.get('/api/pedidos', authenticateToken, esAdmin, async (req, res) => {
     try {
-        const pedidos = await getAll('SELECT * FROM pedidos ORDER BY created_at DESC');
-        const parsed = pedidos.map(p => ({
-            ...p,
-            items: typeof p.items === 'string' ? JSON.parse(p.items) : p.items
-        }));
-        res.json(parsed);
+        const pedidos = leerJSON('pedidos.json');
+        if (!pedidos) {
+            return res.json([]);
+        }
+        res.json(pedidos);
     } catch (error) {
         console.error('Error al obtener pedidos:', error);
         res.status(500).json({ error: 'Error al obtener pedidos' });
