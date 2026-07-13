@@ -59,12 +59,27 @@ async function cargarProductos() {
     console.log('📦 Cargando productos desde backend...');
     try {
         const productos = await apiRequest('/productos');
+        console.log('📦 Respuesta del backend:', productos);
+        
         if (productos && productos.length > 0) {
             S.pr = productos;
             console.log(`✅ ${S.pr.length} productos cargados`);
+            // Guardar en localStorage como backup
+            localStorage.setItem('productos_backup', JSON.stringify(S.pr));
         } else {
             console.warn('⚠️ No hay productos en el backend');
-            S.pr = [];
+            // Intentar cargar desde backup
+            const backup = localStorage.getItem('productos_backup');
+            if (backup) {
+                try {
+                    S.pr = JSON.parse(backup);
+                    console.log(`✅ ${S.pr.length} productos cargados desde backup`);
+                } catch (e) {
+                    S.pr = getProductosPorDefecto();
+                }
+            } else {
+                S.pr = getProductosPorDefecto();
+            }
         }
         renderProducts();
         if (document.getElementById('admin-list')) {
@@ -72,14 +87,26 @@ async function cargarProductos() {
         }
     } catch (error) {
         console.error('❌ Error cargando productos:', error);
-        S.pr = [];
+        // Fallback: usar backup o productos por defecto
+        const backup = localStorage.getItem('productos_backup');
+        if (backup) {
+            try {
+                S.pr = JSON.parse(backup);
+                console.log(`✅ ${S.pr.length} productos cargados desde backup (fallback)`);
+            } catch (e) {
+                S.pr = getProductosPorDefecto();
+            }
+        } else {
+            S.pr = getProductosPorDefecto();
+        }
         renderProducts();
         if (document.getElementById('admin-list')) {
             renderAdminList();
         }
-        showNotif('⚠️ Error al cargar productos del servidor', 'error');
+        showNotif('⚠️ Usando productos locales (fallback)', 'warning');
     }
 }
+
 
 function renderProducts() {
     const grid = safeElement('portada-productos');
