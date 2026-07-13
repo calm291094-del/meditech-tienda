@@ -986,7 +986,7 @@ app.get('/run-migration', async (req, res) => {
 
 
 // ============================================================
-// 📧 ENVIAR PEDIDO POR CORREO (VERSIÓN UNIFICADA Y CORREGIDA)
+// 📧 ENVIAR PEDIDO POR CORREO (VERSIÓN ÚNICA Y CORREGIDA)
 // ============================================================
 app.post('/api/enviar-pedido', async (req, res) => {
     console.log('📧 POST /api/enviar-pedido recibido');
