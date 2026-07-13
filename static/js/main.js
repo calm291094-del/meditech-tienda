@@ -626,7 +626,6 @@ window.removeFromCart = removeFromCart;
 window.openCart = openCart;
 window.closeCart = closeCart;
 window.updateCartQuantity = updateCartQuantity;
-window.enviarPedidoPorCorreo = enviarPedidoPorCorreo;
 // UI
 window.openQuickView = openQuickView;
 window.closeQuickView = closeQuickView;
