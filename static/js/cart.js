@@ -275,20 +275,23 @@ function closeCart() {
 }
 
 // ============================================================
-// FUNCIÓN PARA ENVIAR PEDIDO POR CORREO (DEFINIDA ANTES DE EXPONER)
+// FUNCIÓN PARA ENVIAR PEDIDO POR CORREO (USANDO EMAILJS)
 // ============================================================
 async function enviarPedidoPorCorreo() {
-    console.log('📤 enviarPedidoPorCorreo llamada');
+    console.log('📤 enviarPedidoPorCorreo llamada (EmailJS)');
     
+    // 1. Verificar que el carrito no esté vacío
     if (!S.cart || S.cart.length === 0) {
         showNotif('⚠️ El carrito está vacío', 'warning');
         return;
     }
 
+    // 2. Obtener datos del usuario
     const user = S.currentUser || JSON.parse(localStorage.getItem('session') || '{}');
     const userEmail = user?.email || 'cliente@meditech.com';
     const userName = user?.name || 'Cliente';
 
+    // 3. Calcular el total y preparar el pedido
     let total = 0;
     const pedidoData = S.cart.map(item => {
         const producto = item.producto || {};
@@ -302,58 +305,53 @@ async function enviarPedidoPorCorreo() {
         };
     });
 
-    const payload = {
-        email: userEmail,
-        nombre: userName,
-        pedido: pedidoData,
-        total: total
-    };
-
-    console.log('📤 Enviando pedido:', payload);
+    // 4. Configurar EmailJS
+    const EMAILJS_PUBLIC_KEY = '-oSvhsO6mZn5cdCz6'; // Reemplaza con tu clave pública
+    const EMAILJS_SERVICE_ID = 'service_v1tiylh'; // Reemplaza con tu Service ID
+    const EMAILJS_TEMPLATE_ID = 'service_v1tiylh'; // Reemplaza con tu Template ID
 
     try {
-        showNotif('📤 Procesando pedido...', 'info');
+        // Inicializar EmailJS
+        emailjs.init(EMAILJS_PUBLIC_KEY);
 
-        const response = await fetch('/api/enviar-pedido', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+        // Preparar el payload
+        const payload = {
+            nombre: userName,
+            email: userEmail,
+            total: total.toFixed(2),
+            items: pedidoData.map(p => `${p.nombre} x${p.cantidad} = $${(p.precio * p.cantidad).toFixed(2)}`).join('\n'),
+            fecha: new Date().toLocaleString()
+        };
 
-        const responseText = await response.text();
-        console.log('📥 Respuesta del servidor:', responseText);
+        console.log('📤 Enviando pedido con EmailJS:', payload);
 
-        let data;
-        try {
-            data = JSON.parse(responseText);
-        } catch (parseError) {
-            throw new Error('El servidor devolvió una respuesta inválida');
-        }
+        // Enviar el correo
+        showNotif('📤 Enviando pedido...', 'info');
 
-        if (!response.ok || !data.success) {
-            throw new Error(data.error || data.message || `Error ${response.status}`);
-        }
+        const response = await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            payload
+        );
 
+        console.log('✅ EmailJS respuesta:', response);
+
+        // Éxito
         showNotif('✅ Pedido enviado correctamente', 'success');
+        
+        // Vaciar carrito
         S.cart = [];
         guardarCarrito();
         actualizarContadorCarrito();
         closeCart();
         renderCartItems();
 
-        if (data.pedido) {
-            console.log('📋 Pedido creado:', data.pedido.id);
-            showNotif(`📋 Pedido #${data.pedido.id} creado`, 'success');
-        }
-
     } catch (error) {
-        console.error('❌ Error enviando pedido:', error);
-        showNotif(`❌ ${error.message}`, 'error');
+        console.error('❌ Error enviando pedido con EmailJS:', error);
+        showNotif(`❌ Error al enviar: ${error.text || error.message}`, 'error');
     }
 }
+
 
 // ============================================================
 // NOTIFICACIONES
