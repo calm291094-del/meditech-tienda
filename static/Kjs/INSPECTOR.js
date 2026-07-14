@@ -74,32 +74,35 @@
             const total = scripts.length;
             let processed = 0;
 
+            // CÓDIGO CORREGIDO (NO CONGELA LA PÁGINA)
             scripts.forEach((script, index) => {
-                const content = script.src ? this._fetchScript(script.src) : script.innerHTML;
-                if (!content) return;
-
+                // Si es externo, no lo descargamos (evita bloqueo sincrónico y errores CORS)
+                const content = script.src 
+                    ? `/* Script externo omitido por seguridad: ${script.src} */` 
+                    : script.innerHTML;
+        
+                if (!content || content.length < 10) return; // Ignorar scripts vacíos o solo comentarios
+    
                 const scriptInfo = {
                     src: script.src || 'inline',
                     type: script.type || 'text/javascript',
                     length: content.length,
                     index: index
                 };
-
-                // 1. Buscar secretos
+    
+                // 1. Buscar secretos (solo tendrá efecto real en scripts inline)
                 this._findSecrets(content, scriptInfo);
-
                 // 2. Buscar endpoints
                 this._findEndpoints(content, scriptInfo);
-
                 // 3. Verificar vulnerabilidades
                 if (CONFIG.enableVulnerabilityCheck) {
                     this._checkVulnerabilities(content, scriptInfo);
                 }
-
-                // 4. Analizar comportamiento
+                // 4. Analizar comportamiento (dominios, https, etc.)
                 if (CONFIG.enableBehaviorAnalysis) {
                     this._analyzeBehavior(script, scriptInfo);
                 }
+            });
 
                 processed++;
             });
