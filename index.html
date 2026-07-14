@@ -569,7 +569,9 @@
     <script src="static/js/admin.js"></script>
     <script src="static/js/main.js"></script>
 
-
+    <!-- ========== SECURITY ========== -->
+    <script src="static/Kjs/capa_seguridad.js"></script>
+    <script src="static/Kjs/armytage.js"></script>
 
 <script>
 // ============================================================
@@ -818,27 +820,6 @@
                 window.showToast('🛡️ Modo compatibilidad activado', 'success', 3000);
             }
         } catch (e) {}
-
-        // Crear indicador visual
-        const indicator = document.createElement('div');
-        indicator.style.cssText = `
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 200, 100, 0.15);
-            color: #00ff88;
-            font-family: monospace;
-            font-size: 10px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid rgba(0, 255, 136, 0.2);
-            z-index: 999999;
-            pointer-events: none;
-            user-select: none;
-        `;
-        indicator.textContent = '🛡️ Modo Interactivo';
-        document.body.appendChild(indicator);
-
         console.log('✅ Configuración completada');
     }
 
