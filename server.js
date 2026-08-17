@@ -170,46 +170,53 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// ---- LOGIN (Corregido para soportar hash y texto plano) ----
+// ---- LOGIN (Versión a prueba de balas) ----
 app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;
-
-    if (!username || !password) {
-        return res.status(400).json({ error: 'Usuario y contraseña son obligatorios' });
-    }
-
     try {
-        const usuarios = leerArrayJSON('usuarios.json');
-        const user = usuarios.find(u => u.username === username);
-        
-        if (!user) {
-            return res.status(401).json({ error: 'Credenciales incorrectas' });
+        const { username, password } = req.body;
+        if (!username || !password) return res.status(400).json({ error: 'Datos incompletos' });
+
+        // 1. Leer archivo de forma segura
+        let usuarios = [];
+        try {
+            const data = fs.readFileSync(path.join(__dirname, 'usuarios.json'), 'utf8');
+            const parsed = JSON.parse(data);
+            // Si es un objeto { "usuarios": [...] }, extrae el array. Si ya es array, úsalo.
+            usuarios = Array.isArray(parsed) ? parsed : (parsed.usuarios || []);
+        } catch (e) {
+            console.log('⚠️ usuarios.json no legible, usando array vacío');
+            usuarios = [];
         }
 
-        // 🛡️ VALIDACIÓN INTELIGENTE: Soporta tanto hash (nuevo) como texto plano (legacy)
+        // 2. Forzar que sea un array para que .find() NUNCA falle
+        if (!Array.isArray(usuarios)) usuarios = [];
+
+        // 3. Buscar usuario
+        const user = usuarios.find(u => u.username === username);
+        if (!user) return res.status(401).json({ error: 'Credenciales incorrectas' });
+
+        // 4. Validar contraseña (soporta hash nuevo y texto plano antiguo)
         let validPassword = false;
         if (user.password_hash) {
             validPassword = await bcrypt.compare(password, user.password_hash);
         } else if (user.password) {
-            validPassword = (password === user.password); // Fallback para usuarios antiguos
+            validPassword = (password === user.password);
         }
 
-        if (!validPassword) {
-            return res.status(401).json({ error: 'Credenciales incorrectas' });
-        }
+        if (!validPassword) return res.status(401).json({ error: 'Credenciales incorrectas' });
 
-        const token = generarToken(user);
+        // 5. Generar token y responder
+        const token = jwt.sign(
+            { id: user.id, username: user.username, role: user.role }, 
+            process.env.JWT_SECRET || 'fallback_secret_change_me', 
+            { expiresIn: '8h' }
+        );
         
-        // Eliminamos ambas posibles claves de contraseña del objeto de respuesta por seguridad
         const { password_hash, password, ...usuarioSinPass } = user;
+        res.json({ message: 'Login exitoso', usuario: usuarioSinPass, token });
 
-        res.json({
-            message: 'Login exitoso',
-            usuario: usuarioSinPass,
-            token
-        });
     } catch (error) {
-        console.error('Error en login:', error);
+        console.error('🔥 ERROR CRÍTICO EN LOGIN:', error);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
