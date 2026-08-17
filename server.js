@@ -34,12 +34,22 @@ function leerJSON(nombre) {
     }
 }
 
-// 🛡️ NUEVA FUNCIÓN: Garantiza que siempre se devuelva un ARRAY (evita el error .find)
+// 🛡️ FUNCIÓN INTELIGENTE: Lee el archivo y garantiza devolver un ARRAY
 function leerArrayJSON(nombre) {
     try {
         const data = fs.readFileSync(path.join(__dirname, nombre), 'utf8');
         const parsed = JSON.parse(data);
-        return Array.isArray(parsed) ? parsed : [];
+        
+        // 1. Si ya es un array directo, lo devolvemos
+        if (Array.isArray(parsed)) return parsed;
+        
+        // 2. Si es un objeto (ej: { "usuarios": [...] }), buscamos la clave que contiene el array
+        if (parsed && typeof parsed === 'object') {
+            const claveArray = Object.keys(parsed).find(k => Array.isArray(parsed[k]));
+            if (claveArray) return parsed[claveArray];
+        }
+        
+        return [];
     } catch (e) {
         console.log(`⚠️ Archivo ${nombre} no encontrado o inválido, usando []`);
         return [];
@@ -48,6 +58,7 @@ function leerArrayJSON(nombre) {
 
 function escribirJSON(nombre, datos) {
     try {
+        // Ahora guardamos directamente el array, normalizando la estructura
         fs.writeFileSync(path.join(__dirname, nombre), JSON.stringify(datos, null, 2));
         console.log(`✅ ${nombre} guardado correctamente.`);
     } catch (e) {
@@ -118,7 +129,7 @@ app.post('/api/register', async (req, res) => {
     }
 
     try {
-        const usuarios = leerArrayJSON('usuarios.json'); // ✅ CORREGIDO
+        const usuarios = leerArrayJSON('usuarios.json');
         const exists = usuarios.find(u => u.username === username);
         if (exists) {
             return res.status(400).json({ error: 'El usuario ya existe' });
@@ -130,10 +141,10 @@ app.post('/api/register', async (req, res) => {
         const newUser = {
             id: Date.now(),
             username,
-            password_hash: hashedPassword,
+            password_hash: hashedPassword, // Nuevo registro usa hash seguro
             name,
             email,
-            role: 'user', // Puedes cambiar a 'admin' para el primer registro si lo deseas
+            role: 'user',
             created_at: new Date().toISOString()
         };
 
@@ -159,7 +170,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// ---- LOGIN ----
+// ---- LOGIN (Corregido para soportar hash y texto plano) ----
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -168,20 +179,29 @@ app.post('/api/login', async (req, res) => {
     }
 
     try {
-        const usuarios = leerArrayJSON('usuarios.json'); // ✅ CORREGIDO
+        const usuarios = leerArrayJSON('usuarios.json');
         const user = usuarios.find(u => u.username === username);
         
         if (!user) {
             return res.status(401).json({ error: 'Credenciales incorrectas' });
         }
 
-        const validPassword = await bcrypt.compare(password, user.password_hash);
+        // 🛡️ VALIDACIÓN INTELIGENTE: Soporta tanto hash (nuevo) como texto plano (legacy)
+        let validPassword = false;
+        if (user.password_hash) {
+            validPassword = await bcrypt.compare(password, user.password_hash);
+        } else if (user.password) {
+            validPassword = (password === user.password); // Fallback para usuarios antiguos
+        }
+
         if (!validPassword) {
             return res.status(401).json({ error: 'Credenciales incorrectas' });
         }
 
         const token = generarToken(user);
-        const { password_hash, ...usuarioSinPass } = user;
+        
+        // Eliminamos ambas posibles claves de contraseña del objeto de respuesta por seguridad
+        const { password_hash, password, ...usuarioSinPass } = user;
 
         res.json({
             message: 'Login exitoso',
@@ -197,8 +217,8 @@ app.post('/api/login', async (req, res) => {
 // ---- USUARIOS (solo admin) ----
 app.get('/api/usuarios', authenticateToken, esAdmin, async (req, res) => {
     try {
-        const usuarios = leerArrayJSON('usuarios.json'); // ✅ CORREGIDO
-        const usuariosSinPass = usuarios.map(({ password_hash, ...rest }) => rest);
+        const usuarios = leerArrayJSON('usuarios.json');
+        const usuariosSinPass = usuarios.map(({ password_hash, password, ...rest }) => rest);
         res.json(usuariosSinPass);
     } catch (error) {
         console.error('Error al obtener usuarios:', error);
@@ -209,7 +229,7 @@ app.get('/api/usuarios', authenticateToken, esAdmin, async (req, res) => {
 // ---- PRODUCTOS ----
 app.get('/api/productos', async (req, res) => {
     try {
-        const productos = leerArrayJSON('productos.json'); // ✅ CORREGIDO
+        const productos = leerArrayJSON('productos.json');
         res.json(productos);
     } catch (error) {
         console.error('Error al obtener productos:', error);
@@ -225,7 +245,7 @@ app.post('/api/productos', authenticateToken, esAdmin, async (req, res) => {
     }
 
     try {
-        const productos = leerArrayJSON('productos.json'); // ✅ CORREGIDO
+        const productos = leerArrayJSON('productos.json');
         const newProduct = {
             id: Date.now(),
             name,
@@ -253,7 +273,7 @@ app.put('/api/productos/:id', authenticateToken, esAdmin, async (req, res) => {
     const { name, category, price, description, stock, image, available, feat } = req.body;
 
     try {
-        const productos = leerArrayJSON('productos.json'); // ✅ CORREGIDO
+        const productos = leerArrayJSON('productos.json');
         const index = productos.findIndex(p => p.id == id);
         if (index === -1) {
             return res.status(404).json({ error: 'Producto no encontrado' });
@@ -281,7 +301,7 @@ app.put('/api/productos/:id', authenticateToken, esAdmin, async (req, res) => {
 app.delete('/api/productos/:id', authenticateToken, esAdmin, async (req, res) => {
     const { id } = req.params;
     try {
-        const productos = leerArrayJSON('productos.json'); // ✅ CORREGIDO
+        const productos = leerArrayJSON('productos.json');
         const index = productos.findIndex(p => p.id == id);
         if (index === -1) {
             return res.status(404).json({ error: 'Producto no encontrado' });
@@ -298,7 +318,7 @@ app.delete('/api/productos/:id', authenticateToken, esAdmin, async (req, res) =>
 // ---- PEDIDOS ----
 app.get('/api/pedidos', authenticateToken, esAdmin, async (req, res) => {
     try {
-        const pedidos = leerArrayJSON('pedidos.json'); // ✅ CORREGIDO
+        const pedidos = leerArrayJSON('pedidos.json');
         res.json(pedidos);
     } catch (error) {
         console.error('Error al obtener pedidos:', error);
@@ -307,7 +327,7 @@ app.get('/api/pedidos', authenticateToken, esAdmin, async (req, res) => {
 });
 
 // ============================================================
-// 📧 ENVIAR PEDIDO POR CORREO (VERSIÓN SIMPLIFICADA)
+// 📧 ENVIAR PEDIDO POR CORREO
 // ============================================================
 app.post('/api/enviar-pedido', (req, res) => {
     console.log('📧 POST /api/enviar-pedido recibido');
@@ -335,8 +355,7 @@ app.post('/api/enviar-pedido', (req, res) => {
         };
         
         try {
-            const filePath = path.join(__dirname, 'pedidos.json');
-            let pedidos = leerArrayJSON('pedidos.json'); // ✅ CORREGIDO
+            let pedidos = leerArrayJSON('pedidos.json');
             pedidos.push(nuevoPedido);
             escribirJSON('pedidos.json', pedidos);
             console.log('✅ Pedido guardado:', nuevoPedido.id);
