@@ -144,6 +144,59 @@ canvas{display:block}
 </style>
 </head>
 <body>
+    <!-- ============================================ -->
+    <!-- 👇 BOTÓN PARA REGRESAR A LA TIENDA 👇 -->
+    <!-- ============================================ -->
+    <a href="../index.html" class="btn-regresar-tienda" title="Regresar a MediTech">
+        <i class="fas fa-arrow-left"></i> Regresar a la Tienda
+    </a>
+
+    <style>
+        /* Estilos para el botón de regreso */
+        .btn-regresar-tienda {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 9999; /* Asegura que esté por encima del canvas del juego */
+            background: rgba(44, 62, 80, 0.9); /* Color oscuro semitransparente */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-family: 'Poppins', sans-serif; /* Usa la misma fuente de tu tienda */
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-regresar-tienda:hover {
+            background: #0d9488; /* Color teal de MediTech al pasar el mouse */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Ajuste para móviles: hacerlo más compacto */
+        @media (max-width: 768px) {
+            .btn-regresar-tienda {
+                top: 10px;
+                left: 10px;
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            .btn-regresar-tienda span {
+                display: none; /* En móviles muy pequeños, solo muestra el ícono */
+            }
+        }
+    </style>
+    <!-- ============================================ -->
+    <!-- 👆 FIN DEL BOTÓN DE REGRESO 👆 -->
+    <!-- ============================================ -->
+ 
 <div id="vig"></div><div id="scan"></div><div id="hitFlash"></div>
 
 <!-- ================= INICIO ================= -->
