@@ -170,7 +170,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// ---- LOGIN (Versión a prueba de balas) ----
+// ---- LOGIN (Versión corregida y a prueba de balas) ----
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -205,14 +205,18 @@ app.post('/api/login', async (req, res) => {
 
         if (!validPassword) return res.status(401).json({ error: 'Credenciales incorrectas' });
 
-        // 5. Generar token y responder
+        // 5. Generar token
         const token = jwt.sign(
             { id: user.id, username: user.username, role: user.role }, 
             process.env.JWT_SECRET || 'fallback_secret_change_me', 
             { expiresIn: '8h' }
         );
         
-        const { password_hash, password, ...usuarioSinPass } = user;
+        // 6. ✅ CORRECCIÓN: Eliminar contraseñas sin redeclarar variables
+        const usuarioSinPass = { ...user };
+        delete usuarioSinPass.password_hash;
+        delete usuarioSinPass.password;
+
         res.json({ message: 'Login exitoso', usuario: usuarioSinPass, token });
 
     } catch (error) {
