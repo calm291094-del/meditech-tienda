@@ -34,6 +34,18 @@ function leerJSON(nombre) {
     }
 }
 
+// 🛡️ NUEVA FUNCIÓN: Garantiza que siempre se devuelva un ARRAY (evita el error .find)
+function leerArrayJSON(nombre) {
+    try {
+        const data = fs.readFileSync(path.join(__dirname, nombre), 'utf8');
+        const parsed = JSON.parse(data);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        console.log(`⚠️ Archivo ${nombre} no encontrado o inválido, usando []`);
+        return [];
+    }
+}
+
 function escribirJSON(nombre, datos) {
     try {
         fs.writeFileSync(path.join(__dirname, nombre), JSON.stringify(datos, null, 2));
@@ -47,13 +59,6 @@ function escribirJSON(nombre, datos) {
 // CONFIGURACIÓN DEL BOT DE TELEGRAM (SIMPLIFICADA)
 // ============================================================
 const TOKEN = process.env.TELEGRAM_TOKEN;
-let isRunning = false;
-let lastUpdateId = 0;
-let lastResponse = Date.now();
-let reconnectAttempts = 0;
-let errorMessage = '';
-let botInterval = null;
-
 console.log('🔧 CONFIGURACIÓN:');
 console.log(`   TOKEN: ${TOKEN ? '✅ CONFIGURADO' : '❌ NO CONFIGURADO'}`);
 
@@ -113,7 +118,7 @@ app.post('/api/register', async (req, res) => {
     }
 
     try {
-        const usuarios = leerJSON('usuarios.json') || [];
+        const usuarios = leerArrayJSON('usuarios.json'); // ✅ CORREGIDO
         const exists = usuarios.find(u => u.username === username);
         if (exists) {
             return res.status(400).json({ error: 'El usuario ya existe' });
@@ -128,7 +133,7 @@ app.post('/api/register', async (req, res) => {
             password_hash: hashedPassword,
             name,
             email,
-            role: 'user',
+            role: 'user', // Puedes cambiar a 'admin' para el primer registro si lo deseas
             created_at: new Date().toISOString()
         };
 
@@ -163,8 +168,9 @@ app.post('/api/login', async (req, res) => {
     }
 
     try {
-        const usuarios = leerJSON('usuarios.json') || [];
+        const usuarios = leerArrayJSON('usuarios.json'); // ✅ CORREGIDO
         const user = usuarios.find(u => u.username === username);
+        
         if (!user) {
             return res.status(401).json({ error: 'Credenciales incorrectas' });
         }
@@ -191,7 +197,7 @@ app.post('/api/login', async (req, res) => {
 // ---- USUARIOS (solo admin) ----
 app.get('/api/usuarios', authenticateToken, esAdmin, async (req, res) => {
     try {
-        const usuarios = leerJSON('usuarios.json') || [];
+        const usuarios = leerArrayJSON('usuarios.json'); // ✅ CORREGIDO
         const usuariosSinPass = usuarios.map(({ password_hash, ...rest }) => rest);
         res.json(usuariosSinPass);
     } catch (error) {
@@ -203,7 +209,7 @@ app.get('/api/usuarios', authenticateToken, esAdmin, async (req, res) => {
 // ---- PRODUCTOS ----
 app.get('/api/productos', async (req, res) => {
     try {
-        const productos = leerJSON('productos.json') || [];
+        const productos = leerArrayJSON('productos.json'); // ✅ CORREGIDO
         res.json(productos);
     } catch (error) {
         console.error('Error al obtener productos:', error);
@@ -219,7 +225,7 @@ app.post('/api/productos', authenticateToken, esAdmin, async (req, res) => {
     }
 
     try {
-        const productos = leerJSON('productos.json') || [];
+        const productos = leerArrayJSON('productos.json'); // ✅ CORREGIDO
         const newProduct = {
             id: Date.now(),
             name,
@@ -247,7 +253,7 @@ app.put('/api/productos/:id', authenticateToken, esAdmin, async (req, res) => {
     const { name, category, price, description, stock, image, available, feat } = req.body;
 
     try {
-        const productos = leerJSON('productos.json') || [];
+        const productos = leerArrayJSON('productos.json'); // ✅ CORREGIDO
         const index = productos.findIndex(p => p.id == id);
         if (index === -1) {
             return res.status(404).json({ error: 'Producto no encontrado' });
@@ -275,7 +281,7 @@ app.put('/api/productos/:id', authenticateToken, esAdmin, async (req, res) => {
 app.delete('/api/productos/:id', authenticateToken, esAdmin, async (req, res) => {
     const { id } = req.params;
     try {
-        const productos = leerJSON('productos.json') || [];
+        const productos = leerArrayJSON('productos.json'); // ✅ CORREGIDO
         const index = productos.findIndex(p => p.id == id);
         if (index === -1) {
             return res.status(404).json({ error: 'Producto no encontrado' });
@@ -292,7 +298,7 @@ app.delete('/api/productos/:id', authenticateToken, esAdmin, async (req, res) =>
 // ---- PEDIDOS ----
 app.get('/api/pedidos', authenticateToken, esAdmin, async (req, res) => {
     try {
-        const pedidos = leerJSON('pedidos.json') || [];
+        const pedidos = leerArrayJSON('pedidos.json'); // ✅ CORREGIDO
         res.json(pedidos);
     } catch (error) {
         console.error('Error al obtener pedidos:', error);
@@ -305,28 +311,19 @@ app.get('/api/pedidos', authenticateToken, esAdmin, async (req, res) => {
 // ============================================================
 app.post('/api/enviar-pedido', (req, res) => {
     console.log('📧 POST /api/enviar-pedido recibido');
-    console.log('📦 Body:', req.body);
-    
-    // Siempre responder con JSON, incluso en error
     try {
         const { email, nombre, pedido, total } = req.body;
         
-        // Validación simple
         if (!pedido || !Array.isArray(pedido) || pedido.length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'El pedido está vacío' 
-            });
+            return res.status(400).json({ success: false, error: 'El pedido está vacío' });
         }
         
-        // Procesar items
         const itemsProcesados = pedido.map(p => ({
             nombre: p.nombre || 'Producto',
             cantidad: parseInt(p.cantidad) || 1,
             precio: parseFloat(p.precio) || 0
         }));
         
-        // Crear pedido
         const nuevoPedido = {
             id: 'PED-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
             cliente: nombre || 'Cliente',
@@ -337,27 +334,16 @@ app.post('/api/enviar-pedido', (req, res) => {
             estado: 'pendiente'
         };
         
-        // Guardar en pedidos.json
         try {
-            const fs = require('fs');
-            const path = require('path');
             const filePath = path.join(__dirname, 'pedidos.json');
-            let pedidos = [];
-            
-            if (fs.existsSync(filePath)) {
-                const data = fs.readFileSync(filePath, 'utf8');
-                pedidos = JSON.parse(data);
-                if (!Array.isArray(pedidos)) pedidos = [];
-            }
-            
+            let pedidos = leerArrayJSON('pedidos.json'); // ✅ CORREGIDO
             pedidos.push(nuevoPedido);
-            fs.writeFileSync(filePath, JSON.stringify(pedidos, null, 2));
+            escribirJSON('pedidos.json', pedidos);
             console.log('✅ Pedido guardado:', nuevoPedido.id);
         } catch (fileError) {
             console.error('❌ Error guardando archivo:', fileError.message);
         }
         
-        // Responder con éxito
         return res.status(200).json({
             success: true,
             message: 'Pedido recibido correctamente',
@@ -379,7 +365,6 @@ app.post('/api/enviar-pedido', (req, res) => {
 // ============================================================
 app.get('/api/config/github-token-public', (req, res) => {
     try {
-        // Leer token desde archivo o usar el de localStorage
         const token = process.env.GITHUB_TOKEN || '';
         res.json({ token: token });
     } catch (error) {
@@ -405,7 +390,6 @@ app.get('/api/config', (req, res) => {
 // ============================================================
 // 🚀 INICIAR SERVIDOR
 // ============================================================
-
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Servidor en puerto ${PORT}`);
     console.log(`🌐 URL: https://meditech-bot.onrender.com`);
