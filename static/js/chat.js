@@ -32,7 +32,7 @@ async function sendMessage() {
     messages.scrollTop = messages.scrollHeight;
     
     try {
-        // 1. Obtener productos de forma SEGURA (sin romper el código si falla)
+        // ✅ CORRECCIÓN: Obtener productos de forma segura (Backend o Fallback)
         let productosContexto = "No hay productos disponibles en este momento.";
         try {
             const apiUrl = window.API_URL || 'https://meditech-bot.onrender.com/api';
@@ -44,8 +44,8 @@ async function sendMessage() {
                 }
             }
         } catch (e) {
-            console.warn("⚠️ No se pudo cargar el catálogo para el chat, usando fallback.");
-            // Fallback seguro por si la API falla
+            console.warn("⚠️ No se pudo cargar el catálogo desde API, usando fallback local.");
+            // Fallback seguro: solo usa S.pr si existe y es un array
             if (window.S && window.S.pr && Array.isArray(window.S.pr)) {
                 productosContexto = window.S.pr.slice(0, 15).map(p => 
                     `• ${p.name} ($${p.price}) - Stock: ${p.stock}`
@@ -53,7 +53,6 @@ async function sendMessage() {
             }
         }
 
-        // 2. Llamar a la IA
         const response = await fetch('https://text.pollinations.ai/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -61,7 +60,7 @@ async function sendMessage() {
                 messages: [
                     { 
                         role: 'system', 
-                        content: `Eres el asistente de MediTech (tienda en Holguín, Cuba). 
+                        content: `Eres el asistente de MediTech, una tienda en Holguín, Cuba. 
                         CATÁLOGO DISPONIBLE:\n${productosContexto}\n
                         REGLAS: Responde en español, sé amable y conciso (máx 3-4 líneas). 
                         Si preguntan por productos, usa la información del catálogo. 
