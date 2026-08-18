@@ -32,7 +32,7 @@ async function sendMessage() {
     messages.scrollTop = messages.scrollHeight;
     
     try {
-        // ✅ CORRECCIÓN: Obtener productos de forma segura (Backend o Fallback)
+        // 1. Obtener productos de forma segura
         let productosContexto = "No hay productos disponibles en este momento.";
         try {
             const apiUrl = window.API_URL || 'https://meditech-bot.onrender.com/api';
@@ -45,38 +45,60 @@ async function sendMessage() {
             }
         } catch (e) {
             console.warn("⚠️ No se pudo cargar el catálogo desde API, usando fallback local.");
-            // Fallback seguro: solo usa S.pr si existe y es un array
             if (window.S && window.S.pr && Array.isArray(window.S.pr)) {
-                productosContexto = window.S.pr.slice(0, 15).map(p => 
-                    `• ${p.name} ($${p.price}) - Stock: ${p.stock}`
-                ).join('\n');
+                productosContexto = window.S.pr.slice(0, 15).map(p => `• ${p.name} ($${p.price}) - Stock: ${p.stock}`).join('\n');
             }
         }
 
-        const response = await fetch('https://text.pollinations.ai/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                messages: [
-                    { 
-                        role: 'system', 
-                        content: `Eres el asistente de MediTech, una tienda en Holguín, Cuba. 
-                        CATÁLOGO DISPONIBLE:\n${productosContexto}\n
-                        REGLAS: Responde en español, sé amable y conciso (máx 3-4 líneas). 
-                        Si preguntan por productos, usa la información del catálogo. 
-                        Si no sabes algo, di que no está disponible. Recomienda consultar a un médico para temas de salud.`
-                    },
-                    { role: 'user', content: txt }
-                ],
-                model: 'openai'
-            })
-        });
-        
-        let respuesta = 'Disculpa, tuve un problema de conexión. ¿Puedes repetir?';
-        if (response.ok) {
-            respuesta = await response.text();
-            respuesta = respuesta.replace(/```[\s\S]*?```/g, '').trim();
-            respuesta = respuesta.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        let respuesta = '';
+        let usoIA = true;
+
+        // 2. Intentar usar la IA
+        try {
+            const response = await fetch('https://text.pollinations.ai/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: [
+                        { 
+                            role: 'system', 
+                            content: `Eres el asistente de MediTech, una tienda en Holguín, Cuba. CATÁLOGO:\n${productosContexto}\nResponde en español, sé amable y conciso (máx 3-4 líneas). Si preguntan por productos, usa la información del catálogo.`
+                        },
+                        { role: 'user', content: txt }
+                    ],
+                    model: 'openai'
+                })
+            });
+            
+            if (response.ok) {
+                respuesta = await response.text();
+                respuesta = respuesta.replace(/```[\s\S]*?```/g, '').trim().replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            } else if (response.status === 402) {
+                console.warn('⚠️ Pollinations AI devolvió 402 (Límite alcanzado). Usando respuestas locales.');
+                usoIA = false;
+            } else {
+                console.warn(`⚠️ Pollinations AI devolvió status ${response.status}`);
+                usoIA = false;
+            }
+        } catch (error) {
+            console.error('❌ Error conectando con IA:', error);
+            usoIA = false;
+        }
+
+        // 3. Fallback local inteligente si la IA falla o está limitada
+        if (!usoIA || respuesta.length < 10) {
+            const lower = txt.toLowerCase();
+            if (lower.includes('hola') || lower.includes('buenas') || lower.includes('saludos')) {
+                respuesta = "¡Hola! ☕️ Soy el asistente de MediTech. ¿En qué puedo ayudarte hoy? ✨";
+            } else if (lower.includes('producto') || lower.includes('vende') || lower.includes('catalogo') || lower.includes('medicamento') || lower.includes('tecnologia')) {
+                respuesta = `💰 Tenemos productos disponibles. Aquí un resumen:\n\n${productosContexto}\n\n¿Te interesa alguno en particular?`;
+            } else if (lower.includes('precio') || lower.includes('cuesta')) {
+                respuesta = "💰 Los precios varían según el producto. Puedes ver el catálogo completo en nuestra web o preguntarme por un artículo específico.";
+            } else if (lower.includes('gracias')) {
+                respuesta = "¡De nada! ☕️ ¿Necesitas algo más? ✨";
+            } else {
+                respuesta = "Disculpa, el servicio de IA está temporalmente ocupado. Pero puedo decirte que tenemos medicamentos, tecnología y accesorios de salud. ¿Buscas algo en específico?";
+            }
         }
         
         document.getElementById(typingId)?.remove();
