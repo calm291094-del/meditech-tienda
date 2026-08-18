@@ -418,6 +418,38 @@ app.get('/api/config', (req, res) => {
 });
 
 // ============================================================
+// 🤖 TELEGRAM PROXY (Reemplaza al Worker de Cloudflare)
+// ============================================================
+app.post('/api/telegram-proxy', async (req, res) => {
+    try {
+        const { token, method, data } = req.body;
+
+        if (!token || !method) {
+            return res.status(400).json({ ok: false, error: "Faltan 'token' o 'method' en la solicitud" });
+        }
+
+        // 1. Construir la URL de la API oficial de Telegram
+        const telegramUrl = `https://api.telegram.org/bot${token}/${method}`;
+        
+        // 2. Hacer la petición a Telegram (usamos POST porque Telegram lo acepta para todos los métodos, incluso getMe)
+        const tgResponse = await fetch(telegramUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data || {})
+        });
+
+        const result = await tgResponse.json();
+        
+        // 3. Devolver la respuesta exacta de Telegram a tu frontend
+        res.status(tgResponse.status).json(result);
+
+    } catch (error) {
+        console.error('❌ Error en Telegram Proxy:', error.message);
+        res.status(500).json({ ok: false, error: "Error interno del proxy: " + error.message });
+    }
+});
+
+// ============================================================
 // 🚀 INICIAR SERVIDOR
 // ============================================================
 app.listen(PORT, '0.0.0.0', () => {
