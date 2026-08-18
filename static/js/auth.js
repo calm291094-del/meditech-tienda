@@ -67,15 +67,16 @@ async function handleRegister(e) {
 }
 
 function logout() {
-    S.currentUser = null;
-    S.cart = [];
     localStorage.removeItem('token');
-    localStorage.removeItem('session');
-    document.body.classList.remove('admin-mode');
-    updateUIForLoggedOut();
-    closeUserMenu();
-    updateCartUI();
-    showNotif('👋 Sesión cerrada', 'info');
+    localStorage.removeItem('user');
+    
+    // ✅ CORRECCIÓN: Verificar si la función existe antes de llamarla
+    if (typeof window.updateCartUI === 'function') {
+        window.updateCartUI();
+    }
+    
+    // Recargar la página para limpiar el estado visual completamente
+    window.location.reload(); 
 }
 
 function updateUIForLoggedUser() {
