@@ -352,15 +352,20 @@
 async function getAniaResponse(userMessage) {
     try {
         // ✅ NUEVO: Consultar productos desde el backend de Render
-        let productosContexto = '';
+        let productosContexto = 'No hay productos disponibles en este momento.';
         try {
-            const response = await fetch(`${WORKER_URL.replace('/api/telegram-proxy', '/api/productos-resumen')}`);
+            // Construir URL del endpoint de productos
+            const baseUrl = WORKER_URL.replace('/api/telegram-proxy', '');
+            const response = await fetch(`${baseUrl}/api/productos-resumen`);
+            
             if (response.ok) {
                 const data = await response.json();
                 if (data.ok && data.resumenTexto) {
                     productosContexto = data.resumenTexto;
                     console.log(`📦 Telegram: ${data.total} productos cargados para contexto`);
                 }
+            } else {
+                console.warn('⚠️ API productos-resumen devolvió error:', response.status);
             }
         } catch (e) {
             console.warn('⚠️ No se pudieron cargar productos para Telegram:', e.message);
@@ -377,14 +382,15 @@ async function getAniaResponse(userMessage) {
                         Eres alegre, entusiasta, hablas español con emojis moderados (☕✨🎌).
                         
 CATÁLOGO ACTUAL DE PRODUCTOS:
-${productosContexto || 'No hay productos cargados en este momento.'}
+${productosContexto}
 
 REGLAS:
 - Si preguntan por productos, busca en el catálogo y da precio, stock y descripción.
 - Si preguntan por la tienda: "🌐 Visita nuestra tienda: https://meditech-tienda.onrender.com"
 - Si el stock es bajo (<5), avisa: "⚠️ Quedan pocas unidades".
 - SIEMPRE recomienda consultar a un médico para temas de salud.
-- Sé concisa: máximo 3-4 líneas por respuesta en Telegram.`
+- Sé concisa: máximo 3-4 líneas por respuesta en Telegram.
+- SIEMPRE responde algo útil, NUNCA digas "puedes verlos en la página" sin dar el listado.`
                     },
                     { role: 'user', content: userMessage }
                 ],
