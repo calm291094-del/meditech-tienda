@@ -75,7 +75,7 @@ function logout() {
     updateUIForLoggedOut();
     closeUserMenu();
     
-    // Verificación segura para evitar "updateCartUI is not defined"
+    // ✅ CORRECCIÓN: Verificar si existe antes de llamar para evitar el error
     if (typeof window.updateCartUI === 'function') {
         window.updateCartUI();
     }
