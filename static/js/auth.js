@@ -67,16 +67,23 @@ async function handleRegister(e) {
 }
 
 function logout() {
+    S.currentUser = null;
+    S.cart = [];
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('session');
+    document.body.classList.remove('admin-mode');
+    updateUIForLoggedOut();
+    closeUserMenu();
     
-    // ✅ CORRECCIÓN: Verificar si la función existe antes de llamarla
+    // ✅ CORRECCIÓN: Verificar si la función existe antes de llamarla para evitar el error
     if (typeof window.updateCartUI === 'function') {
         window.updateCartUI();
     }
     
-    // Recargar la página para limpiar el estado visual completamente
-    window.location.reload(); 
+    showNotif('👋 Sesión cerrada', 'info');
+    
+    // Opcional: Recargar la página asegura que todo el estado visual se limpie perfectamente
+    // window.location.reload(); 
 }
 
 function updateUIForLoggedUser() {
