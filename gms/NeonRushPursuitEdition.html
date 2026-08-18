@@ -18,6 +18,34 @@
     }
     canvas { display: block; }
     
+    /* BOTÓN REGRESAR A LA TIENDA */
+    .back-btn {
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        background: rgba(0, 0, 0, 0.7);
+        border: 2px solid #00f3ff;
+        color: #00f3ff;
+        padding: 12px 24px;
+        border-radius: 5px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-decoration: none;
+        z-index: 1000;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        backdrop-filter: blur(5px);
+    }
+    .back-btn:hover {
+        background: #00f3ff;
+        color: #000;
+        box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+        transform: translateX(-3px);
+    }
+
     /* ========================================
        MENÚ PRINCIPAL - OPTIMIZADO PARA FIREFOX
        ======================================== */
@@ -176,7 +204,7 @@
         font-weight: 700;
     }
     
-    /* CORRECCIÓN CRÍTICA PARA FIREFOX: Selects con fondo sólido y apariencia nativa desactivada */
+    /* CORRECCIÓN CRÍTICA PARA FIREFOX: Selects con fondo sólido */
     .setting-box select {
         background: #0a0a12;
         color: #ffffff;
@@ -331,7 +359,7 @@
     
     .version-badge {
         position: absolute;
-        top: 30px;
+        top: 80px;
         left: 30px;
         background: linear-gradient(135deg, #ff0055, #ff6b00);
         padding: 10px 20px;
@@ -400,21 +428,28 @@
         display: none;
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
-        background: #000;
+        background: radial-gradient(ellipse at center, #1a0b2e 0%, #000 100%);
         color: #ff0055;
         font-family: 'Orbitron', sans-serif;
         text-align: center;
         padding: 50px 20px;
         z-index: 9999;
         box-sizing: border-box;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
-    #webgl-error h2 { color: #00f3ff; margin-bottom: 20px; }
+    #webgl-error h2 { color: #00f3ff; margin-bottom: 20px; font-size: 2rem; }
     #webgl-error p { color: #fff; font-size: 1.1rem; line-height: 1.6; max-width: 600px; margin: 0 auto 20px; }
-    #webgl-error ul { text-align: left; max-width: 500px; margin: 0 auto; color: #ccc; }
-    #webgl-error li { margin-bottom: 10px; }
+    #webgl-error ul { text-align: left; max-width: 500px; margin: 0 auto 20px; color: #ccc; font-family: 'Segoe UI', sans-serif; }
+    #webgl-error li { margin-bottom: 12px; }
+    #webgl-error code { background: #222; padding: 2px 6px; border-radius: 4px; color: #00f3ff; }
 </style>
 </head>
 <body>
+
+<!-- BOTÓN REGRESAR A LA TIENDA -->
+<a href="../index.html" class="back-btn">← Regresar a la Tienda</a>
 
 <!-- MENÚ PRINCIPAL -->
 <div id="menu">
@@ -475,13 +510,16 @@
 
 <!-- ERROR WEBGL FALLBACK -->
 <div id="webgl-error">
-    <h2>⚠️ ERROR DE RENDERIZADO GRÁFICO</h2>
-    <p>Tu navegador no pudo crear el contexto WebGL necesario para ejecutar el juego en 3D.</p>
+    <h2>⚠️ ERROR DE RENDERIZADO GRÁFICO EN FIREFOX</h2>
+    <p>Tu navegador no pudo crear el contexto WebGL necesario. Esto es común en Firefox con ciertas tarjetas gráficas.</p>
     <ul>
-        <li>1. En <strong>Firefox</strong>: Ve a <em>Configuración > General > Rendimiento</em> y asegúrate de que "Usar configuración de rendimiento recomendada" esté desmarcada y "Aceleración de hardware" esté <strong>ACTIVADA</strong>.</li>
-        <li>2. Escribe <strong>about:config</strong> en la barra de direcciones, busca <strong>webgl.force-enabled</strong> y ponlo en <strong>true</strong>.</li>
-        <li>3. Actualiza los controladores de tu tarjeta gráfica.</li>
+        <li>1. Escribe <code>about:config</code> en la barra de direcciones y presiona Enter.</li>
+        <li>2. Acepta el riesgo y busca: <code>webgl.force-enabled</code></li>
+        <li>3. Haz doble clic para cambiar su valor a <strong>true</strong>.</li>
+        <li>4. Busca también <code>webgl.disabled</code> y asegúrate de que esté en <strong>false</strong>.</li>
+        <li>5. <strong>Reinicia Firefox</strong> y vuelve a intentar.</li>
     </ul>
+    <a href="../index.html" class="btn" style="margin-top: 20px; display: inline-block; text-decoration: none;"><span>← VOLVER A LA TIENDA</span></a>
 </div>
 
 <!-- HUD -->
@@ -534,7 +572,7 @@ window.addEventListener('keydown', e => keys[e.code] = true);
 window.addEventListener('keyup', e => keys[e.code] = false);
 
 // ==========================================
-// INICIALIZACIÓN WEBGL (UNA SOLA VEZ PARA FIREFOX)
+// INICIALIZACIÓN WEBGL (MÁXIMA COMPATIBILIDAD FIREFOX)
 // ==========================================
 function initThree() {
     try {
@@ -544,14 +582,16 @@ function initThree() {
 
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         
-        // CORRECCIÓN FIREFOX: powerPreference y límite de pixel ratio
+        // Configuración ultra-segura para Firefox (evita "Exhausted GL driver options")
         renderer = new THREE.WebGLRenderer({ 
             antialias: true,
-            powerPreference: "high-performance",
-            preserveDrawingBuffer: false
+            alpha: false,
+            depth: true,
+            stencil: false,
+            preserveDrawingBuffer: false,
+            powerPreference: "default" // "default" es más estable que "high-performance" en Firefox
         });
         
-        // Limitar a 1.5 para evitar sobrecarga en GPUs integradas en Firefox
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
@@ -567,8 +607,9 @@ function initThree() {
         window.addEventListener('resize', onResize);
     } catch (e) {
         console.error("WebGL Error:", e);
-        document.getElementById('webgl-error').style.display = 'block';
+        document.getElementById('webgl-error').style.display = 'flex';
         document.getElementById('menu').style.display = 'none';
+        document.querySelector('.back-btn').style.display = 'none'; // Ocultar el botón normal si hay error
         return false;
     }
     return true;
@@ -594,7 +635,6 @@ function cleanupScene() {
         }
         scene.remove(obj);
     }
-    // Limpiar arrays
     players = []; traffic = []; pedestrians = []; police = [];
     ufo = null; ufoActive = false; ufoTimer = 20;
 }
@@ -1075,7 +1115,6 @@ function startGame(mode) {
     trafficDensity = parseInt(document.getElementById('sel-traffic').value);
     const trackType = parseInt(document.getElementById('sel-track').value);
 
-    // CORRECCIÓN FIREFOX: Limpieza profunda de memoria antes de reiniciar
     cleanupScene();
 
     const ambient = new THREE.AmbientLight(0x222244, 0.5); scene.add(ambient);
@@ -1130,7 +1169,7 @@ function startGame(mode) {
     }, 1000);
 }
 
-// INICIALIZACIÓN ÚNICA (EVITA EXHAUSTED GL DRIVERS EN FIREFOX)
+// INICIALIZACIÓN ÚNICA
 const webglReady = initThree();
 if(webglReady) {
     animate();
