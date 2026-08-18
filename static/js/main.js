@@ -443,11 +443,17 @@ function renderEstadisticas() {
 
 function generarGraficos() {
     try {
+        // ✅ CORRECCIÓN: Destruir gráficos anteriores si ya existen para evitar el error de Canvas
+        if (window.chartVentas) window.chartVentas.destroy();
+        if (window.chartPedidos) window.chartPedidos.destroy();
+
         const ctx1 = safeElement('ventas-categoria');
+        // ✅ CORRECCIÓN: Arreglado el error de sintaxis "& &" por "&&"
         if (ctx1 && typeof Chart !== 'undefined') {
             const categorias = ['medicamento', 'tecnologia', 'salud', 'gaming'];
             const nombres = ['💊 Medicamentos', '💻 Tecnología', '🩺 Salud', '🎮 Gaming'];
             const colores = ['#0d9488', '#3b82f6', '#10b981', '#8b5cf6'];
+            
             const ventas = categorias.map(cat => 
                 S.orders ? S.orders.reduce((sum, o) => {
                     const items = o.items ? o.items.filter(i => {
@@ -457,12 +463,15 @@ function generarGraficos() {
                     return sum + items.reduce((s, i) => s + (i.subtotal || 0), 0);
                 }, 0) : 0
             );
-            new Chart(ctx1, {
+            
+            // ✅ CORRECCIÓN: Guardar la instancia en una variable global para poder destruirla después
+            window.chartVentas = new Chart(ctx1, {
                 type: 'doughnut',
                 data: { labels: nombres, datasets: [{ data: ventas, backgroundColor: colores, borderWidth: 2, borderColor: '#fff' }] },
                 options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
             });
         }
+
         const ctx2 = safeElement('pedidos-dia');
         if (ctx2 && typeof Chart !== 'undefined') {
             const dias = [], counts = [], hoy = new Date();
@@ -473,7 +482,9 @@ function generarGraficos() {
                 dias.push(fecha.toLocaleDateString('es-ES', { weekday: 'short' }));
                 counts.push(S.orders ? S.orders.filter(o => o.fecha && o.fecha.startsWith(fechaStr)).length : 0);
             }
-            new Chart(ctx2, {
+            
+            // ✅ CORRECCIÓN: Guardar la instancia en una variable global
+            window.chartPedidos = new Chart(ctx2, {
                 type: 'bar',
                 data: { labels: dias, datasets: [{ label: 'Pedidos', data: counts, backgroundColor: '#0d9488', borderRadius: 6 }] },
                 options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
