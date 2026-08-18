@@ -70,7 +70,7 @@ async function toggleProductAvailability(id) {
     const p = S.pr.find(x => x.id === id);
     if (!p) return;
     
-    const newVal = p.available === false ? true : false;
+    const newVal = !p.available;
     const estadoTexto = newVal ? 'Disponible' : 'Agotado';
     
     try {
@@ -259,7 +259,7 @@ function renderAdminList() {
     }
     
     list.innerHTML = S.pr.map(p => {
-        const isAvailable = p.available !== false;
+        const isAvailable = p.available === true || p.available === 1;
         return `
             <div class="admin-list-item">
                 <img src="${p.image || 'https://via.placeholder.com/60'}" alt="${p.name}">
