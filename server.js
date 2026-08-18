@@ -281,7 +281,7 @@ app.post('/api/productos', authenticateToken, esAdmin, async (req, res) => {
 
 app.put('/api/productos/:id', authenticateToken, esAdmin, async (req, res) => {
     const { id } = req.params;
-    const { name, category, price, description, stock, image, available, feat } = req.body;
+    const { name, category, price, desc, description, stock, image, available, feat } = req.body;
 
     try {
         const productos = leerArrayJSON('productos.json');
@@ -289,18 +289,36 @@ app.put('/api/productos/:id', authenticateToken, esAdmin, async (req, res) => {
         if (index === -1) {
             return res.status(404).json({ error: 'Producto no encontrado' });
         }
+        
+        // ✅ CORRECCIÓN: Usar validación estricta para permitir el número 0 y booleanos reales
+        const nuevoStock = stock !== undefined && stock !== '' ? parseInt(stock) : productos[index].stock;
+        const nuevoPrecio = price !== undefined && price !== '' ? parseFloat(price) : productos[index].price;
+        const nuevaDesc = desc !== undefined ? desc : (description !== undefined ? description : (productos[index].desc || productos[index].description || ''));
+        
+        // Normalizar available a booleano puro (true/false)
+        let nuevoAvailable = productos[index].available;
+        if (available !== undefined) {
+            nuevoAvailable = (available === true || available === 'true' || available === 1 || available === '1');
+        }
+
+        let nuevoFeat = productos[index].feat;
+        if (feat !== undefined) {
+            nuevoFeat = (feat === true || feat === 'true' || feat === 1 || feat === '1');
+        }
+
         productos[index] = {
             ...productos[index],
-            name: name || productos[index].name,
-            category: category || productos[index].category,
-            price: parseFloat(price) || productos[index].price,
-            description: description || productos[index].description,
-            stock: parseInt(stock) || productos[index].stock,
-            image: image || productos[index].image,
-            available: available !== undefined ? (available ? 1 : 0) : productos[index].available,
-            feat: feat !== undefined ? (feat ? 1 : 0) : productos[index].feat,
+            name: name !== undefined ? name : productos[index].name,
+            category: category !== undefined ? category : productos[index].category,
+            price: nuevoPrecio,
+            desc: nuevaDesc, // Guardamos siempre como 'desc' para que el frontend lo lea bien
+            stock: nuevoStock,
+            image: image !== undefined ? image : productos[index].image,
+            available: nuevoAvailable,
+            feat: nuevoFeat,
             updated_at: new Date().toISOString()
         };
+        
         escribirJSON('productos.json', productos);
         res.json(productos[index]);
     } catch (error) {
