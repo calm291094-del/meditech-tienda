@@ -450,6 +450,52 @@ app.post('/api/telegram-proxy', async (req, res) => {
 });
 
 // ============================================================
+// 📦 RESUMEN DE PRODUCTOS PARA IA (Chatbot + Telegram)
+// ============================================================
+app.get('/api/productos-resumen', (req, res) => {
+    try {
+        const productos = leerArrayJSON('productos.json');
+        
+        // Filtrar solo productos disponibles (stock > 0 y available = 1)
+        const disponibles = productos.filter(p => 
+            p.stock > 0 && (p.available === 1 || p.available === true || p.available === undefined)
+        );
+        
+        // Formatear como texto para IA
+        const resumen = disponibles.map(p => {
+            const categoria = p.category || 'general';
+            const stock = p.stock > 10 ? '✅ Disponible' : p.stock > 0 ? `⚠️ Solo ${p.stock} unidades` : '❌ Agotado';
+            return `• ${p.name} (${categoria}) - $${p.price} - ${stock}\n  ${p.description || 'Sin descripción'}`;
+        }).join('\n\n');
+        
+        // Estadísticas
+        const totalProductos = productos.length;
+        const categorias = [...new Set(productos.map(p => p.category))];
+        const precioMin = Math.min(...disponibles.map(p => p.price));
+        const precioMax = Math.max(...disponibles.map(p => p.price));
+        
+        res.json({
+            ok: true,
+            total: disponibles.length,
+            totalGeneral: totalProductos,
+            categorias,
+            rangoPrecios: { min: precioMin, max: precioMax },
+            resumenTexto: resumen,
+            productos: disponibles.map(p => ({
+                name: p.name,
+                category: p.category,
+                price: p.price,
+                stock: p.stock,
+                description: p.description
+            }))
+        });
+    } catch (error) {
+        console.error('Error en productos-resumen:', error);
+        res.status(500).json({ ok: false, error: error.message });
+    }
+});
+
+// ============================================================
 // 🚀 INICIAR SERVIDOR
 // ============================================================
 app.listen(PORT, '0.0.0.0', () => {
