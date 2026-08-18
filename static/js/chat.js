@@ -1,5 +1,5 @@
 // ============================================
-// CHAT.JS - CHATBOT MEJORADO
+// CHAT.JS - CHATBOT MEJORADO Y ESTABLE
 // ============================================
 
 function toggleChat() {
@@ -32,33 +32,28 @@ async function sendMessage() {
     messages.scrollTop = messages.scrollHeight;
     
     try {
-        // ✅ NUEVO: Consultar productos reales desde el backend
-        let productosContexto = 'No hay productos disponibles en este momento.';
+        // 1. Obtener productos de forma SEGURA (sin romper el código si falla)
+        let productosContexto = "No hay productos disponibles en este momento.";
         try {
-            // Usar la URL global API_URL si existe, sino construirla
             const apiUrl = window.API_URL || 'https://meditech-bot.onrender.com/api';
-            const response = await fetch(`${apiUrl}/productos-resumen`);
-            
-            if (response.ok) {
-                const data = await response.json();
+            const res = await fetch(`${apiUrl}/productos-resumen`);
+            if (res.ok) {
+                const data = await res.json();
                 if (data.ok && data.resumenTexto) {
                     productosContexto = data.resumenTexto;
-                    console.log(`📦 Chatbot: ${data.total} productos cargados para contexto`);
                 }
-            } else {
-                console.warn('⚠️ API productos-resumen devolvió error:', response.status);
             }
         } catch (e) {
-            console.warn('⚠️ No se pudieron cargar productos desde API, usando fallback:', e.message);
-            // Fallback a variable global S.pr si existe
+            console.warn("⚠️ No se pudo cargar el catálogo para el chat, usando fallback.");
+            // Fallback seguro por si la API falla
             if (window.S && window.S.pr && Array.isArray(window.S.pr)) {
-                productosContexto = window.S.pr.slice(0, 30).map(p => 
-                    `• ${p.name} (${p.category || 'general'}) - $${p.price} - Stock: ${p.stock}\n  ${p.description || ''}`
-                ).join('\n\n');
+                productosContexto = window.S.pr.slice(0, 15).map(p => 
+                    `• ${p.name} ($${p.price}) - Stock: ${p.stock}`
+                ).join('\n');
             }
         }
-        
-        // ✅ NUEVO: Petición a la IA con contexto de productos
+
+        // 2. Llamar a la IA
         const response = await fetch('https://text.pollinations.ai/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -66,21 +61,11 @@ async function sendMessage() {
                 messages: [
                     { 
                         role: 'system', 
-                        content: `Eres el asistente virtual de MediTech, una tienda de medicamentos y tecnología en Holguín, Cuba.
-                        
-CATÁLOGO ACTUAL DE PRODUCTOS DISPONIBLES:
-${productosContexto}
-
-REGLAS IMPORTANTES:
-- Responde SIEMPRE en español, de forma amigable y profesional.
-- Si el cliente pregunta por un producto específico, busca en el catálogo y da precio, stock y descripción.
-- Si pregunta por categorías (medicamentos, tecnología, gaming, salud), agrupa los productos relevantes.
-- Si el stock es bajo (<5), avisa: "Quedan pocas unidades".
-- Si el producto no está en el catálogo, di honestamente: "No lo tenemos disponible ahora, pero puedo sugerirte alternativas".
-- SIEMPRE recomienda consultar a un médico para temas de salud.
-- Usa emojis con moderación (💊 para medicamentos, 💻 para tecnología, 🎮 para gaming).
-- Sé conciso: máximo 3-4 oraciones por respuesta.
-- SIEMPRE responde algo útil, NUNCA digas "no puedo procesar tu pregunta".`
+                        content: `Eres el asistente de MediTech (tienda en Holguín, Cuba). 
+                        CATÁLOGO DISPONIBLE:\n${productosContexto}\n
+                        REGLAS: Responde en español, sé amable y conciso (máx 3-4 líneas). 
+                        Si preguntan por productos, usa la información del catálogo. 
+                        Si no sabes algo, di que no está disponible. Recomienda consultar a un médico para temas de salud.`
                     },
                     { role: 'user', content: txt }
                 ],
@@ -88,16 +73,11 @@ REGLAS IMPORTANTES:
             })
         });
         
-        let respuesta = 'Lo siento, hubo un problema. ¿Puedes intentar de nuevo?';
+        let respuesta = 'Disculpa, tuve un problema de conexión. ¿Puedes repetir?';
         if (response.ok) {
             respuesta = await response.text();
             respuesta = respuesta.replace(/```[\s\S]*?```/g, '').trim();
             respuesta = respuesta.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            // Si la respuesta está vacía o es muy corta, usar fallback
-            if (respuesta.length < 10) {
-                respuesta = 'Disculpa, no entendí bien. ¿Puedes reformular tu pregunta?';
-            }
         }
         
         document.getElementById(typingId)?.remove();
@@ -105,9 +85,7 @@ REGLAS IMPORTANTES:
     } catch (error) {
         console.error('❌ Error en chat:', error);
         document.getElementById(typingId)?.remove();
-        messages.innerHTML += `
-            <div class="message bot" style="background:#fee2e2;color:#991b1b;">❌ Error de conexión. Por favor intenta de nuevo.</div>
-        `;
+        messages.innerHTML += `<div class="message bot" style="background:#fee2e2;color:#991b1b;">❌ Error de conexión. Intenta de nuevo.</div>`;
     }
     messages.scrollTop = messages.scrollHeight;
 }
