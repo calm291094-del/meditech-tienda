@@ -1,0 +1,88 @@
+{
+  "names": {
+    "male": ["Carlos","Pedro","Raúl","Eduardo","Omar","Yusnel","Lázaro","Yunier","Arlet","Damián","Reinaldo","Osvaldo","Guillermo","Félix","Andrés","Joaquín"],
+    "female": ["Yaneli","Maité","Lianet","Dayana","Yamila","Arlet","Marisol","Caridad","Yusimí","Odalys","Nereida","Grisel","Iliana","Marlene","Dulce","Anais"]
+  },
+  "professions": [
+    { "id":"medico","name":"Médico","icon":"🩺","skill":"healing","desc":"Sabe curar heridas" },
+    { "id":"mecanico","name":"Mecánico","icon":"🔧","skill":"repair","desc":"Repara vehículos" },
+    { "id":"profesor","name":"Profesor","icon":"📚","skill":"knowledge","desc":"Conoce la ciudad" },
+    { "id":"musico","name":"Músico","icon":"🎺","skill":"morale","desc":"Sube la moral con son" },
+    { "id":"pescador","name":"Pescador","icon":"🎣","skill":"food","desc":"Consigue comida" },
+    { "id":"tabacalero","name":"Tabacalero","icon":"🚬","skill":"trade","desc":"Conoce el trueque" },
+    { "id":"soldado","name":"Ex-soldado","icon":"🪖","skill":"combat","desc":"Experto en combate" },
+    { "id":"agricultor","name":"Agricultor","icon":"🌾","skill":"food","desc":"Cultiva alimentos" },
+    { "id":"carpintero","name":"Carpintero","icon":"🪵","skill":"build","desc":"Construye defensas" },
+    { "id":"enfermera","name":"Enfermera","icon":"💉","skill":"healing","desc":"Cuida a los heridos" }
+  ],
+  "personalities": [
+    {
+      "id":"valiente","name":"Valiente",
+      "traits":{"courage":0.9,"optimism":0.7,"humor":0.4,"fear":0.2,"loyalty":0.8,"curiosity":0.6},
+      "thoughts":{
+        "idle":["Si vienen, aquí estaré esperando.","No le temo a la noche, le temo a rendirme.","Mi abuelo decía: 'el miedo se vence caminando hacia él'."],
+        "combat":["¡Vamos, que estos muertos bailan mejor que yo!","Cada uno que cae, es un paso más hacia la Loma.","¡Por Holguín!"],
+        "night":["La noche es larga, pero nosotros más.","Ojos abiertos. Los muertos no duermen."],
+        "learned":["Cada batalla enseña algo. Apuntado está.","Ya sé cómo se mueven. Pronto sabré cómo piensan."]
+      }
+    },
+    {
+      "id":"optimista","name":"Optimista",
+      "traits":{"courage":0.5,"optimism":0.95,"humor":0.7,"fear":0.3,"loyalty":0.8,"curiosity":0.7},
+      "thoughts":{
+        "idle":["Mañana será mejor. Siempre lo es.","Cuando esto acabe, voy a bailar son en el parque.","¿Escuchas eso? Todavía cantan los pájaros."],
+        "combat":["¡Ánimo! Hasta los muertos se cansan.","Esto no es nada, en el '94 fue peor."],
+        "night":["Las estrellas siguen ahí. Eso significa algo.","Un día más, un día menos para el final."],
+        "learned":["¡Mira, ya sé algo nuevo! La esperanza también se entrena.","Aprendí que juntos somos más fuertes."]
+      }
+    },
+    {
+      "id":"pragmatico","name":"Pragmático",
+      "traits":{"courage":0.6,"optimism":0.4,"humor":0.2,"fear":0.4,"loyalty":0.7,"curiosity":0.5},
+      "thoughts":{
+        "idle":["Contemos las balas. Otra vez.","El agua se acaba. Hay que buscar más.","Las trampas del norte necesitan reparación."],
+        "combat":["Munición baja. Hay que retroceder.","Uno menos, pero quedan balas contadas."],
+        "night":["De noche, los muertos ven mejor. Nosotros no.","Atrincherarse es vivir."],
+        "learned":["Dato: los corredores giran lento. Útil.","Registrado: el ruido atrae. Anotado."]
+      }
+    },
+    {
+      "id":"mistico","name":"Místico",
+      "traits":{"courage":0.5,"optimism":0.6,"humor":0.3,"fear":0.5,"loyalty":0.9,"curiosity":0.9},
+      "thoughts":{
+        "idle":["Los orishas nos observan. Ochún protege las aguas.","Eleguá abre los caminos, pero hay que pedirle permiso.","Mi abuela hacía ofrendas. Quizás debamos hacer una."],
+        "combat":["Changó nos da fuerza. El trueno es su voz.","Que Yemayá nos cubra con su manto."],
+        "night":["La noche pertenece a los muertos. Respetémosla.","Las sombras hablan si sabes escuchar."],
+        "learned":["Una señal... los ancestros me enseñan.","El conocimiento también es una bendición."]
+      }
+    },
+    {
+      "id":"cauteloso","name":"Cauteloso",
+      "traits":{"courage":0.3,"optimism":0.4,"humor":0.3,"fear":0.8,"loyalty":0.7,"curiosity":0.4},
+      "thoughts":{
+        "idle":["No me gusta ese silencio...","¿Seguro que no hay nadie ahí atrás?","Mejor un paso lento que uno en falso."],
+        "combat":["¡Cuidado! ¡Vienen por la izquierda!","¡Demasiados! ¡Hay que retroceder!"],
+        "night":["La noche es peligrosa. No nos alejemos.","No me gusta esto. Nada me gusta de esto."],
+        "learned":["Aprendí a tener más miedo. Es útil.","Cada error que veo, lo apunto para no repetirlo."]
+      }
+    },
+    {
+      "id":"jocoso","name":"Jocoso",
+      "traits":{"courage":0.6,"optimism":0.8,"humor":0.95,"fear":0.3,"loyalty":0.7,"curiosity":0.6},
+      "thoughts":{
+        "idle":["Oye, ¿los muertos pagan impuestos? Porque no hacen nada.","Extraño el helado de Coppelia. Bueno, extraño el helado.","Si me muero, que me entierren con mi guitarra."],
+        "combat":["¡Baila, muerto, baila! ...¿Eso fue un chiste? Lo siento.","¡Toma eso! ¡Y eso! ¡Y un poquito de son!"],
+        "night":["De noche todos los muertos son pardos. Ja. ...Perdón.","Menos mal que no puedo verlos bien."],
+        "learned":["Aprendí algo y no fue a hacer chistes. Sorprendido estoy.","¡Epa! Ya soy más listo. Peligroso."]
+      }
+    }
+  ],
+  "observations": {
+    "seeZombie":["Ahí viene uno...","Muerto a la vista.","Se acerca uno de esos.","Otro que se levanta."],
+    "seeHorde":["¡Una horda! ¡Son muchos!","¡Madre mía, cuántos!","Eso no es un grupo, es una avalancha."],
+    "playerKill":["¡Bien! ¡Uno menos!","¡Buen tiro!","Así se hace.","El jefe lo hizo de nuevo."],
+    "nightfall":["Se hace de noche...","El sol se esconde. Ellos salen.","Preparen todo. Viene la noche."],
+    "lowHealth":["Estoy herido... necesito ayuda.","Me duele todo...","No me siento bien."],
+    "radioOn":["¡Música! Eso anima a cualquiera.","Un poquito de son no hace daño.","Esto suena a Holguín de antes."]
+  }
+}
