@@ -131,7 +131,7 @@ function renderProducts() {
         return;
     }
     
-    const fallbackImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="200"%3E%3Crect width="300" height="200" fill="%23f3f4f6"/%3E%3Ctext x="150" y="105" font-family="Arial" font-size="16" fill="%239ca3af" text-anchor="middle"%3ESin imagen%3C/text%3E%3C/svg%3E';
+    const fallbackImage = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="#f3f4f6"/><text x="150" y="105" font-family="Arial" font-size="16" fill="#9ca3af" text-anchor="middle">Sin imagen</text></svg>');
     
     grid.innerHTML = filtered.map(p => {
         const isSoldOut = p.available === false || p.stock <= 0;
@@ -452,15 +452,16 @@ function generarGraficos() {
             const nombres = ['💊 Medicamentos', '💻 Tecnología', '🩺 Salud', '🎮 Gaming'];
             const colores = ['#0d9488', '#3b82f6', '#10b981', '#8b5cf6'];
             
-            const ventas = categorias.map(cat => 
-                S.orders ? S.orders.reduce((sum, o) => {
-                    const items = o.items ? o.items.filter(i => {
+            const ventas = categorias.map(cat => {
+                if (!S.orders) return 0;
+                return S.orders.reduce((sum, o) => {
+                    const items = (o.items || []).filter(i => {
                         const producto = S.pr.find(p => p.name === i.nombre);
                         return producto && producto.category === cat;
-                    }) : [];
+                    });
                     return sum + items.reduce((s, i) => s + (i.subtotal || 0), 0);
-                }, 0) : 0
-            );
+                }, 0);
+            });
             
             window.chartVentas = new Chart(ctx1, {
                 type: 'doughnut',
@@ -477,7 +478,8 @@ function generarGraficos() {
                 fecha.setDate(fecha.getDate() - i);
                 const fechaStr = fecha.toISOString().split('T')[0];
                 dias.push(fecha.toLocaleDateString('es-ES', { weekday: 'short' }));
-                counts.push(S.orders ? S.orders.filter(o => o.fecha && o.fecha.startsWith(fechaStr)).length : 0);
+                const count = S.orders ? S.orders.filter(o => o.fecha && o.fecha.startsWith(fechaStr)).length : 0;
+                counts.push(count);
             }
             
             window.chartPedidos = new Chart(ctx2, {
