@@ -443,12 +443,11 @@ function renderEstadisticas() {
 
 function generarGraficos() {
     try {
-        // ✅ CORRECCIÓN: Destruir gráficos anteriores si ya existen para evitar el error de Canvas
+        // Destruir gráficos anteriores si ya existen para evitar el error de Canvas
         if (window.chartVentas) window.chartVentas.destroy();
         if (window.chartPedidos) window.chartPedidos.destroy();
 
         const ctx1 = safeElement('ventas-categoria');
-        // ✅ CORRECCIÓN: Arreglado el error de sintaxis "& &" por "&&"
         if (ctx1 && typeof Chart !== 'undefined') {
             const categorias = ['medicamento', 'tecnologia', 'salud', 'gaming'];
             const nombres = ['💊 Medicamentos', '💻 Tecnología', '🩺 Salud', '🎮 Gaming'];
@@ -464,7 +463,6 @@ function generarGraficos() {
                 }, 0) : 0
             );
             
-            // ✅ CORRECCIÓN: Guardar la instancia en una variable global para poder destruirla después
             window.chartVentas = new Chart(ctx1, {
                 type: 'doughnut',
                 data: { labels: nombres, datasets: [{ data: ventas, backgroundColor: colores, borderWidth: 2, borderColor: '#fff' }] },
@@ -483,7 +481,6 @@ function generarGraficos() {
                 counts.push(S.orders ? S.orders.filter(o => o.fecha && o.fecha.startsWith(fechaStr)).length : 0);
             }
             
-            // ✅ CORRECCIÓN: Guardar la instancia en una variable global
             window.chartPedidos = new Chart(ctx2, {
                 type: 'bar',
                 data: { labels: dias, datasets: [{ label: 'Pedidos', data: counts, backgroundColor: '#0d9488', borderRadius: 6 }] },
@@ -498,13 +495,17 @@ function generarGraficos() {
 function actualizarDashboard() {
     const hoy = new Date().toISOString().split('T')[0];
     const ventasHoy = S.orders ? S.orders.filter(o => o.fecha && o.fecha.startsWith(hoy)).reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0) : 0;
+    
     const elVentas = safeElement('dashboard-ventas-hoy');
     if (elVentas) elVentas.textContent = `$${ventasHoy.toFixed(2)}`;
+    
     const elPedidos = safeElement('dashboard-pedidos-pendientes');
     if (elPedidos) elPedidos.textContent = S.orders ? S.orders.length : 0;
+    
     const critico = S.pr ? S.pr.filter(p => p.stock <= 5 && p.stock > 0).length : 0;
     const elStock = safeElement('dashboard-stock-critico');
     if (elStock) elStock.textContent = critico;
+    
     const semana = new Date();
     semana.setDate(semana.getDate() - 7);
     const nuevos = S.users ? S.users.filter(u => u.fecha && new Date(u.fecha) > semana).length : 0;
