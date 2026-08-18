@@ -75,15 +75,12 @@ function logout() {
     updateUIForLoggedOut();
     closeUserMenu();
     
-    // ✅ CORRECCIÓN: Verificar si la función existe antes de llamarla para evitar el error
+    // Verificación segura para evitar "updateCartUI is not defined"
     if (typeof window.updateCartUI === 'function') {
         window.updateCartUI();
     }
     
     showNotif('👋 Sesión cerrada', 'info');
-    
-    // Opcional: Recargar la página asegura que todo el estado visual se limpie perfectamente
-    // window.location.reload(); 
 }
 
 function updateUIForLoggedUser() {
