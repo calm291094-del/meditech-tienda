@@ -140,39 +140,51 @@ async function loadConfigInfo() {
             currentToken = localStorage.getItem('github_token') || '';
         }
         
-        document.getElementById('current-token-display').value = currentToken;
-        document.getElementById('info-repo').textContent = `${GITHUB_USER}/${GITHUB_REPO}`;
+        const tokenDisplay = document.getElementById('current-token-display');
+        if (tokenDisplay) {
+            tokenDisplay.value = currentToken;
+        }
 
-        const tokenType = currentToken.startsWith('github_pat_') ? 'Fine-Grained (Beta)' :
-                          currentToken.startsWith('ghp_') ? 'Classic' : 'No configurado';
-        document.getElementById('info-token-type').textContent = tokenType;
+        // Verificación segura de elementos que podrían no existir en el HTML
+        const infoRepo = document.getElementById('info-repo');
+        if (infoRepo) infoRepo.textContent = `${GITHUB_USER}/${GITHUB_REPO}`;
 
-        const lastSync = localStorage.getItem('github_token_date');
-        document.getElementById('info-last-sync').textContent = lastSync ?
-            new Date(lastSync).toLocaleString('es-ES') : 'Nunca';
+        const infoTokenType = document.getElementById('info-token-type');
+        if (infoTokenType) {
+            const tokenType = currentToken.startsWith('github_pat_') ? 'Fine-Grained (Beta)' :
+                              currentToken.startsWith('ghp_') ? 'Classic' : 'No configurado';
+            infoTokenType.textContent = tokenType;
+        }
 
-        if (currentToken) {
+        const infoLastSync = document.getElementById('info-last-sync');
+        if (infoLastSync) {
+            const lastSync = localStorage.getItem('github_token_date');
+            infoLastSync.textContent = lastSync ? new Date(lastSync).toLocaleString('es-ES') : 'Nunca';
+        }
+
+        const infoStatus = document.getElementById('info-status');
+        if (currentToken && infoStatus) {
             try {
                 const testResult = await apiRequest('/config/test-github-token', {
                     method: 'POST',
                     body: JSON.stringify({ token: currentToken })
                 });
-                const statusEl = document.getElementById('info-status');
                 if (testResult.valid) {
-                    statusEl.innerHTML = '<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Conectado</span>';
+                    infoStatus.innerHTML = '<span style="color:#10b981;"><i class="fas fa-check-circle"></i> Conectado</span>';
                 } else {
-                    statusEl.innerHTML = '<span style="color:#ef4444;"><i class="fas fa-times-circle"></i> Token inválido</span>';
+                    infoStatus.innerHTML = '<span style="color:#ef4444;"><i class="fas fa-times-circle"></i> Token inválido</span>';
                 }
             } catch (e) {
-                document.getElementById('info-status').innerHTML = '<span style="color:#f59e0b;"><i class="fas fa-exclamation-triangle"></i> No verificado</span>';
+                infoStatus.innerHTML = '<span style="color:#f59e0b;"><i class="fas fa-exclamation-triangle"></i> No verificado</span>';
             }
-        } else {
-            document.getElementById('info-status').innerHTML = '<span style="color:#9ca3af;">No configurado</span>';
+        } else if (infoStatus) {
+            infoStatus.innerHTML = '<span style="color:#9ca3af;">No configurado</span>';
         }
     } catch (error) {
         console.error('Error al cargar configuración:', error);
         const currentToken = localStorage.getItem('github_token') || '';
-        document.getElementById('current-token-display').value = currentToken;
+        const tokenDisplay = document.getElementById('current-token-display');
+        if (tokenDisplay) tokenDisplay.value = currentToken;
     }
 }
 
