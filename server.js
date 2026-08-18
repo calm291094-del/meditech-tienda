@@ -496,6 +496,35 @@ app.get('/api/productos-resumen', (req, res) => {
 });
 
 // ============================================================
+// 📦 RESUMEN DE PRODUCTOS PARA IA (Chatbot + Telegram)
+// ============================================================
+app.get('/api/productos-resumen', (req, res) => {
+    try {
+        const productos = leerArrayJSON('productos.json');
+        
+        // Filtrar solo productos disponibles
+        const disponibles = productos.filter(p => 
+            p.stock > 0 && (p.available === 1 || p.available === true || p.available === undefined)
+        );
+        
+        // Formatear como texto simple para IA
+        const resumen = disponibles.map(p => {
+            return `• ${p.name} (${p.category || 'general'}) - $${p.price} - Stock: ${p.stock}\n  ${p.description || 'Sin descripción'}`;
+        }).join('\n\n');
+        
+        res.json({
+            ok: true,
+            total: disponibles.length,
+            resumenTexto: resumen || 'No hay productos disponibles en este momento.',
+            productos: disponibles
+        });
+    } catch (error) {
+        console.error('Error en productos-resumen:', error);
+        res.status(500).json({ ok: false, error: error.message, resumenTexto: '' });
+    }
+});
+
+// ============================================================
 // 🚀 INICIAR SERVIDOR
 // ============================================================
 app.listen(PORT, '0.0.0.0', () => {
