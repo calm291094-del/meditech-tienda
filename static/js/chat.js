@@ -15,9 +15,10 @@ async function sendMessage() {
     const messages = document.getElementById('chat-messages');
     const txt = input.value.trim();
     if (!txt) return;
+    
     messages.innerHTML += `<div class="message user">${txt}</div>`;
     input.value = '';
-
+    
     const typingId = 'typing-' + Date.now();
     messages.innerHTML += `
         <div id="${typingId}" class="message bot" style="background:#f3f4f6;">
@@ -29,12 +30,29 @@ async function sendMessage() {
         </div>
     `;
     messages.scrollTop = messages.scrollHeight;
-
+    
     try {
-        const productosContexto = S.pr.slice(0, 20).map(p => 
-            `- ${p.name} ($${p.price}): ${(p.desc || '').substring(0, 100)}... Stock: ${p.stock}`
-        ).join('\n');
-
+        // ✅ NUEVO: Consultar productos reales desde el backend
+        let productosContexto = 'No hay productos disponibles en este momento.';
+        try {
+            const response = await fetch(`${API_URL}/productos-resumen`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.ok && data.resumenTexto) {
+                    productosContexto = data.resumenTexto;
+                    console.log(`📦 Chatbot: ${data.total} productos cargados para contexto`);
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudieron cargar productos, usando fallback');
+            // Fallback a variable global si la API falla
+            if (window.S && window.S.pr) {
+                productosContexto = window.S.pr.slice(0, 30).map(p => 
+                    `• ${p.name} (${p.category || 'general'}) - $${p.price} - Stock: ${p.stock}\n  ${p.description || ''}`
+                ).join('\n\n');
+            }
+        }
+        
         const response = await fetch('https://text.pollinations.ai/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -42,32 +60,38 @@ async function sendMessage() {
                 messages: [
                     { 
                         role: 'system', 
-                        content: `Eres el asistente de MediTech, una tienda de medicamentos y tecnología. 
-                        Tienes acceso a estos productos:\n${productosContexto}\n
-                        Responde de forma amigable, profesional y concisa en español. 
-                        Si preguntan por un producto específico, dales información del mismo.
-                        Si preguntan por precios, menciónalos.
-                        Siempre recomienda consultar a un médico para temas de salud.`
+                        content: `Eres el asistente virtual de MediTech, una tienda de medicamentos y tecnología en Holguín, Cuba.
+                        
+CATÁLOGO ACTUAL DE PRODUCTOS DISPONIBLES:
+${productosContexto}
+
+REGLAS IMPORTANTES:
+- Responde SIEMPRE en español, de forma amigable y profesional.
+- Si el cliente pregunta por un producto específico, busca en el catálogo y da precio, stock y descripción.
+- Si pregunta por categorías (medicamentos, tecnología, gaming, salud), agrupa los productos relevantes.
+- Si el stock es bajo (<5), avisa: "Quedan pocas unidades".
+- Si el producto no está en el catálogo, di honestamente: "No lo tenemos disponible ahora, pero puedo sugerirte alternativas".
+- SIEMPRE recomienda consultar a un médico para temas de salud.
+- Usa emojis con moderación (💊 para medicamentos, 💻 para tecnología, 🎮 para gaming).
+- Sé conciso: máximo 3-4 oraciones por respuesta.`
                     },
                     { role: 'user', content: txt }
                 ],
                 model: 'openai'
             })
         });
-
-        let respuesta = 'Lo siento, no pude procesar tu pregunta.';
+        
+        let respuesta = 'Lo siento, no pude procesar tu pregunta. ¿Puedes reformularla?';
         if (response.ok) {
             respuesta = await response.text();
             respuesta = respuesta.replace(/```[\s\S]*?```/g, '').trim();
             respuesta = respuesta.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         }
-
+        
         document.getElementById(typingId)?.remove();
-
-        messages.innerHTML += `
-            <div class="message bot">${respuesta}</div>
-        `;
+        messages.innerHTML += `<div class="message bot">${respuesta}</div>`;
     } catch (error) {
+        console.error('Error en chat:', error);
         document.getElementById(typingId)?.remove();
         messages.innerHTML += `
             <div class="message bot" style="background:#fee2e2;color:#991b1b;">❌ Error de conexión. Por favor intenta de nuevo.</div>
