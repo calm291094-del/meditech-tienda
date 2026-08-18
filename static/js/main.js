@@ -443,7 +443,6 @@ function renderEstadisticas() {
 
 function generarGraficos() {
     try {
-        // Destruir gráficos anteriores si ya existen para evitar el error de Canvas
         if (window.chartVentas) window.chartVentas.destroy();
         if (window.chartPedidos) window.chartPedidos.destroy();
 
