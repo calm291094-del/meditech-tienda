@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NEON RUSH: PURSUIT EDITION</title>
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
     
     body, html { 
         margin: 0; 
         padding: 0; 
         overflow: hidden; 
         background: #000; 
-        font-family: 'Rajdhani', sans-serif; 
+        font-family: 'Orbitron', 'Segoe UI', system-ui, sans-serif; 
         color: #fff; 
         user-select: none; 
     }
@@ -37,7 +37,6 @@
         overflow: hidden;
     }
     
-    /* Grid futurista de fondo */
     #menu::before {
         content: '';
         position: absolute;
@@ -58,7 +57,6 @@
         100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
     }
     
-    /* Partículas flotantes */
     .particle {
         position: absolute;
         width: 2px;
@@ -77,7 +75,6 @@
         100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
     }
     
-    /* Líneas de velocidad laterales */
     .speed-line {
         position: absolute;
         width: 3px;
@@ -92,11 +89,11 @@
         100% { transform: translateY(100vh); }
     }
     
-    /* Título principal con efecto neón */
     .title-container {
         position: relative;
         margin-bottom: 20px;
         animation: titlePulse 3s ease-in-out infinite;
+        z-index: 10;
     }
     
     @keyframes titlePulse {
@@ -114,31 +111,13 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
         animation: gradientShift 4s ease infinite;
-        text-shadow: 
-            0 0 20px rgba(255, 0, 85, 0.8),
-            0 0 40px rgba(255, 0, 85, 0.6),
-            0 0 60px rgba(255, 0, 85, 0.4);
+        text-shadow: 0 0 20px rgba(255, 0, 85, 0.8), 0 0 40px rgba(255, 0, 85, 0.6);
         letter-spacing: 8px;
-        position: relative;
     }
     
     @keyframes gradientShift {
         0%, 100% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
-    }
-    
-    .title::before {
-        content: 'NEON RUSH';
-        position: absolute;
-        top: 0;
-        left: 0;
-        background: linear-gradient(45deg, #ff0055, #00f3ff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        filter: blur(20px);
-        opacity: 0.5;
-        z-index: -1;
     }
     
     .subtitle {
@@ -149,28 +128,9 @@
         margin-bottom: 40px;
         text-shadow: 0 0 15px #00f3ff, 0 0 30px #00f3ff;
         letter-spacing: 6px;
-        animation: subtitleGlow 2s ease-in-out infinite alternate;
+        z-index: 10;
     }
     
-    @keyframes subtitleGlow {
-        from { text-shadow: 0 0 15px #00f3ff, 0 0 30px #00f3ff; }
-        to { text-shadow: 0 0 20px #00f3ff, 0 0 40px #00f3ff, 0 0 60px #00f3ff; }
-    }
-    
-    /* Contenedor del auto 3D */
-    .car-showcase {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 400px;
-        height: 400px;
-        opacity: 0.15;
-        z-index: 1;
-        pointer-events: none;
-    }
-    
-    /* Panel de configuración mejorado */
     .settings-panel {
         background: linear-gradient(135deg, rgba(0, 243, 255, 0.05) 0%, rgba(255, 0, 85, 0.05) 100%);
         border: 2px solid rgba(0, 243, 255, 0.3);
@@ -178,61 +138,26 @@
         padding: 30px;
         margin: 20px 0;
         backdrop-filter: blur(10px);
-        box-shadow: 
-            0 0 30px rgba(0, 243, 255, 0.2),
-            inset 0 0 30px rgba(0, 243, 255, 0.05);
+        box-shadow: 0 0 30px rgba(0, 243, 255, 0.2), inset 0 0 30px rgba(0, 243, 255, 0.05);
         position: relative;
         z-index: 10;
-    }
-    
-    .settings-panel::before {
-        content: '';
-        position: absolute;
-        top: -2px;
-        left: -2px;
-        right: -2px;
-        bottom: -2px;
-        background: linear-gradient(45deg, #00f3ff, #ff0055, #00f3ff);
-        border-radius: 15px;
-        opacity: 0;
-        transition: opacity 0.3s;
-        z-index: -1;
-    }
-    
-    .settings-panel:hover::before {
-        opacity: 0.3;
     }
     
     .settings {
         display: flex;
         gap: 25px;
         justify-content: center;
+        flex-wrap: wrap;
     }
     
     .setting-box {
-        background: rgba(0, 0, 0, 0.6);
+        background: rgba(0, 0, 0, 0.8);
         border: 1px solid rgba(0, 243, 255, 0.4);
         border-radius: 10px;
         padding: 20px 30px;
         text-align: center;
         transition: all 0.3s;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .setting-box::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.2), transparent);
-        transition: left 0.5s;
-    }
-    
-    .setting-box:hover::before {
-        left: 100%;
+        min-width: 150px;
     }
     
     .setting-box:hover {
@@ -251,31 +176,42 @@
         font-weight: 700;
     }
     
+    /* CORRECCIÓN DE VISIBILIDAD DE LOS SELECT */
     .setting-box select {
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
+        background: #0a0a12;
+        color: #ffffff;
         border: 2px solid #00f3ff;
-        padding: 8px 15px;
-        font-family: 'Rajdhani', sans-serif;
-        font-size: 1rem;
+        padding: 10px 15px;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
         border-radius: 5px;
         cursor: pointer;
-        transition: all 0.3s;
         width: 100%;
+        outline: none;
+        text-align: center;
     }
     
-    .setting-box select:hover {
+    .setting-box select option {
+        background: #0a0a12;
+        color: #ffffff;
+        padding: 10px;
+        font-weight: 700;
+    }
+    
+    .setting-box select:hover, .setting-box select:focus {
         background: rgba(0, 243, 255, 0.1);
         box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
     }
     
-    /* Botones estilo NFS */
     .btn-container {
         display: flex;
         gap: 20px;
         margin: 30px 0;
         position: relative;
         z-index: 10;
+        flex-wrap: wrap;
+        justify-content: center;
     }
     
     .btn {
@@ -345,7 +281,6 @@
         z-index: 1;
     }
     
-    /* Créditos mejorados */
     .credits {
         position: absolute;
         bottom: 30px;
@@ -354,7 +289,6 @@
         text-align: center;
         width: 100%;
         z-index: 10;
-        font-family: 'Rajdhani', sans-serif;
     }
     
     .credits span {
@@ -368,7 +302,6 @@
         margin: 0 5px;
     }
     
-    /* Indicadores de modo */
     .mode-indicator {
         position: absolute;
         top: 30px;
@@ -389,7 +322,6 @@
         letter-spacing: 1px;
     }
     
-    /* Logo de versión */
     .version-badge {
         position: absolute;
         top: 30px;
@@ -404,7 +336,6 @@
         z-index: 10;
     }
     
-    /* Efecto de escaneo */
     .scan-line {
         position: absolute;
         top: 0;
@@ -422,7 +353,7 @@
         100% { top: 100%; }
     }
     
-    /* HUD durante el juego */
+    /* HUD */
     #hud { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; pointer-events: none; }
     .hud-half { position: absolute; top: 0; height: 100%; width: 50%; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; }
     .hud-p1 { left: 0; border-right: 2px solid #ff0055; background: linear-gradient(90deg, rgba(255,0,85,0.1) 0%, transparent 30%); }
@@ -436,19 +367,11 @@
     .nitro-fill { height: 100%; background: linear-gradient(90deg, #ffaa00, #ff0055); transition: width 0.1s; box-shadow: 0 0 10px #ffaa00; }
     
     .event-alert { 
-        position: absolute; 
-        top: 50%; 
-        left: 50%; 
-        transform: translate(-50%, -50%); 
-        font-size: 2.5rem; 
-        font-weight: 900; 
-        color: #fff; 
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+        font-size: 2.5rem; font-weight: 900; color: #fff; 
         text-shadow: 0 0 20px #ff0055, 0 0 40px #ff0055; 
-        display: none; 
-        animation: pulse 0.5s infinite alternate; 
-        z-index: 50; 
-        pointer-events: none;
-        font-family: 'Orbitron', sans-serif;
+        display: none; animation: pulse 0.5s infinite alternate; z-index: 50; pointer-events: none;
+        font-family: 'Orbitron', sans-serif; text-align: center; width: 80%;
     }
     
     @keyframes pulse { 
@@ -459,49 +382,48 @@
     .divider { position: absolute; top: 0; left: 50%; width: 4px; height: 100%; background: #fff; box-shadow: 0 0 15px #fff; z-index: 20; pointer-events: none; }
     
     .countdown { 
-        position: absolute; 
-        top: 50%; 
-        left: 50%; 
-        transform: translate(-50%, -50%); 
-        font-size: 8rem; 
-        font-weight: 900; 
-        color: #fff; 
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+        font-size: 8rem; font-weight: 900; color: #fff; 
         text-shadow: 0 0 30px #00f3ff, 0 0 60px #00f3ff; 
-        display: none; 
-        z-index: 60;
-        font-family: 'Orbitron', sans-serif;
+        display: none; z-index: 60; font-family: 'Orbitron', sans-serif;
     }
+
+    /* Mensaje de error WebGL */
+    #webgl-error {
+        display: none;
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: #000;
+        color: #ff0055;
+        font-family: 'Orbitron', sans-serif;
+        text-align: center;
+        padding: 50px 20px;
+        z-index: 9999;
+        box-sizing: border-box;
+    }
+    #webgl-error h2 { color: #00f3ff; margin-bottom: 20px; }
+    #webgl-error p { color: #fff; font-size: 1.1rem; line-height: 1.6; max-width: 600px; margin: 0 auto 20px; }
+    #webgl-error ul { text-align: left; max-width: 500px; margin: 0 auto; color: #ccc; }
+    #webgl-error li { margin-bottom: 10px; }
 </style>
 </head>
 <body>
 
-<!-- MENÚ PRINCIPAL MEJORADO -->
+<!-- MENÚ PRINCIPAL -->
 <div id="menu">
-    <!-- Efectos de fondo -->
     <div class="scan-line"></div>
     
-    <!-- Partículas generadas por JS -->
-    
-    <!-- Líneas de velocidad -->
-    <div class="speed-line" style="left: 10%; animation-delay: 0s;"></div>
-    <div class="speed-line" style="left: 25%; animation-delay: 0.5s;"></div>
-    <div class="speed-line" style="left: 75%; animation-delay: 1s;"></div>
-    <div class="speed-line" style="left: 90%; animation-delay: 1.5s;"></div>
-    
-    <!-- Badges -->
     <div class="version-badge">v2.0 PURSUIT</div>
     <div class="mode-indicator">
         <div class="indicator">🎮 LOCAL MULTIPLAYER</div>
         <div class="indicator">⚡ ARCADE RACING</div>
     </div>
     
-    <!-- Título -->
     <div class="title-container">
         <div class="title">NEON RUSH</div>
     </div>
     <div class="subtitle">PURSUIT EDITION · SPLIT-SCREEN RACING</div>
     
-    <!-- Panel de configuración -->
     <div class="settings-panel">
         <div class="settings">
             <div class="setting-box">
@@ -515,9 +437,9 @@
             <div class="setting-box">
                 <label>🔄 VUELTAS</label>
                 <select id="sel-laps">
-                    <option value="2">2</option>
-                    <option value="3" selected>3</option>
-                    <option value="5">5</option>
+                    <option value="2">2 Vueltas</option>
+                    <option value="3" selected>3 Vueltas</option>
+                    <option value="5">5 Vueltas</option>
                 </select>
             </div>
             <div class="setting-box">
@@ -531,13 +453,11 @@
         </div>
     </div>
 
-    <!-- Botones -->
     <div class="btn-container">
         <button class="btn" onclick="startGame(1)"><span>1 JUGADOR</span></button>
         <button class="btn red" onclick="startGame(2)"><span>2 JUGADORES</span></button>
     </div>
     
-    <!-- Créditos -->
     <div class="credits">
         Creado por <span>Carlos Lorenzo Marro</span> con 
         <span class="emoji">🤖</span> IA 
@@ -546,14 +466,26 @@
     </div>
 </div>
 
-<!-- HUD (se mantiene igual) -->
+<!-- ERROR WEBGL FALLBACK -->
+<div id="webgl-error">
+    <h2>⚠️ ERROR DE RENDERIZADO GRÁFICO</h2>
+    <p>Tu navegador no pudo crear el contexto WebGL necesario para ejecutar el juego en 3D.</p>
+    <ul>
+        <li>1. Si usas <strong>Firefox</strong>, intenta abrir el juego en <strong>Google Chrome</strong> o <strong>Microsoft Edge</strong>.</li>
+        <li>2. Asegúrate de tener la <strong>Aceleración por Hardware</strong> activada en la configuración de tu navegador.</li>
+        <li>3. Actualiza los controladores (drivers) de tu tarjeta gráfica (NVIDIA, AMD o Intel).</li>
+        <li>4. Si estás en un móvil, asegúrate de que no esté en "Modo Ahorro de Energía".</li>
+    </ul>
+</div>
+
+<!-- HUD -->
 <div id="hud">
     <div class="hud-half hud-p1">
         <div>
             <div class="speedometer p1-color" id="spd-p1">0 <span style="font-size:1rem">KM/H</span></div>
             <div class="info-bar"><span id="lap-p1">VUELTA 1/3</span><span id="pos-p1">POS: 1º</span></div>
             <div class="nitro-bar"><div class="nitro-fill" id="nit-p1" style="width:100%"></div></div>
-            <div id="heat-p1" style="color:#ffaa00; margin-top:5px; font-size:0.8rem;">🔥 NIVEL DE BÚSQUEDA: 0</div>
+            <div id="heat-p1" style="color:#ffaa00; margin-top:5px; font-size:0.8rem;">🔥 BÚSQUEDA: ☆☆☆☆☆</div>
         </div>
     </div>
     <div class="hud-half hud-p2" id="hud-p2-container" style="display:none;">
@@ -561,7 +493,7 @@
             <div class="speedometer p2-color" id="spd-p2">0 <span style="font-size:1rem">KM/H</span></div>
             <div class="info-bar"><span id="lap-p2">VUELTA 1/3</span><span id="pos-p2">POS: 2º</span></div>
             <div class="nitro-bar"><div class="nitro-fill" id="nit-p2" style="width:100%"></div></div>
-            <div id="heat-p2" style="color:#ffaa00; margin-top:5px; font-size:0.8rem;">🔥 NIVEL DE BÚSQUEDA: 0</div>
+            <div id="heat-p2" style="color:#ffaa00; margin-top:5px; font-size:0.8rem;">🔥 BÚSQUEDA: ☆☆☆☆☆</div>
         </div>
     </div>
     <div class="divider" id="divider" style="display:none;"></div>
@@ -583,10 +515,6 @@ for(let i = 0; i < 50; i++) {
     menu.appendChild(particle);
 }
 
-// ==========================================
-// RESTO DEL CÓDIGO DEL JUEGO (IGUAL QUE ANTES)
-// ==========================================
-
 let scene, camera, renderer, clock;
 let players = [];
 let trackCurve, trackMesh;
@@ -594,36 +522,50 @@ let traffic = [], pedestrians = [], police = [];
 let ufo = null, ufoActive = false, ufoTimer = 20;
 let gameMode = 1, totalLaps = 3, trafficDensity = 1;
 let gameState = 'MENU';
-let eventText = '';
 
 const keys = {};
 window.addEventListener('keydown', e => keys[e.code] = true);
 window.addEventListener('keyup', e => keys[e.code] = false);
 
 function initThree() {
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x05050A);
-    scene.fog = new THREE.FogExp2(0x05050A, 0.008);
+    try {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x05050A);
+        scene.fog = new THREE.FogExp2(0x05050A, 0.008);
 
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    document.body.appendChild(renderer.domElement);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        // CORRECCIÓN WEBGL: powerPreference y manejo de errores
+        renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            powerPreference: "high-performance",
+            failIfMajorPerformanceCaveat: false
+        });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
 
-    const ambient = new THREE.AmbientLight(0x222244, 0.5);
-    scene.add(ambient);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    dirLight.position.set(50, 100, 50);
-    scene.add(dirLight);
+        const ambient = new THREE.AmbientLight(0x222244, 0.5);
+        scene.add(ambient);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        dirLight.position.set(50, 100, 50);
+        scene.add(dirLight);
 
-    clock = new THREE.Clock();
-    window.addEventListener('resize', onResize);
+        clock = new THREE.Clock();
+        window.addEventListener('resize', onResize);
+    } catch (e) {
+        console.error("WebGL Error:", e);
+        document.getElementById('webgl-error').style.display = 'block';
+        document.getElementById('menu').style.display = 'none';
+        return false;
+    }
+    return true;
 }
 
 function onResize() {
+    if (!camera || !renderer) return;
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1051,6 +993,7 @@ function updateHUD() {
 
 function render() {
     if(gameState !== 'PLAY' && gameState !== 'COUNTDOWN') return;
+    if(!renderer || !scene) return;
 
     const w = window.innerWidth;
     const h = window.innerHeight;
@@ -1104,7 +1047,17 @@ function startGame(mode) {
     trafficDensity = parseInt(document.getElementById('sel-traffic').value);
     const trackType = parseInt(document.getElementById('sel-track').value);
 
-    while(scene.children.length > 0) scene.remove(scene.children[0]);
+    // Limpieza segura para evitar fuga de memoria WebGL
+    while(scene.children.length > 0) {
+        const obj = scene.children[0];
+        if(obj.geometry) obj.geometry.dispose();
+        if(obj.material) {
+            if(Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+            else obj.material.dispose();
+        }
+        scene.remove(obj);
+    }
+    
     players = []; traffic = []; pedestrians = []; police = [];
     ufo = null; ufoActive = false; ufoTimer = 20;
 
@@ -1160,8 +1113,11 @@ function startGame(mode) {
     }, 1000);
 }
 
-initThree();
-animate();
+// INICIALIZACIÓN CON MANEJO DE ERRORES
+const webglReady = initThree();
+if(webglReady) {
+    animate();
+}
 </script>
 </body>
 </html>
