@@ -1,5 +1,5 @@
 // ============================================
-// CHAT.JS - CHATBOT
+// CHAT.JS - CHATBOT MEJORADO
 // ============================================
 
 function toggleChat() {
@@ -35,24 +35,30 @@ async function sendMessage() {
         // ✅ NUEVO: Consultar productos reales desde el backend
         let productosContexto = 'No hay productos disponibles en este momento.';
         try {
-            const response = await fetch(`${API_URL}/productos-resumen`);
+            // Usar la URL global API_URL si existe, sino construirla
+            const apiUrl = window.API_URL || 'https://meditech-bot.onrender.com/api';
+            const response = await fetch(`${apiUrl}/productos-resumen`);
+            
             if (response.ok) {
                 const data = await response.json();
                 if (data.ok && data.resumenTexto) {
                     productosContexto = data.resumenTexto;
                     console.log(`📦 Chatbot: ${data.total} productos cargados para contexto`);
                 }
+            } else {
+                console.warn('⚠️ API productos-resumen devolvió error:', response.status);
             }
         } catch (e) {
-            console.warn('⚠️ No se pudieron cargar productos, usando fallback');
-            // Fallback a variable global si la API falla
-            if (window.S && window.S.pr) {
+            console.warn('⚠️ No se pudieron cargar productos desde API, usando fallback:', e.message);
+            // Fallback a variable global S.pr si existe
+            if (window.S && window.S.pr && Array.isArray(window.S.pr)) {
                 productosContexto = window.S.pr.slice(0, 30).map(p => 
                     `• ${p.name} (${p.category || 'general'}) - $${p.price} - Stock: ${p.stock}\n  ${p.description || ''}`
                 ).join('\n\n');
             }
         }
         
+        // ✅ NUEVO: Petición a la IA con contexto de productos
         const response = await fetch('https://text.pollinations.ai/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -73,7 +79,8 @@ REGLAS IMPORTANTES:
 - Si el producto no está en el catálogo, di honestamente: "No lo tenemos disponible ahora, pero puedo sugerirte alternativas".
 - SIEMPRE recomienda consultar a un médico para temas de salud.
 - Usa emojis con moderación (💊 para medicamentos, 💻 para tecnología, 🎮 para gaming).
-- Sé conciso: máximo 3-4 oraciones por respuesta.`
+- Sé conciso: máximo 3-4 oraciones por respuesta.
+- SIEMPRE responde algo útil, NUNCA digas "no puedo procesar tu pregunta".`
                     },
                     { role: 'user', content: txt }
                 ],
@@ -81,17 +88,22 @@ REGLAS IMPORTANTES:
             })
         });
         
-        let respuesta = 'Lo siento, no pude procesar tu pregunta. ¿Puedes reformularla?';
+        let respuesta = 'Lo siento, hubo un problema. ¿Puedes intentar de nuevo?';
         if (response.ok) {
             respuesta = await response.text();
             respuesta = respuesta.replace(/```[\s\S]*?```/g, '').trim();
             respuesta = respuesta.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Si la respuesta está vacía o es muy corta, usar fallback
+            if (respuesta.length < 10) {
+                respuesta = 'Disculpa, no entendí bien. ¿Puedes reformular tu pregunta?';
+            }
         }
         
         document.getElementById(typingId)?.remove();
         messages.innerHTML += `<div class="message bot">${respuesta}</div>`;
     } catch (error) {
-        console.error('Error en chat:', error);
+        console.error('❌ Error en chat:', error);
         document.getElementById(typingId)?.remove();
         messages.innerHTML += `
             <div class="message bot" style="background:#fee2e2;color:#991b1b;">❌ Error de conexión. Por favor intenta de nuevo.</div>
