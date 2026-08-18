@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+  
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -7,7 +8,54 @@
 <link rel="stylesheet" href="static/fonts/remixicon.css">
 <link rel="stylesheet" href="static/css/styles.css">
 </head>
+  
 <body>
+
+       <!-- ============================================ -->
+       <!-- BOTÓN PARA REGRESAR A LA TIENDA -->
+       <!-- ============================================ -->
+       <a href="../../index.html" class="btn-regresar-tienda" title="Regresar a MediTech">
+           <i class="fas fa-arrow-left"></i> Regresar a la Tienda
+       </a>
+
+       <style>
+           .btn-regresar-tienda {
+               position: fixed;
+               top: 20px;
+               left: 20px;
+               z-index: 9999;
+               background: rgba(44, 62, 80, 0.9);
+               color: white;
+               padding: 10px 20px;
+               border-radius: 8px;
+               text-decoration: none;
+               font-family: 'Poppins', 'Segoe UI', sans-serif;
+               font-weight: 600;
+               font-size: 14px;
+               display: flex;
+               align-items: center;
+               gap: 8px;
+               box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+               border: 1px solid rgba(255, 255, 255, 0.2);
+               transition: all 0.3s ease;
+           }
+           .btn-regresar-tienda:hover {
+               background: #0d9488;
+               transform: translateY(-2px);
+           }
+           @media (max-width: 768px) {
+               .btn-regresar-tienda {
+                   top: 10px;
+                   left: 10px;
+                   padding: 8px 12px;
+                   font-size: 12px;
+               }
+           }
+       </style>
+       <!-- ============================================ -->
+       <!-- FIN DEL BOTÓN DE REGRESO -->
+       <!-- ============================================ -->
+  
 <div id="view"></div>
 <div id="hudroot"></div>
 <div id="divider" class="hidden"></div>
