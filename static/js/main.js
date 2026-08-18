@@ -134,7 +134,7 @@ function renderProducts() {
     const fallbackImage = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="#f3f4f6"/><text x="150" y="105" font-family="Arial" font-size="16" fill="#9ca3af" text-anchor="middle">Sin imagen</text></svg>');
     
     grid.innerHTML = filtered.map(p => {
-        const isSoldOut = p.available === false || p.stock <= 0;
+        const isSoldOut = !p.available || p.stock <= 0;
         const isLowStock = p.stock > 0 && p.stock <= 5;
         const stockClass = isSoldOut ? 'soldout' : (isLowStock ? 'low-stock' : 'in-stock');
         const stockText = isSoldOut ? '❌ Agotado' : `📦 ${p.stock} unidades`;
@@ -354,7 +354,7 @@ function showNotif(msg, type = 'info') {
 function openQuickView(id) {
     const p = S.pr.find(x => x.id === id);
     if (!p) return;
-    const isAvailable = p.available !== false && p.stock > 0;
+    const isAvailable = p.available && p.stock > 0;
     const content = safeElement('quick-view-content');
     if (!content) return;
     
