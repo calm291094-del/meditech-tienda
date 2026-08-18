@@ -12,14 +12,14 @@
         padding: 0; 
         overflow: hidden; 
         background: #000; 
-        font-family: 'Orbitron', 'Segoe UI', system-ui, sans-serif; 
+        font-family: 'Orbitron', 'Segoe UI', system-ui, -apple-system, sans-serif; 
         color: #fff; 
         user-select: none; 
     }
     canvas { display: block; }
     
     /* ========================================
-       MENÚ PRINCIPAL - ESTILO NFS SPECIAL EDITION 2
+       MENÚ PRINCIPAL - OPTIMIZADO PARA FIREFOX
        ======================================== */
     #menu {
         position: absolute;
@@ -176,7 +176,7 @@
         font-weight: 700;
     }
     
-    /* CORRECCIÓN DE VISIBILIDAD DE LOS SELECT */
+    /* CORRECCIÓN CRÍTICA PARA FIREFOX: Selects con fondo sólido y apariencia nativa desactivada */
     .setting-box select {
         background: #0a0a12;
         color: #ffffff;
@@ -190,6 +190,13 @@
         width: 100%;
         outline: none;
         text-align: center;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f3ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 16px;
     }
     
     .setting-box select option {
@@ -200,7 +207,7 @@
     }
     
     .setting-box select:hover, .setting-box select:focus {
-        background: rgba(0, 243, 255, 0.1);
+        background-color: rgba(0, 243, 255, 0.1);
         box-shadow: 0 0 15px rgba(0, 243, 255, 0.5);
     }
     
@@ -471,10 +478,9 @@
     <h2>⚠️ ERROR DE RENDERIZADO GRÁFICO</h2>
     <p>Tu navegador no pudo crear el contexto WebGL necesario para ejecutar el juego en 3D.</p>
     <ul>
-        <li>1. Si usas <strong>Firefox</strong>, intenta abrir el juego en <strong>Google Chrome</strong> o <strong>Microsoft Edge</strong>.</li>
-        <li>2. Asegúrate de tener la <strong>Aceleración por Hardware</strong> activada en la configuración de tu navegador.</li>
-        <li>3. Actualiza los controladores (drivers) de tu tarjeta gráfica (NVIDIA, AMD o Intel).</li>
-        <li>4. Si estás en un móvil, asegúrate de que no esté en "Modo Ahorro de Energía".</li>
+        <li>1. En <strong>Firefox</strong>: Ve a <em>Configuración > General > Rendimiento</em> y asegúrate de que "Usar configuración de rendimiento recomendada" esté desmarcada y "Aceleración de hardware" esté <strong>ACTIVADA</strong>.</li>
+        <li>2. Escribe <strong>about:config</strong> en la barra de direcciones, busca <strong>webgl.force-enabled</strong> y ponlo en <strong>true</strong>.</li>
+        <li>3. Actualiza los controladores de tu tarjeta gráfica.</li>
     </ul>
 </div>
 
@@ -527,6 +533,9 @@ const keys = {};
 window.addEventListener('keydown', e => keys[e.code] = true);
 window.addEventListener('keyup', e => keys[e.code] = false);
 
+// ==========================================
+// INICIALIZACIÓN WEBGL (UNA SOLA VEZ PARA FIREFOX)
+// ==========================================
 function initThree() {
     try {
         scene = new THREE.Scene();
@@ -535,15 +544,16 @@ function initThree() {
 
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         
-        // CORRECCIÓN WEBGL: powerPreference y manejo de errores
+        // CORRECCIÓN FIREFOX: powerPreference y límite de pixel ratio
         renderer = new THREE.WebGLRenderer({ 
             antialias: true,
             powerPreference: "high-performance",
-            failIfMajorPerformanceCaveat: false
+            preserveDrawingBuffer: false
         });
         
+        // Limitar a 1.5 para evitar sobrecarga en GPUs integradas en Firefox
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
@@ -569,6 +579,24 @@ function onResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// ==========================================
+// LIMPIEZA DE MEMORIA (EVITA "EXHAUSTED GL DRIVERS")
+// ==========================================
+function cleanupScene() {
+    while(scene.children.length > 0) {
+        const obj = scene.children[0];
+        if(obj.geometry) obj.geometry.dispose();
+        if(obj.material) {
+            if(Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+            else obj.material.dispose();
+        }
+        scene.remove(obj);
+    }
+    // Limpiar arrays
+    players = []; traffic = []; pedestrians = []; police = [];
+    ufo = null; ufoActive = false; ufoTimer = 20;
 }
 
 function generateTrack(type) {
@@ -1047,19 +1075,8 @@ function startGame(mode) {
     trafficDensity = parseInt(document.getElementById('sel-traffic').value);
     const trackType = parseInt(document.getElementById('sel-track').value);
 
-    // Limpieza segura para evitar fuga de memoria WebGL
-    while(scene.children.length > 0) {
-        const obj = scene.children[0];
-        if(obj.geometry) obj.geometry.dispose();
-        if(obj.material) {
-            if(Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
-            else obj.material.dispose();
-        }
-        scene.remove(obj);
-    }
-    
-    players = []; traffic = []; pedestrians = []; police = [];
-    ufo = null; ufoActive = false; ufoTimer = 20;
+    // CORRECCIÓN FIREFOX: Limpieza profunda de memoria antes de reiniciar
+    cleanupScene();
 
     const ambient = new THREE.AmbientLight(0x222244, 0.5); scene.add(ambient);
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.5); dirLight.position.set(50, 100, 50); scene.add(dirLight);
@@ -1113,7 +1130,7 @@ function startGame(mode) {
     }, 1000);
 }
 
-// INICIALIZACIÓN CON MANEJO DE ERRORES
+// INICIALIZACIÓN ÚNICA (EVITA EXHAUSTED GL DRIVERS EN FIREFOX)
 const webglReady = initThree();
 if(webglReady) {
     animate();
