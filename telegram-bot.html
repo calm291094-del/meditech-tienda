@@ -352,10 +352,9 @@
         }
     }
 
-    // --- OBTENCIÓN DE NOTICIAS (URLs SIMPLIFICADAS Y ESTABLES) ---
+    // --- OBTENCIÓN DE NOTICIAS (MÉTODO ROBUSTO: ALLORIGINS + PARSEO XML DIRECTO) ---
     const FEEDS = {
         cuba: [
-            // Búsqueda simple sin parámetros complejos que saturan al parser
             "https://news.google.com/rss/search?q=Cuba&hl=es-419&gl=CU&ceid=CU:es-419"
         ],
         ia: [
@@ -370,26 +369,35 @@
 
     async function fetchNews(cat) {
         const container = document.getElementById(`news-${cat}`);
-        container.innerHTML = '<div style="color:var(--text-dim)">Escaneando fuentes estables...</div>';
+        container.innerHTML = '<div style="color:var(--text-dim)">Escaneando fuentes (Método Robusto)...</div>';
         let items = [];
         
         for (const url of FEEDS[cat]) {
             try {
-                const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
-                const response = await fetch(apiUrl);
+                // allorigins.win/get devuelve un JSON con una propiedad "contents" que es el XML crudo
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl);
                 const data = await response.json();
                 
-                if (data.status === 'ok' && data.items && data.items.length > 0) {
-                    data.items.slice(0, 5).forEach(item => {
-                        items.push({
-                            title: item.title,
-                            link: item.link,
-                            source: url.includes('google') ? 'Google News' : 'Fuente Directa'
-                        });
-                    });
-                } else {
-                    throw new Error(data.message || 'Fuente vacía o no disponible');
+                if (!data.contents) throw new Error("No se recibió contenido de la fuente");
+                
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(data.contents, "text/xml");
+                
+                if (xml.querySelector("parsererror")) {
+                    throw new Error("Error de sintaxis en el XML recibido");
                 }
+
+                const entries = xml.querySelectorAll("item");
+                entries.forEach((item, i) => {
+                    if (i < 5) { // Top 5 noticias
+                        items.push({
+                            title: item.querySelector("title")?.textContent || "Sin título",
+                            link: item.querySelector("link")?.textContent || "#",
+                            source: 'Google News'
+                        });
+                    }
+                });
             } catch (e) {
                 console.warn(`Fallo al leer ${url}:`, e);
                 log(`Fuente omitida: ${e.message}`, 'warn');
@@ -399,7 +407,7 @@
         cachedNews[cat] = items;
         
         if (items.length === 0) {
-            container.innerHTML = '<div style="color:var(--danger)">⚠️ No se pudieron obtener noticias. Verifica tu conexión.</div>';
+            container.innerHTML = '<div style="color:var(--danger)">⚠️ No se pudieron obtener noticias. Intenta de nuevo.</div>';
         } else {
             container.innerHTML = items.map(i => `
                 <div class="news-item">
