@@ -352,7 +352,7 @@
         }
     }
 
-    // --- OBTENCIÓN DE NOTICIAS (MÉTODO ROBUSTO: ALLORIGINS + PARSEO XML DIRECTO) ---
+    // --- OBTENCIÓN DE NOTICIAS (PROXY ESTABLE: CODETABS + ROMPE-CACHÉ) ---
     const FEEDS = {
         cuba: [
             "https://news.google.com/rss/search?q=Cuba&hl=es-419&gl=CU&ceid=CU:es-419"
@@ -369,23 +369,31 @@
 
     async function fetchNews(cat) {
         const container = document.getElementById(`news-${cat}`);
-        container.innerHTML = '<div style="color:var(--text-dim)">Escaneando fuentes (Método Robusto)...</div>';
+        container.innerHTML = '<div style="color:var(--text-dim)">Escaneando fuentes (Anti-Bloqueo Activo)...</div>';
         let items = [];
         
         for (const url of FEEDS[cat]) {
             try {
-                // allorigins.win/get devuelve un JSON con una propiedad "contents" que es el XML crudo
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+                // Usamos codetabs.com (permitido en tu sw.js) + un timestamp para evitar caché de errores 522
+                const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}&t=${Date.now()}`;
                 const response = await fetch(proxyUrl);
-                const data = await response.json();
                 
-                if (!data.contents) throw new Error("No se recibió contenido de la fuente");
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
                 
+                const xmlText = await response.text();
+                
+                // Validación: Si no es XML, el proxy fue bloqueado
+                if (!xmlText.trim().startsWith('<?xml') && !xmlText.trim().startsWith('<rss') && !xmlText.trim().startsWith('<feed')) {
+                    throw new Error("La fuente devolvió HTML (posible bloqueo de firewall)");
+                }
+
                 const parser = new DOMParser();
-                const xml = parser.parseFromString(data.contents, "text/xml");
+                const xml = parser.parseFromString(xmlText, "text/xml");
                 
                 if (xml.querySelector("parsererror")) {
-                    throw new Error("Error de sintaxis en el XML recibido");
+                    throw new Error("Error de sintaxis en el XML");
                 }
 
                 const entries = xml.querySelectorAll("item");
@@ -400,14 +408,14 @@
                 });
             } catch (e) {
                 console.warn(`Fallo al leer ${url}:`, e);
-                log(`Fuente omitida: ${e.message}`, 'warn');
+                // No saturamos el log con advertencias de fuentes individuales, solo si fallan todas
             }
         }
         
         cachedNews[cat] = items;
         
         if (items.length === 0) {
-            container.innerHTML = '<div style="color:var(--danger)">⚠️ No se pudieron obtener noticias. Intenta de nuevo.</div>';
+            container.innerHTML = '<div style="color:var(--danger)">⚠️ No se pudieron obtener noticias. Verifica tu conexión o intenta de nuevo.</div>';
         } else {
             container.innerHTML = items.map(i => `
                 <div class="news-item">
