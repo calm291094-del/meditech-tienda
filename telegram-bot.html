@@ -352,65 +352,45 @@
         }
     }
 
-    // --- OBTENCIÓN DE NOTICIAS (CORREGIDO ANTI-BLOQUEO) ---
-    // Usamos corsproxy.io que es más estable, y Google News RSS para evitar bloqueos de Cloudflare
-    const PROXY = "https://corsproxy.io/?"; 
-    
+    // --- OBTENCIÓN DE NOTICIAS (SOLUCIÓN DEFINITIVA: RSS a JSON) ---
     const FEEDS = {
         cuba: [
-            // Google News RSS es mucho más fiable y no bloquea proxies
             "https://news.google.com/rss/search?q=Cuba+when:7d&hl=es-419&gl=CU&ceid=CU:es-419",
             "https://news.google.com/rss/search?q=Holgu%C3%ADn+when:7d&hl=es-419&gl=CU&ceid=CU:es-419"
         ],
         ia: [
-            "https://news.google.com/rss/search?q=artificial+intelligence+OR+machine+learning&hl=en",
+            "https://news.google.com/rss/search?q=artificial+intelligence+OR+machine+learning&hl=es-419",
             "https://openai.com/blog/rss.xml"
         ],
         tendencias: [
-            "https://news.google.com/rss/search?q=trending+social+media+OR+viral&hl=en",
+            "https://news.google.com/rss/search?q=trending+social+media+OR+viral&hl=es-419",
             "https://www.reddit.com/r/technology/top.rss?t=day"
         ]
     };
 
     async function fetchNews(cat) {
         const container = document.getElementById(`news-${cat}`);
-        container.innerHTML = '<div style="color:var(--text-dim)">Escaneando fuentes seguras...</div>';
+        container.innerHTML = '<div style="color:var(--text-dim)">Escaneando fuentes seguras (JSON)...</div>';
         let items = [];
         
         for (const url of FEEDS[cat]) {
             try {
-                const proxyUrl = PROXY + encodeURIComponent(url);
-                const response = await fetch(proxyUrl);
+                // Usamos rss2json.com: convierte RSS a JSON y maneja CORS perfectamente sin proxies
+                const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+                const response = await fetch(apiUrl);
+                const data = await response.json();
                 
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
-                }
-                
-                const xmlText = await response.text();
-                
-                // Validación anti-fallo: Si no empieza como XML, es una página de error del proxy
-                if (!xmlText.trim().startsWith('<?xml') && !xmlText.trim().startsWith('<rss') && !xmlText.trim().startsWith('<feed')) {
-                    throw new Error("La fuente devolvió HTML en lugar de XML (posible bloqueo)");
-                }
-
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(xmlText, "text/xml");
-                
-                // Verificar si el parser encontró errores internos
-                if (xml.querySelector("parsererror")) {
-                    throw new Error("Error de sintaxis en el XML recibido");
-                }
-
-                const entries = xml.querySelectorAll("item");
-                entries.forEach((item, i) => {
-                    if (i < 5) { // Top 5 noticias
+                if (data.status === 'ok' && data.items) {
+                    data.items.slice(0, 5).forEach(item => {
                         items.push({
-                            title: item.querySelector("title")?.textContent || "Sin título",
-                            link: item.querySelector("link")?.textContent || "#",
+                            title: item.title,
+                            link: item.link,
                             source: url.includes('google') ? 'Google News' : 'Fuente Directa'
                         });
-                    }
-                });
+                    });
+                } else {
+                    throw new Error(data.message || 'Error en la respuesta de la fuente');
+                }
             } catch (e) {
                 console.warn(`Fallo al leer ${url}:`, e);
                 log(`Fuente omitida: ${e.message}`, 'warn');
@@ -453,7 +433,6 @@
         const titles = { cuba: "🇨🇺 *RESUMEN CUBA*", ia: "🧠 *TENDENCIAS IA*", tendencias: "📈 *REDES SOCIALES*" };
         let msg = `${titles[cat]}\n\n`;
         items.slice(0, 5).forEach((i, idx) => {
-            // Limpiar caracteres que rompen el Markdown de Telegram
             const clean = i.title.replace(/[_*[\]()~`>#+=|{}.!-]/g, '');
             msg += `${idx + 1}. [${clean}](${i.link})\n\n`;
         });
