@@ -352,70 +352,54 @@
         }
     }
 
-    // --- OBTENCIÓN DE NOTICIAS (PROXY ESTABLE: CODETABS + ROMPE-CACHÉ) ---
-    const FEEDS = {
-        cuba: [
-            "https://news.google.com/rss/search?q=Cuba&hl=es-419&gl=CU&ceid=CU:es-419"
-        ],
-        ia: [
-            "https://news.google.com/rss/search?q=Inteligencia+Artificial&hl=es-419&gl=CU&ceid=CU:es-419",
-            "https://news.google.com/rss/search?q=OpenAI+OR+Machine+Learning&hl=en-US&gl=US&ceid=US:en"
-        ],
-        tendencias: [
-            "https://news.google.com/rss/search?q=Tecnologia+OR+Redes+Sociales&hl=es-419&gl=CU&ceid=CU:es-419",
-            "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVhZU0FtVnVHZ0pWVXlnQVAB?hl=en-US&gl=US&ceid=US:en"
-        ]
-    };
-
+    // --- OBTENCIÓN DE NOTICIAS (APIS NATIVAS - CERO PROXIES - CERO ERRORES 522) ---
     async function fetchNews(cat) {
         const container = document.getElementById(`news-${cat}`);
-        container.innerHTML = '<div style="color:var(--text-dim)">Escaneando fuentes (Anti-Bloqueo Activo)...</div>';
+        container.innerHTML = '<div style="color:var(--text-dim)">Conectando con APIs directas...</div>';
         let items = [];
         
-        for (const url of FEEDS[cat]) {
-            try {
-                // Usamos codetabs.com (permitido en tu sw.js) + un timestamp para evitar caché de errores 522
-                const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}&t=${Date.now()}`;
-                const response = await fetch(proxyUrl);
-                
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
-                }
-                
-                const xmlText = await response.text();
-                
-                // Validación: Si no es XML, el proxy fue bloqueado
-                if (!xmlText.trim().startsWith('<?xml') && !xmlText.trim().startsWith('<rss') && !xmlText.trim().startsWith('<feed')) {
-                    throw new Error("La fuente devolvió HTML (posible bloqueo de firewall)");
-                }
-
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(xmlText, "text/xml");
-                
-                if (xml.querySelector("parsererror")) {
-                    throw new Error("Error de sintaxis en el XML");
-                }
-
-                const entries = xml.querySelectorAll("item");
-                entries.forEach((item, i) => {
-                    if (i < 5) { // Top 5 noticias
-                        items.push({
-                            title: item.querySelector("title")?.textContent || "Sin título",
-                            link: item.querySelector("link")?.textContent || "#",
-                            source: 'Google News'
-                        });
-                    }
-                });
-            } catch (e) {
-                console.warn(`Fallo al leer ${url}:`, e);
-                // No saturamos el log con advertencias de fuentes individuales, solo si fallan todas
+        try {
+            if (cat === 'ia') {
+                // Hacker News API (Soporta CORS nativamente, ideal para IA y Tech)
+                const res = await fetch('https://hn.algolia.com/api/v1/search?query=AI+OR+Machine+Learning+OR+LLM&tags=story&hitsPerPage=5');
+                const data = await res.json();
+                items = data.hits.map(h => ({ 
+                    title: h.title, 
+                    link: h.url || `https://news.ycombinator.com/item?id=${h.objectID}`, 
+                    source: 'Hacker News' 
+                }));
+            } 
+            else if (cat === 'tendencias') {
+                // Reddit JSON (Soporta CORS nativamente, ideal para tendencias sociales)
+                const res = await fetch('https://www.reddit.com/r/technology/hot.json?limit=5');
+                const data = await res.json();
+                items = data.data.children.map(c => ({ 
+                    title: c.data.title, 
+                    link: `https://reddit.com${c.data.permalink}`, 
+                    source: 'Reddit' 
+                }));
             }
+            else if (cat === 'cuba') {
+                // BBC Mundo vía RSS2JSON (Las webs cubanas bloquean proxies, BBC Mundo es la alternativa más estable para Latam)
+                const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ffeeds.bbci.co.uk%2Fnews%2Fworld%2Flatin_america%2Frss.xml');
+                const data = await res.json();
+                if(data.status === 'ok' && data.items) {
+                    items = data.items.slice(0, 5).map(i => ({ 
+                        title: i.title, 
+                        link: i.link, 
+                        source: 'BBC Mundo' 
+                    }));
+                }
+            }
+        } catch (e) {
+            console.warn(`Error API ${cat}:`, e);
+            log(`Error obteniendo ${cat}: ${e.message}`, 'warn');
         }
         
         cachedNews[cat] = items;
         
         if (items.length === 0) {
-            container.innerHTML = '<div style="color:var(--danger)">⚠️ No se pudieron obtener noticias. Verifica tu conexión o intenta de nuevo.</div>';
+            container.innerHTML = '<div style="color:var(--danger)">⚠️ No se pudieron obtener noticias.</div>';
         } else {
             container.innerHTML = items.map(i => `
                 <div class="news-item">
@@ -445,7 +429,7 @@
     }
 
     function formatMsg(cat, items) {
-        const titles = { cuba: "🇨🇺 *RESUMEN CUBA*", ia: "🧠 *TENDENCIAS IA*", tendencias: "📈 *REDES SOCIALES*" };
+        const titles = { cuba: "🇨🇺 *RESUMEN LATAM/CUBA*", ia: "🧠 *TENDENCIAS IA*", tendencias: "📈 *REDES SOCIALES*" };
         let msg = `${titles[cat]}\n\n`;
         items.slice(0, 5).forEach((i, idx) => {
             const clean = i.title.replace(/[_*[\]()~`>#+=|{}.!-]/g, '');
