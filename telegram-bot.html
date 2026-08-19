@@ -7,7 +7,7 @@
     <style>
         :root {
             --bg-deep: #030712;
-            --bg-card: rgba(17, 24, 39, 0.8);
+            --bg-card: rgba(17, 24, 39, 0.85);
             --border: rgba(56, 189, 248, 0.2);
             --accent: #38bdf8;
             --accent-glow: rgba(56, 189, 248, 0.3);
@@ -54,7 +54,7 @@
             border: 1px solid var(--border); background: rgba(0,0,0,0.3);
             color: var(--text); font-family: monospace;
         }
-        input:focus { outline: none; border-color: var(--accent); }
+        input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
 
         .btn {
             width: 100%; padding: 12px; border: none; border-radius: 8px;
@@ -66,7 +66,6 @@
         .btn-primary:hover { box-shadow: 0 0 15px var(--accent-glow); }
         .btn-success { background: var(--success); color: white; }
         .btn-success:hover { box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
-        .btn-danger { background: var(--danger); color: white; }
         .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
         .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 
@@ -97,7 +96,7 @@
 <div class="container">
     <header>
         <h1>🤖 Ania Bot - MediTech & ANIA OS</h1>
-        <p>Panel de Control Neural · v13.0 · Gestión de Webhook y Noticias</p>
+        <p>Panel de Control Neural · v13.0 · Carga Automática de Configuración</p>
     </header>
 
     <div class="grid">
@@ -106,7 +105,7 @@
             <h3>🔑 Configuración del Servidor</h3>
             <div class="input-group">
                 <label>Token del Bot (@BotFather)</label>
-                <input type="password" id="botToken" placeholder="123456:ABC-DEF...">
+                <input type="password" id="botToken" placeholder="Se cargará automáticamente si ya se guardó">
             </div>
             <div class="input-group">
                 <label>URL de tu Worker/Servidor (Webhook)</label>
@@ -116,16 +115,16 @@
                 <label>Tu Chat ID (Para pruebas)</label>
                 <input type="text" id="chatId" placeholder="123456789">
             </div>
-            <button class="btn btn-primary" onclick="saveConfig()">💾 Guardar Configuración</button>
+            <button class="btn btn-primary" onclick="saveConfig()">💾 Guardar Configuración (Activa carga automática)</button>
         </div>
 
-        <!-- CONTROL DEL BOT (LA SOLUCIÓN AL "NO RESPONDE") -->
+        <!-- CONTROL DEL BOT -->
         <div class="card">
             <h3>📡 Estado del Bot</h3>
             <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 15px;">
-                Si el bot no responde a "hola" o productos, es porque Telegram perdió la conexión con tu servidor. Usa este botón para reconectarlo.
+                Si el bot no responde, es porque Telegram perdió la conexión con tu servidor. Usa este botón para reconectarlo.
             </p>
-            <button class="btn btn-success" onclick="reactivateWebhook()">🔗 REACTIVAR WEBHOOK (Solución)</button>
+            <button class="btn btn-success" onclick="reactivateWebhook()">🔗 REACTIVAR WEBHOOK</button>
             <button class="btn btn-ghost" onclick="testBot()">🔍 Probar Conexión API</button>
             <button class="btn btn-ghost" onclick="sendTestMessage()">💬 Enviar Mensaje de Prueba</button>
             <div style="text-align: center;">
@@ -134,7 +133,7 @@
         </div>
     </div>
 
-    <!-- NOTICIAS (SISTEMA A PRUEBA DE FALLOS) -->
+    <!-- NOTICIAS -->
     <div class="grid">
         <div class="card">
             <h3>🌎 Latam / Cuba <button onclick="fetchNews('cuba')" style="margin-left:auto; background:none; border:none; color:var(--accent); cursor:pointer;">🔄</button></h3>
@@ -158,11 +157,13 @@
 </div>
 
 <script>
-    // --- ESTADO GLOBAL ---
+    // --- 1. CARGA AUTOMÁTICA AL INICIAR (La clave de tu pregunta) ---
+    // Esto busca en la memoria del navegador y rellena los campos automáticamente
     let botToken = localStorage.getItem('tg_token') || '';
     let workerUrl = localStorage.getItem('tg_worker_url') || '';
     let chatId = localStorage.getItem('tg_chat_id') || '';
 
+    // Asignar los valores a los inputs apenas carga la página
     document.getElementById('botToken').value = botToken;
     document.getElementById('workerUrl').value = workerUrl;
     document.getElementById('chatId').value = chatId;
@@ -175,17 +176,21 @@
         box.scrollTop = box.scrollHeight;
     }
 
+    // --- 2. GUARDADO PARA FUTURAS CARGAS AUTOMÁTICAS ---
     function saveConfig() {
         botToken = document.getElementById('botToken').value.trim();
         workerUrl = document.getElementById('workerUrl').value.trim();
         chatId = document.getElementById('chatId').value.trim();
+        
         localStorage.setItem('tg_token', botToken);
         localStorage.setItem('tg_worker_url', workerUrl);
         localStorage.setItem('tg_chat_id', chatId);
-        log('✅ Configuración guardada localmente.');
+        
+        log('✅ Configuración guardada. Se cargará automáticamente la próxima vez.', 'info');
+        alert('¡Guardado! La próxima vez que abras esta página, los campos se llenarán solos.');
     }
 
-    // --- FUNCIÓN CRÍTICA: REACTIVAR WEBHOOK ---
+    // --- 3. REACTIVAR WEBHOOK (Soluciona que el bot no responda) ---
     async function reactivateWebhook() {
         if (!botToken || !workerUrl) {
             alert('Debes guardar el Token y la URL del Worker primero.');
@@ -198,10 +203,10 @@
             const data = await res.json();
             
             if (data.ok) {
-                log(`✅ ¡WEBHOOK REACTIVADO! Telegram ahora enviará los mensajes a tu servidor.`, 'info');
+                log(`✅ ¡WEBHOOK REACTIVADO! Telegram enviará los mensajes a tu servidor.`, 'info');
                 document.getElementById('botStatus').innerText = 'Webhook Activo';
                 document.getElementById('botStatus').className = 'status-badge status-online';
-                alert('¡Webhook reactivado! Prueba escribirle "hola" a tu bot en Telegram. (Si tu servidor está dormido, el primer mensaje puede tardar 30 segundos en responder).');
+                alert('¡Webhook reactivado! Prueba escribirle "hola" a tu bot en Telegram.');
             } else {
                 throw new Error(data.description);
             }
@@ -238,7 +243,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: chatId,
-                    text: "🧠 *Prueba de ANIA OS*\n\nEl sistema de notificaciones está funcionando correctamente.",
+                    text: "🧠 *Prueba de ANIA OS*\n\nEl sistema de notificaciones está funcionando correctamente y la carga automática de token es exitosa.",
                     parse_mode: 'Markdown'
                 })
             });
@@ -250,12 +255,11 @@
         }
     }
 
-    // --- NOTICIAS (SISTEMA A PRUEBA DE FALLOS CON RSS2JSON) ---
-    // Usamos fuentes que NO bloquean rss2json, evitando errores 403/522
+    // --- 4. NOTICIAS (SISTEMA A PRUEBA DE FALLOS) ---
     const FEEDS = {
-        cuba: "https://feeds.bbci.co.uk/news/world/latin_america/rss.xml", // BBC Latam es muy estable
-        ia: "https://www.techmeme.com/feed.xml", // Techmeme es excelente para IA y no bloquea
-        tendencias: "https://www.reddit.com/r/technology/.rss" // RSS de Reddit es más permisivo que su API JSON
+        cuba: "https://feeds.bbci.co.uk/news/world/latin_america/rss.xml",
+        ia: "https://www.techmeme.com/feed.xml",
+        tendencias: "https://www.reddit.com/r/technology/.rss"
     };
 
     async function fetchNews(cat) {
@@ -285,12 +289,19 @@
         }
     }
 
-    // --- INICIALIZACIÓN ---
+    // --- 5. INICIALIZACIÓN ---
     window.onload = () => {
         log('🧠 Interfaz ANIA OS v13.0 cargada.');
-        if (botToken && workerUrl) {
-            log('Configuración detectada. Si el bot no responde, pulsa "REACTIVAR WEBHOOK".', 'warn');
+        if (botToken) {
+            log('✅ Token cargado automáticamente desde la memoria local.', 'info');
+        } else {
+            log('⚠️ No se encontró token guardado. Por favor, ingrésalo y pulsa "Guardar".', 'warn');
         }
+        
+        if (botToken && workerUrl) {
+            testBot(); // Prueba automática si ya hay datos
+        }
+        
         fetchNews('cuba');
         fetchNews('ia');
         fetchNews('tendencias');
