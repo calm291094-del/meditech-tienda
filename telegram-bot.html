@@ -352,35 +352,34 @@
         }
     }
 
-    // --- OBTENCIÓN DE NOTICIAS (SOLUCIÓN DEFINITIVA: RSS a JSON) ---
+    // --- OBTENCIÓN DE NOTICIAS (URLs SIMPLIFICADAS Y ESTABLES) ---
     const FEEDS = {
         cuba: [
-            "https://news.google.com/rss/search?q=Cuba+when:7d&hl=es-419&gl=CU&ceid=CU:es-419",
-            "https://news.google.com/rss/search?q=Holgu%C3%ADn+when:7d&hl=es-419&gl=CU&ceid=CU:es-419"
+            // Búsqueda simple sin parámetros complejos que saturan al parser
+            "https://news.google.com/rss/search?q=Cuba&hl=es-419&gl=CU&ceid=CU:es-419"
         ],
         ia: [
-            "https://news.google.com/rss/search?q=artificial+intelligence+OR+machine+learning&hl=es-419",
-            "https://openai.com/blog/rss.xml"
+            "https://news.google.com/rss/search?q=Inteligencia+Artificial&hl=es-419&gl=CU&ceid=CU:es-419",
+            "https://news.google.com/rss/search?q=OpenAI+OR+Machine+Learning&hl=en-US&gl=US&ceid=US:en"
         ],
         tendencias: [
-            "https://news.google.com/rss/search?q=trending+social+media+OR+viral&hl=es-419",
-            "https://www.reddit.com/r/technology/top.rss?t=day"
+            "https://news.google.com/rss/search?q=Tecnologia+OR+Redes+Sociales&hl=es-419&gl=CU&ceid=CU:es-419",
+            "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVhZU0FtVnVHZ0pWVXlnQVAB?hl=en-US&gl=US&ceid=US:en"
         ]
     };
 
     async function fetchNews(cat) {
         const container = document.getElementById(`news-${cat}`);
-        container.innerHTML = '<div style="color:var(--text-dim)">Escaneando fuentes seguras (JSON)...</div>';
+        container.innerHTML = '<div style="color:var(--text-dim)">Escaneando fuentes estables...</div>';
         let items = [];
         
         for (const url of FEEDS[cat]) {
             try {
-                // Usamos rss2json.com: convierte RSS a JSON y maneja CORS perfectamente sin proxies
                 const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 
-                if (data.status === 'ok' && data.items) {
+                if (data.status === 'ok' && data.items && data.items.length > 0) {
                     data.items.slice(0, 5).forEach(item => {
                         items.push({
                             title: item.title,
@@ -389,7 +388,7 @@
                         });
                     });
                 } else {
-                    throw new Error(data.message || 'Error en la respuesta de la fuente');
+                    throw new Error(data.message || 'Fuente vacía o no disponible');
                 }
             } catch (e) {
                 console.warn(`Fallo al leer ${url}:`, e);
@@ -400,7 +399,7 @@
         cachedNews[cat] = items;
         
         if (items.length === 0) {
-            container.innerHTML = '<div style="color:var(--danger)">⚠️ No se pudieron obtener noticias. Intenta de nuevo.</div>';
+            container.innerHTML = '<div style="color:var(--danger)">⚠️ No se pudieron obtener noticias. Verifica tu conexión.</div>';
         } else {
             container.innerHTML = items.map(i => `
                 <div class="news-item">
