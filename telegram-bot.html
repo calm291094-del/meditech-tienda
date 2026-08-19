@@ -3,386 +3,489 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 Ania Bot - MediTech & ANIA OS Neural Dashboard</title>
+    <title>🧠 ANIA OS · Neural Telegram Command</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
+            --bg-deep: #030712;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --border: rgba(56, 189, 248, 0.2);
             --accent: #38bdf8;
-            --accent-glow: rgba(56, 189, 248, 0.2);
-            --success: #22c55e;
+            --accent-glow: rgba(56, 189, 248, 0.4);
+            --success: #10b981;
             --danger: #ef4444;
-            --border: #334155;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 20px;
-            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-deep);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* Fondo Neural Animado */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+                linear-gradient(180deg, #030712 0%, #0f172a 100%);
+            z-index: -2;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(40px, 40px); }
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+        /* Header */
         header {
             text-align: center;
+            padding: 40px 20px;
             margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: 0 0 20px var(--accent-glow);
+            position: relative;
         }
-        header h1 { margin: 0; font-size: 2rem; color: var(--accent); }
-        header p { margin: 5px 0 0; color: var(--text-secondary); }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #38bdf8, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            text-shadow: 0 0 30px var(--accent-glow);
         }
+        header p {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-dim);
+            margin-top: 10px;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+        .status-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* Cards */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px; }
         .card {
             background: var(--bg-card);
+            backdrop-filter: blur(10px);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            transition: transform 0.2s;
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .card:hover { transform: translateY(-2px); border-color: var(--accent); }
-        .card h3 { margin-top: 0; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 10px 30px -10px var(--accent-glow); }
+        .card:hover::before { opacity: 1; }
         
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        .status-online { background: rgba(34, 197, 94, 0.2); color: var(--success); }
-        .status-offline { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-        button {
-            background: var(--accent);
-            color: var(--bg-primary);
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-        }
-        button:hover { background: #0ea5e9; box-shadow: 0 0 15px var(--accent-glow); }
-        button:disabled { background: var(--border); cursor: not-allowed; color: var(--text-secondary); }
-        button.btn-danger { background: var(--danger); color: white; }
-        button.btn-success { background: var(--success); color: white; }
-
-        .news-list { max-height: 300px; overflow-y: auto; padding-right: 10px; }
-        .news-item {
-            padding: 10px;
-            border-bottom: 1px solid var(--border);
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 0.9rem;
         }
-        .news-item a { color: var(--accent); text-decoration: none; }
-        .news-item a:hover { text-decoration: underline; }
-        
-        .log-box {
-            background: #000;
-            color: #0f0;
-            padding: 15px;
+
+        /* Inputs & Buttons */
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            font-family: monospace;
-            font-size: 0.85rem;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .btn-primary { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; }
+        .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.02); }
+        .btn-success { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .btn-success:hover { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+        .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
+        .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* News Feed */
+        .news-feed { max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .news-feed::-webkit-scrollbar { width: 4px; }
+        .news-feed::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+        .news-item {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        .news-item:hover { background: rgba(56, 189, 248, 0.05); }
+        .news-item a { color: var(--text); text-decoration: none; display: block; }
+        .news-item a:hover { color: var(--accent); }
+        .news-source { font-size: 0.7rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 4px; }
+
+        /* Terminal Log */
+        .terminal {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
             height: 200px;
             overflow-y: auto;
-            border: 1px solid var(--border);
+            color: #10b981;
+            line-height: 1.5;
         }
-        .spinner {
-            border: 3px solid var(--border);
-            border-top: 3px solid var(--accent);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-            margin-right: 10px;
+        .log-error { color: #ef4444; }
+        .log-info { color: #38bdf8; }
+        .log-warn { color: #f59e0b; }
+
+        /* Automation Badge */
+        .auto-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: var(--success);
+            font-family: 'JetBrains Mono', monospace;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>🤖 Ania Bot - MediTech & ANIA OS</h1>
-        <p>Panel de Control Neural · Integración Telegram · v13.0</p>
+        <h1>🧠 ANIA OS · TELEGRAM COMMAND</h1>
+        <p><span class="status-dot"></span>NEURAL AUTONOMOUS SYSTEM v13.0 · BUILD 2026</p>
     </header>
 
-    <!-- CONFIGURACIÓN DEL BOT -->
     <div class="grid">
+        <!-- CONFIGURACIÓN -->
         <div class="card">
-            <h3>🔑 Configuración de Telegram</h3>
-            <label>Token del Bot (BotFather):</label>
-            <input type="password" id="botToken" placeholder="123456:ABC-DEF...">
-            <label>Chat ID (Destinatario):</label>
-            <input type="text" id="chatId" placeholder="Ej: -1001234567890 o tu ID personal">
-            <button onclick="saveConfig()">💾 Guardar Configuración</button>
-            <button onclick="testBot()" class="btn-success">🔍 Probar Conexión</button>
-            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px;">
-                Estado: <span id="botStatus" class="status-badge status-offline">Desconectado</span>
+            <div class="card-title">🔐 Credenciales de Acceso</div>
+            <div class="input-group">
+                <label>TOKEN DEL BOT (BOTFATHER)</label>
+                <input type="password" id="botToken" placeholder="123456:ABC-DEF...">
+            </div>
+            <div class="input-group">
+                <label>CHAT ID (DESTINATARIO)</label>
+                <input type="text" id="chatId" placeholder="Ej: -1001234567890">
+            </div>
+            <button class="btn btn-primary" onclick="saveConfig()">💾 Sincronizar Credenciales</button>
+            <button class="btn btn-ghost" onclick="testBot()">📡 Probar Enlace Neural</button>
+        </div>
+
+        <!-- AUTOMATIZACIÓN (CRON DE FRONTEND) -->
+        <div class="card">
+            <div class="card-title">⏱️ Protocolo de Automatización</div>
+            <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 15px;">
+                El sistema enviará el informe diario automáticamente si esta ventana permanece activa o en PWA.
             </p>
-        </div>
-
-        <div class="card">
-            <h3>⚡ Acciones de Envío Neural</h3>
-            <p style="font-size: 0.9rem; color: var(--text-secondary);">Genera y envía resúmenes directamente a tu chat de Telegram.</p>
-            <button onclick="sendDailyDigest('cuba')">🇨🇺 Enviar Noticias de Cuba</button>
-            <button onclick="sendDailyDigest('ia')">🧠 Enviar Tendencias de IA</button>
-            <button onclick="sendDailyDigest('tendencias')">📈 Enviar Tendencias Redes</button>
-            <button onclick="sendDailyDigest('all')" class="btn-success">🚀 Enviar Informe Completo</button>
+            <div class="input-group">
+                <label>HORA DE EJECUCIÓN (FORMATO 24H)</label>
+                <input type="number" id="autoHour" min="0" max="23" value="8" placeholder="8">
+            </div>
+            <div class="input-group">
+                <label>TIPO DE INFORME</label>
+                <select id="autoReportType">
+                    <option value="all">🌟 Completo (Cuba + IA + Tendencias)</option>
+                    <option value="cuba">🇨🇺 Solo Noticias Cubanas</option>
+                    <option value="ia">🧠 Solo Inteligencia Artificial</option>
+                </select>
+            </div>
+            <button class="btn btn-success" onclick="toggleAutomation()">
+                <span id="autoBtnText">🚀 Activar Cron Automático</span>
+            </button>
+            <div style="margin-top: 15px; text-align: center;">
+                <span id="autoStatusBadge" class="auto-badge" style="display: none;">
+                    ⏳ Próximo envío: --:--
+                </span>
+            </div>
         </div>
     </div>
 
-    <!-- PANEL DE NOTICIAS EN TIEMPO REAL -->
+    <!-- ACCIONES MANUALES -->
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-title">⚡ Despliegue Manual de Inteligencia</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <button class="btn btn-ghost" onclick="sendDailyDigest('cuba')">🇨🇺 Informe Cuba</button>
+            <button class="btn btn-ghost" onclick="sendDailyDigest('ia')">🧠 Informe IA</button>
+            <button class="btn btn-ghost" onclick="sendDailyDigest('tendencias')">📈 Informe Tendencias</button>
+            <button class="btn btn-primary" onclick="sendDailyDigest('all')">🚀 DESPLEGAR TODO</button>
+        </div>
+    </div>
+
+    <!-- FEEDS DE NOTICIAS -->
     <div class="grid">
         <div class="card">
-            <h3>🇨🇺 Noticias Cubanas <button onclick="fetchNews('cuba')" style="width:auto; padding: 5px 10px; font-size:0.8rem; margin:0;">🔄</button></h3>
-            <div id="news-cuba" class="news-list">Cargando noticias de Cuba...</div>
+            <div class="card-title">🇨🇺 Flujo Cubano <button onclick="fetchNews('cuba')" style="margin-left:auto; background:none; border:none; color:var(--accent); cursor:pointer;">🔄</button></div>
+            <div id="news-cuba" class="news-feed">Inicializando escáner...</div>
         </div>
-
         <div class="card">
-            <h3>🧠 Inteligencia Artificial <button onclick="fetchNews('ia')" style="width:auto; padding: 5px 10px; font-size:0.8rem; margin:0;">🔄</button></h3>
-            <div id="news-ia" class="news-list">Cargando noticias de IA...</div>
+            <div class="card-title">🧠 Flujo IA <button onclick="fetchNews('ia')" style="margin-left:auto; background:none; border:none; color:var(--accent); cursor:pointer;">🔄</button></div>
+            <div id="news-ia" class="news-feed">Inicializando escáner...</div>
         </div>
-
         <div class="card">
-            <h3>📈 Tendencias / Redes <button onclick="fetchNews('tendencias')" style="width:auto; padding: 5px 10px; font-size:0.8rem; margin:0;">🔄</button></h3>
-            <div id="news-tendencias" class="news-list">Cargando tendencias...</div>
+            <div class="card-title">📈 Flujo Tendencias <button onclick="fetchNews('tendencias')" style="margin-left:auto; background:none; border:none; color:var(--accent); cursor:pointer;">🔄</button></div>
+            <div id="news-tendencias" class="news-feed">Inicializando escáner...</div>
         </div>
     </div>
 
-    <!-- REGISTRO DE ACTIVIDAD -->
+    <!-- TERMINAL -->
     <div class="card">
-        <h3>📋 Registro de Actividad del Sistema</h3>
-        <div id="logBox" class="log-box">[SYSTEM] Iniciando ANIA OS Neural Dashboard...\n</div>
+        <div class="card-title">📟 Terminal del Sistema</div>
+        <div id="logBox" class="terminal">[SYSTEM] Iniciando ANIA OS Neural Command...</div>
     </div>
 </div>
 
 <script>
-    // --- CONFIGURACIÓN Y ESTADO ---
-    let botToken = localStorage.getItem('telegram_token') || '';
-    let chatId = localStorage.getItem('telegram_chat_id') || '';
-    
+    // --- ESTADO GLOBAL ---
+    let botToken = localStorage.getItem('tg_token') || '';
+    let chatId = localStorage.getItem('tg_chat_id') || '';
+    let cachedNews = { cuba: [], ia: [], tendencias: [] };
+    let automationActive = localStorage.getItem('tg_auto_active') === 'true';
+    let autoHour = parseInt(localStorage.getItem('tg_auto_hour') || '8');
+    let autoType = localStorage.getItem('tg_auto_type') || 'all';
+
     document.getElementById('botToken').value = botToken;
     document.getElementById('chatId').value = chatId;
+    document.getElementById('autoHour').value = autoHour;
+    document.getElementById('autoReportType').value = autoType;
+    updateAutomationUI();
 
-    function log(msg) {
-        const logBox = document.getElementById('logBox');
+    // --- LOGGING ---
+    function log(msg, type = 'info') {
+        const box = document.getElementById('logBox');
         const time = new Date().toLocaleTimeString();
-        logBox.innerHTML += `[${time}] ${msg}\n`;
-        logBox.scrollTop = logBox.scrollHeight;
+        const cls = type === 'error' ? 'log-error' : type === 'warn' ? 'log-warn' : 'log-info';
+        box.innerHTML += `<div class="${cls}">[${time}] ${msg}</div>`;
+        box.scrollTop = box.scrollHeight;
     }
 
+    // --- CONFIGURACIÓN ---
     function saveConfig() {
         botToken = document.getElementById('botToken').value.trim();
         chatId = document.getElementById('chatId').value.trim();
-        localStorage.setItem('telegram_token', botToken);
-        localStorage.setItem('telegram_chat_id', chatId);
-        log('✅ Configuración guardada localmente.');
-        alert('Configuración guardada.');
+        localStorage.setItem('tg_token', botToken);
+        localStorage.setItem('tg_chat_id', chatId);
+        log('Credenciales almacenadas en memoria local.', 'info');
     }
 
     async function testBot() {
-        if (!botToken) return alert('Por favor, ingresa un Token.');
-        log('🔄 Probando conexión con Telegram API...');
+        if (!botToken) return log('Error: Token no definido.', 'error');
+        log('Estableciendo enlace con API de Telegram...', 'info');
         try {
             const res = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
             const data = await res.json();
             if (data.ok) {
-                document.getElementById('botStatus').innerText = 'Conectado';
-                document.getElementById('botStatus').className = 'status-badge status-online';
-                log(`✅ Conectado como: @${data.result.username}`);
+                log(`Enlace exitoso con @${data.result.username}.`, 'info');
             } else {
                 throw new Error(data.description);
             }
         } catch (e) {
-            log(`❌ Error de conexión: ${e.message}`);
-            alert('Error: ' + e.message);
+            log(`Fallo de enlace: ${e.message}`, 'error');
         }
     }
 
-    // --- OBTENCIÓN DE NOTICIAS (USANDO PROXY CORS PARA RSS) ---
-    const CORS_PROXY = "https://api.allorigins.win/raw?url=";
-    
-    const RSS_FEEDS = {
-        cuba: [
-            "http://www.cubadebate.cu/feed/",
-            "https://www.granma.cu/feed"
-        ],
-        ia: [
-            "https://news.google.com/rss/search?q=artificial+intelligence+OR+machine+learning&hl=en",
-            "https://openai.com/blog/rss.xml"
-        ],
-        tendencias: [
-            "https://news.google.com/rss/search?q=trending+topics+OR+viral+social+media&hl=en",
-            "https://www.reddit.com/r/technology/top.rss?t=day"
-        ]
+    // --- OBTENCIÓN DE NOTICIAS (RSS vía Proxy) ---
+    const PROXY = "https://api.allorigins.win/raw?url=";
+    const FEEDS = {
+        cuba: ["http://www.cubadebate.cu/feed/", "https://www.granma.cu/feed"],
+        ia: ["https://news.google.com/rss/search?q=artificial+intelligence&hl=en", "https://openai.com/blog/rss.xml"],
+        tendencias: ["https://news.google.com/rss/search?q=trending+social+media&hl=en", "https://www.reddit.com/r/technology/top.rss?t=day"]
     };
 
-    let cachedNews = { cuba: [], ia: [], tendencias: [] };
-
-    async function fetchNews(category) {
-        const container = document.getElementById(`news-${category}`);
-        container.innerHTML = '<div class="spinner"></div> Analizando fuentes...';
-        log(`🔍 Buscando fuentes para: ${category.toUpperCase()}`);
-        
+    async function fetchNews(cat) {
+        const container = document.getElementById(`news-${cat}`);
+        container.innerHTML = '<div style="color:var(--text-dim)">Escaneando fuentes...</div>';
         let items = [];
-        const feeds = RSS_FEEDS[category];
-
-        for (const feedUrl of feeds) {
+        
+        for (const url of FEEDS[cat]) {
             try {
-                const proxyUrl = CORS_PROXY + encodeURIComponent(feedUrl);
-                const response = await fetch(proxyUrl);
-                const xmlText = await response.text();
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(xmlText, "text/xml");
-                
-                const entries = xml.querySelectorAll("item");
-                entries.forEach((entry, index) => {
-                    if (index < 5) { // Top 5 por fuente
+                const res = await fetch(PROXY + encodeURIComponent(url));
+                const xml = await res.text();
+                const doc = new DOMParser().parseFromString(xml, "text/xml");
+                doc.querySelectorAll("item").forEach((item, i) => {
+                    if (i < 5) {
                         items.push({
-                            title: entry.querySelector("title")?.textContent || "Sin título",
-                            link: entry.querySelector("link")?.textContent || "#"
+                            title: item.querySelector("title")?.textContent || "Sin título",
+                            link: item.querySelector("link")?.textContent || "#",
+                            source: url.includes('cubadebate') ? 'Cubadebate' : url.includes('granma') ? 'Granma' : 'Global'
                         });
                     }
                 });
-            } catch (e) {
-                console.warn(`Error fetching ${feedUrl}:`, e);
-            }
+            } catch (e) { console.warn(e); }
         }
-
-        cachedNews[category] = items;
-        renderNews(category, items);
-        log(`✅ ${items.length} artículos encontrados para ${category}.`);
-    }
-
-    function renderNews(category, items) {
-        const container = document.getElementById(`news-${category}`);
-        if (items.length === 0) {
-            container.innerHTML = '<p style="color:var(--text-secondary)">No se pudieron cargar las noticias.</p>';
-            return;
-        }
-        container.innerHTML = items.map(item => `
+        
+        cachedNews[cat] = items;
+        container.innerHTML = items.map(i => `
             <div class="news-item">
-                <a href="${item.link}" target="_blank">${item.title}</a>
+                <div class="news-source">${i.source}</div>
+                <a href="${i.link}" target="_blank">${i.title}</a>
             </div>
-        `).join('');
+        `).join('') || '<div style="color:var(--text-dim)">Sin datos disponibles.</div>';
+        log(`Flujo ${cat.toUpperCase()} actualizado (${items.length} nodos).`);
     }
 
     // --- ENVÍO A TELEGRAM ---
     async function sendToTelegram(text) {
-        if (!botToken || !chatId) {
-            alert('Configura tu Token y Chat ID primero.');
-            return;
-        }
-        
-        log(`📤 Enviando mensaje a Telegram (Chat: ${chatId})...`);
-        const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-        
+        if (!botToken || !chatId) return log('Error: Configure Token y Chat ID.', 'error');
         try {
-            const res = await fetch(url, {
+            const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: chatId,
-                    text: text,
-                    parse_mode: 'Markdown',
-                    disable_web_page_preview: true
-                })
+                body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown', disable_web_page_preview: true })
             });
             const data = await res.json();
-            if (data.ok) {
-                log('✅ Mensaje enviado a Telegram exitosamente.');
-            } else {
-                throw new Error(data.description);
-            }
+            if (!data.ok) throw new Error(data.description);
+            log('Paquete de datos transmitido a Telegram.', 'info');
         } catch (e) {
-            log(`❌ Error al enviar a Telegram: ${e.message}`);
-            alert('Error al enviar: ' + e.message);
+            log(`Error de transmisión: ${e.message}`, 'error');
         }
     }
 
-    function formatNewsForTelegram(category, items) {
-        const titles = {
-            cuba: "🇨🇺 *RESUMEN NOTICIOSO CUBANO*",
-            ia: "🧠 *TENDENCIAS EN INTELIGENCIA ARTIFICIAL*",
-            tendencias: "📈 *TENDENCIAS EN REDES SOCIALES*"
-        };
-        
-        let msg = `${titles[category]}\n\n`;
-        items.slice(0, 5).forEach((item, i) => {
-            // Limpiar caracteres que rompen Markdown de Telegram
-            const cleanTitle = item.title.replace(/[_*[\]()~`>#+=|{}.!-]/g, '');
-            msg += `${i + 1}. [${cleanTitle}](${item.link})\n\n`;
+    function formatMsg(cat, items) {
+        const titles = { cuba: "🇨🇺 *RESUMEN CUBA*", ia: "🧠 *TENDENCIAS IA*", tendencias: "📈 *REDES SOCIALES*" };
+        let msg = `${titles[cat]}\n\n`;
+        items.slice(0, 5).forEach((i, idx) => {
+            const clean = i.title.replace(/[_*[\]()~`>#+=|{}.!-]/g, '');
+            msg += `${idx + 1}. [${clean}](${i.link})\n\n`;
         });
-        msg += `_Generado por ANIA OS v13 · ${new Date().toLocaleDateString()}_`;
-        return msg;
+        return msg + `_ANIA OS v13 · ${new Date().toLocaleDateString()}_`;
     }
 
-    async function sendDailyDigest(category) {
-        if (category === 'all') {
-            log('🚀 Generando informe completo...');
-            // Asegurar que tenemos las noticias
+    async function sendDailyDigest(type) {
+        log(`Iniciando despliegue manual: ${type.toUpperCase()}`, 'warn');
+        if (type === 'all') {
             if(cachedNews.cuba.length === 0) await fetchNews('cuba');
             if(cachedNews.ia.length === 0) await fetchNews('ia');
             if(cachedNews.tendencias.length === 0) await fetchNews('tendencias');
             
-            let fullMsg = "🌟 *INFORME NEURAL COMPLETO ANIA OS*\n\n";
-            fullMsg += formatNewsForTelegram('cuba', cachedNews.cuba) + "\n\n";
-            fullMsg += formatNewsForTelegram('ia', cachedNews.ia) + "\n\n";
-            fullMsg += formatNewsForTelegram('tendencias', cachedNews.tendencias);
-            
-            // Telegram tiene límite de 4096 caracteres. Si es muy largo, lo dividimos.
-            if (fullMsg.length > 4000) {
-                await sendToTelegram(formatNewsForTelegram('cuba', cachedNews.cuba));
-                await sendToTelegram(formatNewsForTelegram('ia', cachedNews.ia));
-                await sendToTelegram(formatNewsForTelegram('tendencias', cachedNews.tendencias));
-            } else {
-                await sendToTelegram(fullMsg);
-            }
+            await sendToTelegram(formatMsg('cuba', cachedNews.cuba));
+            await sendToTelegram(formatMsg('ia', cachedNews.ia));
+            await sendToTelegram(formatMsg('tendencias', cachedNews.tendencias));
         } else {
-            if (cachedNews[category].length === 0) {
-                await fetchNews(category);
-            }
-            const msg = formatNewsForTelegram(category, cachedNews[category]);
-            await sendToTelegram(msg);
+            if (cachedNews[type].length === 0) await fetchNews(type);
+            await sendToTelegram(formatMsg(type, cachedNews[type]));
+        }
+    }
+
+    // --- CRON DE FRONTEND (AUTOMATIZACIÓN) ---
+    function toggleAutomation() {
+        autoHour = parseInt(document.getElementById('autoHour').value) || 8;
+        autoType = document.getElementById('autoReportType').value;
+        automationActive = !automationActive;
+        
+        localStorage.setItem('tg_auto_active', automationActive);
+        localStorage.setItem('tg_auto_hour', autoHour);
+        localStorage.setItem('tg_auto_type', autoType);
+        
+        updateAutomationUI();
+        log(`Automatización ${automationActive ? 'ACTIVADA' : 'DESACTIVADA'} para las ${autoHour}:00.`, 'warn');
+    }
+
+    function updateAutomationUI() {
+        const btn = document.getElementById('autoBtnText');
+        const badge = document.getElementById('autoStatusBadge');
+        if (automationActive) {
+            btn.innerText = '🛑 Desactivar Cron';
+            badge.style.display = 'inline-flex';
+            badge.innerHTML = `⏳ Cron Activo: Diario a las ${autoHour}:00`;
+        } else {
+            btn.innerText = '🚀 Activar Cron Automático';
+            badge.style.display = 'none';
+        }
+    }
+
+    function checkAutoSend() {
+        if (!automationActive) return;
+        const now = new Date();
+        const lastSent = localStorage.getItem('tg_last_auto_sent');
+        const today = now.toDateString();
+        
+        // Si ya pasó la hora objetivo hoy (o es la hora exacta) y no se ha enviado
+        if (now.getHours() >= autoHour && lastSent !== today) {
+            log('Ejecutando protocolo de envío automático programado...', 'warn');
+            sendDailyDigest(autoType);
+            localStorage.setItem('tg_last_auto_sent', today);
         }
     }
 
     // --- INICIALIZACIÓN ---
     window.onload = () => {
-        log('🧠 Interfaz Neural Cargada.');
-        if (botToken && chatId) {
-            testBot();
-        }
-        // Cargar noticias al inicio
-        fetchNews('cuba');
-        fetchNews('ia');
-        fetchNews('tendencias');
+        log('Interfaz Neural v13.0 inicializada.');
+        if (botToken && chatId) testBot();
+        fetchNews('cuba'); fetchNews('ia'); fetchNews('tendencias');
+        
+        // Revisar si es hora de enviar automáticamente cada 5 minutos
+        checkAutoSend();
+        setInterval(checkAutoSend, 300000); // 300,000 ms = 5 mins
     };
 </script>
-
 </body>
 </html>
