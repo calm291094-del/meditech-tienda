@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HOLGUÍN RUSH: PURSUIT EDITION v6.0 (Re-Volt Style)</title>
+<title>HOLGUÍN RUSH: PURSUIT EDITION v7.0</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,14 +12,16 @@ body, html { overflow: hidden; background: #000; font-family: 'Orbitron', 'Segoe
 canvas { display: block; }
 
 .back-btn { position: fixed; top: 20px; left: 20px; background: rgba(0,0,0,0.8); border: 2px solid #00f3ff; color: #00f3ff; padding: 10px 20px; border-radius: 5px; font-size: 0.9rem; font-weight: 700; text-decoration: none; z-index: 1000; transition: all 0.3s; }
-.back-btn:hover { background: #00f3ff; color: #000; box-shadow: 0 0 20px #00f3ff; }
+.back-btn:hover { background: #00f3ff; color: #000; box-shadow: 0 0 20px #00f3ff; transform: translateX(-3px); }
 
 .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, #1a0b2e 0%, #05050A 70%, #000 100%); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; overflow-y: auto; }
 .screen.active { display: flex; }
 
-.title { font-size: 4.5rem; font-weight: 900; background: linear-gradient(45deg, #ff0055, #ffaa00, #00f3ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 6px; margin-bottom: 10px; text-shadow: 0 0 40px rgba(255,0,85,0.6); text-align: center; }
+.title { font-size: 4.5rem; font-weight: 900; background: linear-gradient(45deg, #ff0055, #ffaa00, #00f3ff, #ff0055); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: grad 4s ease infinite; letter-spacing: 6px; margin-bottom: 10px; text-shadow: 0 0 40px rgba(255,0,85,0.6); text-align: center; }
+@keyframes grad { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
 .subtitle { font-size: 1.2rem; color: #00f3ff; letter-spacing: 4px; margin-bottom: 30px; text-shadow: 0 0 15px #00f3ff; text-align: center; }
-.panel { background: rgba(0,0,0,0.7); border: 2px solid rgba(0,243,255,0.4); border-radius: 12px; padding: 25px; margin: 15px 0; box-shadow: 0 0 30px rgba(0,243,255,0.15); width: 90%; max-width: 800px; }
+
+.panel { background: rgba(0,0,0,0.7); border: 2px solid rgba(0,243,255,0.4); border-radius: 12px; padding: 25px; margin: 15px 0; box-shadow: 0 0 30px rgba(0,243,255,0.15); width: 90%; max-width: 800px; backdrop-filter: blur(5px); }
 .stats-bar { display: flex; justify-content: space-around; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ff0055; }
 .stat { text-align: center; }
 .stat-val { font-size: 1.8rem; font-weight: 900; color: #ffaa00; }
@@ -29,8 +31,8 @@ canvas { display: block; }
 .car-card { background: rgba(0,0,0,0.6); border: 2px solid #333; border-radius: 10px; padding: 15px; text-align: center; transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden; }
 .car-card:hover { border-color: #00f3ff; transform: translateY(-5px); box-shadow: 0 0 20px rgba(0,243,255,0.3); }
 .car-card.locked { opacity: 0.5; filter: grayscale(1); }
-.car-card.selected { border-color: #ff0055; box-shadow: 0 0 25px rgba(255,0,85,0.5); }
-.car-name { font-size: 1.1rem; color: #fff; margin-bottom: 10px; }
+.car-card.selected { border-color: #ff0055; box-shadow: 0 0 25px rgba(255,0,85,0.5); background: rgba(255,0,85,0.1); }
+.car-name { font-size: 1.1rem; color: #fff; margin-bottom: 10px; font-weight: 700; }
 .car-stat { display: flex; justify-content: space-between; font-size: 0.8rem; margin: 5px 0; color: #aaa; }
 .stat-bar { width: 60%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; }
 .stat-fill { height: 100%; background: linear-gradient(90deg, #00f3ff, #ff0055); transition: width 0.5s; }
@@ -46,7 +48,7 @@ canvas { display: block; }
 .setting-box { background: rgba(0,0,0,0.8); border: 1px solid rgba(0,243,255,0.3); border-radius: 8px; padding: 15px 20px; text-align: center; min-width: 140px; transition: all 0.3s; }
 .setting-box:hover { border-color: #00f3ff; box-shadow: 0 0 15px rgba(0,243,255,0.4); }
 .setting-box label { display: block; font-size: 0.75rem; color: #00f3ff; margin-bottom: 8px; letter-spacing: 2px; font-weight: 700; }
-.setting-box select { background: #0a0a12; color: #fff; border: 2px solid #00f3ff; padding: 8px 12px; font-size: 0.95rem; font-weight: 700; border-radius: 4px; cursor: pointer; width: 100%; outline: none; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+.setting-box select { background: #0a0a12; color: #fff; border: 2px solid #00f3ff; padding: 8px 12px; font-size: 0.95rem; font-weight: 700; border-radius: 4px; cursor: pointer; width: 100%; outline: none; -webkit-appearance: none; -moz-appearance: none; appearance: none; text-align: center; }
 .setting-box select option { background: #0a0a12; color: #fff; }
 
 #hud { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; pointer-events: none; z-index: 50; }
@@ -60,10 +62,10 @@ canvas { display: block; }
 .nitro-fill { height: 100%; background: linear-gradient(90deg, #ffaa00, #ff0055); transition: width 0.1s; box-shadow: 0 0 15px #ffaa00; }
 .nitro-text { position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-size: 0.7rem; font-weight: 900; line-height: 14px; text-shadow: 0 0 3px #000; }
 .divider { position: fixed; top: 0; left: 50%; width: 4px; height: 100%; background: #fff; box-shadow: 0 0 15px #fff; z-index: 55; pointer-events: none; display: none; }
-.event-alert { position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px #ff0055, 0 0 40px #ff0055; display: none; animation: pulse 0.4s infinite alternate; z-index: 60; pointer-events: none; text-align: center; width: 90%; }
+.event-alert { position: fixed; top: 25%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; font-weight: 900; color: #fff; text-shadow: 0 0 20px #ff0055, 0 0 40px #ff0055; display: none; animation: pulse 0.4s infinite alternate; z-index: 60; pointer-events: none; text-align: center; width: 90%; }
 @keyframes pulse { from { opacity: 0.7; transform: translate(-50%, -50%) scale(0.95); } to { opacity: 1; transform: translate(-50%, -50%) scale(1.05); } }
 .countdown { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 8rem; font-weight: 900; color: #fff; text-shadow: 0 0 30px #00f3ff, 0 0 60px #00f3ff; display: none; z-index: 70; }
-.xp-popup { position: fixed; top: 20%; left: 50%; transform: translateX(-50%); font-size: 1.5rem; color: #ffaa00; font-weight: 900; text-shadow: 0 0 10px #ffaa00; opacity: 0; transition: all 0.5s; z-index: 65; }
+.xp-popup { position: fixed; top: 20%; left: 50%; transform: translateX(-50%); font-size: 1.5rem; color: #ffaa00; font-weight: 900; text-shadow: 0 0 10px #ffaa00; opacity: 0; transition: all 0.5s; z-index: 65; pointer-events: none; }
 .xp-popup.show { opacity: 1; top: 15%; }
 
 #fallback { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px; }
@@ -81,14 +83,14 @@ canvas { display: block; }
 
 <div id="fallback">
   <h2>⚠️ LÍMITE DE FIREFOX ALCANZADO</h2>
-  <p>El error <code>Exhausted GL driver options</code> significa que Firefox agotó su límite de contextos WebGL por recargar la página demasiadas veces.</p>
+  <p>El error <code>Exhausted GL driver options</code> ocurre cuando Firefox agota su límite de contextos WebGL por recargar la página demasiadas veces.</p>
   <p><strong>SOLUCIÓN:</strong> 1. Cierra TODAS las pestañas de Firefox. 2. Vuelve a abrir Firefox. 3. Abre este archivo. ¡Funcionará perfectamente!</p>
   <a href="../index.html" class="btn">← Regresar a la Tienda</a>
 </div>
 
 <div id="screen-menu" class="screen active">
   <div class="title">HOLGUÍN RUSH</div>
-  <div class="subtitle">PURSUIT EDITION · EDICIÓN ESPECIAL</div>
+  <div class="subtitle">PURSUIT EDITION · v7.0</div>
   <div class="panel">
     <div class="stats-bar">
       <div class="stat"><div class="stat-val" id="menu-level">1</div><div class="stat-label">NIVEL</div></div>
@@ -104,7 +106,7 @@ canvas { display: block; }
 </div>
 
 <div id="screen-garage" class="screen">
-  <div class="title" style="font-size: 3rem;">GARAJE</div>
+  <div class="title" style="font-size: 3rem;">GARAJE HOLOGRÁFICO</div>
   <div class="panel">
     <div class="stats-bar">
       <div class="stat"><div class="stat-val" id="garage-money">$500</div><div class="stat-label">DINERO DISPONIBLE</div></div>
@@ -125,7 +127,7 @@ canvas { display: block; }
         <select id="sel-track">
           <option value="parque">Parque Calixto García</option>
           <option value="loma">Loma de la Cruz</option>
-          <option value="guardalavaca">Guardalavaca (Desbloquear Nvl 3)</option>
+          <option value="guardalavaca">Guardalavaca (Nvl 3)</option>
         </select>
       </div>
       <div class="setting-box">
@@ -144,7 +146,7 @@ canvas { display: block; }
         </select>
       </div>
       <div class="setting-box">
-        <label>🧟 EVENTOS</label>
+        <label>🌟 EVENTOS</label>
         <select id="sel-events">
           <option value="1" selected>Activados</option>
           <option value="0">Desactivados</option>
@@ -186,8 +188,8 @@ canvas { display: block; }
 <script>
 'use strict';
 /* =========================================================================
-   HOLGUÍN RUSH: PURSUIT EDITION v6.0
-   IA Mejorada + Características de Re-Volt (Boost Pads, Items, Física RC)
+   HOLGUÍN RUSH: PURSUIT EDITION v7.0
+   Físicas RC, Eventos Misteriosos, Secretos, Pistas Temáticas y 100% Firefox-Safe
    ========================================================================= */
 
 var renderer, scene, ambCam, hemi, sun, clock;
@@ -218,7 +220,7 @@ sun = new THREE.DirectionalLight(0xffe0b0, 0.9);
 sun.position.set(60, 90, 30);
 scene.add(sun);
 
-var SAVE_KEY = 'holguin_rush_v6';
+var SAVE_KEY = 'holguin_rush_v7';
 var profile = {
     level: 1, xp: 0, money: 500,
     unlockedCars: ['lada'],
@@ -269,7 +271,8 @@ function showEvent(text) {
 var CARS = {
     lada: { name: 'Lada Neón', price: 0, speed: 70, accel: 40, handling: 2.0, nitro: 80, color: 0xff0055, desc: 'El clásico cubano tuneado.' },
     jeep: { name: 'Jeep Holguín', price: 1500, speed: 65, accel: 50, handling: 1.8, nitro: 100, color: 0x4a5d3a, desc: 'Potente y estable en la Loma.' },
-    deportivo: { name: 'Caguayo GT', price: 4000, speed: 110, accel: 70, handling: 2.8, nitro: 120, color: 0x00f3ff, desc: 'Velocidad pura para Guardalavaca.' }
+    deportivo: { name: 'Caguayo GT', price: 4000, speed: 110, accel: 70, handling: 2.8, nitro: 120, color: 0x00f3ff, desc: 'Velocidad pura para Guardalavaca.' },
+    mistico: { name: 'Caguayo Místico', price: 9999, speed: 130, accel: 80, handling: 3.2, nitro: 150, color: 0xffaa00, desc: '🌟 SECRETO: Desbloqueado por habilidad.' }
 };
 
 var TRACKS = {
@@ -279,11 +282,11 @@ var TRACKS = {
 };
 
 var players = [], aiCars = [], trafficCars = [], particles = [];
-var boostPads = [], items = [];
+var boostPads = [], items = [], meteors = [];
 var trackCurve, trackMesh;
 var gameMode = 1, currentTrack = 'parque', totalLaps = 3, hasTraffic = 1, hasEvents = 1;
 var gameState = 'MENU';
-var eventTimer = 0, ufo = null, ufoActive = false;
+var eventTimer = 0, ufo = null, ufoActive = false, rainbowMode = false;
 
 var keys = {};
 window.addEventListener('keydown', function(e) { keys[e.code] = true; });
@@ -350,16 +353,14 @@ function generateTrack() {
     geometry.computeVertexNormals();
 
     var mat = new THREE.MeshStandardMaterial({ 
-        color: 0x222222, 
-        roughness: 0.6, 
-        metalness: 0.4,
-        emissive: 0x111111,
-        emissiveIntensity: 0.2
+        color: 0x222222, roughness: 0.6, metalness: 0.4,
+        emissive: rainbowMode ? 0xff00ff : 0x111111, emissiveIntensity: rainbowMode ? 0.5 : 0.2
     });
     trackMesh = new THREE.Mesh(geometry, mat);
     scene.add(trackMesh);
 
-    var lineMat = new THREE.LineBasicMaterial({ color: 0x00f3ff, linewidth: 3 });
+    var lineColor = currentTrack === 'guardalavaca' ? 0x00ffff : 0x00f3ff;
+    var lineMat = new THREE.LineBasicMaterial({ color: lineColor, linewidth: 3 });
     var leftPts = [], rightPts = [];
     for (var i = 0; i < points.length; i++) {
         var p = points[i];
@@ -380,6 +381,7 @@ function generateTrack() {
     ground.position.y = -0.5;
     scene.add(ground);
     
+    // Decoración temática
     for (var i = 0; i < 40; i++) {
         var angle = (i / 40) * Math.PI * 2;
         var r = radius + 40 + Math.random() * 60;
@@ -387,16 +389,34 @@ function generateTrack() {
         var z = Math.sin(angle) * r;
         var h = 10 + Math.random() * 30;
         var w = 8 + Math.random() * 8;
-        var building = new THREE.Mesh(
-            new THREE.BoxGeometry(w, h, w),
-            new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.7 })
-        );
-        building.position.set(x, h / 2, z);
-        scene.add(building);
+        
+        if (currentTrack === 'loma' && i === 0) {
+            // Cruz de la Loma
+            var cross = new THREE.Mesh(new THREE.BoxGeometry(4, 20, 4), new THREE.MeshBasicMaterial({color: 0xffffff}));
+            cross.position.set(x, 30, z);
+            scene.add(cross);
+            var light = new THREE.PointLight(0xffffff, 2, 60);
+            light.position.set(x, 30, z);
+            scene.add(light);
+        } else if (currentTrack === 'guardalavaca' && Math.random() > 0.5) {
+            // Palmeras
+            var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 8, 6), new THREE.MeshStandardMaterial({color: 0x8a6a44}));
+            trunk.position.set(x, 4, z);
+            scene.add(trunk);
+            var leaves = new THREE.Mesh(new THREE.ConeGeometry(3, 2, 8), new THREE.MeshStandardMaterial({color: 0x3f7a34}));
+            leaves.position.set(x, 8, z);
+            scene.add(leaves);
+        } else {
+            var building = new THREE.Mesh(
+                new THREE.BoxGeometry(w, h, w),
+                new THREE.MeshStandardMaterial({ color: 0x222233, roughness: 0.7 })
+            );
+            building.position.set(x, h / 2, z);
+            scene.add(building);
+        }
     }
 }
 
-// CARACTERÍSTICA RE-VOLT: Alfombras de Turbo
 function generateBoostPads() {
     for (var i = 0; i < 6; i++) {
         var t = (i + 1) / 7;
@@ -414,7 +434,6 @@ function generateBoostPads() {
     }
 }
 
-// CARACTERÍSTICA RE-VOLT: Ítems de Potencia Flotantes
 function generateItems() {
     for (var i = 0; i < 10; i++) {
         var t = (i + 0.5) / 10;
@@ -423,14 +442,17 @@ function generateItems() {
         var normal = new THREE.Vector3(-tangent.z, 0, tangent.x);
         var offset = (Math.random() > 0.5 ? 7 : -7);
         
+        var type = Math.random();
+        var color = type > 0.6 ? 0xffaa00 : (type > 0.3 ? 0x00f3ff : 0xaa00ff); // Oro, Cian, Púrpura
+        
         var item = new THREE.Mesh(
             new THREE.OctahedronGeometry(0.8, 0),
-            new THREE.MeshBasicMaterial({ color: 0xffaa00, wireframe: true })
+            new THREE.MeshBasicMaterial({ color: color, wireframe: true })
         );
         item.position.copy(pos).add(normal.multiplyScalar(offset));
         item.position.y = 1.5;
         scene.add(item);
-        items.push({ mesh: item, t: t, active: true, respawnT: 0 });
+        items.push({ mesh: item, t: t, active: true, respawnT: 0, type: type > 0.6 ? 'nitro' : (type > 0.3 ? 'shield' : 'mystery') });
     }
 }
 
@@ -488,7 +510,7 @@ function createCar(carId, isP2, isAI) {
     return {
         mesh: group, carId: carId, pos: new THREE.Vector3(), angle: 0, speed: 0,
         nitro: 100, heat: 0, lap: 1, checkpoint: 0, finished: false,
-        isP2: isP2, isAI: isAI, shake: 0, stats: data
+        isP2: isP2, isAI: isAI, shake: 0, stats: data, driftTime: 0, shield: false
     };
 }
 
@@ -496,10 +518,8 @@ function updateCarPhysics(car, dt) {
     if (car.finished) { car.speed *= 0.95; return; }
 
     if (car.isAI) {
-        // IA INTELIGENTE: Sigue la pista, frena en curvas y acelera en rectas
         var currentT = getClosestT(car.pos);
         car.checkpoint = currentT;
-        
         var lookahead = 0.02 + (car.speed / car.stats.speed) * 0.04;
         var targetT = (currentT + lookahead) % 1;
         var targetPos = trackCurve.getPointAt(targetT);
@@ -524,18 +544,12 @@ function updateCarPhysics(car, dt) {
         while (curveSharpness < -Math.PI) curveSharpness += Math.PI * 2;
         
         var targetSpeed = car.stats.speed * (1 - Math.abs(curveSharpness) * 0.8);
-        
-        if (car.speed < targetSpeed) {
-            car.speed += car.stats.accel * 0.7 * dt;
-        } else {
-            car.speed -= car.stats.accel * 1.2 * dt;
-        }
+        if (car.speed < targetSpeed) car.speed += car.stats.accel * 0.7 * dt;
+        else car.speed -= car.stats.accel * 1.2 * dt;
         
         car.speed = Math.max(25, Math.min(car.stats.speed * 1.05, car.speed));
-        
         var turnSpeed = car.stats.handling;
         car.angle += steerInput * turnSpeed * dt * (car.speed / car.stats.speed);
-        
         car.pos.x += Math.sin(car.angle) * car.speed * dt;
         car.pos.z += Math.cos(car.angle) * car.speed * dt;
         
@@ -578,8 +592,17 @@ function updateCarPhysics(car, dt) {
 
         var isDrifting = keys[driftKey] && Math.abs(car.speed) > 20;
         if (isDrifting) {
+            car.driftTime += dt;
             car.shake = Math.min(car.shake + dt * 2, 0.15);
             if (Math.random() > 0.6) spawnParticle(car.pos.x, 0.5, car.pos.z, 0xaaaaaa);
+            
+            // SECRETO: Derrape prolongado
+            if (car.driftTime > 3.0 && Math.random() < 0.05) {
+                spawnSecretOrb(car.pos.x, car.pos.z);
+                car.driftTime = 0;
+            }
+        } else {
+            car.driftTime = Math.max(0, car.driftTime - dt);
         }
 
         car.speed += accel * dt;
@@ -597,11 +620,13 @@ function updateCarPhysics(car, dt) {
         var centerPos = trackCurve.getPointAt(closestT);
         var dist = Math.hypot(car.pos.x - centerPos.x, car.pos.z - centerPos.z);
         if (dist > 14) {
-            car.speed *= 0.85;
-            car.pos.x += (centerPos.x - car.pos.x) * 0.1;
-            car.pos.z += (centerPos.z - car.pos.z) * 0.1;
-            car.shake = 0.3;
-            if (dist > 18) {
+            if (!car.shield) {
+                car.speed *= 0.85;
+                car.pos.x += (centerPos.x - car.pos.x) * 0.1;
+                car.pos.z += (centerPos.z - car.pos.z) * 0.1;
+                car.shake = 0.3;
+            }
+            if (dist > 18 && !car.shield) {
                 car.speed *= 0.5;
                 addXP(5);
             }
@@ -610,12 +635,17 @@ function updateCarPhysics(car, dt) {
 
     car.mesh.position.copy(car.pos);
     
-    // CARACTERÍSTICA RE-VOLT: Rebote de suspensión dinámico estilo RC
+    // FÍSICA RC: Rebote de suspensión y inclinación
     var bounce = Math.sin(performance.now() * 0.025 * (Math.abs(car.speed) / 20)) * (Math.abs(car.speed) / 30) * 0.15;
     car.mesh.position.y = 0.5 + Math.max(0, bounce);
     
     car.mesh.rotation.y = car.angle;
-    car.mesh.rotation.z = (car.isAI ? 0 : (keys[!car.isP2 ? 'KeyA' : 'ArrowLeft'] ? 0.1 : (keys[!car.isP2 ? 'KeyD' : 'ArrowRight'] ? -0.1 : 0))) * (car.speed / car.stats.speed);
+    var tilt = 0;
+    if (!car.isAI) {
+        if (keys[!car.isP2 ? 'KeyA' : 'ArrowLeft']) tilt = 0.1;
+        if (keys[!car.isP2 ? 'KeyD' : 'ArrowRight']) tilt = -0.1;
+    }
+    car.mesh.rotation.z = tilt * (car.speed / car.stats.speed);
 }
 
 function getClosestT(pos) {
@@ -637,6 +667,17 @@ function spawnParticle(x, y, z, color) {
     particles.push({ mesh: mesh, life: 1.0, vy: 0.3 + Math.random() * 0.5 });
 }
 
+function spawnSecretOrb(x, z) {
+    var orb = new THREE.Mesh(
+        new THREE.SphereGeometry(1, 16, 16),
+        new THREE.MeshBasicMaterial({ color: 0xffaa00, emissive: 0xffaa00, emissiveIntensity: 1 })
+    );
+    orb.position.set(x, 2, z);
+    scene.add(orb);
+    items.push({ mesh: orb, t: -1, active: true, respawnT: 0, type: 'secret' });
+    showEvent("🌟 ¡ORBE SECRETO APARECIÓ! 🌟");
+}
+
 function updateParticles(dt) {
     for (var i = particles.length - 1; i >= 0; i--) {
         var p = particles[i];
@@ -651,18 +692,15 @@ function updateParticles(dt) {
     }
 }
 
-// CARACTERÍSTICA RE-VOLT: Lógica de Boost Pads
 function updateBoostPads(dt) {
     for (var i = 0; i < boostPads.length; i++) {
         var pad = boostPads[i];
         pad.mesh.material.opacity = 0.4 + Math.sin(performance.now() * 0.01) * 0.2;
-        
         for (var j = 0; j < players.length; j++) {
             var p = players[j];
             var t = getClosestT(p.pos);
             var distToPad = Math.abs(t - pad.t);
             if (distToPad > 0.5) distToPad = 1 - distToPad;
-            
             if (distToPad < 0.025) {
                 var centerPos = trackCurve.getPointAt(pad.t);
                 if (Math.hypot(p.pos.x - centerPos.x, p.pos.z - centerPos.z) < 9) {
@@ -675,9 +713,8 @@ function updateBoostPads(dt) {
     }
 }
 
-// CARACTERÍSTICA RE-VOLT: Lógica de Ítems Flotantes
 function updateItems(dt) {
-    for (var i = 0; i < items.length; i++) {
+    for (var i = items.length - 1; i >= 0; i--) {
         var item = items[i];
         if (!item.active) {
             item.respawnT -= dt;
@@ -697,12 +734,26 @@ function updateItems(dt) {
             if (Math.hypot(p.pos.x - item.mesh.position.x, p.pos.z - item.mesh.position.z) < 3) {
                 item.active = false;
                 item.mesh.visible = false;
-                item.respawnT = 6;
+                item.respawnT = item.type === 'secret' ? 9999 : 6;
                 
-                p.nitro = 100;
-                p.speed = Math.min(p.stats.speed + 40, p.speed + 30);
-                p.shake = 0.3;
-                showEvent("¡POTENCIA MÁXIMA!");
+                if (item.type === 'nitro' || item.type === 'secret') {
+                    p.nitro = 100;
+                    p.speed = Math.min(p.stats.speed + 40, p.speed + 30);
+                    p.shake = 0.3;
+                    showEvent(item.type === 'secret' ? "🌟 ¡CAGUAYO MÍSTICO DESBLOQUEADO!" : "¡NITRO MÁXIMO!");
+                    if (item.type === 'secret' && !profile.unlockedCars.includes('mistico')) {
+                        profile.unlockedCars.push('mistico');
+                        saveProfile();
+                    }
+                } else if (item.type === 'shield') {
+                    p.shield = true;
+                    showEvent("🛡️ ¡ESCUDO ACTIVADO!");
+                } else if (item.type === 'mystery') {
+                    var rand = Math.random();
+                    if (rand < 0.33) { p.nitro = 100; showEvent("🎁 ¡SORPRESA: NITRO!"); }
+                    else if (rand < 0.66) { p.shield = true; showEvent("🎁 ¡SORPRESA: ESCUDO!"); }
+                    else { rainbowMode = true; setTimeout(function(){ rainbowMode = false; }, 5000); showEvent("🌈 ¡MODO ARCOÍRIS!"); }
+                }
                 for(var k=0; k<10; k++) spawnParticle(p.pos.x, 1, p.pos.z, 0xffaa00);
             }
         }
@@ -718,35 +769,44 @@ function updateEvents(dt) {
         for (var i = 0; i < 5; i++) {
             var t = 0.5 + (Math.random() - 0.5) * 0.1;
             var pos = trackCurve.getPointAt(t);
-            var zom = new THREE.Mesh(
-                new THREE.BoxGeometry(1, 2, 1),
-                new THREE.MeshBasicMaterial({ color: 0x4a6a3a })
-            );
+            var zom = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1), new THREE.MeshBasicMaterial({ color: 0x4a6a3a }));
             zom.position.set(pos.x, 1, pos.z);
             scene.add(zom);
             trafficCars.push({ mesh: zom, isStatic: true, pos: pos });
         }
     }
 
-    if (eventTimer <= -30) {
-        eventTimer = 40 + Math.random() * 40;
-        ufoActive = true;
-        var geo = new THREE.CylinderGeometry(0, 12, 4, 16);
-        var mat = new THREE.MeshBasicMaterial({ color: 0xaa00ff, transparent: true, opacity: 0.8 });
-        ufo = new THREE.Mesh(geo, mat);
-        var light = new THREE.PointLight(0xaa00ff, 5, 60);
-        ufo.add(light);
-        var startP = trackCurve.getPointAt(0);
-        ufo.position.set(startP.x - 100, 40, startP.z - 100);
-        scene.add(ufo);
-        showEvent("🛸 ¡OVNI DETECTADO! GRAVEDAD ALTERADA 🛸");
+    if (eventTimer <= -25) {
+        eventTimer = 35 + Math.random() * 35;
+        var eventType = Math.random();
+        if (eventType < 0.5) {
+            ufoActive = true;
+            var geo = new THREE.CylinderGeometry(0, 12, 4, 16);
+            var mat = new THREE.MeshBasicMaterial({ color: 0xaa00ff, transparent: true, opacity: 0.8 });
+            ufo = new THREE.Mesh(geo, mat);
+            var light = new THREE.PointLight(0xaa00ff, 5, 60);
+            ufo.add(light);
+            var startP = trackCurve.getPointAt(0);
+            ufo.position.set(startP.x - 100, 40, startP.z - 100);
+            scene.add(ufo);
+            showEvent("🛸 ¡OVNI DETECTADO! 🛸");
+        } else {
+            showEvent("☄️ ¡LLUVIA DE METEOROS! ☄️");
+            for (var m = 0; m < 8; m++) {
+                var mt = Math.random();
+                var mpos = trackCurve.getPointAt(mt);
+                var meteor = new THREE.Mesh(new THREE.SphereGeometry(1.5, 8, 8), new THREE.MeshBasicMaterial({color: 0xff4400}));
+                meteor.position.set(mpos.x + (Math.random()-0.5)*20, 30, mpos.z + (Math.random()-0.5)*20);
+                scene.add(meteor);
+                meteors.push({ mesh: meteor, vy: -15 - Math.random()*10, active: true });
+            }
+        }
     }
 
     if (ufoActive && ufo) {
         ufo.position.x += dt * 50;
         ufo.position.z += dt * 30;
         ufo.rotation.y += dt * 4;
-        
         players.forEach(function(p) {
             if (Math.hypot(p.pos.x - ufo.position.x, p.pos.z - ufo.position.z) < 35) {
                 p.speed *= 0.9;
@@ -754,11 +814,25 @@ function updateEvents(dt) {
                 p.shake = 0.4;
             }
         });
+        if (ufo.position.x > 300) { scene.remove(ufo); ufo = null; ufoActive = false; }
+    }
 
-        if (ufo.position.x > 300) {
-            scene.remove(ufo);
-            ufo = null;
-            ufoActive = false;
+    for (var mi = meteors.length - 1; mi >= 0; mi--) {
+        var met = meteors[mi];
+        met.mesh.position.y += met.vy * dt;
+        if (met.mesh.position.y < 0) {
+            scene.remove(met.mesh);
+            meteors.splice(mi, 1);
+            // Efecto de impacto
+            for(var k=0; k<5; k++) spawnParticle(met.mesh.position.x, 0.5, met.mesh.position.z, 0xff4400);
+        } else {
+            players.forEach(function(p) {
+                if (Math.hypot(p.pos.x - met.mesh.position.x, p.pos.z - met.mesh.position.z) < 4 && !p.shield) {
+                    p.speed *= 0.3;
+                    p.shake = 0.5;
+                    showEvent("💥 ¡IMPACTO! 💥");
+                }
+            });
         }
     }
 }
@@ -782,9 +856,7 @@ function showFinish(car) {
     profile.money += reward;
     addXP(100);
     showEvent("🏆 ¡CARRERA TERMINADA! +$" + reward);
-    setTimeout(function() {
-        toMenu();
-    }, 4000);
+    setTimeout(function() { toMenu(); }, 4000);
 }
 
 function updateHUD() {
@@ -841,7 +913,6 @@ function loop() {
             p.cam.position.y += shakeY;
             
             p.cam.lookAt(p.pos.x, 2, p.pos.z);
-            
             if (Math.abs(p.speed) > 70) p.heat = Math.min(5, p.heat + dt * 0.2);
             else p.heat = Math.max(0, p.heat - dt * 0.1);
         }
@@ -884,8 +955,8 @@ function buildGarage() {
             <div class="lock-icon">${isUnlocked ? (isSelected ? '✅' : '🔓') : '🔒'}</div>
             <div class="car-name">${car.name}</div>
             <div style="font-size:0.8rem; color:#888; margin-bottom:10px;">${car.desc}</div>
-            <div class="car-stat"><span>VEL</span><div class="stat-bar"><div class="stat-fill" style="width:${(car.speed/120)*100}%"></div></div></div>
-            <div class="car-stat"><span>ACE</span><div class="stat-bar"><div class="stat-fill" style="width:${(car.accel/80)*100}%"></div></div></div>
+            <div class="car-stat"><span>VEL</span><div class="stat-bar"><div class="stat-fill" style="width:${(car.speed/150)*100}%"></div></div></div>
+            <div class="car-stat"><span>ACE</span><div class="stat-bar"><div class="stat-fill" style="width:${(car.accel/100)*100}%"></div></div></div>
             <div class="car-stat"><span>NIT</span><div class="stat-bar"><div class="stat-fill" style="width:${(car.nitro/150)*100}%"></div></div></div>
             <div style="margin-top:10px; font-weight:900; color:#ffaa00;">${isUnlocked ? 'DESBLOQUEADO' : '$' + car.price}</div>
         `;
@@ -924,6 +995,7 @@ function startGame(mode) {
         return;
     }
 
+    // Limpieza profunda para evitar fugas de memoria en Firefox
     while (scene.children.length > 0) {
         var obj = scene.children[0];
         if (obj.geometry) obj.geometry.dispose();
@@ -934,8 +1006,8 @@ function startGame(mode) {
         scene.remove(obj);
     }
     players = []; aiCars = []; trafficCars = []; particles = [];
-    boostPads = []; items = [];
-    eventTimer = 20; ufo = null; ufoActive = false;
+    boostPads = []; items = []; meteors = [];
+    eventTimer = 20; ufo = null; ufoActive = false; rainbowMode = false;
 
     scene.add(hemi);
     scene.add(sun);
@@ -950,7 +1022,6 @@ function startGame(mode) {
             var tangent = trackCurve.getTangentAt(t);
             var normal = new THREE.Vector3(-tangent.z, 0, tangent.x);
             var offset = (Math.random() > 0.5 ? 7 : -7);
-            
             var ai = createCar('lada', false, true);
             ai.pos.copy(pos).add(normal.multiplyScalar(offset));
             ai.checkpoint = t;
