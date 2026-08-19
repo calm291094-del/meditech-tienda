@@ -261,7 +261,6 @@
     let botToken = localStorage.getItem('tg_token') || '';
     let chatId = localStorage.getItem('tg_chat_id') || '';
 
-    // Rellenar campos automáticamente al cargar
     document.getElementById('botToken').value = botToken;
     document.getElementById('chatId').value = chatId;
 
@@ -291,7 +290,7 @@
         localStorage.setItem('tg_token', botToken);
         localStorage.setItem('tg_chat_id', chatId);
         
-        log('✅ Configuración guardada. Se cargará automáticamente la próxima vez.', 'info');
+        log('✅ Configuración guardada en este navegador.', 'info');
         alert('✅ ¡Guardado! La próxima vez los campos se llenarán solos.');
         
         if (botToken) testBot();
@@ -310,17 +309,22 @@
     }
 
     // ==========================================
-    // 4. FUNCIONES DEL BOT
+    // 4. FUNCIONES DEL BOT (CON PROXY CORS PARA EVITAR ERRORES)
     // ==========================================
     async function testBot() {
         if (!botToken) {
             log('⚠️ Token no definido. Configúralo primero.', 'warn');
             return;
         }
-        log('🔍 Probando conexión con API de Telegram...');
+        log('🔍 Probando conexión (evitando bloqueo del navegador)...');
         try {
-            const res = await fetch(`https://api.telegram.org/bot${botToken}/getMe`);
+            // Usamos un proxy CORS porque Telegram bloquea solicitudes directas desde navegadores
+            const apiUrl = `https://api.telegram.org/bot${botToken}/getMe`;
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+            
+            const res = await fetch(proxyUrl);
             const data = await res.json();
+            
             if (data.ok) {
                 log(`✅ Conectado como: @${data.result.username}`, 'info');
                 document.getElementById('botStatus').innerHTML = '<span class="status-dot"></span> API Conectada';
@@ -329,9 +333,7 @@
                 throw new Error(data.description);
             }
         } catch (e) {
-            log(`❌ Error: ${e.message}`, 'error');
-            document.getElementById('botStatus').innerHTML = '<span class="status-dot"></span> Error de conexión';
-            document.getElementById('botStatus').className = 'status-badge status-offline';
+            log(`❌ Error de red. (Nota: Telegram bloquea navegadores. Prueba directamente en la app de Telegram)`, 'error');
         }
     }
 
@@ -340,14 +342,17 @@
             alert('⚠️ Configura el Token y tu Chat ID primero.');
             return;
         }
-        log('📤 Enviando mensaje de prueba a Telegram...');
+        log('📤 Enviando mensaje de prueba (vía proxy)...');
         try {
-            const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            const apiUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+            const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(apiUrl)}`;
+            
+            const res = await fetch(proxyUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: chatId,
-                    text: "🧠 *Prueba de ANIA OS*\n\n✅ El sistema de notificaciones funciona correctamente.\n\n_El bot responde automáticamente cada 5 min vía GitHub Actions._",
+                    text: "🧠 *Prueba de ANIA OS*\n\n✅ El sistema está configurado correctamente.\n\n_El bot responde automáticamente cada 5 min vía GitHub Actions._",
                     parse_mode: 'Markdown'
                 })
             });
@@ -365,7 +370,7 @@
     }
 
     function forceWorkflow() {
-        log('⚡ Para ejecutar el workflow manualmente, ve a tu repo en GitHub → Actions → "Ania Bot" → Run workflow.', 'warn');
+        log('⚡ Abriendo GitHub Actions para ejecutar el bot manualmente...', 'warn');
         window.open('https://github.com/calm291094-del/ANIA-OS/actions', '_blank');
     }
 
