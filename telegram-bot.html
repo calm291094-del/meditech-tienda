@@ -352,43 +352,83 @@
         }
     }
 
-    // --- OBTENCIÓN DE NOTICIAS (RSS vía Proxy) ---
-    const PROXY = "https://api.allorigins.win/raw?url=";
+    // --- OBTENCIÓN DE NOTICIAS (CORREGIDO ANTI-BLOQUEO) ---
+    // Usamos corsproxy.io que es más estable, y Google News RSS para evitar bloqueos de Cloudflare
+    const PROXY = "https://corsproxy.io/?"; 
+    
     const FEEDS = {
-        cuba: ["http://www.cubadebate.cu/feed/", "https://www.granma.cu/feed"],
-        ia: ["https://news.google.com/rss/search?q=artificial+intelligence&hl=en", "https://openai.com/blog/rss.xml"],
-        tendencias: ["https://news.google.com/rss/search?q=trending+social+media&hl=en", "https://www.reddit.com/r/technology/top.rss?t=day"]
+        cuba: [
+            // Google News RSS es mucho más fiable y no bloquea proxies
+            "https://news.google.com/rss/search?q=Cuba+when:7d&hl=es-419&gl=CU&ceid=CU:es-419",
+            "https://news.google.com/rss/search?q=Holgu%C3%ADn+when:7d&hl=es-419&gl=CU&ceid=CU:es-419"
+        ],
+        ia: [
+            "https://news.google.com/rss/search?q=artificial+intelligence+OR+machine+learning&hl=en",
+            "https://openai.com/blog/rss.xml"
+        ],
+        tendencias: [
+            "https://news.google.com/rss/search?q=trending+social+media+OR+viral&hl=en",
+            "https://www.reddit.com/r/technology/top.rss?t=day"
+        ]
     };
 
     async function fetchNews(cat) {
         const container = document.getElementById(`news-${cat}`);
-        container.innerHTML = '<div style="color:var(--text-dim)">Escaneando fuentes...</div>';
+        container.innerHTML = '<div style="color:var(--text-dim)">Escaneando fuentes seguras...</div>';
         let items = [];
         
         for (const url of FEEDS[cat]) {
             try {
-                const res = await fetch(PROXY + encodeURIComponent(url));
-                const xml = await res.text();
-                const doc = new DOMParser().parseFromString(xml, "text/xml");
-                doc.querySelectorAll("item").forEach((item, i) => {
-                    if (i < 5) {
+                const proxyUrl = PROXY + encodeURIComponent(url);
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const xmlText = await response.text();
+                
+                // Validación anti-fallo: Si no empieza como XML, es una página de error del proxy
+                if (!xmlText.trim().startsWith('<?xml') && !xmlText.trim().startsWith('<rss') && !xmlText.trim().startsWith('<feed')) {
+                    throw new Error("La fuente devolvió HTML en lugar de XML (posible bloqueo)");
+                }
+
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(xmlText, "text/xml");
+                
+                // Verificar si el parser encontró errores internos
+                if (xml.querySelector("parsererror")) {
+                    throw new Error("Error de sintaxis en el XML recibido");
+                }
+
+                const entries = xml.querySelectorAll("item");
+                entries.forEach((item, i) => {
+                    if (i < 5) { // Top 5 noticias
                         items.push({
                             title: item.querySelector("title")?.textContent || "Sin título",
                             link: item.querySelector("link")?.textContent || "#",
-                            source: url.includes('cubadebate') ? 'Cubadebate' : url.includes('granma') ? 'Granma' : 'Global'
+                            source: url.includes('google') ? 'Google News' : 'Fuente Directa'
                         });
                     }
                 });
-            } catch (e) { console.warn(e); }
+            } catch (e) {
+                console.warn(`Fallo al leer ${url}:`, e);
+                log(`Fuente omitida: ${e.message}`, 'warn');
+            }
         }
         
         cachedNews[cat] = items;
-        container.innerHTML = items.map(i => `
-            <div class="news-item">
-                <div class="news-source">${i.source}</div>
-                <a href="${i.link}" target="_blank">${i.title}</a>
-            </div>
-        `).join('') || '<div style="color:var(--text-dim)">Sin datos disponibles.</div>';
+        
+        if (items.length === 0) {
+            container.innerHTML = '<div style="color:var(--danger)">⚠️ No se pudieron obtener noticias. Intenta de nuevo.</div>';
+        } else {
+            container.innerHTML = items.map(i => `
+                <div class="news-item">
+                    <div class="news-source">${i.source}</div>
+                    <a href="${i.link}" target="_blank">${i.title}</a>
+                </div>
+            `).join('');
+        }
         log(`Flujo ${cat.toUpperCase()} actualizado (${items.length} nodos).`);
     }
 
@@ -413,6 +453,7 @@
         const titles = { cuba: "🇨🇺 *RESUMEN CUBA*", ia: "🧠 *TENDENCIAS IA*", tendencias: "📈 *REDES SOCIALES*" };
         let msg = `${titles[cat]}\n\n`;
         items.slice(0, 5).forEach((i, idx) => {
+            // Limpiar caracteres que rompen el Markdown de Telegram
             const clean = i.title.replace(/[_*[\]()~`>#+=|{}.!-]/g, '');
             msg += `${idx + 1}. [${clean}](${i.link})\n\n`;
         });
@@ -420,7 +461,7 @@
     }
 
     async function sendDailyDigest(type) {
-        log(`Iniciando despliegue manual: ${type.toUpperCase()}`, 'warn');
+        log(`Iniciando despliegue: ${type.toUpperCase()}`, 'warn');
         if (type === 'all') {
             if(cachedNews.cuba.length === 0) await fetchNews('cuba');
             if(cachedNews.ia.length === 0) await fetchNews('ia');
@@ -468,7 +509,6 @@
         const lastSent = localStorage.getItem('tg_last_auto_sent');
         const today = now.toDateString();
         
-        // Si ya pasó la hora objetivo hoy (o es la hora exacta) y no se ha enviado
         if (now.getHours() >= autoHour && lastSent !== today) {
             log('Ejecutando protocolo de envío automático programado...', 'warn');
             sendDailyDigest(autoType);
@@ -480,12 +520,14 @@
     window.onload = () => {
         log('Interfaz Neural v13.0 inicializada.');
         if (botToken && chatId) testBot();
-        fetchNews('cuba'); fetchNews('ia'); fetchNews('tendencias');
+        fetchNews('cuba'); 
+        fetchNews('ia'); 
+        fetchNews('tendencias');
         
-        // Revisar si es hora de enviar automáticamente cada 5 minutos
         checkAutoSend();
-        setInterval(checkAutoSend, 300000); // 300,000 ms = 5 mins
+        setInterval(checkAutoSend, 300000); // Revisar cada 5 minutos
     };
 </script>
+    
 </body>
 </html>
