@@ -1,68 +1,25 @@
-name: 🧪 Diagnóstico del Bot
+name: 🤖 Bot Simple
 
 on:
   workflow_dispatch:
 
 jobs:
-  test-bot:
+  test:
     runs-on: ubuntu-latest
+    timeout-minutes: 1
     steps:
-      - name: 🐍 Configurar Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: 🧪 Ejecutar Diagnóstico
+      - name: Probar Bot
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: |
-          pip install requests
-          python - << 'EOF'
+          python3 -c "
           import requests, os
-
           token = os.getenv('TELEGRAM_TOKEN')
+          print(f'Token: {token[:10]}...')
           
-          # 🔥 PON TU CHAT ID AQUÍ (el número que te dio @userinfobot)
-          CHAT_ID = "TU_CHAT_ID_AQUI"  # <-- CAMBIA ESTO POR TU CHAT ID REAL
-          
-          print(f"🔑 Token cargado: {token[:10]}...{token[-5:]}")
-          print(f"📱 Chat ID objetivo: {CHAT_ID}")
-          
-          # 1. Probar getMe
-          print("\n📡 1. Probando getMe...")
-          try:
-              me = requests.get(f"https://api.telegram.org/bot{token}/getMe", timeout=5).json()
-              print(f"   ➔ Respuesta: {me}")
-              if me.get('ok'):
-                  print(f"   ✅ Bot conectado: @{me['result']['username']}")
-              else:
-                  print(f"   ❌ Error: {me.get('description')}")
-          except Exception as e:
-              print(f"   ❌ Exception: {e}")
-          
-          # 2. Eliminar webhook
-          print("\n🔌 2. Eliminando webhook...")
-          try:
-              del_wh = requests.get(f"https://api.telegram.org/bot{token}/deleteWebhook?drop_pending_updates=true", timeout=5).json()
-              print(f"   ➔ Respuesta: {del_wh}")
-          except Exception as e:
-              print(f"   ❌ Exception: {e}")
-          
-          # 3. Enviar mensaje de prueba
-          print(f"\n📤 3. Enviando mensaje de prueba a {CHAT_ID}...")
-          try:
-              send = requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={
-                  "chat_id": 1767346954,
-                  "text": "🧪 *DIAGNÓSTICO EXITOSO*\n\n✅ El token funciona correctamente.\n✅ GitHub Actions puede enviar mensajes.\n✅ El bot está listo para recibir comandos.",
-                  "parse_mode": "Markdown"
-              }, timeout=5).json()
-              print(f"   ➔ Respuesta: {send}")
-              if send.get('ok'):
-                  print(f"   ✅ ¡MENSAJE ENVIADO! Revisa tu Telegram.")
-              else:
-                  print(f"   ❌ Error: {send.get('description')}")
-          except Exception as e:
-              print(f"   ❌ Exception: {e}")
-          
-          print("\n🏁 Diagnóstico completado.")
-          EOF
+          # Solo enviar un mensaje de prueba
+          r = requests.post(f'https://api.telegram.org/bot{token}/sendMessage', 
+              json={'chat_id': 'TU_CHAT_ID_AQUI', 'text': '✅ BOT FUNCIONA'}, 
+              timeout=3)
+          print(f'Respuesta: {r.status_code}')
+          "
