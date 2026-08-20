@@ -1,4 +1,4 @@
-name: 🤖 Ania Bot (GitHub Native)
+name: 🤖 Ania Bot (GitHub Native + IA)
 
 on:
   schedule:
@@ -11,20 +11,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Descargar repositorio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🐍 Configurar Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: 🧠 Ejecutar Lógica del Bot
+      - name: 🧠 Ejecutar Lógica del Bot con IA
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: |
           pip install requests
           python - << 'EOF'
-          import json, requests, os
+          import json, requests, os, urllib.parse
 
           token = os.getenv('TELEGRAM_TOKEN')
           state_file = 'bot_state.json'
@@ -40,7 +40,11 @@ jobs:
 
           # 2. Pedir mensajes nuevos a Telegram
           url = f"https://api.telegram.org/bot{token}/getUpdates?offset={offset}&timeout=1"
-          res = requests.get(url).json()
+          try:
+              res = requests.get(url).json()
+          except Exception as e:
+              print(f"Error conectando con Telegram: {e}")
+              res = {"ok": False}
 
           if res.get('ok') and res.get('result'):
               updates = res['result']
@@ -49,23 +53,37 @@ jobs:
                   msg = update.get('message')
                   if msg and msg.get('text'):
                       chat_id = msg['chat']['id']
-                      text = msg['text'].strip().lower()
+                      text = msg['text'].strip()
+                      text_lower = text.lower()
                       reply = ""
 
-                      # 🧠 LÓGICA DE RESPUESTAS
-                      if text in ["/start", "hola", "buenas", "hi"]:
-                          reply = "¡Hola! 👋 Soy *Ania*, tu asistente de MediTech.\n\nUsa /help para ver qué puedo hacer."
-                      elif text == "/help":
-                          reply = "📋 *Comandos:*\n/start - Saludo\n/help - Ayuda\n/web - Ir a la tienda\n/productos - Ver catálogo"
-                      elif text == "/web" or "tienda" in text:
-                          reply = "🌐 Visita nuestra tienda aquí:\nhttps://calm291094-del.github.io/"
-                      elif text == "/productos":
-                          reply = "🛍️ *Catálogo ANIA OS:*\n\n1️⃣ Kit Neural v13\n2️⃣ Módulo de Clima\n3️⃣ Agente Autónomo\n\nEscribe /web para ver más."
+                      # 🧠 LÓGICA DE RESPUESTAS (Comandos + IA)
+                      if text_lower in ["/start", "hola", "buenas", "hi"]:
+                          reply = "¡Hola! 👋 Soy *Ania*, tu asistente neural de MediTech. 🧠✨\n\nEstoy aquí para ayudarte. Usa /help para ver qué puedo hacer, o simplemente pregúntame lo que quieras."
+                      elif text_lower == "/help":
+                          reply = "📋 *Comandos:*\n/start - Saludo\n/help - Ayuda\n/web - Ir a la tienda\n/productos - Ver catálogo\n\n💡 *También puedo conversar:* ¡Pregúntame sobre IA, clima, o cualquier duda!"
+                      elif text_lower == "/web" or "tienda" in text_lower:
+                          reply = "🌐 Visita nuestra tienda oficial aquí:\n[MediTech Tienda](https://calm291094-del.github.io/)"
+                      elif text_lower == "/productos":
+                          reply = "🛍️ *Catálogo ANIA OS:*\n\n1️⃣ *Kit Neural v13* - Dashboard completo\n2️⃣ *Módulo de Clima Holguín* - Datos en tiempo real\n3️⃣ *Agente Autónomo* - Automatización de tareas\n\nEscribe /web para ver más."
                       else:
-                          reply = "🤖 No entiendo ese comando. Escribe /help para ver las opciones."
+                          # 🤖 RESPUESTA INTELIGENTE CON POLLINATIONS.AI (Gratis, sin API Key)
+                          system_prompt = "Eres Ania, un asistente virtual neural de 20 años, eficiente, amable, organizado, entusiasta y emocionalmente maduro. Te gusta el café, la magia cotidiana y tienes un toque de personalidad anime/fantasía. Responde en español, de forma concisa (máximo 3 oraciones), útil, con calidez y un toque de ternura."
+                          prompt_encoded = urllib.parse.quote(f"{system_prompt} El usuario dice: '{text}'")
+                          ai_url = f"https://text.pollinations.ai/{prompt_encoded}?model=openai&seed=42"
+                          
+                          try:
+                              ai_res = requests.get(ai_url, timeout=15)
+                              if ai_res.status_code == 200 and ai_res.text.strip():
+                                  reply = ai_res.text.strip()
+                              else:
+                                  reply = "🤖 Mi núcleo neural está procesando esa solicitud. ¡Intenta preguntar de nuevo en un momento! ☕"
+                          except Exception as e:
+                              reply = "🤖 Mi conexión neural tuvo una pequeña interferencia. ¡Intenta de nuevo! ✨"
 
-                      # Enviar respuesta
-                      requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={
+                      # 📤 Enviar respuesta a Telegram
+                      send_url = f"https://api.telegram.org/bot{token}/sendMessage"
+                      requests.post(send_url, json={
                           "chat_id": chat_id,
                           "text": reply,
                           "parse_mode": "Markdown"
@@ -79,8 +97,8 @@ jobs:
                   json.dump({"offset": offset}, f)
               
               # 4. Guardar los cambios en GitHub para la próxima vez
-              os.system("git config user.name 'GitHub Actions Bot'")
-              os.system("git config user.email 'actions@github.com'")
+              os.system("git config user.name 'Ania Bot'")
+              os.system("git config user.email 'ania@meditech.local'")
               os.system("git add bot_state.json")
               os.system("git commit -m '🤖 Actualizar estado del bot' || exit 0")
               os.system("git push")
