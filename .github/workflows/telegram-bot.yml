@@ -1,4 +1,4 @@
-name: 🤖 Ania Bot (GitHub Native + IA + Timeouts)
+name: 🤖 Ania Bot (Simple Test)
 
 on:
   schedule:
@@ -8,7 +8,7 @@ on:
 jobs:
   check-and-reply:
     runs-on: ubuntu-latest
-    timeout-minutes: 2  # 🔥 Mata el workflow si tarda más de 2 minutos
+    timeout-minutes: 2
     steps:
       - name: 📥 Descargar repositorio
         uses: actions/checkout@v4
@@ -18,35 +18,25 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: 🧠 Ejecutar Lógica del Bot (Con Timeouts Estrictos)
+      - name: 🧠 Ejecutar Bot (Sin IA Externa)
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
         run: |
           pip install requests
           python - << 'EOF'
-          import json, requests, os, urllib.parse
-          from requests.adapters import HTTPAdapter
-          from urllib3.util.retry import Retry
+          import json, requests, os
 
           token = os.getenv('TELEGRAM_TOKEN')
           state_file = 'bot_state.json'
 
-          # 🔥 CONFIGURACIÓN DE TIMEOUTS ESTRICTOS
-          session = requests.Session()
-          retry = Retry(connect=1, backoff_factor=0.5)
-          adapter = HTTPAdapter(max_retries=retry)
-          session.mount('http://', adapter)
-          session.mount('https://', adapter)
+          print("🚀 Iniciando bot simple...")
 
-          print("🚀 1. Iniciando bot con timeouts estrictos...")
-
-          # 1. Eliminar webhook (por si acaso)
+          # 1. Eliminar webhook
           try:
-              print("   🔌 Desactivando webhook antiguo...")
-              del_webhook = session.get(f"https://api.telegram.org/bot{token}/deleteWebhook?drop_pending_updates=true", timeout=5).json()
-              print(f"   ➔ Webhook: {del_webhook.get('description', 'OK')}")
+              del_webhook = requests.get(f"https://api.telegram.org/bot{token}/deleteWebhook?drop_pending_updates=true", timeout=5).json()
+              print(f"✅ Webhook eliminado: {del_webhook.get('ok', False)}")
           except Exception as e:
-              print(f"   ⚠️ Error eliminando webhook: {e}")
+              print(f"⚠️ Error eliminando webhook: {e}")
 
           # 2. Leer estado
           try:
@@ -56,71 +46,50 @@ jobs:
               state = {"offset": 0}
           
           offset = state.get("offset", 0)
-          print(f"\n📖 2. Offset actual: {offset}")
+          print(f"📖 Offset actual: {offset}")
 
           # 3. Obtener mensajes
           try:
-              print("📡 3. Consultando mensajes nuevos...")
-              res = session.get(f"https://api.telegram.org/bot{token}/getUpdates?offset={offset}&timeout=1", timeout=5).json()
-              print(f"   ➔ Respuesta: {res.get('ok', False)}")
+              res = requests.get(f"https://api.telegram.org/bot{token}/getUpdates?offset={offset}&timeout=1", timeout=5).json()
+              print(f"✅ getUpdates: {res.get('ok', False)}")
           except Exception as e:
-              print(f"   ❌ Error obteniendo mensajes: {e}")
+              print(f"❌ Error: {e}")
               res = {"ok": False, "result": []}
 
           if res.get('ok') and res.get('result'):
               updates = res['result']
-              print(f"\n✅ 4. ¡{len(updates)} mensajes encontrados!")
+              print(f"✅ {len(updates)} mensajes encontrados!")
               
               for update in updates:
                   msg = update.get('message')
                   if msg and msg.get('text'):
                       chat_id = msg['chat']['id']
-                      text = msg['text'].strip()
-                      text_lower = text.lower()
+                      text = msg['text'].strip().lower()
                       reply = ""
 
-                      # 🧠 LÓGICA DE RESPUESTAS
-                      if text_lower in ["/start", "hola", "buenas", "hi"]:
-                          reply = "¡Hola! 👋 Soy *Ania*, tu asistente neural de MediTech. 🧠✨\n\nUsa /help para ver qué puedo hacer."
-                      elif text_lower == "/help":
-                          reply = "📋 *Comandos:*\n/start - Saludo\n/help - Ayuda\n/web - Ir a la tienda\n/productos - Ver catálogo\n\n💡 También puedo conversar: ¡Pregúntame lo que quieras!"
-                      elif text_lower == "/web" or "tienda" in text_lower:
-                          reply = "🌐 Visita nuestra tienda oficial aquí:\n[MediTech Tienda](https://calm291094-del.github.io/)"
-                      elif text_lower == "/productos":
-                          reply = "🛍️ *Catálogo ANIA OS:*\n\n1️⃣ *Kit Neural v13* - Dashboard completo\n2️⃣ *Módulo de Clima Holguín* - Datos en tiempo real\n3️⃣ *Agente Autónomo* - Automatización de tareas\n\nEscribe /web para ver más."
+                      if text in ["/start", "hola", "buenas", "hi"]:
+                          reply = "¡Hola! 👋 Soy *Ania*, tu asistente de MediTech.\n\nUsa /help para ver comandos."
+                      elif text == "/help":
+                          reply = "📋 *Comandos:*\n/start - Saludo\n/help - Ayuda\n/web - Tienda\n/productos - Catálogo"
+                      elif text == "/web" or "tienda" in text:
+                          reply = "🌐 Tienda oficial:\nhttps://calm291094-del.github.io/"
+                      elif text == "/productos":
+                          reply = "🛍️ *Catálogo ANIA OS:*\n\n1️⃣ Kit Neural v13\n2️⃣ Módulo Clima Holguín\n3️⃣ Agente Autónomo\n\n/web para más info."
                       else:
-                          # 🤖 RESPUESTA INTELIGENTE CON TIMEOUT ESTRICTO
-                          print(f"   🤖 Consultando IA para: '{text[:30]}...'")
-                          system_prompt = "Eres Ania, asistente neural de 20 años, amable, eficiente, te gusta el café y la magia cotidiana. Responde en español, máximo 2 oraciones, con calidez."
-                          prompt_encoded = urllib.parse.quote(f"{system_prompt} El usuario dice: '{text}'")
-                          ai_url = f"https://text.pollinations.ai/{prompt_encoded}?model=openai&seed=42"
-                          
-                          try:
-                              ai_res = session.get(ai_url, timeout=10)  # 🔥 TIMEOUT DE 10 SEGUNDOS
-                              if ai_res.status_code == 200 and ai_res.text.strip():
-                                  reply = ai_res.text.strip()
-                                  print(f"   ➔ IA respondió: {reply[:50]}...")
-                              else:
-                                  raise Exception("IA no respondió")
-                          except Exception as e:
-                              print(f"   ⚠️ IA falló: {e}. Usando respuesta de emergencia.")
-                              reply = "🤖 Mi núcleo neural está procesando tu solicitud. ¡Intenta preguntar de nuevo en un momento! ☕✨"
+                          reply = "🤖 No entiendo ese comando. Escribe /help para ver opciones."
 
-                      # 📤 Enviar respuesta
                       try:
-                          print(f"   📤 Enviando respuesta a {chat_id}...")
-                          send_res = session.post(f"https://api.telegram.org/bot{token}/sendMessage", json={
+                          send_res = requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={
                               "chat_id": chat_id,
                               "text": reply,
                               "parse_mode": "Markdown"
                           }, timeout=5).json()
-                          print(f"   ➔ Enviado: {send_res.get('ok', False)}")
+                          print(f"✅ Enviado a {chat_id}: {send_res.get('ok', False)}")
                       except Exception as e:
-                          print(f"   ❌ Error enviando: {e}")
+                          print(f"❌ Error enviando: {e}")
                   
                   offset = update['update_id'] + 1
 
-              # 4. Guardar estado
               with open(state_file, 'w') as f:
                   json.dump({"offset": offset}, f)
               
@@ -129,7 +98,7 @@ jobs:
               os.system("git add bot_state.json")
               os.system("git commit -m '🤖 Actualizar estado' || exit 0")
               os.system("git push")
-              print("\n✅ 5. ¡Proceso completado exitosamente!")
+              print("✅ ¡Completado!")
           else:
-              print("\n⏳ No hay mensajes nuevos.")
+              print("⏳ No hay mensajes nuevos.")
           EOF
