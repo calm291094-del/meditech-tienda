@@ -13,23 +13,8 @@
   "dir": "ltr",
   "categories": ["games", "entertainment"],
   "icons": [
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%2305070c'/%3E%3Ccircle cx='96' cy='70' r='42' fill='%23b45fff' opacity='.3'/%3E%3Ctext x='96' y='95' text-anchor='middle' font-size='70'%3E%F0%9F%91%91%3C/text%3E%3Ctext x='96' y='145' text-anchor='middle' font-size='28' font-weight='bold' fill='%233fe0c8' font-family='sans-serif'%3EKALM%3C/text%3E%3Ctext x='96' y='172' text-anchor='middle' font-size='14' fill='%23ffb340' font-family='sans-serif'%3EMUGEN%3C/text%3E%3C/svg%3E",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%2305070c'/%3E%3Ccircle cx='256' cy='180' r='110' fill='%23b45fff' opacity='.3'/%3E%3Ctext x='256' y='220' text-anchor='middle' font-size='180'%3E%F0%9F%91%91%3C/text%3E%3Ctext x='256' y='380' text-anchor='middle' font-size='72' font-weight='bold' fill='%233fe0c8' font-family='sans-serif'%3EKALM%3C/text%3E%3Ctext x='256' y='450' text-anchor='middle' font-size='36' fill='%23ffb340' font-family='sans-serif'%3EMUGEN%3C/text%3E%3C/svg%3E",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%2305070c'/%3E%3Ccircle cx='256' cy='180' r='110' fill='%23b45fff' opacity='.3'/%3E%3Ctext x='256' y='220' text-anchor='middle' font-size='180'%3E%F0%9F%91%91%3C/text%3E%3Ctext x='256' y='380' text-anchor='middle' font-size='72' font-weight='bold' fill='%233fe0c8' font-family='sans-serif'%3EKALM%3C/text%3E%3Ctext x='256' y='450' text-anchor='middle' font-size='36' fill='%23ffb340' font-family='sans-serif'%3EMUGEN%3C/text%3E%3C/svg%3E",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
