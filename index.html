@@ -27,6 +27,144 @@
 
     <!-- ========== FAVICON ========== -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232c3e50'/%3E%3Ctext x='50' y='70' font-family='Arial' font-size='70' font-weight='bold' fill='white' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E">
+
+
+<!-- En el <head> o en el bloque <style> de tu página -->
+<style>
+  /* Estilos para el menú desplegable tipo "cajita sorpresa" */
+  .game-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .game-dropdown-btn {
+    background: linear-gradient(145deg, #f59e0b, #fbbf24);
+    color: #1e293b;
+    font-weight: 700;
+    padding: 0.5rem 1.2rem;
+    border: none;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+  }
+
+  .game-dropdown-btn:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
+  }
+
+  .game-dropdown-btn i {
+    font-size: 1.2rem;
+    transition: transform 0.4s ease;
+  }
+
+  .game-dropdown-btn:hover i {
+    transform: rotate(20deg) scale(1.1);
+  }
+
+  /* La cajita sorpresa (contenedor del menú) */
+  .game-dropdown-content {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.8) rotateY(90deg);
+    transform-origin: top center;
+    background: white;
+    min-width: 220px;
+    border-radius: 24px;
+    padding: 0.8rem 0.3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 0 0 2px #fcd34d inset;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #fbbf24;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Cuando el menú está abierto (clase "open" añadida con JS) */
+  .game-dropdown-content.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) scale(1) rotateY(0deg);
+  }
+
+  /* Elementos del menú (juegos) con animación individual */
+  .game-dropdown-content a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.7rem 1.5rem;
+    margin: 0.2rem 0.5rem;
+    border-radius: 16px;
+    color: #1e293b;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    background: transparent;
+    border-left: 3px solid transparent;
+    font-size: 0.9rem;
+  }
+
+  .game-dropdown-content a:hover {
+    background: #fef9c3;
+    border-left-color: #f59e0b;
+    transform: translateX(6px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .game-dropdown-content a i {
+    font-size: 1.3rem;
+    width: 28px;
+    text-align: center;
+    color: #f59e0b;
+  }
+
+  /* Animación de "sorpresa" al abrir: cada ítem aparece con retraso */
+  .game-dropdown-content.open a {
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+    transform: scale(0.8) translateY(-10px);
+  }
+
+  .game-dropdown-content.open a:nth-child(1) { animation-delay: 0.05s; }
+  .game-dropdown-content.open a:nth-child(2) { animation-delay: 0.10s; }
+  .game-dropdown-content.open a:nth-child(3) { animation-delay: 0.15s; }
+  .game-dropdown-content.open a:nth-child(4) { animation-delay: 0.20s; }
+  .game-dropdown-content.open a:nth-child(5) { animation-delay: 0.25s; }
+  .game-dropdown-content.open a:nth-child(6) { animation-delay: 0.30s; }
+
+  @keyframes popIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Flecha indicadora */
+  .game-dropdown-btn .arrow {
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
+
+  .game-dropdown-btn .arrow.open {
+    transform: rotate(180deg);
+  }
+</style>
+    
+
 </head>
     
 <body>
@@ -50,13 +188,26 @@
                 <div id="search-results" class="search-results"></div>
             </div>
 
-            <nav class="nav">
-                <a href="#inicio">Inicio</a>
-                <a href="#productos">Productos</a>
-                <a href="#categorias">Categorías</a>
-                <a href="#ofertas">Ofertas</a>
-                <a href="gms/MugenKalmVcell/MugenKalm-Vcell.html" class="user-menu-item"><i class="fas fa-ghost text-red-600"></i> 👻 Mugen Kalm VCell</a>
-            </nav>
+<nav class="nav">
+    <a href="#inicio">Inicio</a>
+    <a href="#productos">Productos</a>
+    <a href="#categorias">Categorías</a>
+    <a href="#ofertas">Ofertas</a>
+
+    <!-- MENÚ DESPLEGABLE DE JUEGOS (CAJITA SORPRESA) -->
+    <div class="game-dropdown">
+        <button class="game-dropdown-btn" onclick="toggleGameMenu()">
+            <i class="fas fa-gamepad"></i> Juegos <span class="arrow">▼</span>
+        </button>
+        <div class="game-dropdown-content" id="gameMenu">
+            <a href="gms/Vuelo-V3.html"><i class="fas fa-plane"></i> AeroHolgín</a>
+            <a href="gms/HLG-Z/index.html"><i class="fas fa-ghost"></i> HLG-Z</a>
+            <a href="gms/NeonRushPursuitEdition.html"><i class="fas fa-car"></i> Neon Rush</a>
+            <a href="gms/MugenKalm.html"><i class="fas fa-skull"></i> Mugen Kalm</a>
+            <a href="gms/MugenKalmVcell/MugenKalm-Vcell.html"><i class="fas fa-mobile-alt"></i> Mugen Kalm (Móvil)</a>
+        </div>
+    </div>
+</nav>
 
             <div class="flex items-center gap-3">
                 <button id="cart-btn" onclick="openCart()" class="cart-btn hidden">
@@ -909,6 +1060,27 @@
         console.log('✅ MediTech listo');
     });
 </script>  
+
+<script>
+// Alternar menú de juegos (cajita sorpresa)
+function toggleGameMenu() {
+    const menu = document.getElementById('gameMenu');
+    const arrow = document.querySelector('.game-dropdown-btn .arrow');
+    menu.classList.toggle('open');
+    arrow.classList.toggle('open');
+}
+
+// Cerrar el menú si se hace clic fuera
+document.addEventListener('click', function(e) {
+    const dropdown = document.querySelector('.game-dropdown');
+    if (dropdown && !dropdown.contains(e.target)) {
+        const menu = document.getElementById('gameMenu');
+        const arrow = document.querySelector('.game-dropdown-btn .arrow');
+        if (menu) menu.classList.remove('open');
+        if (arrow) arrow.classList.remove('open');
+    }
+});
+</script>
     
 </body>
 </html>
