@@ -1657,11 +1657,11 @@ loop();
 </script>
 
 <script>
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./sw.js', { scope: './' })
-      .then(function(reg) { console.log('[SW] Registrado:', reg.scope); })
-      .catch(function(err) { console.warn('[SW] Error:', err); });
+if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js')
+      .then(function(r){ console.log('[SW] ✓ activo'); })
+      .catch(function(e){ console.warn('[SW]', e); });
   });
 }
 </script>
