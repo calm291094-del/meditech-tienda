@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "io.github.calm291094_del.twa",
+    "sha256_cert_fingerprints": ["AA:BB:CC:DD:..."]
+  }
+}]
