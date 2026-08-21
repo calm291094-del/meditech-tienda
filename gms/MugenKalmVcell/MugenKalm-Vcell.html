@@ -121,7 +121,13 @@ button{cursor:pointer;font-family:inherit;touch-action:manipulation;border:none;
 .buy:disabled{opacity:.3}
 .invgrid{display:grid;grid-template-columns:1fr;gap:10px}
 @media(min-width:600px){.invgrid{grid-template-columns:280px 1fr}}
-.eqslots{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.eqslots{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:4px;
+ max-height:280px;
+ overflow-y:auto;
+}
 .slot{background:#0c141c;border:2px solid #24313f;border-radius:5px;min-height:48px;padding:3px;text-align:center;cursor:pointer}
 .slot .lb{font-size:7px;color:#5c7186}
 .slot .it{font-size:16px;margin-top:2px}
@@ -941,11 +947,35 @@ var selItem=null;
 function renderInv(){
  $('#invGold').textContent='$'+fmt(P.gold);$('#invLvl').textContent=P.level;
  var EG=$('#equipGrid');EG.innerHTML='';
- var mkSlot=function(lb,it){var d=document.createElement('div');d.className='slot'+(it?' rar'+it.ri:'');
+var mkSlot=function(lb,it){var d=document.createElement('div');d.className='slot'+(it?' rar'+it.ri:'');
   d.innerHTML='<div class="lb">'+lb+'</div><div class="it">'+(it?SLOTI[it.slot]:'·')+'</div>';
   if(it)d.onclick=function(){selItem=it;renderDetail(true);};EG.appendChild(d);};
- mkSlot('ARMA',P.equip.weapon);mkSlot('CASCO',P.equip.helmet);mkSlot('ARMAD',P.equip.armor);
- mkSlot('CAMISA',P.equip.shirt);mkSlot('PANTAL',P.equip.pants);mkSlot('BOTAS',P.equip.shoes);
+ 
+ // Slots principales
+ mkSlot('ARMA',P.equip.weapon);
+ mkSlot('CASCO',P.equip.helmet);
+ mkSlot('ARMAD',P.equip.armor);
+ mkSlot('CAMISA',P.equip.shirt);
+ mkSlot('PANTAL',P.equip.pants);
+ mkSlot('BOTAS',P.equip.shoes);
+ 
+ // Collares
+ mkSlot('COLLAR 1',P.equip.neck1);
+ mkSlot('COLLAR 2',P.equip.neck2);
+ 
+ // Anillos (mostrar los primeros 4 para no saturar)
+ for(var ri=0;ri<10;ri++){
+  var ringIt=P.equip.rings[ri];
+  var ringSlot=document.createElement('div');
+  ringSlot.className='slot'+(ringIt?' rar'+ringIt.ri:'');
+  ringSlot.innerHTML='<div class="lb">ANILLO '+(ri+1)+'</div><div class="it">'+(ringIt?'💍':'·')+'</div>';
+  if(ringIt){
+   (function(r){
+    ringSlot.onclick=function(){selItem=r;renderDetail(true);};
+   })(ringIt);
+  }
+  EG.appendChild(ringSlot);
+ }
  var BG=$('#bagGrid');BG.innerHTML='';$('#bagN').textContent=P.bag.length;
  P.bag.forEach(function(it,idx){var d=document.createElement('div');d.className='bagit rar'+(it.ri||0);
   d.innerHTML='<div class="ic">'+(it.scrollId?'📜':SLOTI[it.slot])+'</div><div class="nm3">'+(it.scrollId?SCROLLS[it.scrollId].n:it.name)+'</div>';
