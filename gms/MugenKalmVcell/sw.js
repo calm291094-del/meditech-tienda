@@ -1,7 +1,7 @@
-var CACHE_NAME = 'mugen-kalm-v1';
+var CACHE_NAME = 'mugen-kalm-v3';
 var ASSETS = [
   './',
-  './index.html',
+  './MugenKalm-Vcell.html',
   './manifest.json',
   'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'
 ];
@@ -40,7 +40,7 @@ self.addEventListener('fetch', function(e) {
         }
         return resp;
       }).catch(function() {
-        return caches.match('./index.html');
+        return caches.match('./MugenKalm-Vcell.html');
       });
     })
   );

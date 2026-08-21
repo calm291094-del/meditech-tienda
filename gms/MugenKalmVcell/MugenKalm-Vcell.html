@@ -1,21 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
- 
 <head>
 <meta charset="UTF-8">
- <link rel="manifest" href="./manifest.json">
- <meta name="description" content="Dungeon RPG de 100 pisos inspirado en Solo Leveling. Derrota jefes, extrae sombras y conviertete en el Primer Monarca.">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
- <meta name="theme-color" content="#05070c">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
- <meta name="apple-mobile-web-app-title" content="MUGEN KALM">
 <meta name="theme-color" content="#05070c">
+<meta name="description" content="Dungeon RPG 100 pisos estilo Solo Leveling. Derrota jefes y extrae sombras.">
 <title>Mugen KALM: THE FIRST MONARCH</title>
-<link rel="apple-touch-icon" href="./icon-192.png">
-
- <style>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%2305070c'/%3E%3Ctext x='96' y='100' text-anchor='middle' font-size='90'%3E%F0%9F%91%91%3C/text%3E%3Ctext x='96' y='150' text-anchor='middle' font-size='32' font-weight='bold' fill='%233fe0c8' font-family='sans-serif'%3EKALM%3C/text%3E%3C/svg%3E">
+<style>
 *{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#05070c;font-family:'Segoe UI',system-ui,sans-serif;color:#dfe6ea;position:fixed;touch-action:none}
 canvas{display:block}
@@ -180,7 +175,6 @@ button{cursor:pointer;font-family:inherit;touch-action:manipulation;border:none;
 </head>
 <body>
 <div id="rotateMsg"><div class="ic">📱↻</div><p><b>GIRA TU DISPOSITIVO</b><br>Mugen KALM se juega en horizontal</p></div>
-
 <div id="hud" class="hidden">
  <div class="hud-top">
   <div class="hud-left">
@@ -202,7 +196,6 @@ button{cursor:pointer;font-family:inherit;touch-action:manipulation;border:none;
  </div>
  <div id="hint" class="hidden"></div>
 </div>
-
 <div id="touchControls" class="hidden">
  <div id="lookZone"></div>
  <div id="joystickZone"><div id="joyBase"><div id="joyKnob"></div></div></div>
@@ -224,7 +217,6 @@ button{cursor:pointer;font-family:inherit;touch-action:manipulation;border:none;
  </div>
  <div id="pauseBtn"><div class="mbtn" id="mbPause">⏸</div></div>
 </div>
-
 <div id="menu">
  <div class="mwrap">
   <div style="font-size:10px;color:#5c7186;letter-spacing:5px;margin-bottom:4px">無限 · SOLO LEVELING DUNGEON RPG</div>
@@ -246,7 +238,6 @@ button{cursor:pointer;font-family:inherit;touch-action:manipulation;border:none;
   <div class="mfoot">📱 Joystick: mover/girar · Zona derecha: cámara · Botones: acciones<br>🖥️ W/S avanzar · A/D girar · Q/E strafe · R interactuar · X ARISE</div>
  </div>
 </div>
-
 <div id="invPanel" class="panel hidden"><div class="pbox">
  <button class="pclose" id="invClose">✕</button>
  <h3>🎒 MOCHILA · <span id="invGold"></span> · NV <span id="invLvl"></span></h3>
@@ -254,7 +245,6 @@ button{cursor:pointer;font-family:inherit;touch-action:manipulation;border:none;
  <div><div style="font-size:9px;color:#5c7186;letter-spacing:2px;margin-bottom:4px">OBJETOS (<span id="bagN"></span>/60)</div><div class="bagwrap" id="bagGrid"></div></div></div>
  <div class="idetail" id="itemDetail">Selecciona un objeto…</div>
 </div></div>
-
 <div id="charPanel" class="panel hidden"><div class="pbox">
  <button class="pclose" id="charClose">✕</button>
  <h3>💪 PERSONAJE · Pts: <b style="color:#ffb340" id="statPts">0</b> · Hab: <b style="color:#3fe0c8" id="skillPts">0</b></h3>
@@ -262,30 +252,25 @@ button{cursor:pointer;font-family:inherit;touch-action:manipulation;border:none;
  <div class="derived" id="derived"></div>
  <div id="treeWrap" style="margin-top:10px"></div>
 </div></div>
-
 <div id="craftPanel" class="panel hidden"><div class="pbox">
  <button class="pclose" id="craftClose">✕</button>
  <h3>⚒️ CRAFTEO</h3>
  <div id="craftMats" style="font-size:10px;color:#8fa3b5;margin-bottom:8px"></div>
  <div class="craftgrid" id="craftList"></div>
 </div></div>
-
 <div id="shadowPanel" class="panel hidden"><div class="pbox">
  <button class="pclose" id="shadowClose">✕</button>
  <h3>👻 SOMBRAS · <span id="shCap"></span>/<span id="shMax"></span></h3>
  <div class="shadow-list" id="shadowList"></div>
 </div></div>
-
 <div id="questPanel" class="panel hidden"><div class="pbox">
  <button class="pclose" id="questClose">✕</button>
  <h3>📋 MISIONES</h3><div id="questList"></div>
 </div></div>
-
 <div id="dlg" class="hidden">
  <div id="dlgName"></div><div id="dlgText"></div>
  <div class="prow"><button class="pbtn" id="dlgAct" style="padding:8px 16px;font-size:12px"></button><button class="pbtn red" id="dlgClose" style="padding:8px 16px;font-size:12px">CERRAR</button></div>
 </div>
-
 <div id="pause" class="bigov hidden">
  <h1 style="color:#9fb4c6;font-size:28px">⏸ PAUSA</h1>
  <div class="mrow" style="flex-direction:column">
@@ -296,32 +281,28 @@ button{cursor:pointer;font-family:inherit;touch-action:manipulation;border:none;
   <button class="pbtn red" id="btnPauseMenu">MENÚ</button>
  </div>
 </div>
-
 <div id="over" class="bigov hidden">
  <h1>HAS CAÍDO</h1>
  <div style="color:#8fa3b5;font-size:12px;letter-spacing:3px">LA MUERTE NO ES EL FINAL PARA UN MONARCA</div>
  <div class="sts" id="ovStats"></div>
  <div class="mrow"><button class="pbtn amber" id="btnRetry">⚔️ RENACER</button><button class="pbtn red" id="btnOverMenu">MENÚ</button></div>
 </div>
-
 <div id="victory" class="bigov hidden">
  <h1>THE FIRST MONARCH</h1>
  <div style="color:#8fa3b5;font-size:12px">EL PISO 100 SE INCLINA ANTE MUGEN KALM</div>
  <div class="sts" id="vicStats"></div>
  <div class="mrow"><button class="pbtn amber" id="btnVicCont">PISO 101 →</button><button class="pbtn red" id="btnVicMenu">MENÚ</button></div>
 </div>
-
 <div id="toasts"></div>
 <div id="announce" class="hidden"><div id="ann-t"></div><div id="ann-s"></div></div>
 <div id="floorBanner"><div id="fb-t"></div><div id="fb-s"></div></div>
 <div id="ariseOverlay"><div id="ariseTxt">ARISE</div><div id="ariseSub">EXTRAYENDO SOMBRA...</div></div>
 <div id="dmgflash"></div>
 <input type="file" id="fileInput" accept=".json" style="display:none">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 'use strict';
-if(!window.THREE){document.body.innerHTML='<h2 style="padding:40px;color:#fff">No se pudo cargar THREE.js. Necesitas internet.</h2>';throw new Error('no three');}
+if(!window.THREE){document.body.innerHTML='<h2 style="padding:40px;color:#fff">Necesitas internet la primera vez.</h2>';throw new Error('no three');}
 var $=function(q){return document.querySelector(q);};
 var $$=function(q){return document.querySelectorAll(q);};
 var rand=function(a,b){return a+Math.random()*(b-a);};
@@ -460,11 +441,20 @@ function addSecretRoom(){
 function themeFor(f){return THEMES[clamp(Math.floor((f-1)/10),0,9)];}
 function floorName(f){var t=themeFor(f);return f>100?t.n+' ETERNO':t.n;}
 function makeLabel(txt,col,size){
- var c=document.createElement('canvas');c.width=256;c.height=64;var g=c.getContext('2d');
- g.fillStyle='rgba(6,10,16,.85)';g.fillRect(0,0,256,64);g.strokeStyle=col;g.lineWidth=3;g.strokeRect(2,2,252,60);
- g.fillStyle=col;g.font='bold 24px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(txt,128,33);
- var s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c)}));
- s.scale.set(size||3.4,(size||3.4)*64/256,1);return s;
+ var c=document.createElement('canvas');c.width=256;c.height=64;
+ var g=c.getContext('2d');
+ if(!g)return new THREE.Sprite(new THREE.SpriteMaterial());
+ g.fillStyle='rgba(6,10,16,.85)';g.fillRect(0,0,256,64);
+ g.strokeStyle=col;g.lineWidth=3;g.strokeRect(2,2,252,60);
+ g.fillStyle=col;g.font='bold 22px sans-serif';g.textAlign='center';g.textBaseline='middle';
+ try{g.fillText(txt,128,33);}catch(e){g.fillText('???',128,33);}
+ var tex=new THREE.CanvasTexture(c);
+ tex.needsUpdate=true;
+ var mat=new THREE.SpriteMaterial({map:tex});
+ var s=new THREE.Sprite(mat);
+ var sc=size||3.4;
+ s.scale.set(sc,sc*0.25,1);
+ return s;
 }
 function buildWorld(th){
  worldGroup=new THREE.Group();scene.add(worldGroup);
@@ -542,6 +532,43 @@ function makeShadowMesh(rt){
  return{g:g,parts:parts};
 }
 function pickRace(f){var ok=MOB_TYPES.filter(function(t){return t.minF<=f;});return pick(ok.slice(-6));}
+function genItem(lvl,luck){
+ var slotKeys=['helmet','armor','shirt','pants','shoes','neck','ring'];
+ var slot=pick(slotKeys);
+ var rr=Math.random();
+ var ri=0;
+ if(rr<.01*luck)ri=5;
+ else if(rr<.04*luck)ri=4;
+ else if(rr<.12*luck)ri=3;
+ else if(rr<.30*luck)ri=2;
+ else if(rr<.60)ri=1;
+ var rar=RAR[ri];
+ var dmg=0,def=0;
+ if(slot==='helmet')def=Math.round(2+lvl*.8+ri*2);
+ else if(slot==='armor')def=Math.round(5+lvl*1.4+ri*4);
+ else if(slot==='shirt')def=Math.round(1+lvl*.4+ri*1.5);
+ else if(slot==='pants')def=Math.round(3+lvl*.9+ri*3);
+ else if(slot==='shoes')def=Math.round(2+lvl*.6+ri*2);
+ var aff=[];
+ var nAff=ri>=4?3:(ri>=2?2:(ri>=1?1:0));
+ var pool=['str','vit','int','mag','agi','hp','dmg','crit','ls','spd','dodge','mp'];
+ for(var i=0;i<nAff;i++){
+  var k=pick(pool);
+  var v;
+  if(k==='str'||k==='vit'||k==='int'||k==='mag'||k==='agi')v=irand(1,3+ri);
+  else if(k==='hp')v=irand(5,15+ri*5);
+  else if(k==='dmg')v=irand(2,6+ri*2);
+  else if(k==='crit')v=irand(2,5+ri);
+  else if(k==='ls')v=irand(1,3+ri);
+  else if(k==='spd')v=irand(2,5+ri);
+  else if(k==='dodge')v=irand(1,3+ri);
+  else if(k==='mp')v=irand(5,15+ri*3);
+  aff.push({k:k,v:v});
+ }
+ var suf=ri>=1?' '+pick(SUFN.slice(1)):' ';
+ var nm=SLOTN[slot]+' de '+pick(NPC_NAMES)+suf;
+ return{id:uid(),slot:slot,lvl:lvl,ri:ri,dmg:dmg,def:def,name:nm,aff:aff};
+}
 function spawnMob(x,z,lvl,raceOpt,forceTier,room){
  var rt=raceOpt||pickRace(curFloor);var tier=forceTier||0;
  if(!forceTier&&Math.random()<.13)tier=1;
@@ -1075,10 +1102,13 @@ function tryArise(){if(!ariseTarget||ariseTarget.dead){toast('No hay jefe recien
  if(ariseTarget._extracted){toast('Ya extrajiste esta sombra','bad');return;}
  if(Math.hypot(ariseTarget.x-P.pos.x,ariseTarget.z-P.pos.z)>14){toast('Acércate al jefe','bad');return;}
  ariseTarget._extracted=true;tryExtractShadow(ariseTarget);}
-function interact(){if(!P||P.dead)return;
- if(portal&&Math.hypot(portal.x-P.pos.x,portal.z-P.pos.z)<2.6){nextFloor();return;}
+function interact(){
+ if(!P||P.dead)return;
+ /* Portal */
+ if(portal&&Math.hypot(portal.x-P.pos.x,portal.z-P.pos.z)<3.2){nextFloor();return;}
+ /* Cofres */
  for(var c=0;c<chests.length;c++){var ch=chests[c];
-  if(!ch.opened&&Math.hypot(ch.x-P.pos.x,ch.z-P.pos.z)<2.6){
+  if(!ch.opened&&Math.hypot(ch.x-P.pos.x,ch.z-P.pos.z)<3.2){
    ch.opened=true;sfx.chest();
    dropGold(ch.x,ch.z,Math.round((15+curFloor*8)*rand(1,2.2)*(ch.rich?2:1)*(subDef().gold||1)));
    var n=ch.rich?irand(2,3):irand(1,2);
@@ -1086,13 +1116,34 @@ function interact(){if(!P||P.dead)return;
    if(Math.random()<.5)dropPotion(ch.x,ch.z);
    if(ch.rich&&Math.random()<.18)dropScroll(ch.x,ch.z);
    ch.m.rotation.z=.4;ch.m.position.y=-.15;
-   questProgress('secret',1);return;}}
+   toast('📦 ¡Cofre abierto!','gold');
+   return;}}
+ /* NPCs */
  for(var n2=0;n2<npcs.length;n2++){var np=npcs[n2];
-  if(Math.hypot(np.x-P.pos.x,np.z-P.pos.z)<3){npcInteract(np);return;}}
+  if(Math.hypot(np.x-P.pos.x,np.z-P.pos.z)<3.5){npcInteract(np);return;}}
+ /* ★ MUROS SECRETOS — rango ampliado y feedback visual */
  for(var s=0;s<secretDoors.length;s++){var sd=secretDoors[s];var dw=t2w(sd.gx,sd.gy);
-  if(Math.hypot(dw.x-P.pos.x,dw.z-P.pos.z)<3.6){
-   grid[sd.gy][sd.gx]=0;worldGroup.remove(sd.mesh);worldGroup.remove(sd.crack);
-   secretDoors.splice(s,1);sfx.chest();announce('¡CUARTO OCULTO!','');questProgress('secret',1);return;}}}
+  var dist=Math.hypot(dw.x-P.pos.x,dw.z-P.pos.z);
+  if(dist<4.5){
+   grid[sd.gy][sd.gx]=0;
+   worldGroup.remove(sd.mesh);
+   if(sd.crack)worldGroup.remove(sd.crack);
+   secretDoors.splice(s,1);
+   sfx.chest();
+   announce('🔍 ¡CUARTO OCULTO!','HAS ENCONTRADO UNA SALA SECRETA');
+   toast('✨ ¡Muro destruido! Hay tesoros dentro','purple');
+   questProgress('secret',1);
+   /* partículas de escombros */
+   for(var p=0;p<6;p++){
+    var deb=new THREE.Mesh(new THREE.BoxGeometry(.3,.3,.3),new THREE.MeshLambertMaterial({color:themeCur.wall}));
+    deb.position.set(dw.x+rand(-1,1),rand(.5,2),dw.z+rand(-1,1));
+    scene.add(deb);
+    texts.push({s:deb,t:1.2});
+   }
+   return;
+  }}
+ toast('No hay nada cerca para usar','bad');
+}
 function npcInteract(n){
  if(n.type==='merchant'){openShop(n);return;}
  if(n.type==='healer'){var cost=20+curFloor*4;
@@ -1102,24 +1153,25 @@ function npcInteract(n){
  if(n.type==='quest'){assignQuests();showDlg(n.name,'Revisa tus misiones [📋].');return;}
  showDlg(n.name,n.lines[n.li%n.lines.length]);n.li++;}
 function showDlg(name,text){$('#dlgName').textContent=name;$('#dlgText').textContent=text;$('#dlgAct').classList.add('hidden');$('#dlg').classList.remove('hidden');}
-var shopNpc=null,shopItems=[];
-function openShop(n){shopNpc=n;shopItems=[];for(var i=0;i<4;i++)shopItems.push({type:'item',it:genItem(curFloor,1.2)});
- state='SHOP';renderShop();$('#shopPanel').classList.remove('hidden');}
-function itemPrice(it){return Math.round((10+it.lvl*6)*RAR[it.ri].mult*(subDef().disc||1));}
-function renderShop(){
+function openShop(n){
+ state='SHOP';
+ var shopItems=[];for(var i=0;i<4;i++)shopItems.push({type:'item',it:genItem(curFloor,1.2)});
+ $('#shopPanel').classList.remove('hidden');
+ var list=$('#shopList');list.innerHTML='';
+ $('#shopTitle').textContent='TIENDA · PISO '+curFloor;
  $('#shopGold').textContent='$'+fmt(P.gold);
- $('#shopTitle').textContent=(shopNpc?shopNpc.name.toUpperCase():'TIENDA');
- var L=$('#shopList');L.innerHTML='';
  var mk=function(icon,nm,price,cb){var r=document.createElement('div');r.className='row';
   r.innerHTML='<div class="ic">'+icon+'</div><div class="nm">'+nm+'</div><div style="color:#ffb340;font-weight:700">$'+fmt(price)+'</div>';
   var b=document.createElement('button');b.className='buy';b.textContent='COMPRAR';b.disabled=P.gold<price;
-  b.onclick=cb;r.appendChild(b);L.appendChild(r);};
+  b.onclick=cb;r.appendChild(b);list.appendChild(r);};
  var pp=Math.round((18+curFloor*3)*(subDef().disc||1));
- mk('🧪','Poción vida',pp,function(){P.gold-=pp;P.pots.hp++;sfx.buy();renderShop();});
- mk('💧','Poción maná',pp,function(){P.gold-=pp;P.pots.mp++;sfx.buy();renderShop();});
+ mk('🧪','Poción vida',pp,function(){P.gold-=pp;P.pots.hp++;sfx.buy();openShop(n);});
+ mk('💧','Poción maná',pp,function(){P.gold-=pp;P.pots.mp++;sfx.buy();openShop(n);});
  shopItems.forEach(function(si,idx){var it=si.it;
-  mk(SLOTI[it.slot],'<span class="rar'+it.ri+'">'+it.name+'</span> NV '+it.lvl,itemPrice(it),function(){
-   P.gold-=itemPrice(it);toBag(it);shopItems.splice(idx,1);sfx.buy();renderShop();});});}
+  var price=Math.round((10+it.lvl*6)*RAR[it.ri].mult*(subDef().disc||1));
+  mk(SLOTI[it.slot],'<span class="rar'+it.ri+'">'+it.name+'</span> NV '+it.lvl,price,function(){
+   P.gold-=price;toBag(it);shopItems.splice(idx,1);sfx.buy();openShop(n);});});
+}
 function inSafeZone(x,z){var r=roomAtWorld(x,z);return r&&(r.type==='safe'||r.type==='spawn');}
 function roomTypeAt(x,z){var r=roomAtWorld(x,z);return r?r.type:'';}
 function updatePlayer(dt){
@@ -1159,12 +1211,14 @@ function updatePlayer(dt){
  playerMesh.ll.rotation.x=sw;playerMesh.rl.rotation.x=-sw;
  playerMesh.la.rotation.x=walking?-sw*.6:-.1;
  playerMesh.ra.rotation.x=P.swingT>0?-1.9:(walking?sw*.6:-.15);
+var isTouch=('ontouchstart' in window);
+ var iKey=isTouch?'✋':'[R]';
  var hint=null;
- if(portal&&Math.hypot(portal.x-P.pos.x,portal.z-P.pos.z)<2.6)hint='✋ Portal al piso '+(curFloor+1);
- if(!hint&&ariseTarget&&ariseTarget.dead&&!ariseTarget._extracted&&Math.hypot(ariseTarget.x-P.pos.x,ariseTarget.z-P.pos.z)<5)hint='👻 ¡ARISE disponible!';
- if(!hint)for(var c2=0;c2<chests.length;c2++)if(!chests[c2].opened&&Math.hypot(chests[c2].x-P.pos.x,chests[c2].z-P.pos.z)<2.6){hint='✋ Abrir cofre';break;}
- if(!hint)for(var n=0;n<npcs.length;n++)if(Math.hypot(npcs[n].x-P.pos.x,npcs[n].z-P.pos.z)<3){hint='✋ Hablar';break;}
- if(!hint)for(var s=0;s<secretDoors.length;s++){var dw=t2w(secretDoors[s].gx,secretDoors[s].gy);if(Math.hypot(dw.x-P.pos.x,dw.z-P.pos.z)<3.6){hint='✋ Muro sospechoso';break;}}
+ if(portal&&Math.hypot(portal.x-P.pos.x,portal.z-P.pos.z)<3.2)hint=iKey+' Portal al piso '+(curFloor+1);
+ if(!hint&&ariseTarget&&ariseTarget.dead&&!ariseTarget._extracted&&Math.hypot(ariseTarget.x-P.pos.x,ariseTarget.z-P.pos.z)<8)hint='👻 [X] ¡ARISE disponible!';
+ if(!hint)for(var c2=0;c2<chests.length;c2++)if(!chests[c2].opened&&Math.hypot(chests[c2].x-P.pos.x,chests[c2].z-P.pos.z)<3.2){hint=iKey+' Abrir cofre';break;}
+ if(!hint)for(var n=0;n<npcs.length;n++)if(Math.hypot(npcs[n].x-P.pos.x,npcs[n].z-P.pos.z)<3.5){hint=iKey+' Hablar con '+npcs[n].name;break;}
+ if(!hint)for(var s=0;s<secretDoors.length;s++){var dw=t2w(secretDoors[s].gx,secretDoors[s].gy);if(Math.hypot(dw.x-P.pos.x,dw.z-P.pos.z)<4.5){hint=iKey+' 🔍 Muro sospechoso (¡golpea!)';break;}}
  var H=$('#hint');if(hint){H.textContent=hint;H.classList.remove('hidden');}else H.classList.add('hidden');
 }
 function updateMobs(dt){
@@ -1177,7 +1231,7 @@ function updateMobs(dt){
     spawnMob(c.x+rand(-4,4),c.z+rand(-4,4),curFloor+(rm.type==='danger'?1:0),null,0,rm);}}}
  var pSafe=inSafeZone(P.pos.x,P.pos.z);
  for(var i=mobs.length-1;i>=0;i--){var m=mobs[i];
-  if(m.dead){m.dieT+=dt;m.mesh.g.rotation.x=-Math.min(1,m.dieT*2)*Math.PI/2;
+  if(m.dead){m.dieT+=dt;m.mesh.g.rotation.x=-Math.min(1,m.dieT*2.2)*Math.PI/2;
    var ttl=m.boss?20:3;if(m.dieT>ttl){scene.remove(m.mesh.g);mobs.splice(i,1);}continue;}
   if(m.frozen){m.mesh.g.position.x=m.x;m.mesh.g.position.z=m.z;continue;}
   m.atkCd-=dt;if(m.flash>0)m.flash-=dt;
@@ -1392,7 +1446,18 @@ addEventListener('keydown',function(e){
  else if(state==='INV'||state==='CHAR'||state==='SHOP'||state==='CRAFT'||state==='QUEST'||state==='SHADOW'){if(e.code==='Escape')closePanels();}
 });
 addEventListener('keyup',function(e){keys[e.code]=false;});
-addEventListener('mousedown',function(e){if(state==='PLAY'&&e.button===0){ac();playerAttack();touchAttack=true;}});
+addEventListener('mousedown',function(e){
+ if(state==='PLAY'&&e.button===0){
+  ac();
+  /* Si hay algo cerca para interactuar, interactuar en vez de atacar */
+  var canInteract=false;
+  if(portal&&Math.hypot(portal.x-P.pos.x,portal.z-P.pos.z)<3.2)canInteract=true;
+  if(!canInteract)for(var c=0;c<chests.length;c++)if(!chests[c].opened&&Math.hypot(chests[c].x-P.pos.x,chests[c].z-P.pos.z)<3.2){canInteract=true;break;}
+  if(!canInteract)for(var s=0;s<secretDoors.length;s++){var dw=t2w(secretDoors[s].gx,secretDoors[s].gy);if(Math.hypot(dw.x-P.pos.x,dw.z-P.pos.z)<4.5){canInteract=true;break;}}
+  if(canInteract){interact();return;}
+  playerAttack();touchAttack=true;
+ }
+});
 addEventListener('mouseup',function(e){if(e.button===0)touchAttack=false;});
 addEventListener('mousemove',function(e){
  if(state!=='PLAY'||!P)return;
@@ -1426,18 +1491,14 @@ loop();
 </script>
 
 <script>
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('./sw.js')
-      .then(function(reg) {
-        console.log('[SW] Registrado:', reg.scope);
-      })
-      .catch(function(err) {
-        console.log('[SW] Error:', err);
-      });
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(function(reg) { console.log('[SW] Registrado:', reg.scope); })
+      .catch(function(err) { console.warn('[SW] Error:', err); });
   });
 }
 </script>
- 
+
 </body>
 </html>
