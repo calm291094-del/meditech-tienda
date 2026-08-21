@@ -2,22 +2,26 @@
 // AUTH.JS - AUTENTICACIÓN
 // ============================================
 
-function openLoginModal() { 
-    document.getElementById('login-modal').classList.add('active');
+function openLoginModal() {
+    const modal = document.getElementById('login-modal');
+    if (modal) modal.classList.add('active');
     closeUserMenu();
 }
 
-function closeLoginModal() { 
-    document.getElementById('login-modal').classList.remove('active');
+function closeLoginModal() {
+    const modal = document.getElementById('login-modal');
+    if (modal) modal.classList.remove('active');
 }
 
-function openRegisterModal() { 
-    document.getElementById('register-modal').classList.add('active');
+function openRegisterModal() {
+    const modal = document.getElementById('register-modal');
+    if (modal) modal.classList.add('active');
     closeUserMenu();
 }
 
-function closeRegisterModal() { 
-    document.getElementById('register-modal').classList.remove('active');
+function closeRegisterModal() {
+    const modal = document.getElementById('register-modal');
+    if (modal) modal.classList.remove('active');
 }
 
 async function handleLogin(e) {
@@ -84,44 +88,77 @@ function logout() {
 }
 
 function updateUIForLoggedUser() {
-    document.getElementById('user-name-display').textContent = S.currentUser.name;
-    document.getElementById('user-menu-name').textContent = S.currentUser.name;
+    // Elementos que siempre deben existir
+    const userNameDisplay = document.getElementById('user-name-display');
+    if (userNameDisplay) userNameDisplay.textContent = S.currentUser.name;
+
+    const userMenuName = document.getElementById('user-menu-name');
+    if (userMenuName) userMenuName.textContent = S.currentUser.name;
+
     const badge = document.getElementById('user-role-badge');
-    if (S.currentUser.role === 'admin') {
-        badge.textContent = '🔒 Administrador';
-        badge.className = 'badge-role admin';
-        document.getElementById('admin-menu-btn').classList.remove('hidden');
-        document.body.classList.add('admin-mode');
-        document.getElementById('users-menu-btn').classList.remove('hidden');
-        document.getElementById('telegram-btn').classList.remove('hidden');
-        document.getElementById('crud-menu-btn').classList.remove('hidden');
-        document.getElementById('agent-office-btn').classList.remove('hidden');
-    } else {
-        badge.textContent = '👤 Cliente';
-        badge.className = 'badge-role user';
-        document.getElementById('admin-menu-btn').classList.add('hidden');
-        document.body.classList.remove('admin-mode');
-        document.getElementById('users-menu-btn').classList.add('hidden');
-        document.getElementById('telegram-btn').classList.add('hidden');
+    if (badge) {
+        if (S.currentUser.role === 'admin') {
+            badge.textContent = '🔒 Administrador';
+            badge.className = 'badge-role admin';
+        } else {
+            badge.textContent = '👤 Cliente';
+            badge.className = 'badge-role user';
+        }
     }
-    document.getElementById('menu-logged-out').classList.add('hidden');
-    document.getElementById('menu-logged-in').classList.remove('hidden');
-    document.getElementById('cart-btn').classList.remove('hidden');
+
+    // Elementos que pueden no existir (los protegemos con if)
+    const adminMenu = document.getElementById('admin-menu-btn');
+    const usersMenu = document.getElementById('users-menu-btn');
+    const telegramBtn = document.getElementById('telegram-btn');
+    const crudMenu = document.getElementById('crud-menu-btn');
+    const agentOffice = document.getElementById('agent-office-btn');
+
+    if (S.currentUser.role === 'admin') {
+        if (adminMenu) adminMenu.classList.remove('hidden');
+        if (usersMenu) usersMenu.classList.remove('hidden');
+        if (telegramBtn) telegramBtn.classList.remove('hidden');
+        if (crudMenu) crudMenu.classList.remove('hidden');
+        if (agentOffice) agentOffice.classList.remove('hidden');
+        document.body.classList.add('admin-mode');
+    } else {
+        if (adminMenu) adminMenu.classList.add('hidden');
+        if (usersMenu) usersMenu.classList.add('hidden');
+        if (telegramBtn) telegramBtn.classList.add('hidden');
+        if (crudMenu) crudMenu.classList.add('hidden');
+        if (agentOffice) agentOffice.classList.add('hidden');
+        document.body.classList.remove('admin-mode');
+    }
+
+    const menuLoggedOut = document.getElementById('menu-logged-out');
+    const menuLoggedIn = document.getElementById('menu-logged-in');
+    const cartBtn = document.getElementById('cart-btn');
+
+    if (menuLoggedOut) menuLoggedOut.classList.add('hidden');
+    if (menuLoggedIn) menuLoggedIn.classList.remove('hidden');
+    if (cartBtn) cartBtn.classList.remove('hidden');
 }
 
 function updateUIForLoggedOut() {
-    document.getElementById('user-name-display').textContent = 'Iniciar Sesión';
-    document.getElementById('menu-logged-out').classList.remove('hidden');
-    document.getElementById('menu-logged-in').classList.add('hidden');
-    document.getElementById('cart-btn').classList.add('hidden');
+    const userNameDisplay = document.getElementById('user-name-display');
+    if (userNameDisplay) userNameDisplay.textContent = 'Iniciar Sesión';
+
+    const menuLoggedOut = document.getElementById('menu-logged-out');
+    const menuLoggedIn = document.getElementById('menu-logged-in');
+    const cartBtn = document.getElementById('cart-btn');
+
+    if (menuLoggedOut) menuLoggedOut.classList.remove('hidden');
+    if (menuLoggedIn) menuLoggedIn.classList.add('hidden');
+    if (cartBtn) cartBtn.classList.add('hidden');
 }
 
-function toggleUserMenu() { 
-    document.getElementById('user-menu').classList.toggle('open');
+function toggleUserMenu() {
+    const menu = document.getElementById('user-menu');
+    if (menu) menu.classList.toggle('open');
 }
 
-function closeUserMenu() { 
-    document.getElementById('user-menu').classList.remove('open');
+function closeUserMenu() {
+    const menu = document.getElementById('user-menu');
+    if (menu) menu.classList.remove('open');
 }
 
 document.addEventListener('click', (e) => { 
