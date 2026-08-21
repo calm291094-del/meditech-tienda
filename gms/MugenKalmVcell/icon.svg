@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#05070c" rx="64"/>
+  <text x="256" y="200" text-anchor="middle" font-size="160" fill="#b45fff">👑</text>
+  <text x="256" y="360" text-anchor="middle" font-size="80" font-weight="bold" fill="#3fe0c8" font-family="sans-serif">KALM</text>
+  <text x="256" y="430" text-anchor="middle" font-size="36" fill="#ffb340" font-family="sans-serif">MUGEN</text>
+</svg>

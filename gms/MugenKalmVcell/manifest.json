@@ -1,0 +1,33 @@
+{
+  "name": "Mugen KALM: The First Monarch",
+  "short_name": "MUGEN KALM",
+  "description": "Dungeon RPG de 100 pisos inspirado en Solo Leveling. Derrota jefes, extrae sombras y conviertete en el Primer Monarca.",
+  "start_url": "./index.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#05070c",
+  "theme_color": "#05070c",
+  "scope": "./",
+  "lang": "es",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
