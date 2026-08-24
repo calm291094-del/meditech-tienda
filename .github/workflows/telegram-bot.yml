@@ -1,4 +1,4 @@
-name: 🤖 Ania Bot (Funcionando)
+name: 🤖 Ania Bot
 
 on:
   schedule:
@@ -6,105 +6,26 @@ on:
   workflow_dispatch:
 
 jobs:
-  check-and-reply:
+  bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 4
     steps:
-      - name: 📥 Descargar repositorio
+      - name: 📥 Checkout
         uses: actions/checkout@v4
 
-      - name: 🐍 Configurar Python
-        uses: actions/setup-python@v5
+      - name: 🟢 Configurar Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.10'
+          node-version: '20'
 
-      - name: 🧠 Ejecutar Bot
+      - name: 📦 Instalar dependencias
+        run: npm install --no-audit --no-fund
+
+      - name: 🤖 Ejecutar Ania Bot
+        run: node bot.js
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-        run: |
-          pip install requests
-          python3 << 'EOF'
-          import json, requests, os
-
-          token = os.getenv('TELEGRAM_TOKEN')
-          state_file = 'bot_state.json'
-
-          print("🚀 Iniciando bot...")
-
-          # 1. ELIMINAR WEBHOOK (CRÍTICO)
-          print("🔌 1. Eliminando webhook antiguo...")
-          try:
-              del_wh = requests.get(f"https://api.telegram.org/bot{token}/deleteWebhook?drop_pending_updates=true", timeout=5).json()
-              print(f"   ✅ Webhook: {del_wh.get('description', 'OK')}")
-          except Exception as e:
-              print(f"   ⚠️ Error: {e}")
-
-          # 2. LEER ESTADO
-          try:
-              with open(state_file, 'r') as f:
-                  state = json.load(f)
-          except:
-              state = {"offset": 0}
-          
-          offset = state.get("offset", 0)
-          print(f"📖 2. Offset: {offset}")
-
-          # 3. OBTENER MENSAJES
-          print("📡 3. Buscando mensajes nuevos...")
-          try:
-              res = requests.get(f"https://api.telegram.org/bot{token}/getUpdates?offset={offset}&timeout=1", timeout=5).json()
-              print(f"   ✅ getUpdates: {res.get('ok', False)}")
-          except Exception as e:
-              print(f"   ❌ Error: {e}")
-              res = {"ok": False, "result": []}
-
-          if res.get('ok') and res.get('result'):
-              updates = res['result']
-              print(f"✅ 4. ¡{len(updates)} mensajes encontrados!")
-              
-              for update in updates:
-                  msg = update.get('message')
-                  if msg and msg.get('text'):
-                      chat_id = msg['chat']['id']
-                      text = msg['text'].strip().lower()
-                      reply = ""
-
-                      # RESPUESTAS
-                      if text in ["/start", "hola", "buenas", "hi"]:
-                          reply = "¡Hola! 👋 Soy *Ania*, tu asistente de MediTech.\n\nUsa /help para ver comandos."
-                      elif text == "/help":
-                          reply = "📋 *Comandos:*\n/start - Saludo\n/help - Ayuda\n/web - Tienda\n/productos - Catálogo"
-                      elif text == "/web" or "tienda" in text:
-                          reply = "🌐 Tienda oficial:\nhttps://calm291094-del.github.io/"
-                      elif text == "/productos":
-                          reply = "🛍️ *Catálogo ANIA OS:*\n\n1️⃣ Kit Neural v13\n2️⃣ Módulo Clima Holguín\n3️⃣ Agente Autónomo\n\n/web para más info."
-                      else:
-                          reply = "🤖 No entiendo ese comando. Escribe /help para ver opciones."
-
-                      # ENVIAR RESPUESTA
-                      try:
-                          print(f"   📤 Enviando a {chat_id}...")
-                          send_res = requests.post(f"https://api.telegram.org/bot{token}/sendMessage", json={
-                              "chat_id": chat_id,
-                              "text": reply,
-                              "parse_mode": "Markdown"
-                          }, timeout=5).json()
-                          print(f"   ✅ Enviado: {send_res.get('ok', False)}")
-                      except Exception as e:
-                          print(f"   ❌ Error enviando: {e}")
-                  
-                  offset = update['update_id'] + 1
-
-              # GUARDAR ESTADO
-              with open(state_file, 'w') as f:
-                  json.dump({"offset": offset}, f)
-              
-              os.system("git config user.name 'Ania Bot'")
-              os.system("git config user.email 'ania@meditech.local'")
-              os.system("git add bot_state.json")
-              os.system("git commit -m '🤖 Actualizar estado' || exit 0")
-              os.system("git push")
-              print("✅ ¡Completado!")
-          else:
-              print("⏳ No hay mensajes nuevos.")
-          EOF
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_STATE_KEY: ${{ secrets.TELEGRAM_STATE_KEY }}
+          API_URL: https://meditech-bot.onrender.com/api
+          HORA_INFORME: '7'
