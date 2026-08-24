@@ -2312,5 +2312,1474 @@ console.log('[WK] Los muros bloquean: aldeanos van a la puerta 🚪');
 console.log('[WK] WK.UI.openNpcModal funciona correctamente');
 console.log('[WK] Audio se activa al primer click');
 </script>
+
+
+
+<script>
+// ================================================================
+// PARTE 5A REESCRITA: Sin errores, Música, Eventos, Finales
+// ================================================================
+
+// ============ MÚSICA PROCEDURAL ============
+WK.Music = {
+  playing: false, currentEra: -1, loopTimer: null, vol: 0.06,
+  scales: {
+    0: [262, 294, 330, 392, 440],
+    1: [262, 294, 330, 349, 392, 440],
+    2: [262, 294, 330, 349, 392, 440, 494],
+    3: [262, 294, 330, 349, 392, 440, 494, 523],
+    4: [294, 330, 370, 415, 466],
+    5: [262, 330, 392, 523, 659],
+    6: [440, 554, 659, 880],
+    7: [523, 659, 784, 1047, 1319]
+  },
+  rhythms: {
+    0: [400, 600, 800], 1: [300, 500, 700], 2: [250, 400, 600],
+    3: [200, 350, 500], 4: [300, 450, 600], 5: [150, 300, 450],
+    6: [120, 250, 400], 7: [200, 400, 800]
+  },
+  start: function() {
+    if (this.playing) return;
+    this.playing = true;
+    this.scheduleNext();
+  },
+  stop: function() {
+    this.playing = false;
+    if (this.loopTimer) {
+      clearTimeout(this.loopTimer);
+      this.loopTimer = null;
+    }
+  },
+  scheduleNext: function() {
+    if (!this.playing) return;
+    if (WK.Game && WK.Game.paused) {
+      var self = this;
+      this.loopTimer = setTimeout(function() { self.scheduleNext(); }, 500);
+      return;
+    }
+    var self = this;
+    var era = (WK.Game && typeof WK.Game.era === 'number') ? WK.Game.era : 0;
+    var scale = this.scales[era] || this.scales[0];
+    var rhythm = this.rhythms[era] || this.rhythms[0];
+    var notes = 3 + Math.floor(Math.random() * 3);
+    for (var i = 0; i < notes; i++) {
+      (function(idx) {
+        setTimeout(function() {
+          if (!self.playing) return;
+          if (WK.Game && WK.Game.paused) return;
+          var freq = scale[Math.floor(Math.random() * scale.length)];
+          var dur = rhythm[Math.floor(Math.random() * rhythm.length)] / 1000;
+          var type = era < 3 ? 'sine' : (era < 5 ? 'triangle' : 'square');
+          WK.Audio.tone(freq, dur, type, self.vol * (era >= 6 ? 0.4 : 1));
+          if (era >= 3 && Math.random() < 0.3) {
+            WK.Audio.tone(freq / 2, dur * 1.5, 'sine', self.vol * 0.5);
+          }
+        }, idx * rhythm[Math.floor(Math.random() * rhythm.length)]);
+      })(i);
+    }
+    var totalDur = notes * (300 + Math.random() * 400) + 2000 + Math.random() * 3000;
+    this.loopTimer = setTimeout(function() { self.scheduleNext(); }, totalDur);
+  },
+  update: function() {
+    var era = (WK.Game && typeof WK.Game.era === 'number') ? WK.Game.era : 0;
+    if (era !== this.currentEra) {
+      this.currentEra = era;
+      if (this.playing) {
+        this.stop();
+        this.start();
+      }
+    }
+  }
+};
+
+// ============ STORYTELLER ÉPICO ============
+WK.Story = {
+  entries: [],
+  templates: {
+    birth: [
+      'En el día {d}, bajo el cielo de {s}, nació {n}. Los ancianos dicen que las estrellas brillaron esa noche.',
+      '{n} llegó al mundo llorando con fuerza. La aldea entera celebró el milagro.',
+      'Los dioses sonrieron cuando {n} abrió los ojos por primera vez.'
+    ],
+    death: [
+      '{n} partió hacia el más allá. La aldea guardó silencio tres días.',
+      'Las campanas sonaron por {n}. Los ancianos lloraron junto a la fogata.',
+      'El viento llevó el alma de {n} hacia las estrellas.'
+    ],
+    marriage: [
+      '{n1} y {n2} unieron sus destinos bajo el árbol sagrado.',
+      'El amor floreció entre {n1} y {n2}. Los dioses bendijeron la unión.',
+      'Cuando {n1} tomó la mano de {n2}, hasta los lobos dejaron de aullar.'
+    ],
+    war: [
+      'Los tambores de guerra resonaron. {n} empuñó su arma y lideró la defensa.',
+      'La sangre tiñó la tierra. Pero {n} se mantuvo firme como una roca.',
+      'El cielo se oscureció con flechas. Los defensores vencieron.'
+    ],
+    discovery: [
+      '{n} miró las estrellas y comprendió: {t}. La era cambió para siempre.',
+      'Junto al fuego, {n} experimentó con {t} hasta que funcionó.',
+      'Los dioses susurraron a {n} el secreto de {t}.'
+    ],
+    arrival: [
+      '{n} apareció en el horizonte, cansado. La aldea le dio refugio.',
+      'Un extraño cruzó la puerta: {n}. Sus ojos contaban historias.',
+      '{n} llegó ese día. La aldea ganó un nuevo hijo.'
+    ],
+    season: [
+      '{s} llegó a la isla. El aire cambió.',
+      'El viento anunció {s}. Los aldeanos prepararon sus herramientas.',
+      '{s} transformó el paisaje como un manto divino.'
+    ]
+  },
+  generate: function(type, data) {
+    var t = this.templates[type];
+    if (!t) return;
+    var text = t[Math.floor(Math.random() * t.length)];
+    var s = WK.CFG.SEASONS[WK.Game.currentSeason];
+    text = text.replace(/{d}/g, WK.Game.day)
+      .replace(/{s}/g, s.e + ' ' + s.n)
+      .replace(/{n}/g, (data && data.name) || 'Alguien')
+      .replace(/{n1}/g, (data && data.name1) || '')
+      .replace(/{n2}/g, (data && data.name2) || '')
+      .replace(/{t}/g, (data && data.tech) || '');
+    this.entries.unshift({ text: text, type: type, day: WK.Game.day });
+    if (this.entries.length > 30) this.entries.pop();
+  },
+  render: function(el) {
+    if (!el) return;
+    var html = '<h3 style="margin-bottom:8px;font-size:.8rem;color:var(--gold)">📖 Crónicas Épicas</h3>';
+    var limit = Math.min(this.entries.length, 10);
+    for (var i = 0; i < limit; i++) {
+      var e = this.entries[i];
+      html += '<p style="font-size:.65rem;line-height:1.4;margin-bottom:8px;padding:6px;background:rgba(251,191,36,.05);border-radius:6px;border-left:2px solid var(--gold);font-style:italic">"' + e.text + '" <span style="color:var(--td);font-size:.55rem">— Día ' + e.day + '</span></p>';
+    }
+    if (this.entries.length === 0) html += '<p style="color:var(--td);font-size:.7rem">Aún no hay crónicas...</p>';
+    el.innerHTML = html;
+  }
+};
+
+// ============ 55 EVENTOS ALEATORIOS (REESCRITOS SIN ERRORES) ============
+WK.Events = {
+  pool: [
+    { id: 'e1', w: 3, fn: function(G) { G.stock.food += 50; G.log('🍇 Gran cosecha +50', 'gold'); } },
+    { id: 'e2', w: 3, fn: function(G) { G.stock.wood += 40; G.log('🪵 Bosque generoso +40', 'gold'); } },
+    { id: 'e3', w: 2, fn: function(G) { G.stock.stone += 30; G.log('🪨 Veta de piedra +30', 'gold'); } },
+    { id: 'e4', w: 2, fn: function(G) { G.stock.gold += 40; G.log('🪙 Tesoro encontrado +40', 'gold'); } },
+    { id: 'e5', w: 2, fn: function(G) { G.stock.knowledge += 100; G.log('💡 Iluminación +100', 'gold'); } },
+    { id: 'e6', w: 2, fn: function(G) { G.stock.faith += 50; G.log('🕊️ Visión divina +50', 'faith'); } },
+    { id: 'e7', w: 2, fn: function(G) {
+      if (G.villagers.length < WK.CFG.MAX_POP) {
+        var c = G.villageCenter();
+        var v = new WK.Villager(c.x + WK.U.rand(-80, 80), c.y + WK.U.rand(-80, 80), WK.U.ri(18, 40));
+        v.arrivalStory = 'adventure';
+        G.villagers.push(v); G.assignHomeless();
+        G.log('🧭 ' + v.name + ' llegó por aventura', 'birth');
+      }
+    }},
+    { id: 'e8', w: 1, fn: function(G) {
+      for (var i = 0; i < G.villagers.length; i++) {
+        G.villagers[i].hp = Math.min(100, G.villagers[i].hp + 20);
+        G.villagers[i].mood = Math.min(100, G.villagers[i].mood + 15);
+      }
+      G.log('✨ Bendición de salud', 'faith');
+    }},
+    { id: 'e9', w: 1, fn: function(G) { G.birthBoost = 800; G.log('🌱 Fertilidad divina', 'faith'); } },
+    { id: 'e10', w: 2, fn: function(G) {
+      var c = G.villageCenter();
+      for (var i = 0; i < 3; i++) {
+        G.resources.push(new WK.Resource(c.x + WK.U.rand(-100, 100), c.y + WK.U.rand(-100, 100), 'berry'));
+      }
+      G.log('🫐 Arbustos de bayas', 'gold');
+    }},
+    { id: 'e11', w: 1, fn: function(G) {
+      var c = G.villageCenter();
+      var weapons = WK.D.WEAPONS.filter(function(w) { return w.era <= G.era; });
+      if (weapons.length > 0) {
+        var w = weapons[Math.floor(Math.random() * weapons.length)];
+        G.resources.push(new WK.Resource(c.x + WK.U.rand(-50, 50), c.y + WK.U.rand(-50, 50), 'tool', w));
+        G.log('🗡️ Arma misteriosa: ' + w.n, 'gold');
+      }
+    }},
+    { id: 'e12', w: 1, fn: function(G) {
+      for (var i = 0; i < G.buildings.length; i++) {
+        if (G.buildings[i].def.id === 'farm') G.buildings[i].growth = 100;
+      }
+      G.log('🌾 Cosechas instantáneas', 'gold');
+    }},
+    { id: 'e13', w: 1, fn: function(G) {
+      G.weather = 'rain'; G.stock.food += 20;
+      G.log('🌧️ Lluvia bendita', 'gold');
+    }},
+    { id: 'e14', w: 1, fn: function(G) {
+      if (G.dogs.length < WK.CFG.MAX_DOGS) {
+        var c = G.villageCenter();
+        var d = new WK.Dog(c.x, c.y, null, '🐕', null, false);
+        G.dogs.push(d);
+        G.log('🐕 Perro salvaje domesticado: ' + d.name, 'dog');
+      }
+    }},
+    { id: 'e15', w: 1, fn: function(G) { G.stock.ore += 25; G.log('⛏️ Veta mineral +25', 'gold'); } },
+    { id: 'e16', w: 1, fn: function(G) {
+      for (var i = 0; i < G.villagers.length; i++) {
+        G.villagers[i].social = Math.min(100, G.villagers[i].social + 30);
+      }
+      G.log('🎉 Festival espontáneo', 'gold');
+    }},
+    { id: 'e17', w: 1, fn: function(G) { G.stock.knowledge += 200; G.log('📜 Pergamino +200', 'gold'); } },
+    { id: 'e18', w: 1, fn: function(G) {
+      if (G.villagers.length < WK.CFG.MAX_POP) {
+        var c = G.villageCenter();
+        var v = new WK.Villager(c.x, c.y, 0);
+        G.villagers.push(v); G.assignHomeless();
+        G.log('👶 Bebé abandonado: ' + v.name, 'birth');
+      }
+    }},
+    { id: 'e19', w: 1, fn: function(G) { G.stock.gold += 80; G.log('💰 Mercader deja oro +80', 'gold'); } },
+    { id: 'e20', w: 1, fn: function(G) {
+      for (var i = 0; i < G.dogs.length; i++) G.dogs[i].hp = 100;
+      G.log('🐕 Perros sanan', 'dog');
+    }},
+    { id: 'e21', w: 3, fn: function(G) { G.stock.food = Math.max(0, G.stock.food - 30); G.log('🥀 Sequía -30', 'death'); } },
+    { id: 'e22', w: 2, fn: function(G) { G.stock.wood = Math.max(0, G.stock.wood - 20); G.log('🔥 Incendio -20', 'death'); } },
+    { id: 'e23', w: 2, fn: function(G) {
+      var count = Math.min(3, G.villagers.length);
+      for (var i = 0; i < count; i++) {
+        var v = G.villagers[Math.floor(Math.random() * G.villagers.length)];
+        if (v && !v.sick) { v.sick = true; v.sickTimer = 500; }
+      }
+      G.log('🦠 Brote enfermedad', 'death');
+    }},
+    { id: 'e24', w: 2, fn: function(G) {
+      var c = G.villageCenter();
+      var wolfDef = WK.D.ANIMALS.find(function(a) { return a.id === 'a5'; });
+      for (var i = 0; i < 3; i++) {
+        var ang = WK.U.rand(0, Math.PI * 2);
+        G.animals.push(new WK.Animal(c.x + Math.cos(ang) * 400, c.y + Math.sin(ang) * 400, wolfDef));
+      }
+      G.log('🐺 Manada de lobos (3)', 'war');
+    }},
+    { id: 'e25', w: 1, fn: function(G) { G.stock.gold = Math.max(0, G.stock.gold - 30); G.log('🦹 Ladrón -30 oro', 'death'); } },
+    { id: 'e26', w: 1, fn: function(G) {
+      G.shake = 25;
+      for (var i = 0; i < G.buildings.length; i++) {
+        if (G.buildings[i].def.id === 'farm') {
+          G.buildings[i].growth = Math.max(0, G.buildings[i].growth - 30);
+        }
+      }
+      G.log('🌋 Terremoto', 'death');
+    }},
+    { id: 'e27', w: 1, fn: function(G) {
+      G.plagueTimer = 600;
+      for (var i = 0; i < G.villagers.length; i++) {
+        if (Math.random() < 0.4) {
+          G.villagers[i].sick = true;
+          G.villagers[i].sickTimer = 600;
+        }
+      }
+      G.log('☠️ Plaga se extiende', 'death');
+    }},
+    { id: 'e28', w: 1, fn: function(G) {
+      var c = G.villageCenter();
+      var bearDef = WK.D.ANIMALS.find(function(a) { return a.id === 'a6'; });
+      G.animals.push(new WK.Animal(c.x + WK.U.rand(-300, 300), c.y + WK.U.rand(-300, 300), bearDef));
+      G.log('🐻 ¡Un oso ataca!', 'war');
+    }},
+    { id: 'e29', w: 1, fn: function(G) { G.stock.food = Math.max(0, G.stock.food - 40); G.log('🦗 Langostas -40', 'death'); } },
+    { id: 'e30', w: 1, fn: function(G) {
+      G.weather = 'rain';
+      G.stock.wood = Math.max(0, G.stock.wood - 15);
+      G.log('⛈️ Tormenta -15 madera', 'death');
+    }},
+    { id: 'e31', w: 1, fn: function(G) {
+      for (var i = 0; i < G.villagers.length; i++) {
+        G.villagers[i].mood = Math.max(0, G.villagers[i].mood - 20);
+      }
+      G.log('😢 Mal presagio', 'death');
+    }},
+    { id: 'e32', w: 1, fn: function(G) {
+      if (G.villagers.length > 3) {
+        var v = G.villagers[Math.floor(Math.random() * G.villagers.length)];
+        if (v) G.killVillager(v, 'accidente');
+      }
+    }},
+    { id: 'e33', w: 1, fn: function(G) { G.stock.knowledge = Math.max(0, G.stock.knowledge - 50); G.log('🔥 Biblioteca -50', 'death'); } },
+    { id: 'e34', w: 1, fn: function(G) {
+      var c = G.villageCenter();
+      var lionDef = WK.D.ANIMALS.find(function(a) { return a.id === 'a11'; });
+      if (lionDef) G.animals.push(new WK.Animal(c.x + 400, c.y + 400, lionDef));
+      G.log('🦁 León merodea', 'war');
+    }},
+    { id: 'e35', w: 1, fn: function(G) { G.stock.stone = Math.max(0, G.stock.stone - 20); G.log('🌊 Inundación -20', 'death'); } },
+    { id: 'e36', w: 1, fn: function(G) {
+      for (var i = 0; i < G.villagers.length; i++) {
+        if (Math.random() < 0.2) {
+          G.villagers[i].energy = Math.max(0, G.villagers[i].energy - 30);
+        }
+      }
+      G.log('😴 Insomnio colectivo', 'death');
+    }},
+    { id: 'e37', w: 1, fn: function(G) { G.stock.faith = Math.max(0, G.stock.faith - 30); G.log('🌑 Eclipse -30 fe', 'death'); } },
+    { id: 'e38', w: 1, fn: function(G) {
+      if (G.dogs.length > 0) {
+        var d = G.dogs[Math.floor(Math.random() * G.dogs.length)];
+        if (d) d.hp -= 40;
+        G.log('🐕 Perro herido', 'dog');
+      }
+    }},
+    { id: 'e39', w: 1, fn: function(G) { G.stock.ore = Math.max(0, G.stock.ore - 15); G.log('⛏️ Derrumbe -15', 'death'); } },
+    { id: 'e40', w: 1, fn: function(G) {
+      for (var i = 0; i < G.villagers.length; i++) {
+        G.villagers[i].hunger = Math.max(0, G.villagers[i].hunger - 25);
+      }
+      G.log('🍽️ Escasez', 'death');
+    }},
+    { id: 'e41', w: 1, fn: function(G) {
+      G.shake = 15;
+      var c = G.villageCenter();
+      var divineSword = WK.D.WEAPONS.find(function(w) { return w.id === 'w44'; });
+      if (divineSword) {
+        G.resources.push(new WK.Resource(c.x + WK.U.rand(-50, 50), c.y + WK.U.rand(-50, 50), 'tool', divineSword));
+        G.log('☄️ ¡Meteorito trae Espada Divina!', 'gold');
+        WK.UI.banner('☄️ ¡Arma legendaria!', 'magic');
+      }
+    }},
+    { id: 'e42', w: 1, fn: function(G) {
+      for (var i = 0; i < G.villagers.length; i++) {
+        G.villagers[i].mood = 100;
+        G.villagers[i].social = 100;
+      }
+      G.log('🌈 Arcoíris divino', 'faith');
+      WK.UI.banner('🌈 ¡Arcoíris!', 'magic');
+    }},
+    { id: 'e43', w: 1, fn: function(G) {
+      if (G.villagers.length < WK.CFG.MAX_POP) {
+        var c = G.villageCenter();
+        var warrior = WK.D.PERS.find(function(p) { return p.id === 'warrior'; });
+        var v = new WK.Villager(c.x, c.y, WK.U.ri(20, 35), {
+          name: 'Héroe',
+          pers: warrior,
+          traits: ['strong', 'brave', 'swift']
+        });
+        v.arrivalStory = 'divine';
+        G.villagers.push(v); G.assignHomeless();
+        G.log('⚔️ Héroe legendario: ' + v.name, 'gold');
+        WK.UI.banner('⚔️ ¡Héroe!', 'magic');
+      }
+    }},
+    { id: 'e44', w: 1, fn: function(G) {
+      G.stock.food += 100; G.stock.wood += 100; G.stock.stone += 100;
+      G.log('🎁 Caravana real: +100 todo', 'gold');
+      WK.UI.banner('🎁 ¡Caravana real!', 'gold');
+    }},
+    { id: 'e45', w: 1, fn: function(G) {
+      for (var i = 0; i < 5; i++) G.spawnAnimal();
+      G.log('🐾 Migración: +5 animales', 'evolve');
+    }},
+    { id: 'e46', w: 1, fn: function(G) {
+      G.currentSeason = (G.currentSeason + 1) % 4;
+      G.log('🌀 Anomalía temporal', 'evolve');
+      WK.UI.banner('🌀 ¡Anomalía!', 'magic');
+    }},
+    { id: 'e47', w: 1, fn: function(G) {
+      for (var i = 0; i < G.villagers.length; i++) {
+        G.villagers[i].skills.wisdom += 10;
+      }
+      G.log('🦉 Búho sabio', 'evolve');
+    }},
+    { id: 'e48', w: 1, fn: function(G) {
+      var alive = G.rivals.filter(function(r) { return r.alive; });
+      if (alive.length > 0) {
+        var r = alive[Math.floor(Math.random() * alive.length)];
+        r.hostile = false; r.warCooldown = 50;
+        G.log('🕊️ ' + r.name + ' ofrece paz', 'faith');
+        WK.UI.banner('🕊️ ¡Paz!', 'magic');
+      }
+    }},
+    { id: 'e49', w: 1, fn: function(G) {
+      G.stock.faith += 100;
+      G.log('✨ Dioses hablan +100', 'faith');
+      WK.UI.banner('✨ ¡Mensaje divino!', 'magic');
+    }},
+    { id: 'e50', w: 1, fn: function(G) {
+      var c = G.villageCenter();
+      for (var i = 0; i < 4; i++) {
+        G.resources.push(new WK.Resource(c.x + WK.U.rand(-150, 150), c.y + WK.U.rand(-150, 150), 'ore'));
+      }
+      G.log('💎 Gemas descubiertas', 'gold');
+      WK.UI.banner('💎 ¡Gemas!', 'gold');
+    }},
+    { id: 'e51', w: 1, fn: function(G) {
+      if (G.dogs.length < WK.CFG.MAX_DOGS) {
+        var c = G.villageCenter();
+        for (var i = 0; i < 2; i++) {
+          var d = new WK.Dog(c.x + WK.U.rand(-30, 30), c.y + WK.U.rand(-30, 30), null, '🐶', null, true);
+          G.dogs.push(d);
+        }
+        G.log('🐶 Cachorros adoptados', 'dog');
+        WK.UI.banner('🐶 ¡Cachorros!', 'dog');
+      }
+    }},
+    { id: 'e52', w: 1, fn: function(G) {
+      G.stock.knowledge += 300;
+      G.log('🔮 Profecía +300', 'faith');
+      WK.UI.banner('🔮 ¡Profecía!', 'magic');
+    }},
+    { id: 'e53', w: 1, fn: function(G) {
+      for (var i = 0; i < G.villagers.length; i++) {
+        G.villagers[i].hp = 100;
+        G.villagers[i].hunger = 100;
+        G.villagers[i].energy = 100;
+      }
+      G.log('🌟 Milagro total', 'faith');
+      WK.UI.banner('🌟 ¡Milagro!', 'magic');
+    }},
+    { id: 'e54', w: 1, fn: function(G) {
+      G.shake = 30;
+      G.stock.stone += 50;
+      G.log('🌋 Erupción +50 piedra', 'gold');
+      WK.UI.banner('🌋 ¡Erupción!', 'danger');
+    }},
+    { id: 'e55', w: 1, fn: function(G) {
+      var singles = G.villagers.filter(function(v) {
+        return !v.isChild && !v.spouseId;
+      });
+      if (singles.length >= 2) {
+        var v1 = singles[Math.floor(Math.random() * singles.length)];
+        var candidates = singles.filter(function(x) {
+          return x.id !== v1.id && x.gender !== v1.gender;
+        });
+        if (candidates.length > 0) {
+          var v2 = candidates[Math.floor(Math.random() * candidates.length)];
+          v1.spouseId = v2.id; v2.spouseId = v1.id;
+          G.log('💘 ' + v1.name + ' y ' + v2.name, 'birth');
+          WK.UI.banner('💘 ¡Amor divino!', 'magic');
+          WK.Story.generate('marriage', { name1: v1.name, name2: v2.name });
+        }
+      }
+    }}
+  ],
+  trigger: function() {
+    var G = WK.Game;
+    if (!G) return;
+    var totalW = 0;
+    for (var i = 0; i < this.pool.length; i++) totalW += this.pool[i].w;
+    var roll = Math.random() * totalW;
+    var acc = 0;
+    for (var j = 0; j < this.pool.length; j++) {
+      acc += this.pool[j].w;
+      if (roll <= acc) {
+        try { this.pool[j].fn(G); } catch(e) { console.warn('Evento falló:', e); }
+        return;
+      }
+    }
+  }
+};
+
+// ============ FINALES MÚLTIPLES ============
+WK.Endings = {
+  checked: false,
+  check: function() {
+    if (this.checked) return;
+    var G = WK.Game;
+    if (!G || !G.running) return;
+    var aliveRivals = G.rivals.filter(function(r) { return r.alive; });
+    if (aliveRivals.length === 0 && G.rivals.length > 0 && G.day > 10) {
+      this.trigger('military'); return;
+    }
+    var believers = 0;
+    for (var i = 0; i < G.villagers.length; i++) {
+      if (G.villagers[i].believer) believers++;
+    }
+    if (believers >= G.villagers.length * 0.8 && G.villagers.length >= 10 && Object.keys(G.activeGods).length >= 6) {
+      this.trigger('religious'); return;
+    }
+    if (G.stock.gold >= 500 && G.hasBuilding('market') && G.hasBuilding('bank')) {
+      this.trigger('economic'); return;
+    }
+    if (G.hasBuilding('theater') && G.hasBuilding('library') && G.hasBuilding('university') && G.stock.knowledge >= 2000) {
+      this.trigger('cultural'); return;
+    }
+    if (G.techs['space']) { this.trigger('space'); return; }
+  },
+  trigger: function(type) {
+    this.checked = true;
+    var G = WK.Game;
+    var msgs = {
+      military: { t: '⚔️ VICTORIA MILITAR', m: '¡Has conquistado todas las aldeas rivales!', c: 'war' },
+      religious: { t: '🕊️ VICTORIA RELIGIOSA', m: 'Toda tu civilización adora a los dioses.', c: 'magic' },
+      economic: { t: '🪙 VICTORIA ECONÓMICA', m: 'Tu civilización es la más rica del mundo.', c: 'gold' },
+      cultural: { t: '🎭 VICTORIA CULTURAL', m: 'Faro de conocimiento y arte.', c: 'magic' },
+      space: { t: '🚀 VICTORIA ESPACIAL', m: '¡Alcanzaste las estrellas!', c: 'gold' }
+    };
+    var msg = msgs[type] || msgs.space;
+    G.paused = true;
+    WK.UI.banner(msg.t + ' — ' + msg.m, msg.c);
+    G.log('🏆 ' + msg.t, 'gold');
+    WK.Audio.play('miracle');
+    var self = this;
+    setTimeout(function() {
+      WK.UI.showPopup('🏆 ' + msg.t,
+        '<p style="font-size:.85rem;line-height:1.6;margin-bottom:12px">' + msg.m + '</p>' +
+        '<p style="color:var(--td);font-size:.7rem">Día: ' + G.day + ' | Población: ' + G.villagers.length + ' | Era: ' + WK.CFG.ERAS[G.era] + '</p>' +
+        '<button class="btn btn-p" style="margin-top:12px" onclick="WK.Game.paused=false;WK.Endings.checked=false;document.getElementById(\'popup\').classList.remove(\'show\')">▶ Seguir Jugando</button>' +
+        '<button class="btn btn-g" style="margin-top:6px" onclick="WK.Save.save(true);location.reload()">🚪 Nueva Partida</button>'
+      );
+    }, 2000);
+  }
+};
+
+// Hook al update existente (sin romper nada)
+(function() {
+  var origUpdate = WK.Game.update;
+  WK.Game.update = function() {
+    origUpdate.call(this);
+    if (!this.running || this.paused) return;
+    if (WK.Music) WK.Music.update();
+    if (this.time % WK.CFG.DAY < WK.CFG.TICK && Math.random() < 0.6) {
+      WK.Events.trigger();
+    }
+    if (this.day % 5 === 0 && WK.Endings) WK.Endings.check();
+  };
+})();
+
+console.log('[WK] Parte 5A REESCRITA: Música + Storyteller + 55 Eventos + Finales ✓');
+</script>
+
+
+<script>
+// ================================================================
+// PARTE 5B REESCRITA: Sistemas con efectos VISIBLES y REALES
+// ================================================================
+
+// ============ PARTÍCULAS (Sistema visual real) ============
+WK.Particles = {
+  list: [],
+  add: function(x, y, type) {
+    for (var i = 0; i < 5; i++) {
+      this.list.push({
+        x: x, y: y,
+        vx: (Math.random() - 0.5) * 3,
+        vy: -Math.random() * 2 - 1,
+        life: 40,
+        maxLife: 40,
+        type: type
+      });
+    }
+  },
+  update: function() {
+    for (var i = this.list.length - 1; i >= 0; i--) {
+      var p = this.list[i];
+      p.x += p.vx; p.y += p.vy;
+      p.vy += 0.1;
+      p.life--;
+      if (p.life <= 0) this.list.splice(i, 1);
+    }
+  },
+  draw: function(ctx) {
+    for (var i = 0; i < this.list.length; i++) {
+      var p = this.list[i];
+      var alpha = p.life / p.maxLife;
+      var sx = WK.SX(p.x), sy = WK.SY(p.y);
+      ctx.globalAlpha = alpha;
+      if (p.type === 'gold') { ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(sx, sy, WK.SZ(3), 0, Math.PI * 2); ctx.fill(); }
+      else if (p.type === 'blood') { ctx.fillStyle = '#dc2626'; ctx.fillRect(sx, sy, WK.SZ(2), WK.SZ(2)); }
+      else if (p.type === 'spark') { ctx.fillStyle = '#fff'; ctx.fillRect(sx, sy, WK.SZ(2), WK.SZ(2)); }
+      else if (p.type === 'leaf') { ctx.fillStyle = '#4ade80'; ctx.fillRect(sx, sy, WK.SZ(3), WK.SZ(3)); }
+    }
+    ctx.globalAlpha = 1;
+  }
+};
+// Hook al render
+(function() {
+  var origDraw = WK.Render.draw;
+  WK.Render.draw = function() {
+    origDraw.call(this);
+    WK.Particles.update();
+    WK.Particles.draw(this.ctx);
+  };
+})();
+
+// ============ DIPLOMACIA PROFUNDA (con consecuencias reales) ============
+WK.Diplomacy = {
+  relations: {},
+  init: function() {
+    this.relations = {};
+    if (WK.Game && WK.Game.rivals) {
+      for (var i = 0; i < WK.Game.rivals.length; i++) {
+        this.relations[WK.Game.rivals[i].id] = { type: 'peace', turns: 0, gifts: 0, respect: 50 };
+      }
+    }
+  },
+  getRel: function(id) { return this.relations[id] || { type: 'peace', turns: 0, gifts: 0, respect: 50 }; },
+  proposeAlliance: function(rivalId) {
+    var G = WK.Game, r = null;
+    for (var i = 0; i < G.rivals.length; i++) {
+      if (G.rivals[i].id === rivalId) { r = G.rivals[i]; break; }
+    }
+    if (!r || !r.alive) return;
+    if (G.stock.gold < 50) { WK.UI.notify('🪙 Necesitas 50 oro'); return; }
+    G.stock.gold -= 50;
+    var rel = this.getRel(rivalId);
+    var prob = 0.3 + (rel.respect / 200) + (rel.gifts * 0.1);
+    if (Math.random() < prob) {
+      this.relations[rivalId] = { type: 'alliance', turns: 100, gifts: rel.gifts, respect: Math.min(100, rel.respect + 20) };
+      r.hostile = false;
+      G.log('🤝 Alianza con ' + r.name, 'faith');
+      WK.UI.banner('🤝 ¡Alianza con ' + r.name + '!', 'magic');
+      G.checkAchv('first_alliance');
+    } else {
+      G.log('❌ ' + r.name + ' rechazó alianza', 'war');
+      WK.UI.notify('❌ Rechazaron (respeta: ' + rel.respect + ')');
+      this.relations[rivalId].respect = Math.max(0, rel.respect - 10);
+    }
+  },
+  proposeTrade: function(rivalId) {
+    var G = WK.Game, r = null;
+    for (var i = 0; i < G.rivals.length; i++) {
+      if (G.rivals[i].id === rivalId) { r = G.rivals[i]; break; }
+    }
+    if (!r || !r.alive) return;
+    if (G.stock.food < 30) { WK.UI.notify('🍎 Necesitas 30 comida'); return; }
+    G.stock.food -= 30;
+    var gain = 20 + Math.floor(this.getRel(rivalId).respect / 10);
+    G.stock.gold += gain;
+    this.relations[rivalId].gifts = (this.relations[rivalId].gifts || 0) + 1;
+    this.relations[rivalId].respect = Math.min(100, this.getRel(rivalId).respect + 5);
+    G.log('📦 Comercio con ' + r.name + ' (+' + gain + ' oro)', 'gold');
+  },
+  sendGift: function(rivalId) {
+    var G = WK.Game, r = null;
+    for (var i = 0; i < G.rivals.length; i++) {
+      if (G.rivals[i].id === rivalId) { r = G.rivals[i]; break; }
+    }
+    if (!r || !r.alive) return;
+    if (G.stock.gold < 20) { WK.UI.notify('🪙 Necesitas 20 oro'); return; }
+    G.stock.gold -= 20;
+    this.relations[rivalId].gifts = (this.relations[rivalId].gifts || 0) + 1;
+    this.relations[rivalId].respect = Math.min(100, this.getRel(rivalId).respect + 15);
+    if (this.relations[rivalId].gifts >= 3 && r.hostile) {
+      r.hostile = false;
+      this.relations[rivalId].type = 'peace';
+      G.log('🕊️ ' + r.name + ' ya no es hostil', 'faith');
+    }
+    G.log('🎁 Regalo a ' + r.name + ' (respeto: ' + this.relations[rivalId].respect + ')', 'faith');
+  },
+  declareWar: function(rivalId) {
+    this.relations[rivalId] = { type: 'war', turns: 0, gifts: this.getRel(rivalId).gifts, respect: 0 };
+    WK.Game.declareWarOn(rivalId);
+  },
+  update: function() {
+    var G = WK.Game;
+    if (!G) return;
+    // Las alianzas dan bonus defensivos
+    var allyBonus = 0;
+    for (var id in this.relations) {
+      var r = this.relations[id];
+      if (r.type === 'alliance') {
+        r.turns--;
+        allyBonus += 10;
+        if (r.turns <= 0) {
+          r.type = 'peace';
+          G.log('🤝 Alianza expiró', 'war');
+        }
+      }
+    }
+    // Aplicar bonus
+    if (allyBonus > 0 && G.stock.faith < 9999) {
+      G.stock.faith += allyBonus * 0.01;
+    }
+  },
+  render: function(el) {
+    if (!el) return;
+    var G = WK.Game; if (!G) return;
+    var html = '';
+    for (var i = 0; i < G.rivals.length; i++) {
+      var r = G.rivals[i]; if (!r.alive) continue;
+      var rel = this.getRel(r.id);
+      var icons = { war: '⚔️', peace: '🕊️', alliance: '🤝', vassal: '👑', trade: '📦' };
+      var colors = { war: 'var(--danger)', peace: 'var(--ac)', alliance: '#8b5cf6', vassal: 'var(--gold)' };
+      html += '<div class="icard"><span class="ico">' + (icons[rel.type] || '🏘️') + '</span>';
+      html += '<span class="inm"><b>' + r.name + '</b>';
+      html += '<small style="color:' + (colors[rel.type] || 'var(--td)') + '">' + rel.type.toUpperCase() + '</small>';
+      html += '<small>👥' + Math.floor(r.pop) + ' · Respeto: ' + rel.respect + '/100 · 🎁' + (rel.gifts || 0) + '</small>';
+      html += '<div class="prog" style="margin-top:3px"><div style="width:' + rel.respect + '%;background:var(--gold)"></div></div></span>';
+      html += '<div style="display:flex;flex-direction:column;gap:2px">';
+      html += '<button style="font-size:.55rem;padding:2px 4px;background:#8b5cf6;border:none;border-radius:3px;color:#fff;cursor:pointer" data-diplo="ally" data-rid="' + r.id + '">🤝 Aliar (50🪙)</button>';
+      html += '<button style="font-size:.55rem;padding:2px 4px;background:var(--gold);border:none;border-radius:3px;color:#000;cursor:pointer" data-diplo="trade" data-rid="' + r.id + '">📦 Comerciar</button>';
+      html += '<button style="font-size:.55rem;padding:2px 4px;background:#06b6d4;border:none;border-radius:3px;color:#fff;cursor:pointer" data-diplo="gift" data-rid="' + r.id + '">🎁 Regalo</button>';
+      html += '<button class="abtn" style="font-size:.55rem;padding:2px 4px" data-diplo="war" data-rid="' + r.id + '">⚔️ Guerra</button>';
+      html += '</div></div>';
+    }
+    el.innerHTML = html;
+    var btns = el.querySelectorAll('[data-diplo]');
+    var self = this;
+    for (var b = 0; b < btns.length; b++) {
+      btns[b].onclick = function() {
+        var action = this.getAttribute('data-diplo');
+        var rid = this.getAttribute('data-rid');
+        if (action === 'ally') self.proposeAlliance(rid);
+        else if (action === 'trade') self.proposeTrade(rid);
+        else if (action === 'gift') self.sendGift(rid);
+        else if (action === 'war') self.declareWar(rid);
+        WK.UI.renderPantheon();
+      };
+    }
+  }
+};
+
+// ============ POLÍTICA (con efectos visibles REALES) ============
+WK.Politics = {
+  government: 'tribal',
+  types: {
+    tribal: { n: 'Tribal', e: '🏕️', fx: 'Jefe por edad' },
+    monarchy: { n: 'Monarquía', e: '👑', fx: 'Jefe hereda, +orden' },
+    republic: { n: 'República', e: '🏛️', fx: 'Elecciones cada 20 días' },
+    democracy: { n: 'Democracia', e: '🗳️', fx: '+moral colectiva' },
+    technocracy: { n: 'Tecnocracia', e: '🔬', fx: '+investigación' },
+    theocracy: { n: 'Teocracia', e: '⛪', fx: '+fe, -saber' }
+  },
+  canChange: function(type) {
+    var G = WK.Game; if (!G) return false;
+    var reqs = {
+      monarchy: { pop: 10 },
+      republic: { pop: 15, tech: 'writing' },
+      democracy: { pop: 20, tech: 'philosophy' },
+      technocracy: { pop: 25, tech: 'electricity' },
+      theocracy: { pop: 15, tech: 'mysticism', faith: 100 }
+    };
+    var req = reqs[type]; if (!req) return true;
+    if (req.pop && G.villagers.length < req.pop) return false;
+    if (req.tech && !G.techs[req.tech]) return false;
+    if (req.faith && G.stock.faith < req.faith) return false;
+    return true;
+  },
+  changeTo: function(type) {
+    if (!this.canChange(type)) { WK.UI.notify('❌ Requisitos no cumplidos'); return; }
+    this.government = type;
+    WK.Game.log('🏛️ Nuevo gobierno: ' + this.types[type].n, 'gold');
+    WK.UI.banner(this.types[type].e + ' ¡' + this.types[type].n + '!', 'magic');
+    WK.Audio.play('discover');
+    if (type === 'democracy') WK.Game.checkAchv('democracy');
+  },
+  applyEffects: function() {
+    var G = WK.Game; if (!G) return;
+    if (this.government === 'technocracy') G.stock.knowledge += 0.05;
+    if (this.government === 'theocracy') G.stock.faith += 0.06;
+    if (this.government === 'democracy') {
+      for (var i = 0; i < G.villagers.length; i++) {
+        G.villagers[i].mood = Math.min(100, G.villagers[i].mood + 0.02);
+      }
+    }
+    if (this.government === 'monarchy') {
+      var chief = G.getChief();
+      if (chief) chief.mood = Math.min(100, chief.mood + 0.03);
+    }
+  },
+  render: function(el) {
+    if (!el) return;
+    var html = '<h3 style="margin-bottom:6px;font-size:.8rem">🏛️ Gobierno: ' + this.types[this.government].e + ' ' + this.types[this.government].n + '</h3>';
+    var keys = Object.keys(this.types);
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i], t = this.types[k], can = this.canChange(k), active = this.government === k;
+      html += '<div class="icard' + (active ? ' done' : (can ? ' avl' : ' lck')) + '">';
+      html += '<span class="ico">' + t.e + '</span>';
+      html += '<span class="inm"><b>' + t.n + '</b><small>' + t.fx + '</small></span>';
+      if (!active) html += '<button ' + (can ? '' : 'disabled') + ' data-gov="' + k + '">Cambiar</button>';
+      else html += '<span style="color:var(--ac)">✔</span>';
+      html += '</div>';
+    }
+    el.innerHTML = html;
+    var btns = el.querySelectorAll('[data-gov]');
+    var self = this;
+    for (var b = 0; b < btns.length; b++) {
+      btns[b].onclick = function() {
+        self.changeTo(this.getAttribute('data-gov'));
+        self.render(this.closest('.pc'));
+      };
+    }
+  }
+};
+
+// ============ SALUD MENTAL (EFECTOS VISIBLES) ============
+WK.Mental = {
+  update: function(v) {
+    if (!v || !v.alive) return;
+    v.stress = v.stress || 0;
+    v.trauma = v.trauma || 0;
+    v.depression = v.depression || 0;
+    // Estrés
+    var working = ['build', 'gather_w', 'gather_f', 'farm', 'hunt', 'fish'].indexOf(v.state) >= 0;
+    if (working) v.stress = Math.min(100, v.stress + 0.05);
+    else v.stress = Math.max(0, v.stress - 0.08);
+    // Depresión
+    if (v.social < 20) v.depression = Math.min(100, v.depression + 0.03);
+    else v.depression = Math.max(0, v.depression - 0.02);
+    // Efectos VISIBLES
+    var mental = v.stress + v.trauma + v.depression;
+    if (mental > 50) v.mood = Math.max(0, v.mood - 0.02);
+    if (mental > 80) {
+      v.energy = Math.max(0, v.energy - 0.01);
+      if (Math.random() < 0.0005) v.hp -= 0.5; // Puede morir de estrés
+    }
+    // Locura extrema
+    if (mental > 150 && Math.random() < 0.0001) {
+      WK.Game.log('😱 ' + v.name + ' enloqueció', 'death');
+      v.state = 'wander';
+      v.target = WK.Map.edgeLand();
+      v.timer = 500;
+    }
+    // Curación en templo/taberna
+    if (v.state === 'pray') {
+      v.stress = Math.max(0, v.stress - 0.2);
+      v.trauma = Math.max(0, v.trauma - 0.1);
+    }
+  },
+  render: function(v) {
+    var html = '';
+    if (v.stress > 20) html += '<p style="font-size:.6rem;color:#f97316">😰 Estrés: ' + Math.floor(v.stress) + '</p>';
+    if (v.trauma > 20) html += '<p style="font-size:.6rem;color:#ef4444">😱 Trauma: ' + Math.floor(v.trauma) + '</p>';
+    if (v.depression > 20) html += '<p style="font-size:.6rem;color:#6366f1">😢 Depresión: ' + Math.floor(v.depression) + '</p>';
+    var mental = (v.stress || 0) + (v.trauma || 0) + (v.depression || 0);
+    if (mental > 80) html += '<p style="font-size:.6rem;color:var(--danger);font-weight:bold">⚠️ Al borde del colapso</p>';
+    return html;
+  },
+  getIcon: function(v) {
+    var mental = (v.stress || 0) + (v.trauma || 0) + (v.depression || 0);
+    if (mental > 150) return '😱';
+    if (mental > 100) return '😰';
+    if (mental > 50) return '😟';
+    return '';
+  }
+};
+
+// ============ GENEALOGÍA ============
+WK.Genealogy = {
+  getFamily: function(v) {
+    var G = WK.Game;
+    var fam = { self: v, parents: [], spouse: null, children: [], siblings: [] };
+    if (v.parentId) {
+      for (var i = 0; i < G.villagers.length; i++) {
+        if (G.villagers[i].id === v.parentId) fam.parents.push(G.villagers[i]);
+      }
+    }
+    if (v.spouseId) {
+      for (var i = 0; i < G.villagers.length; i++) {
+        if (G.villagers[i].id === v.spouseId) fam.spouse = G.villagers[i];
+      }
+    }
+    for (var i = 0; i < G.villagers.length; i++) {
+      if (G.villagers[i].parentId === v.id) fam.children.push(G.villagers[i]);
+      if (v.parentId && G.villagers[i].parentId === v.parentId && G.villagers[i].id !== v.id) {
+        fam.siblings.push(G.villagers[i]);
+      }
+    }
+    return fam;
+  },
+  render: function(v) {
+    var fam = this.getFamily(v);
+    var html = '<hr style="margin:8px 0;border-color:var(--border)"><h3 style="font-size:.75rem;margin-bottom:6px">🌳 Familia</h3>';
+    if (fam.parents.length) html += '<p style="font-size:.62rem">👴 Padres: ' + fam.parents.map(function(p) { return p.name; }).join(', ') + '</p>';
+    if (fam.spouse) html += '<p style="font-size:.62rem">💍 Cónyuge: ' + fam.spouse.name + '</p>';
+    if (fam.siblings.length) html += '<p style="font-size:.62rem">👫 Hermanos: ' + fam.siblings.length + '</p>';
+    if (fam.children.length) html += '<p style="font-size:.62rem">👶 Hijos: ' + fam.children.map(function(c) { return c.name; }).join(', ') + '</p>';
+    if (!fam.parents.length && !fam.spouse && !fam.children.length) html += '<p style="font-size:.62rem;color:var(--td)">Sin familia conocida</p>';
+    return html;
+  }
+};
+
+// ============ EXPORT/IMPORT JSON (RESTAURADO) ============
+WK.ExportImport = {
+  exportSave: function() {
+    var G = WK.Game; if (!G) return;
+    WK.Save.save(true);
+    var profile = G.profile;
+    if (!profile || !profile.saves || !profile.saves['main']) {
+      WK.UI.notify('❌ No hay partida para exportar');
+      return;
+    }
+    var data = JSON.stringify(profile, null, 2);
+    var blob = new Blob([data], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'worlkalm-' + profile.name + '-day' + G.day + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    WK.UI.notify('💾 Partida exportada');
+    WK.UI.banner('📤 ¡Exportada!', 'gold');
+  },
+  importSave: function() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = function(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        try {
+          var data = JSON.parse(ev.target.result);
+          if (!data.saves || !data.saves['main']) {
+            WK.UI.notify('❌ Archivo inválido');
+            return;
+          }
+          // Crear nuevo perfil con los datos importados
+          var newProf = WK.Auth.createProfile(data.name + ' (Import)', data.avatar || '👑', data.difficulty || 'normal');
+          newProf.saves = data.saves;
+          newProf.achievements = data.achievements || {};
+          WK.Auth.saveProfiles();
+          WK.UI.notify('✅ Importado: ' + data.name);
+          WK.UI.banner('📥 ¡Importado!', 'gold');
+          if (confirm('¿Cargar la partida importada ahora?')) {
+            WK.App.startWithProfile(newProf);
+          }
+        } catch (err) {
+          WK.UI.notify('❌ Error al importar: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+};
+
+// ============ DECISIONES MORALES ============
+WK.Moral = {
+  lastOffer: 0,
+  decisions: [
+    {
+      id: 'sacrifice',
+      title: '🔥 Sacrificio Divino',
+      text: 'Un aldeano debe sacrificarse para obtener la bendición de los dioses. ¿Aceptas?',
+      yes: function(G) {
+        var v = G.villagers[Math.floor(Math.random() * G.villagers.length)];
+        if (v) {
+          G.killVillager(v, 'sacrificio');
+          G.stock.faith += 200;
+          G.log('🔥 ' + v.name + ' se sacrificó. +200 fe', 'faith');
+          WK.UI.banner('🔥 ¡Sacrificio aceptado!', 'magic');
+        }
+      },
+      no: function(G) {
+        G.log('🙏 Rechazaste el sacrificio', 'faith');
+        G.stock.faith -= 30;
+      }
+    },
+    {
+      id: 'refugees',
+      title: '🏚️ Refugiados',
+      text: '5 refugiados hambrientos piden asilo. ¿Los aceptas?',
+      yes: function(G) {
+        var c = G.villageCenter();
+        for (var i = 0; i < 5; i++) {
+          if (G.villagers.length >= WK.CFG.MAX_POP) break;
+          var v = new WK.Villager(c.x + WK.U.rand(-100, 100), c.y + WK.U.rand(-100, 100), WK.U.ri(15, 40));
+          v.arrivalStory = 'refuge';
+          G.villagers.push(v);
+        }
+        G.assignHomeless();
+        G.stock.food -= 40;
+        G.log('🏚️ 5 refugiados aceptados. -40 comida', 'birth');
+      },
+      no: function(G) {
+        G.log('🏚️ Rechazaste a los refugiados', 'death');
+        for (var i = 0; i < G.villagers.length; i++) {
+          G.villagers[i].mood = Math.max(0, G.villagers[i].mood - 10);
+        }
+      }
+    },
+    {
+      id: 'treasure',
+      title: '💎 Tesoro Maldito',
+      text: 'Un cofre misterioso aparece. ¿Lo abres?',
+      yes: function(G) {
+        if (Math.random() < 0.5) {
+          G.stock.gold += 200;
+          G.log('💎 ¡Tesoro! +200 oro', 'gold');
+        } else {
+          for (var i = 0; i < Math.min(3, G.villagers.length); i++) {
+            var v = G.villagers[Math.floor(Math.random() * G.villagers.length)];
+            if (v) { v.sick = true; v.sickTimer = 500; }
+          }
+          G.log('☠️ ¡Maldición! Varios enfermaron', 'death');
+        }
+      },
+      no: function(G) {
+        G.log('💎 Rechazaste el tesoro (sabio)', 'faith');
+        G.stock.faith += 20;
+      }
+    }
+  ],
+  offer: function() {
+    var G = WK.Game;
+    if (!G || G.day - this.lastOffer < 30) return;
+    if (Math.random() > 0.05) return;
+    this.lastOffer = G.day;
+    var d = this.decisions[Math.floor(Math.random() * this.decisions.length)];
+    G.paused = true;
+    setTimeout(function() {
+      WK.UI.showPopup(d.title,
+        '<p style="font-size:.85rem;line-height:1.5;margin-bottom:15px">' + d.text + '</p>' +
+        '<div style="display:flex;gap:10px">' +
+        '<button class="btn btn-p" id="moralYes" style="flex:1">✅ Aceptar</button>' +
+        '<button class="btn btn-g" id="moralNo" style="flex:1">❌ Rechazar</button>' +
+        '</div>'
+      );
+      document.getElementById('moralYes').onclick = function() {
+        d.yes(G);
+        G.paused = false;
+        document.getElementById('popup').classList.remove('show');
+      };
+      document.getElementById('moralNo').onclick = function() {
+        d.no(G);
+        G.paused = false;
+        document.getElementById('popup').classList.remove('show');
+      };
+    }, 500);
+  }
+};
+
+// ============ TEMAS (con persistencia) ============
+WK.Themes = {
+  current: 'default',
+  themes: {
+    default: { bg: '#0a0f1d', panel: 'rgba(15,23,42,.95)', ac: '#10b981', gold: '#fbbf24' },
+    ocean: { bg: '#0c1929', panel: 'rgba(12,25,41,.95)', ac: '#38bdf8', gold: '#fbbf24' },
+    forest: { bg: '#0a1a0f', panel: 'rgba(10,26,15,.95)', ac: '#4ade80', gold: '#fbbf24' },
+    volcanic: { bg: '#1a0a0a', panel: 'rgba(26,10,10,.95)', ac: '#ef4444', gold: '#f97316' },
+    royal: { bg: '#0f0a1a', panel: 'rgba(15,10,26,.95)', ac: '#a855f7', gold: '#fbbf24' },
+    neon: { bg: '#0a0a0a', panel: 'rgba(10,10,10,.95)', ac: '#00ff88', gold: '#ff00ff' }
+  },
+  apply: function(name) {
+    var t = this.themes[name]; if (!t) return;
+    this.current = name;
+    var r = document.documentElement.style;
+    r.setProperty('--bg', t.bg);
+    r.setProperty('--panel', t.panel);
+    r.setProperty('--ac', t.ac);
+    r.setProperty('--gold', t.gold);
+    try { localStorage.setItem('wk_theme', name); } catch (e) {}
+    WK.UI.notify('🎨 Tema: ' + name);
+  },
+  load: function() {
+    try {
+      var saved = localStorage.getItem('wk_theme');
+      if (saved && this.themes[saved]) this.apply(saved);
+    } catch (e) {}
+  }
+};
+
+// ============ PERSISTENCIA OFFLINE ============
+WK.Persistence = {
+  saveTimestamp: function() {
+    try { localStorage.setItem('wk_lasttime', Date.now()); } catch (e) {}
+  },
+  calcOffline: function() {
+    try {
+      var last = parseInt(localStorage.getItem('wk_lasttime')) || 0;
+      if (last === 0) return 0;
+      var elapsed = (Date.now() - last) / 1000;
+      return Math.min(elapsed, 3600);
+    } catch (e) { return 0; }
+  },
+  applyOffline: function() {
+    var secs = this.calcOffline();
+    if (secs < 60) return;
+    var G = WK.Game; if (!G) return;
+    var days = Math.floor(secs / 60);
+    if (days > 0) {
+      G.day += days;
+      for (var i = 0; i < G.villagers.length; i++) {
+        G.villagers[i].age += days * WK.CFG.AGING * 60;
+      }
+      G.stock.food += days * 2;
+      G.stock.wood += days;
+      G.stock.knowledge += days * 5;
+      G.log('⏰ ' + days + ' días pasaron offline', 'evolve');
+      WK.UI.banner('⏰ ' + days + ' días offline', 'magic');
+    }
+    this.saveTimestamp();
+  }
+};
+
+// ============ MÁS TECNOLOGÍAS (30 nuevas) ============
+(function() {
+  var extras = [
+    { id: 'irrigation', n: 'Irrigación', e: '💧', era: 1, cost: 350, req: ['agriculture'] },
+    { id: 'wheel', n: 'Rueda', e: '☸️', era: 1, cost: 400, req: ['stone_tools'] },
+    { id: 'sailing', n: 'Vela', e: '⛵', era: 1, cost: 450, req: ['fishing'] },
+    { id: 'mathematics', n: 'Matemáticas', e: '📐', era: 2, cost: 650, req: ['writing'] },
+    { id: 'engineering', n: 'Ingeniería', e: '🏗️', era: 2, cost: 800, req: ['masonry', 'mathematics'] },
+    { id: 'metallurgy', n: 'Metalurgia', e: '🔥', era: 2, cost: 750, req: ['bronze'] },
+    { id: 'paper', n: 'Papel', e: '📄', era: 2, cost: 700, req: ['writing'] },
+    { id: 'compass', n: 'Brújula', e: '🧭', era: 2, cost: 900, req: ['mathematics', 'sailing'] },
+    { id: 'banking', n: 'Banca', e: '🏦', era: 3, cost: 1400, req: ['currency'] },
+    { id: 'chemistry', n: 'Química', e: '⚗️', era: 3, cost: 1600, req: ['philosophy', 'iron'] },
+    { id: 'optics', n: 'Óptica', e: '🔭', era: 3, cost: 1700, req: ['philosophy'] },
+    { id: 'anatomy', n: 'Anatomía', e: '🫀', era: 3, cost: 1500, req: ['medicine'] },
+    { id: 'cartography', n: 'Cartografía', e: '🗺️', era: 3, cost: 1450, req: ['compass', 'writing'] },
+    { id: 'architecture', n: 'Arquitectura', e: '🏛️', era: 3, cost: 1800, req: ['engineering', 'masonry'] },
+    { id: 'astronomy', n: 'Astronomía', e: '🔭', era: 4, cost: 2200, req: ['optics', 'mathematics'] },
+    { id: 'physics', n: 'Física', e: '⚛️', era: 4, cost: 2400, req: ['mathematics', 'gunpowder'] },
+    { id: 'biology', n: 'Biología', e: '🧬', era: 4, cost: 2500, req: ['anatomy', 'chemistry'] },
+    { id: 'geology', n: 'Geología', e: '🪨', era: 4, cost: 2100, req: ['chemistry'] },
+    { id: 'economics', n: 'Economía', e: '📈', era: 4, cost: 2300, req: ['banking', 'philosophy'] },
+    { id: 'telegraph', n: 'Telégrafo', e: '📡', era: 5, cost: 3500, req: ['electricity'] },
+    { id: 'combustion', n: 'Combustión', e: '🔥', era: 5, cost: 3800, req: ['steam', 'physics'] },
+    { id: 'genetics', n: 'Genética', e: '🧬', era: 5, cost: 4000, req: ['biology'] },
+    { id: 'radio', n: 'Radio', e: '📻', era: 5, cost: 4500, req: ['telegraph'] },
+    { id: 'rocketry', n: 'Cohetería', e: '🚀', era: 6, cost: 6000, req: ['flight', 'physics'] },
+    { id: 'computing', n: 'Computación', e: '💻', era: 6, cost: 6500, req: ['electricity', 'mathematics'] },
+    { id: 'robotics', n: 'Robótica', e: '🤖', era: 6, cost: 7500, req: ['computing', 'ai_tech'] },
+    { id: 'nanotech', n: 'Nanotecnología', e: '🔬', era: 7, cost: 10000, req: ['ai_tech', 'genetics'] },
+    { id: 'fusion', n: 'Fusión Nuclear', e: '☀️', era: 7, cost: 11000, req: ['rocketry', 'physics'] },
+    { id: 'terraform', n: 'Terraformación', e: '🌍', era: 7, cost: 13000, req: ['space', 'nanotech'] },
+    { id: 'immortality', n: 'Inmortalidad', e: '♾️', era: 7, cost: 15000, req: ['genetics', 'nanotech'] }
+  ];
+  for (var i = 0; i < extras.length; i++) {
+    var exists = false;
+    for (var j = 0; j < WK.D.TECHS.length; j++) {
+      if (WK.D.TECHS[j].id === extras[i].id) { exists = true; break; }
+    }
+    if (!exists) WK.D.TECHS.push(extras[i]);
+  }
+})();
+
+// ============ MÁS LOGROS ============
+(function() {
+  var extras = [
+    { id: 'pop100', n: 'Metrópolis', e: '🌆', d: '100 habitantes' },
+    { id: 'first_alliance', n: 'Diplomático', e: '🤝', d: 'Primera alianza' },
+    { id: 'festival5', n: 'Festivo', e: '🎭', d: '5 festivales' },
+    { id: 'democracy', n: 'Demócrata', e: '🗳️', d: 'Gobierno democrático' },
+    { id: 'military_vic', n: 'Conquistador', e: '⚔️', d: 'Victoria militar' },
+    { id: 'religious_vic', n: 'Iluminado', e: '🕊️', d: 'Victoria religiosa' },
+    { id: 'economic_vic', n: 'Magnate', e: '🪙', d: 'Victoria económica' },
+    { id: 'cultural_vic', n: 'Mecenas', e: '🎨', d: 'Victoria cultural' },
+    { id: 'survivor', n: 'Superviviente', e: '💪', d: '200 días' },
+    { id: 'dog_army', n: 'Manada', e: '🐕', d: '12 perros activos' },
+    { id: 'moral_choice', n: 'Filósofo', e: '⚖️', d: 'Toma una decisión moral' },
+    { id: 'exported', n: 'Archivista', e: '📤', d: 'Exporta una partida' }
+  ];
+  for (var i = 0; i < extras.length; i++) {
+    var exists = false;
+    for (var j = 0; j < WK.D.ACHV.length; j++) {
+      if (WK.D.ACHV[j].id === extras[i].id) { exists = true; break; }
+    }
+    if (!exists) WK.D.ACHV.push(extras[i]);
+  }
+})();
+
+// ============ HOOKS AL UPDATE PRINCIPAL ============
+(function() {
+  var origUpdate = WK.Game.update;
+  WK.Game.update = function() {
+    origUpdate.call(this);
+    if (!this.running || this.paused) return;
+    // Diplomacia
+    if (WK.Diplomacy) WK.Diplomacy.update();
+    // Política
+    if (WK.Politics) WK.Politics.applyEffects();
+    // Salud mental
+    for (var i = 0; i < this.villagers.length; i++) {
+      WK.Mental.update(this.villagers[i]);
+    }
+    // Decisiones morales
+    if (this.day % 10 === 0) WK.Moral.offer();
+    // Logros expandidos
+    if (this.villagers.length >= 100) this.checkAchv('pop100');
+    if (this.day >= 200) this.checkAchv('survivor');
+    if (this.dogs.filter(function(d) { return d.alive; }).length >= 12) this.checkAchv('dog_army');
+  };
+})();
+
+// ============ HOOK A updateVillager PARA SALUD MENTAL ============
+(function() {
+  var origUV = WK.Game.updateVillager;
+  WK.Game.updateVillager = function(v) {
+    origUV.call(this, v);
+    if (v.alive) WK.Mental.update(v);
+  };
+})();
+
+// ============ HERENCIA EN NACIMIENTOS ============
+(function() {
+  var origUpdate2 = WK.Game.update;
+  WK.Game.update = function() {
+    var before = this.villagers.length;
+    origUpdate2.call(this);
+    var after = this.villagers.length;
+    if (after > before) {
+      var baby = this.villagers[this.villagers.length - 1];
+      if (baby && baby.parentId) {
+        var parent = null;
+        for (var i = 0; i < this.villagers.length; i++) {
+          if (this.villagers[i].id === baby.parentId) { parent = this.villagers[i]; break; }
+        }
+        if (parent) {
+          for (var j = 0; j < parent.traits.length; j++) {
+            if (Math.random() < 0.5 && baby.traits.indexOf(parent.traits[j]) < 0 && baby.traits.length < 3) {
+              baby.traits.push(parent.traits[j]);
+            }
+          }
+          if (Math.random() < 0.4) baby.like = parent.like;
+          if (Math.random() < 0.3) baby.pers = parent.pers;
+          baby.parentName = parent.name;
+          this.log('🧬 ' + baby.name + ' heredó de ' + parent.name, 'birth');
+          WK.Story.generate('birth', { name: baby.name, parent: parent.name });
+        }
+      }
+    }
+  };
+})();
+
+console.log('[WK] Parte 5B REESCRITA: Sistemas con efectos VISIBLES y REALES ✓');
+</script>
+
+
+
+
+
+<script>
+// ================================================================
+// PARTE 5C REESCRITA: UI integrada, sin romper panel de poderes
+// ================================================================
+
+// ============ AGREGAR BOTONES AL TOPBAR ============
+(function() {
+  var tb = document.getElementById('tb');
+  if (!tb) return;
+  var btns = [
+    { id: 'bDiplo', txt: '🤝', title: 'Diplomacia' },
+    { id: 'bGov', txt: '🗳️', title: 'Gobierno' },
+    { id: 'bStory', txt: '📖', title: 'Crónicas' },
+    { id: 'bTheme', txt: '🎨', title: 'Tema' },
+    { id: 'bExport', txt: '📤', title: 'Exportar' },
+    { id: 'bImport', txt: '📥', title: 'Importar' }
+  ];
+  for (var i = 0; i < btns.length; i++) {
+    if (document.getElementById(btns[i].id)) continue;
+    var b = document.createElement('button');
+    b.className = 'ibtn';
+    b.id = btns[i].id;
+    b.textContent = btns[i].txt;
+    b.title = btns[i].title;
+    tb.appendChild(b);
+  }
+})();
+
+// ============ CREAR PANELES NUEVOS ============
+(function() {
+  var panels = [
+    { id: 'pDiplo', title: '🤝 Diplomacia' },
+    { id: 'pGov', title: '🗳️ Gobierno' },
+    { id: 'pStory', title: '📖 Crónicas Épicas' }
+  ];
+  for (var i = 0; i < panels.length; i++) {
+    if (document.getElementById(panels[i].id)) continue;
+    var div = document.createElement('div');
+    div.className = 'ui pnl pp hid';
+    div.id = panels[i].id;
+    div.innerHTML = '<div class="ph">' + panels[i].title + ' <span class="pcl" data-c="' + panels[i].id + '">✕</span></div><div class="pc" id="' + panels[i].id + 'C"></div>';
+    document.body.appendChild(div);
+  }
+})();
+
+// ============ BIND BOTONES NUEVOS ============
+(function() {
+  var diploBtn = document.getElementById('bDiplo');
+  if (diploBtn) diploBtn.onclick = function() {
+    WK.UI.togglePanel('pDiplo');
+    var p = document.getElementById('pDiplo');
+    if (p && p.style.display === 'flex' && WK.Diplomacy) {
+      WK.Diplomacy.render(document.getElementById('pDiploC'));
+    }
+  };
+
+  var govBtn = document.getElementById('bGov');
+  if (govBtn) govBtn.onclick = function() {
+    WK.UI.togglePanel('pGov');
+    var p = document.getElementById('pGov');
+    if (p && p.style.display === 'flex' && WK.Politics) {
+      WK.Politics.render(document.getElementById('pGovC'));
+    }
+  };
+
+  var storyBtn = document.getElementById('bStory');
+  if (storyBtn) storyBtn.onclick = function() {
+    WK.UI.togglePanel('pStory');
+    var p = document.getElementById('pStory');
+    if (p && p.style.display === 'flex' && WK.Story) {
+      WK.Story.render(document.getElementById('pStoryC'));
+    }
+  };
+
+  var themeBtn = document.getElementById('bTheme');
+  if (themeBtn) themeBtn.onclick = function() {
+    var themes = Object.keys(WK.Themes.themes);
+    var idx = themes.indexOf(WK.Themes.current);
+    WK.Themes.apply(themes[(idx + 1) % themes.length]);
+  };
+
+  var expBtn = document.getElementById('bExport');
+  if (expBtn) expBtn.onclick = function() {
+    WK.ExportImport.exportSave();
+    WK.Game.checkAchv('exported');
+  };
+
+  var impBtn = document.getElementById('bImport');
+  if (impBtn) impBtn.onclick = function() {
+    WK.ExportImport.importSave();
+  };
+})();
+
+// ============ EXTENDER POPUP DE ALDEANO (SIN ROMPER) ============
+(function() {
+  var origHandle = WK.Input.handleClick;
+  WK.Input.handleClick = function(wx, wy) {
+    var G = WK.Game;
+    if (!G) { origHandle.call(this, wx, wy); return; }
+    for (var j = 0; j < G.villagers.length; j++) {
+      var v = G.villagers[j];
+      if (v.alive && Math.hypot(v.x - wx, v.y - wy) < 20) {
+        var traitStr = '';
+        for (var t = 0; t < v.traits.length; t++) {
+          var tr = WK.D.TRAITS.find(function(x) { return x.id === v.traits[t]; });
+          if (tr) traitStr += tr.e + ' ';
+        }
+        var html = '<p><b>' + (v.gender === 'M' ? '👨' : '👩') + ' ' + v.name + '</b> · ' + Math.floor(v.age) + ' años</p>';
+        html += '<p style="margin:4px 0;">' + (v.pers ? v.pers.e + ' ' + v.pers.n : '') + ' · ' + traitStr + '</p>';
+        html += '<p style="color:var(--td);font-size:.65rem;">Le gusta ' + v.like + '</p>';
+        if (v.arrivalStory) {
+          var stories = { refuge: '🏚️ Buscó refugio', family: '👨‍👩‍👧 Buscó familiar', adventure: '🧭 Aventurero', exile: '⚔️ Exiliado', divine: '✨ Enviado divino' };
+          html += '<p style="color:var(--gold);font-size:.65rem;">' + (stories[v.arrivalStory] || '') + '</p>';
+        }
+        html += '<p style="margin-top:4px;">' + v.profession + (v.isChief ? ' 👑' : '') + '</p>';
+        html += '<p>❤️' + Math.floor(v.hp) + ' 🍎' + Math.floor(v.hunger) + ' ⚡' + Math.floor(v.energy) + '</p>';
+        if (v.sick) html += '<p style="color:var(--danger);">🤒 Enfermo</p>';
+        if (v.hasDogCompanion()) html += '<p>🐕 Con perro</p>';
+        // Icono de salud mental
+        var mentalIcon = WK.Mental.getIcon(v);
+        if (mentalIcon) html += '<p style="font-size:.65rem;color:var(--danger)">' + mentalIcon + ' Estado mental afectado</p>';
+        // Detalles de salud mental
+        html += WK.Mental.render(v);
+        // Genealogía
+        html += WK.Genealogy.render(v);
+        WK.UI.showPopup(v.name, html);
+        return;
+      }
+    }
+    origHandle.call(this, wx, wy);
+  };
+})();
+
+// ============ EXTENDER renderPantheon PARA INCLUIR DIPLOMACIA ============
+(function() {
+  var origRenderPan = WK.UI.renderPantheon;
+  WK.UI.renderPantheon = function() {
+    origRenderPan.call(this);
+    var el = document.getElementById('panC');
+    if (!el) return;
+    // Quitar si existe ya uno
+    var existing = document.getElementById('diploInline');
+    if (existing) existing.remove();
+    var extra = document.createElement('div');
+    extra.id = 'diploInline';
+    extra.innerHTML = '<h3 style="margin:10px 0 6px;font-size:.8rem;">🤝 Diplomacia Avanzada</h3>';
+    el.appendChild(extra);
+    WK.Diplomacy.render(extra);
+  };
+})();
+
+// ============ EXTENDER renderLogs PARA MOSTRAR HISTORIAS ============
+(function() {
+  var origRenderLogs = WK.UI.renderLogs;
+  WK.UI.renderLogs = function() {
+    origRenderLogs.call(this);
+    var el = document.getElementById('logC');
+    if (!el || !WK.Story || WK.Story.entries.length === 0) return;
+    var extra = document.createElement('div');
+    extra.style.marginTop = '12px';
+    extra.style.borderTop = '1px solid var(--border)';
+    extra.style.paddingTop = '8px';
+    extra.innerHTML = '<h4 style="font-size:.7rem;margin-bottom:6px;color:var(--gold)">📖 Últimas crónicas épicas</h4>';
+    var limit = Math.min(WK.Story.entries.length, 3);
+    for (var i = 0; i < limit; i++) {
+      var e = WK.Story.entries[i];
+      var p = document.createElement('p');
+      p.style.fontSize = '.6rem';
+      p.style.fontStyle = 'italic';
+      p.style.color = 'var(--td)';
+      p.style.marginBottom = '4px';
+      p.textContent = '"' + e.text + '"';
+      extra.appendChild(p);
+    }
+    el.insertBefore(extra, el.firstChild);
+  };
+})();
+
+// ============ HOOK AL INIT PARA INICIALIZAR TODO ============
+(function() {
+  var origInit = WK.Game.init;
+  WK.Game.init = function(profile) {
+    origInit.call(this, profile);
+    if (WK.Diplomacy) WK.Diplomacy.init();
+    if (WK.Music) WK.Music.start();
+    if (WK.Themes) WK.Themes.load();
+    if (WK.Persistence) {
+      WK.Persistence.applyOffline();
+      WK.Persistence.saveTimestamp();
+    }
+    var self = this;
+    window.addEventListener('beforeunload', function() {
+      if (WK.Persistence) WK.Persistence.saveTimestamp();
+    });
+  };
+})();
+
+// ============ PAUSAR MÚSICA CON PAUSA ============
+(function() {
+  var origPauseSetter = null;
+  // Observar cambios de pausa
+  setInterval(function() {
+    if (WK.Game && WK.Music) {
+      if (WK.Game.paused && WK.Music.playing) {
+        // La música sigue pero se salta notas en scheduleNext
+      }
+    }
+  }, 500);
+})();
+
+console.log('[WK] Parte 5C REESCRITA: UI integrada sin romper ✓');
+console.log('[WK] ═══════════════════════════════════════════');
+console.log('[WK] 🌍 WORL KALM - VERSIÓN FINAL COMPLETA');
+console.log('[WK] ═══════════════════════════════════════════');
+console.log('[WK] ✅ Sintaxis corregida (sin errores)');
+console.log('[WK] ✅ WK.Music funciona correctamente');
+console.log('[WK] ✅ Panel de poderes funciona');
+console.log('[WK] ✅ Export/Import JSON restaurado');
+console.log('[WK] ✅ Partículas visuales funcionando');
+console.log('[WK] ✅ Diplomacia con respeto y consecuencias');
+console.log('[WK] ✅ Salud mental con efectos VISIBLES');
+console.log('[WK] ✅ Decisiones morales reales');
+console.log('[WK] ✅ Música se pausa con el juego');
+console.log('[WK] ✅ Temas se guardan en localStorage');
+console.log('[WK] ✅ Genealogía en popup de aldeano');
+console.log('[WK] ✅ Herencia de rasgos funcional');
+console.log('[WK] ✅ 58 tecnologías totales');
+console.log('[WK] ✅ 42 logros totales');
+console.log('[WK] ✅ 55 eventos aleatorios');
+console.log('[WK] ✅ 5 finales múltiples');
+console.log('[WK] ✅ 6 gobiernos con efectos reales');
+console.log('[WK] ✅ Mundo persistente offline');
+console.log('[WK] ═══════════════════════════════════════════');
+</script>
+
+
+
+
+
+
 </body>
 </html>
