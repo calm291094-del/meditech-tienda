@@ -1,0 +1,2316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>🌍 Worl Kalm</title>
+<style>
+:root{--bg:#0a0f1d;--panel:rgba(15,23,42,.95);--border:rgba(255,255,255,.1);--ac:#10b981;--acg:rgba(16,185,129,.4);--gold:#fbbf24;--danger:#ef4444;--tx:#f8fafc;--td:#94a3b8}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:var(--bg);color:var(--tx);touch-action:none}
+button{cursor:pointer;font-family:inherit}
+canvas#gc{position:absolute;inset:0;z-index:1;cursor:grab}
+canvas#gc:active{cursor:grabbing}
+.ui{position:absolute;z-index:10;pointer-events:none}
+.ui>*{pointer-events:auto}
+#auth{position:fixed;inset:0;z-index:1000;background:linear-gradient(135deg,#0a0f1d,#1e293b);display:flex;align-items:center;justify-content:center}
+#auth .box{text-align:center;max-width:480px;width:92%}
+#auth h1{font-size:3rem;background:linear-gradient(90deg,var(--ac),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#auth .sub{color:var(--td);margin:8px 0 24px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;backdrop-filter:blur(12px)}
+.card h2{margin-bottom:16px;font-size:1.1rem}
+.inp{width:100%;padding:12px;font-size:1rem;background:rgba(255,255,255,.05);border:2px solid var(--ac);border-radius:10px;color:#fff;text-align:center;outline:none;margin-bottom:12px}
+.btn{padding:12px 24px;border:none;border-radius:10px;font-weight:bold;font-size:.95rem;width:100%;margin-top:8px;transition:all .2s}
+.btn-p{background:linear-gradient(135deg,var(--ac),#059669);color:#fff}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 20px var(--acg)}
+.btn-g{background:transparent;border:1px solid var(--border);color:var(--td)}
+.btn-g:hover{border-color:var(--ac);color:var(--tx)}
+.profiles{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;max-height:240px;overflow-y:auto}
+.pf{display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;cursor:pointer;text-align:left}
+.pf:hover{border-color:var(--ac)}
+.pf .av{font-size:1.8rem}.pf .inf{flex:1}.pf .nm{font-weight:bold}.pf .mt{font-size:.7rem;color:var(--td)}
+.pf .dl{color:var(--danger);opacity:.5;padding:4px 8px}.pf .dl:hover{opacity:1}
+.avpick{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+.avopt{font-size:1.6rem;padding:6px;border-radius:8px;border:2px solid transparent;cursor:pointer;background:rgba(255,255,255,.04)}
+.avopt.sel{border-color:var(--gold);background:rgba(251,191,36,.15)}
+.diffs{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+.dbtn{flex:1;padding:8px 4px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;color:var(--td);font-size:.72rem}
+.dbtn.act{border-color:var(--ac);color:var(--tx);background:rgba(16,185,129,.12)}
+#tb{top:6px;left:50%;transform:translateX(-50%);display:flex;gap:10px;align-items:center;padding:6px 14px;background:var(--panel);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(12px);max-width:97vw;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+#tb::-webkit-scrollbar{display:none}
+.st{font-size:.8rem;font-weight:600;color:var(--ac)}
+.gbadge{font-size:1.2rem}.gname{font-weight:bold;color:var(--gold);font-size:.85rem}
+.ebadge{background:linear-gradient(135deg,var(--gold),#d97706);color:#000;padding:2px 7px;border-radius:20px;font-size:.6rem;font-weight:bold}
+.sbadge{padding:2px 7px;border-radius:20px;font-size:.6rem;font-weight:bold;background:#4ade80;color:#000}
+.ibtn{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:6px 9px;font-size:.9rem;color:var(--tx)}
+.ibtn:hover{background:var(--acg);border-color:var(--ac)}
+.pnl{position:absolute;width:285px;max-height:65vh;background:var(--panel);border:1px solid var(--border);border-radius:14px;backdrop-filter:blur(12px);display:none;flex-direction:column;overflow:hidden}
+.pl{top:60px;left:10px}.pr{top:60px;right:10px}.pt{top:60px;right:305px;width:295px}.pp{top:60px;left:305px;width:295px}
+.ph{padding:10px 12px;border-bottom:1px solid var(--border);font-weight:bold;display:flex;justify-content:space-between;align-items:center;font-size:.85rem}
+.pc{padding:8px;overflow-y:auto;flex:1;font-size:.75rem}
+.pcl{cursor:pointer;opacity:.6;padding:2px 6px}.pcl:hover{opacity:1}
+#popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(360px,92vw);max-height:75vh;background:var(--panel);border:2px solid var(--gold);border-radius:14px;z-index:500;display:none;flex-direction:column;overflow:hidden}
+#popup.show{display:flex}
+#npcModal{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center}
+#npcModal.show{display:flex}
+#npcModal .inner{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;width:min(420px,92vw);max-height:85vh;overflow-y:auto}
+#npcModal h3{margin-bottom:12px}
+.frow{margin-bottom:10px}
+.frow label{display:block;font-size:.7rem;color:var(--td);margin-bottom:4px}
+.frow input,.frow select{width:100%;padding:8px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;color:var(--tx);font-size:.85rem}
+.frow input[type=range]{padding:0}
+.trait-grid{display:flex;flex-wrap:wrap;gap:4px}
+.trait-opt{padding:4px 8px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;font-size:.68rem;cursor:pointer}
+.trait-opt.sel{border-color:var(--ac);background:rgba(16,185,129,.15)}
+.sec{margin-bottom:6px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.sect{padding:8px 10px;background:rgba(255,255,255,.05);cursor:pointer;font-weight:bold;display:flex;justify-content:space-between;font-size:.72rem}
+.sect::after{content:'▼';font-size:.55rem;transition:transform .3s}
+.sec.act .sect::after{transform:rotate(180deg)}
+.secb{max-height:0;overflow:hidden;transition:max-height .3s}
+.sec.act .secb{max-height:300px;overflow-y:auto}
+.secc{padding:6px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.pbtn{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:6px;padding:6px 3px;text-align:center;cursor:pointer;font-size:.58rem;transition:all .2s}
+.pbtn:hover{background:var(--acg);border-color:var(--ac)}
+.pbtn .ic{font-size:1.1rem;display:block}
+.icard{display:flex;align-items:center;gap:6px;padding:6px;border-radius:6px;margin-bottom:3px;background:rgba(255,255,255,.03);font-size:.68rem}
+.icard.done{border-left:3px solid var(--ac)}.icard.avl{border-left:3px solid var(--gold)}.icard.lck{opacity:.4;border-left:3px solid #475569}
+.icard .ico{font-size:1.1rem}.icard .inm{flex:1}
+.icard .inm small{display:block;color:var(--td);font-size:.6rem}
+.icard button{background:var(--gold);color:#000;border:none;padding:2px 6px;border-radius:4px;font-size:.6rem;font-weight:bold}
+.icard button:disabled{background:#475569;color:#888}
+.icard .abtn{background:var(--danger);color:#fff}
+.prog{height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;margin-top:2px}
+.prog div{height:100%;background:var(--gold)}
+.lentry{margin-bottom:4px;padding:4px 6px;border-radius:5px;background:rgba(255,255,255,.03);border-left:3px solid var(--ac);font-size:.64rem;line-height:1.2}
+.lentry.birth{border-left-color:#f472b6}.lentry.death{border-left-color:var(--danger)}.lentry.war{border-left-color:#dc2626}
+.lentry.dog{border-left-color:#38bdf8}.lentry.faith{border-left-color:#e879f9}.lentry.gold{border-left-color:var(--gold)}
+.ltime{font-size:.55rem;color:var(--td)}
+#ctrls{bottom:12px;left:50%;transform:translateX(-50%);display:none;gap:5px;flex-wrap:wrap;justify-content:center}
+.cbtn{padding:9px 13px;background:var(--panel);border:1px solid var(--border);border-radius:10px;color:var(--tx);font-weight:bold;font-size:.85rem}
+.cbtn:hover{background:var(--ac)}.cbtn.ext{border-color:var(--danger);color:var(--danger)}.cbtn.ext:hover{background:var(--danger);color:#fff}
+#zoomc{position:absolute;right:10px;top:50%;transform:translateY(-50%);display:none;flex-direction:column;gap:5px;z-index:10}
+#zoomc button{width:38px;height:38px;border-radius:9px;background:var(--panel);border:1px solid var(--border);color:var(--tx);font-size:1.2rem;font-weight:bold}
+#mmw{position:absolute;bottom:12px;right:10px;z-index:10;border:2px solid var(--border);border-radius:8px;overflow:hidden;background:#000;display:none}
+#mm{display:block;width:160px;height:116px;cursor:pointer;image-rendering:pixelated}
+#banner{position:absolute;top:60px;left:50%;transform:translateX(-50%);padding:10px 22px;border-radius:12px;font-weight:bold;background:linear-gradient(135deg,rgba(16,185,129,.95),rgba(5,150,105,.95));box-shadow:0 6px 25px var(--acg);z-index:400;pointer-events:none;opacity:0;transition:opacity .4s;text-align:center;max-width:90vw;font-size:.9rem}
+#banner.show{opacity:1}
+#banner.gold{background:linear-gradient(135deg,rgba(251,191,36,.95),rgba(217,119,6,.95));color:#000}
+#banner.danger{background:linear-gradient(135deg,rgba(239,68,68,.95),rgba(153,27,27,.95))}
+#banner.war{background:linear-gradient(135deg,rgba(220,38,38,.95),rgba(127,29,29,.95))}
+#banner.dog{background:linear-gradient(135deg,rgba(56,189,248,.95),rgba(30,64,175,.95))}
+#banner.magic{background:linear-gradient(135deg,rgba(168,85,247,.95),rgba(88,28,135,.95))}
+#obanner{position:absolute;top:105px;left:50%;transform:translateX(-50%);padding:6px 16px;border-radius:8px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);color:var(--gold);z-index:390;pointer-events:none;opacity:0;transition:opacity .4s;font-size:.8rem}
+#obanner.show{opacity:1}
+#notif{position:fixed;top:16px;right:16px;padding:12px 18px;background:var(--panel);border:1px solid var(--gold);border-radius:10px;z-index:2000;opacity:0;transform:translateY(-10px);transition:all .3s;pointer-events:none;max-width:280px;font-size:.8rem}
+#notif.show{opacity:1;transform:translateY(0)}
+#buildHint{position:absolute;bottom:65px;left:50%;transform:translateX(-50%);padding:7px 18px;border-radius:8px;background:rgba(16,185,129,.9);color:#000;font-weight:bold;z-index:390;display:none;font-size:.8rem}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}
+@media(max-width:900px){.pnl{width:86vw;max-height:48vh}.pl{left:7vw}.pr{right:7vw}.pt,.pp{left:7vw;right:auto;width:86vw}#mm{width:100px;height:73px}.st{font-size:.7rem}}
+</style>
+</head>
+<body>
+<div id="auth"><div class="box">
+<h1>🌍 WORL KALM</h1>
+<p class="sub">Simulación Divina · Guía tu civilización desde la piedra hasta las estrellas</p>
+<div id="authProfiles" style="display:none"><div class="card"><h2>Elige tu Dios</h2><div class="profiles" id="profList"></div><button class="btn btn-p" id="btnNewProf">➕ Crear Nuevo Dios</button></div></div>
+<div id="authCreate" style="display:none"><div class="card"><h2>Crea tu Dios</h2>
+<input class="inp" id="inpName" placeholder="Nombre del Dios" maxlength="20">
+<div class="avpick" id="avPick"></div>
+<div class="diffs" id="diffPick"></div>
+<button class="btn btn-p" id="btnCreate">🌅 Descender al Mundo</button>
+<button class="btn btn-g" id="btnBack">← Volver</button>
+</div></div>
+</div></div>
+<canvas id="gc"></canvas>
+<div class="ui" id="tb" style="display:none">
+<span class="gbadge" id="uAv">👑</span><span class="gname" id="uNm">Dios</span>
+<span class="ebadge" id="uEra">Piedra</span><span class="sbadge" id="uSeas">🌸</span>
+<span class="st" id="uTime">🕒 08:00</span><span class="st" id="uWea">🌤</span><span class="st" id="uDay">Día 1</span>
+<span class="st" id="uPop">👥 0</span><span class="st" id="uDog">🐕 0</span>
+<span class="st" id="uFood">🍎 0</span><span class="st" id="uWood">🪵 0</span><span class="st" id="uStone">🪨 0</span>
+<span class="st" id="uGold">🪙 0</span><span class="st" id="uFaith">🕊️ 0</span><span class="st" id="uKnow">🧠 0</span><span class="st" id="uDef">🛡️ 0</span>
+<button class="ibtn" id="bRain">🌧️</button><button class="ibtn" id="bLog">📜</button>
+<button class="ibtn" id="bPow">✨</button><button class="ibtn" id="bTech">🧪</button>
+<button class="ibtn" id="bPan">🏛️</button><button class="ibtn" id="bNpc">👤+</button>
+<button class="ibtn" id="bAch">🏆</button><button class="ibtn" id="bPause">⏸</button>
+<button class="ibtn" id="bSpd">▶x1</button><button class="ibtn" id="bSave">💾</button><button class="ibtn" id="bExit">🚪</button>
+</div>
+<div class="ui pnl pl" id="pLog"><div class="ph">📜 Crónicas <span class="pcl" data-c="pLog">✕</span></div><div class="pc" id="logC"></div></div>
+<div class="ui pnl pr" id="pPow"><div class="ph">✨ Poderes <span class="pcl" data-c="pPow">✕</span></div><div class="pc" id="powC"></div></div>
+<div class="ui pnl pt" id="pTech"><div class="ph">🧪 Tecnologías <span class="pcl" data-c="pTech">✕</span></div><div class="pc" id="techC"></div></div>
+<div class="ui pnl pp" id="pPan"><div class="ph">🏛️ Panteón y Mundo <span class="pcl" data-c="pPan">✕</span></div><div class="pc" id="panC"></div></div>
+<div class="ui pnl pp" id="pAch"><div class="ph">🏆 Logros <span class="pcl" data-c="pAch">✕</span></div><div class="pc" id="achC"></div></div>
+<div id="popup"><div class="ph" id="popT">Info <span class="pcl" data-c="popup">✕</span></div><div class="pc" id="popC"></div></div>
+<div class="ui" id="ctrls">
+<button class="cbtn" id="cPause">⏸ PAUSA</button>
+<button class="cbtn" id="cNpc">👤+ CREAR NPC</button>
+<button class="cbtn ext" id="cExit">🚪 SALIR</button>
+</div>
+<div id="zoomc"><button id="zIn">+</button><button id="zOut">−</button></div>
+<div id="mmw"><canvas id="mm" width="110" height="80"></canvas></div>
+<div id="banner"></div><div id="obanner"></div><div id="notif"></div><div id="buildHint">🏗️ Click para colocar · ESC cancela</div>
+<div id="npcModal"><div class="inner">
+<h3>👤 Crear NPC Divino</h3>
+<div class="frow"><label>Nombre</label><input id="npcName" placeholder="Nombre del NPC" maxlength="20"></div>
+<div class="frow"><label>Edad: <span id="npcAgeVal">25</span></label><input type="range" id="npcAge" min="1" max="70" value="25"></div>
+<div class="frow"><label>Género</label><select id="npcGender"><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+<div class="frow"><label>Personalidad</label><select id="npcPers"></select></div>
+<div class="frow"><label>Rasgos (hasta 3)</label><div class="trait-grid" id="npcTraits"></div></div>
+<div class="frow"><label>Gusto</label><select id="npcLike"></select></div>
+<div class="frow"><label>Historia de llegada</label><select id="npcStory">
+<option value="refuge">🏚️ Llegó buscando refugio</option>
+<option value="family">👨‍👩‍👧 Llegó buscando a un familiar</option>
+<option value="adventure">🧭 Llegó por aventura</option>
+<option value="exile">⚔️ Fue exiliado de otra aldea</option>
+<option value="divine">✨ Enviado por los dioses</option>
+</select></div>
+<button class="btn btn-p" id="npcCreate">🌟 Crear y Enviar</button>
+<button class="btn btn-g" id="npcCancel">Cancelar</button>
+</div></div>
+<script>
+var WK={};
+WK.CFG={TILE:40,COLS:110,ROWS:80,TICK:16,DAY:60000,AGING:.00028,SEASON_LEN:30,MAX_DOGS:12,MAX_POP:80,WALL_R:230,WALL_N:16,
+ERAS:['Piedra','Agrícola','Bronce','Hierro','Medieval','Industrial','Moderna','Futurista'],
+SEASONS:[{n:'Primavera',e:'🌸',f:1.3,c:'#4ade80'},{n:'Verano',e:'☀️',f:1.5,c:'#fbbf24'},{n:'Otoño',e:'🍂',f:1,c:'#f97316'},{n:'Invierno',e:'❄️',f:.4,c:'#93c5fd'}],
+DIFF:{peaceful:{t:.3,r:1.5},normal:{t:1,r:1},hard:{t:1.8,r:.7},brutal:{t:3,r:.4}}};
+WK.CFG.WW=WK.CFG.COLS*WK.CFG.TILE;WK.CFG.WH=WK.CFG.ROWS*WK.CFG.TILE;
+WK.U={rand:function(a,b){return Math.random()*(b-a)+a},ri:function(a,b){return Math.floor(this.rand(a,b))},
+dist:function(a,b){return Math.hypot(a.x-b.x,a.y-b.y)},clamp:function(v,a,b){return Math.max(a,Math.min(b,v))},
+pick:function(a){return a[this.ri(0,a.length)]},uid:function(){return Math.random().toString(36).substr(2,9)},
+h2:function(x,y){var n=Math.imul(x,374761393)+Math.imul(y,668265263);n=Math.imul(n^(n>>>13),1274126177);return((n^(n>>>16))>>>0)/4294967295},
+sn:function(x,y){var xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi;xf=xf*xf*(3-2*xf);yf=yf*yf*(3-2*yf);var u=this;var a=u.h2(xi,yi),b=u.h2(xi+1,yi),c=u.h2(xi,yi+1),d=u.h2(xi+1,yi+1);return a+(b-a)*xf+(c-a)*yf+(a-b-c+d)*xf*yf},
+fbm:function(x,y){var t=0,amp=1,f=1,tot=0;for(var i=0;i<4;i++){t+=this.sn(x*f,y*f)*amp;tot+=amp;amp*=.5;f*=2}return t/tot}};
+WK.Audio={ctx:null,on:true,init:function(){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){this.on=false}},
+resume:function(){if(this.ctx&&this.ctx.state==='suspended')try{this.ctx.resume()}catch(e){}},
+tone:function(f,d,t,v){if(!this.on||!this.ctx)return;this.resume();try{var o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.08,this.ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,this.ctx.currentTime+(d||.2));o.connect(g);g.connect(this.ctx.destination);o.start();o.stop(this.ctx.currentTime+(d||.2))}catch(e){}},
+play:function(n){if(!this.on)return;var s=this;switch(n){case'click':s.tone(600,.06,'square',.04);break;case'build':s.tone(300,.12,'triangle',.07);break;case'discover':s.tone(523,.12,'sine',.09);setTimeout(function(){s.tone(784,.2,'sine',.09)},120);break;case'birth':s.tone(880,.15,'sine',.07);break;case'death':s.tone(200,.3,'sine',.07);break;case'war':s.tone(150,.25,'sawtooth',.07);break;case'bark':s.tone(400,.08,'square',.05);setTimeout(function(){s.tone(350,.08,'square',.05)},80);break;case'achv':s.tone(659,.1,'sine',.09);setTimeout(function(){s.tone(880,.15,'sine',.09)},100);break;case'miracle':s.tone(523,.2,'sine',.09);setTimeout(function(){s.tone(784,.3,'sine',.09)},150);break}}};
+WK.D={};
+WK.D.ANIMALS=[
+{id:'a1',n:'Conejo',e:'🐇',hp:10,m:5,sp:2,h:0,era:0,w:0},{id:'a2',n:'Ciervo',e:'🦌',hp:30,m:15,sp:2.5,h:0,era:0,w:0},
+{id:'a3',n:'Oveja',e:'🐑',hp:15,m:8,sp:1,h:0,era:0,w:0},{id:'a4',n:'Jabalí',e:'🐗',hp:40,m:20,sp:1.5,h:1,era:0,w:0},
+{id:'a5',n:'Lobo',e:'🐺',hp:50,m:10,sp:2.5,h:1,era:0,w:0},{id:'a6',n:'Oso',e:'🐻',hp:100,m:40,sp:1.5,h:1,era:0,w:0},
+{id:'a7',n:'Águila',e:'🦅',hp:20,m:5,sp:4,h:1,era:0,w:0},{id:'a8',n:'Cangrejo',e:'🦀',hp:10,m:3,sp:1,h:0,era:0,w:1},
+{id:'a9',n:'Cocodrilo',e:'🐊',hp:120,m:40,sp:1.5,h:1,era:1,w:1},{id:'a10',n:'Tiburón',e:'🦈',hp:80,m:30,sp:3,h:1,era:1,w:1},
+{id:'a11',n:'León',e:'🦁',hp:90,m:30,sp:2.5,h:1,era:1,w:0},{id:'a12',n:'Tigre',e:'🐯',hp:80,m:25,sp:3,h:1,era:1,w:0},
+{id:'a13',n:'Mamut',e:'🦣',hp:200,m:100,sp:1,h:1,era:2,w:0},{id:'a14',n:'T-Rex',e:'🦖',hp:300,m:150,sp:2,h:1,era:2,w:0},
+{id:'a15',n:'Dragón',e:'🐉',hp:500,m:200,sp:4,h:1,era:3,w:0},{id:'a16',n:'Unicornio',e:'🦄',hp:200,m:80,sp:3,h:0,era:3,w:0},
+{id:'a17',n:'Zorro',e:'🦊',hp:25,m:8,sp:3,h:1,era:0,w:0},{id:'a18',n:'Gato',e:'🐈',hp:12,m:2,sp:3,h:0,era:0,w:0},
+{id:'a19',n:'Perro Salvaje',e:'🐕',hp:30,m:5,sp:2.5,h:1,era:0,w:0},{id:'a20',n:'Caballo',e:'🐎',hp:40,m:20,sp:3,h:0,era:0,w:0},
+{id:'a21',n:'Vaca',e:'🐄',hp:35,m:15,sp:1,h:0,era:0,w:0},{id:'a22',n:'Cerdo',e:'🐖',hp:20,m:10,sp:1,h:0,era:0,w:0},
+{id:'a23',n:'Gallina',e:'🐓',hp:8,m:4,sp:1,h:0,era:0,w:0},{id:'a24',n:'Pato',e:'🦆',hp:8,m:4,sp:2,h:0,era:0,w:0},
+{id:'a25',n:'Pavo',e:'🦃',hp:12,m:6,sp:1,h:0,era:0,w:0},{id:'a26',n:'Cabra',e:'🐐',hp:18,m:9,sp:1.5,h:0,era:0,w:0},
+{id:'a27',n:'Tortuga',e:'🐢',hp:20,m:5,sp:.5,h:0,era:0,w:0},{id:'a28',n:'Serpiente',e:'🐍',hp:15,m:2,sp:2,h:1,era:0,w:0},
+{id:'a29',n:'Rana',e:'🐸',hp:5,m:1,sp:2,h:0,era:0,w:0},{id:'a30',n:'Ratón',e:'🐁',hp:4,m:2,sp:2,h:0,era:0,w:0},
+{id:'a31',n:'Ardilla',e:'🐿️',hp:8,m:3,sp:3,h:0,era:0,w:0},{id:'a32',n:'Mapache',e:'🦝',hp:20,m:6,sp:2,h:0,era:0,w:0},
+{id:'a33',n:'Mofeta',e:'🦨',hp:15,m:3,sp:1.5,h:0,era:0,w:0},{id:'a34',n:'Tejón',e:'🦡',hp:30,m:8,sp:1.5,h:1,era:0,w:0},
+{id:'a35',n:'Castor',e:'🦫',hp:20,m:8,sp:1.5,h:0,era:0,w:0},{id:'a36',n:'Nutria',e:'🦦',hp:15,m:5,sp:2,h:0,era:0,w:1},
+{id:'a37',n:'Foca',e:'🦭',hp:25,m:10,sp:1.5,h:0,era:0,w:1},{id:'a38',n:'Pingüino',e:'🐧',hp:15,m:5,sp:1,h:0,era:0,w:1},
+{id:'a39',n:'Delfín',e:'🐬',hp:60,m:20,sp:4,h:0,era:2,w:1},{id:'a40',n:'Ballena',e:'🐋',hp:250,m:80,sp:1,h:0,era:2,w:1},
+{id:'a41',n:'Pulpo',e:'🐙',hp:70,m:25,sp:2,h:1,era:2,w:1},{id:'a42',n:'Calamar',e:'🦑',hp:60,m:20,sp:2.5,h:1,era:2,w:1},
+{id:'a43',n:'Pez Espada',e:'🐟',hp:30,m:10,sp:3,h:0,era:1,w:1},{id:'a44',n:'Mantarraya',e:'🐟',hp:40,m:15,sp:2,h:0,era:1,w:1},
+{id:'a45',n:'Leopardo',e:'🐆',hp:70,m:22,sp:3.5,h:1,era:1,w:0},{id:'a46',n:'Pantera',e:'🐈‍⬛',hp:80,m:25,sp:3.5,h:1,era:1,w:0},
+{id:'a47',n:'Gorila',e:'🦍',hp:100,m:35,sp:2,h:1,era:2,w:0},{id:'a48',n:'Chimpancé',e:'🐒',hp:40,m:10,sp:2.5,h:0,era:1,w:0},
+{id:'a49',n:'Elefante',e:'🐘',hp:180,m:80,sp:1,h:0,era:2,w:0},{id:'a50',n:'Rinoceronte',e:'🦏',hp:150,m:60,sp:1.5,h:1,era:2,w:0},
+{id:'a51',n:'Hipopótamo',e:'🦛',hp:140,m:50,sp:1,h:1,era:2,w:1},{id:'a52',n:'Jirafa',e:'🦒',hp:120,m:50,sp:1.5,h:0,era:2,w:0},
+{id:'a53',n:'Cebra',e:'🦓',hp:40,m:20,sp:3,h:0,era:1,w:0},{id:'a54',n:'Bisonte',e:'🦬',hp:80,m:30,sp:2,h:0,era:1,w:0},
+{id:'a55',n:'Alce',e:'🦌',hp:60,m:25,sp:2,h:0,era:1,w:0},{id:'a56',n:'Reno',e:'🦌',hp:50,m:20,sp:2.5,h:0,era:1,w:0},
+{id:'a57',n:'Búho',e:'🦉',hp:15,m:5,sp:3,h:0,era:0,w:0},{id:'a58',n:'Cuervo',e:'🐦‍⬛',hp:10,m:3,sp:3,h:0,era:0,w:0},
+{id:'a59',n:'Loro',e:'🦜',hp:12,m:4,sp:3,h:0,era:0,w:0},{id:'a60',n:'Flamenco',e:'🦩',hp:15,m:5,sp:2,h:0,era:0,w:0},
+{id:'a61',n:'Cisne',e:'🦢',hp:15,m:5,sp:2,h:0,era:0,w:1},{id:'a62',n:'Pelícano',e:'🐦',hp:20,m:8,sp:2,h:0,era:0,w:1},
+{id:'a63',n:'Colibrí',e:'🐦',hp:3,m:1,sp:5,h:0,era:0,w:0},{id:'a64',n:'Pavo Real',e:'🦚',hp:15,m:5,sp:1.5,h:0,era:0,w:0},
+{id:'a65',n:'Mariposa',e:'🦋',hp:2,m:0,sp:3,h:0,era:0,w:0},{id:'a66',n:'Abeja',e:'🐝',hp:3,m:1,sp:4,h:1,era:0,w:0},
+{id:'a67',n:'Escorpión',e:'🦂',hp:10,m:2,sp:1.5,h:1,era:0,w:0},{id:'a68',n:'Araña Gigante',e:'🕷️',hp:25,m:5,sp:2,h:1,era:1,w:0},
+{id:'a69',n:'Iguana',e:'🦎',hp:15,m:5,sp:1.5,h:0,era:0,w:0},{id:'a70',n:'Camaleón',e:'🦎',hp:10,m:3,sp:1,h:0,era:0,w:0},
+{id:'a71',n:'Komodo',e:'🦎',hp:60,m:20,sp:1.5,h:1,era:1,w:0},{id:'a72',n:'Piraña',e:'🐟',hp:10,m:2,sp:3,h:1,era:1,w:1},
+{id:'a73',n:'Anguila',e:'🐍',hp:20,m:8,sp:2,h:1,era:1,w:1},{id:'a74',n:'Langosta',e:'🦞',hp:15,m:8,sp:1,h:0,era:0,w:1},
+{id:'a75',n:'Erizo de Mar',e:'🦔',hp:10,m:3,sp:.5,h:1,era:0,w:1},{id:'a76',n:'Estrella de Mar',e:'⭐',hp:5,m:1,sp:.3,h:0,era:0,w:1},
+{id:'a77',n:'Grifo',e:'🦅',hp:300,m:100,sp:4,h:1,era:3,w:0},{id:'a78',n:'Fénix',e:'🔥',hp:250,m:90,sp:4,h:1,era:3,w:0},
+{id:'a79',n:'Kraken',e:'🦑',hp:400,m:100,sp:2,h:1,era:3,w:1},{id:'a80',n:'Leviatán',e:'🐋',hp:450,m:120,sp:2,h:1,era:3,w:1},
+{id:'a81',n:'Basilisco',e:'🐍',hp:180,m:60,sp:2,h:1,era:2,w:0},{id:'a82',n:'Minotauro',e:'🐂',hp:250,m:80,sp:2,h:1,era:2,w:0},
+{id:'a83',n:'Cíclope',e:'👁️',hp:200,m:70,sp:1.5,h:1,era:2,w:0},{id:'a84',n:'Hidra',e:'🐉',hp:350,m:120,sp:1.5,h:1,era:3,w:1},
+{id:'a85',n:'Mantícora',e:'🦂',hp:280,m:90,sp:3,h:1,era:3,w:0},{id:'a86',n:'Quimera',e:'🦁',hp:320,m:110,sp:2.5,h:1,era:3,w:0},
+{id:'a87',n:'Wyvern',e:'🐲',hp:280,m:95,sp:4,h:1,era:3,w:0},{id:'a88',n:'Behemoth',e:'🦏',hp:500,m:180,sp:1,h:1,era:3,w:0},
+{id:'a89',n:'Yeti',e:'🦍',hp:200,m:70,sp:2,h:1,era:2,w:0},{id:'a90',n:'Espectro',e:'👻',hp:100,m:30,sp:3,h:1,era:2,w:0},
+{id:'a91',n:'Golem de Piedra',e:'🗿',hp:400,m:0,sp:1,h:1,era:2,w:0},{id:'a92',n:'Elemental de Fuego',e:'🔥',hp:200,m:60,sp:2,h:1,era:3,w:0},
+{id:'a93',n:'Lobo Gélido',e:'🐺',hp:80,m:15,sp:3,h:1,era:1,w:0},{id:'a94',n:'Oso Polar',e:'🐻‍❄️',hp:120,m:45,sp:1.5,h:1,era:1,w:0},
+{id:'a95',n:'Búfalo',e:'🦬',hp:70,m:30,sp:2,h:0,era:1,w:0},{id:'a96',n:'Antílope',e:'🦌',hp:30,m:12,sp:3.5,h:0,era:1,w:0},
+{id:'a97',n:'Jaguar',e:'🐆',hp:75,m:25,sp:3,h:1,era:1,w:0},{id:'a98',n:'Puma',e:'🐈',hp:65,m:20,sp:3,h:1,era:1,w:0},
+{id:'a99',n:'Hiena',e:'🐕',hp:45,m:12,sp:2.5,h:1,era:0,w:0},{id:'a100',n:'Buitre',e:'🦅',hp:20,m:5,sp:3,h:1,era:0,w:0},
+{id:'a101',n:'Anaconda',e:'🐍',hp:80,m:25,sp:1.5,h:1,era:1,w:1},{id:'a102',n:'Pez Globo',e:'🐡',hp:15,m:5,sp:1.5,h:1,era:0,w:1},
+{id:'a103',n:'Morena',e:'🐍',hp:35,m:12,sp:2,h:1,era:1,w:1},{id:'a104',n:'Narval',e:'🐋',hp:100,m:40,sp:2,h:0,era:2,w:1},
+{id:'a105',n:'Orca',e:'🐋',hp:120,m:50,sp:3,h:1,era:2,w:1}];
+WK.D.WEAPONS=[
+{id:'w1',n:'Garrote',e:'🪵',d:3,era:0},{id:'w2',n:'Roca Afilada',e:'🪨',d:4,era:0},{id:'w3',n:'Lanza Caña',e:'🔱',d:4,era:0},
+{id:'w4',n:'Honda',e:'🪢',d:4,era:0},{id:'w5',n:'Daga Hueso',e:'🦴',d:5,era:0},{id:'w6',n:'Hacha Pedernal',e:'🪓',d:5,era:0,t:'axe'},
+{id:'w7',n:'Arco Corto',e:'🏹',d:6,era:0},{id:'w8',n:'Jabalina',e:'🎯',d:6,era:0},{id:'w9',n:'Maza Piedra',e:'🔨',d:7,era:0},
+{id:'w10',n:'Cuchillo Sílex',e:'🔪',d:7,era:0},{id:'w11',n:'Boomerang',e:'🪃',d:6,era:0},{id:'w12',n:'Atlatl',e:'🔱',d:8,era:0},
+{id:'w13',n:'Hacha Bronce',e:'🪓',d:12,era:1,t:'axe'},{id:'w14',n:'Espada Bronce',e:'🗡️',d:10,era:1},{id:'w15',n:'Lanza Bronce',e:'🔱',d:11,era:1},
+{id:'w16',n:'Arco Compuesto',e:'🏹',d:14,era:1},{id:'w17',n:'Maza Guerra',e:'🔨',d:15,era:1},{id:'w18',n:'Daga Bronce',e:'🔪',d:12,era:1},
+{id:'w19',n:'Pico Bronce',e:'⛏️',d:8,era:1,t:'mine'},{id:'w20',n:'Caña Pescar',e:'🎣',d:0,era:1,t:'fish'},
+{id:'w21',n:'Red Pesca',e:'🕸️',d:0,era:1,t:'net'},{id:'w22',n:'Bote',e:'🛶',d:0,era:1,t:'boat'},
+{id:'w23',n:'Escudo Madera',e:'🛡️',d:5,era:1},{id:'w24',n:'Falx',e:'🗡️',d:13,era:1},{id:'w25',n:'Khopesh',e:'🗡️',d:14,era:1},
+{id:'w26',n:'Espada Hierro',e:'🗡️',d:20,era:2},{id:'w27',n:'Hacha Hierro',e:'🪓',d:22,era:2,t:'axe'},{id:'w28',n:'Ballesta',e:'🏹',d:25,era:2},
+{id:'w29',n:'Alabarda',e:'🔱',d:24,era:2},{id:'w30',n:'Martillo Guerra',e:'🔨',d:28,era:2},{id:'w31',n:'Pico Hierro',e:'⛏️',d:12,era:2,t:'mine'},
+{id:'w32',n:'Espada Larga',e:'🗡️',d:22,era:2},{id:'w33',n:'Mandoble',e:'⚔️',d:30,era:2},{id:'w34',n:'Lanza Larga',e:'🔱',d:26,era:2},
+{id:'w35',n:'Arco Largo',e:'🏹',d:28,era:2},{id:'w36',n:'Escudo Torre',e:'🛡️',d:10,era:2},{id:'w37',n:'Mangual',e:'⛓️',d:27,era:2},
+{id:'w38',n:'Espada Acero',e:'🗡️',d:35,era:3},{id:'w39',n:'Hacha Acero',e:'🪓',d:38,era:3,t:'axe'},{id:'w40',n:'Arco Élite',e:'🏹',d:40,era:3},
+{id:'w41',n:'Ballesta Pesada',e:'🏹',d:42,era:3},{id:'w42',n:'Alabarda Real',e:'🔱',d:44,era:3},{id:'w43',n:'Martillo Combate',e:'🔨',d:45,era:3},
+{id:'w44',n:'Espada Divina',e:'⚔️',d:100,era:3},{id:'w45',n:'Rayo Zeus',e:'⚡',d:200,era:3},{id:'w46',n:'Tridente',e:'🔱',d:110,era:3,t:'fish'},
+{id:'w47',n:'Excalibur',e:'⚔️',d:150,era:3},{id:'w48',n:'Mjolnir',e:'🔨',d:180,era:3},{id:'w49',n:'Gungnir',e:'🔱',d:160,era:3},
+{id:'w50',n:'Arco Artemisa',e:'🏹',d:140,era:3},{id:'w51',n:'Cetro Divino',e:'🪄',d:120,era:3},{id:'w52',n:'Escudo Divino',e:'🛡️',d:80,era:3},
+{id:'w53',n:'Hoz Cosecha',e:'🌾',d:8,era:1,t:'axe'},{id:'w54',n:'Pico Oro',e:'⛏️',d:15,era:2,t:'mine'},
+{id:'w55',n:'Caña Dorada',e:'🎣',d:0,era:2,t:'fish'},{id:'w56',n:'Red Mágica',e:'🕸️',d:0,era:2,t:'net'},
+{id:'w57',n:'Bote Real',e:'🛶',d:0,era:2,t:'boat'},{id:'w58',n:'Katana',e:'🗡️',d:32,era:2},
+{id:'w59',n:'Naginata',e:'🔱',d:30,era:2},{id:'w60',n:'Shuriken',e:'⭐',d:18,era:2},
+{id:'w61',n:'Cimitarra',e:'🗡️',d:28,era:2},{id:'w62',n:'Pica',e:'🔱',d:35,era:3},{id:'w63',n:'Mosquete',e:'🔫',d:50,era:4},
+{id:'w64',n:'Cañón Manual',e:'💣',d:80,era:4},{id:'w65',n:'Rifle',e:'🔫',d:60,era:4},{id:'w66',n:'Granada',e:'💣',d:70,era:4},
+{id:'w67',n:'Sable',e:'🗡️',d:38,era:3},{id:'w68',n:'Florete',e:'🗡️',d:25,era:3},{id:'w69',n:'Guadaña',e:'⚔️',d:40,era:3},
+{id:'w70',n:'Barda',e:'🔱',d:36,era:2},{id:'w71',n:'Lucero del Alba',e:'⛓️',d:33,era:2},{id:'w72',n:'Bec de Corbin',e:'🔨',d:34,era:2},
+{id:'w73',n:'Partesana',e:'🔱',d:30,era:2},{id:'w74',n:'Voulge',e:'🪓',d:29,era:2,t:'axe'},{id:'w75',n:'Glaive',e:'🔱',d:31,era:2},
+{id:'w76',n:'Scythe Guerra',e:'⚔️',d:37,era:3},{id:'w77',n:'Warhammer',e:'🔨',d:46,era:3},{id:'w78',n:'Maul',e:'🔨',d:48,era:3},
+{id:'w79',n:'Claymore',e:'⚔️',d:42,era:3},{id:'w80',n:'Zweihander',e:'⚔️',d:50,era:3},
+{id:'w81',n:'Tridente Poseidón',e:'🔱',d:130,era:3,t:'fish'},{id:'w82',n:'Arco Apolo',e:'🏹',d:145,era:3},
+{id:'w83',n:'Lanza Longinus',e:'🔱',d:135,era:3},{id:'w84',n:'Hacha Hefesto',e:'🪓',d:155,era:3,t:'axe'},
+{id:'w85',n:'Báculo Atenea',e:'🪄',d:125,era:3},{id:'w86',n:'Escudo Perseo',e:'🛡️',d:90,era:3},
+{id:'w87',n:'Espada Fuego',e:'🔥',d:95,era:3},{id:'w88',n:'Espada Hielo',e:'❄️',d:95,era:3},
+{id:'w89',n:'Espada Rayo',e:'⚡',d:98,era:3},{id:'w90',n:'Espada Sombra',e:'🌑',d:92,era:3},
+{id:'w91',n:'Espada Luz',e:'✨',d:97,era:3},{id:'w92',n:'Arco Viento',e:'🌪️',d:88,era:3},
+{id:'w93',n:'Lanza Tierra',e:'🪨',d:85,era:3},{id:'w94',n:'Daga Veneno',e:'🐍',d:45,era:2},
+{id:'w95',n:'Ballesta Repetición',e:'🏹',d:38,era:3},{id:'w96',n:'Arco Compuesto Élite',e:'🏹',d:44,era:3},
+{id:'w97',n:'Pica Caballería',e:'🔱',d:40,era:3},{id:'w98',n:'Lanza Dragón',e:'🐉',d:115,era:3},
+{id:'w99',n:'Hacha Berserker',e:'🪓',d:55,era:3,t:'axe'},{id:'w100',n:'Martillo Thor',e:'🔨',d:190,era:3},
+{id:'w101',n:'Espada del Vacío',e:'🌀',d:160,era:3},{id:'w102',n:'Arco Celestial',e:'🌟',d:170,era:3}];
+WK.D.BUILDINGS=[
+{id:'hut',n:'Choza',e:'🛖',cap:2,cw:10,cs:0,cat:'house'},{id:'wood_house',n:'Casa Madera',e:'🏠',cap:4,cw:20,cs:5,cat:'house'},
+{id:'stone_house',n:'Casa Piedra',e:'🏡',cap:6,cw:15,cs:40,cat:'house'},{id:'mansion',n:'Mansión',e:'🏢',cap:10,cw:50,cs:60,cat:'house'},
+{id:'campfire',n:'Fogata',e:'🔥',cap:0,cw:5,cs:0,cat:'civic'},{id:'well',n:'Pozo',e:'⛲',cap:0,cw:8,cs:10,cat:'civic'},
+{id:'farm',n:'Granja',e:'🌾',cap:0,cw:15,cs:0,cat:'prod'},{id:'temple',n:'Templo',e:'🏛️',cap:0,cw:25,cs:25,cat:'relig'},
+{id:'market',n:'Mercado',e:'🏪',cap:0,cw:35,cs:20,cat:'prod'},{id:'library',n:'Biblioteca',e:'📚',cap:0,cw:30,cs:20,cat:'civic'},
+{id:'hospital',n:'Hospital',e:'🏥',cap:0,cw:40,cs:30,cat:'civic'},{id:'kennel',n:'Perrera',e:'🐕',cap:0,cw:12,cs:8,cat:'civic'},
+{id:'tower',n:'Torre Vigía',e:'🗼',cap:0,cw:10,cs:40,cat:'mil'},{id:'wall',n:'Muralla',e:'🧱',cap:0,cw:0,cs:15,cat:'mil'},
+{id:'gate',n:'Puerta',e:'🚪',cap:0,cw:15,cs:20,cat:'mil'},{id:'castle',n:'Castillo',e:'🏰',cap:20,cw:100,cs:150,cat:'mil'},
+{id:'barracks',n:'Cuartel',e:'⚔️',cap:0,cw:30,cs:25,cat:'mil'},{id:'stable',n:'Establo',e:'🐎',cap:0,cw:20,cs:10,cat:'prod'},
+{id:'smith',n:'Herrería',e:'🔨',cap:0,cw:25,cs:20,cat:'prod'},{id:'bakery',n:'Panadería',e:'🍞',cap:0,cw:15,cs:10,cat:'prod'},
+{id:'mill',n:'Molino',e:'🌬️',cap:0,cw:20,cs:15,cat:'prod'},{id:'sawmill',n:'Aserradero',e:'🪚',cap:0,cw:20,cs:10,cat:'prod'},
+{id:'quarry',n:'Cantera',e:'⛏️',cap:0,cw:15,cs:20,cat:'prod'},{id:'mine',n:'Mina',e:'🕳️',cap:0,cw:20,cs:25,cat:'prod'},
+{id:'dock',n:'Muelle',e:'⚓',cap:0,cw:30,cs:10,cat:'prod'},{id:'warehouse',n:'Almacén',e:'📦',cap:0,cw:25,cs:20,cat:'prod'},
+{id:'tavern',n:'Taberna',e:'🍺',cap:0,cw:20,cs:15,cat:'civic'},{id:'school',n:'Escuela',e:'🏫',cap:0,cw:30,cs:25,cat:'civic'},
+{id:'university',n:'Universidad',e:'🎓',cap:0,cw:50,cs:40,cat:'civic'},{id:'theater',n:'Teatro',e:'🎭',cap:0,cw:35,cs:30,cat:'civic'},
+{id:'bath',n:'Termas',e:'🛁',cap:0,cw:25,cs:20,cat:'civic'},{id:'garden',n:'Jardín',e:'🌺',cap:0,cw:10,cs:5,cat:'civic'},
+{id:'fountain',n:'Fuente',e:'⛲',cap:0,cw:10,cs:15,cat:'civic'},{id:'monument',n:'Monumento',e:'🗿',cap:0,cw:20,cs:30,cat:'civic'},
+{id:'shrine',n:'Santuario',e:'⛩️',cap:0,cw:15,cs:15,cat:'relig'},{id:'cathedral',n:'Catedral',e:'⛪',cap:0,cw:60,cs:80,cat:'relig'},
+{id:'monastery',n:'Monasterio',e:'🏯',cap:0,cw:40,cs:35,cat:'relig'},{id:'oracle',n:'Oráculo',e:'🔮',cap:0,cw:30,cs:30,cat:'relig'},
+{id:'altar',n:'Altar',e:'🕯️',cap:0,cw:10,cs:10,cat:'relig'},{id:'totem',n:'Tótem',e:'🗿',cap:0,cw:8,cs:5,cat:'relig'},
+{id:'wall_wood',n:'Empalizada',e:'🪵',cap:0,cw:10,cs:0,cat:'mil'},{id:'wall_stone',n:'Muralla Piedra',e:'🧱',cap:0,cw:0,cs:25,cat:'mil'},
+{id:'wall_iron',n:'Muralla Hierro',e:'🛡️',cap:0,cw:5,cs:35,cat:'mil'},{id:'gatehouse',n:'Casa Puerta',e:'🏰',cap:0,cw:20,cs:30,cat:'mil'},
+{id:'archery',n:'Campo Tiro',e:'🏹',cap:0,cw:15,cs:10,cat:'mil'},{id:'arena',n:'Arena',e:'🏟️',cap:0,cw:40,cs:35,cat:'mil'},
+{id:'siege',n:'Taller Asedio',e:'🏗️',cap:0,cw:30,cs:25,cat:'mil'},{id:'watchtower',n:'Atalaya',e:'🗼',cap:0,cw:8,cs:30,cat:'mil'},
+{id:'fort',n:'Fuerte',e:'🏰',cap:5,cw:60,cs:50,cat:'mil'},{id:'keep',n:'Torreón',e:'🏰',cap:8,cw:80,cs:70,cat:'mil'},
+{id:'apiary',n:'Apiario',e:'🐝',cap:0,cw:8,cs:5,cat:'prod'},{id:'vineyard',n:'Viñedo',e:'🍇',cap:0,cw:15,cs:5,cat:'prod'},
+{id:'orchard',n:'Huerto',e:'🍎',cap:0,cw:12,cs:5,cat:'prod'},{id:'pasture',n:'Pasto',e:'🐑',cap:0,cw:10,cs:5,cat:'prod'},
+{id:'fishery',n:'Pesquería',e:'🐟',cap:0,cw:15,cs:10,cat:'prod'},{id:'tannery',n:'Curtiduría',e:'🐄',cap:0,cw:15,cs:10,cat:'prod'},
+{id:'weaver',n:'Tejeduría',e:'🧵',cap:0,cw:15,cs:10,cat:'prod'},{id:'pottery',n:'Alfarería',e:'🏺',cap:0,cw:15,cs:10,cat:'prod'},
+{id:'brewery',n:'Cervecería',e:'🍺',cap:0,cw:20,cs:15,cat:'prod'},{id:'winery',n:'Bodega',e:'🍷',cap:0,cw:20,cs:15,cat:'prod'},
+{id:'cheese',n:'Quesería',e:'🧀',cap:0,cw:12,cs:8,cat:'prod'},{id:'butcher',n:'Carnicería',e:'🥩',cap:0,cw:12,cs:8,cat:'prod'},
+{id:'granary',n:'Granero',e:'🌾',cap:0,cw:20,cs:15,cat:'prod'},{id:'silo',n:'Silo',e:'🏗️',cap:0,cw:15,cs:20,cat:'prod'},
+{id:'bank',n:'Banco',e:'🏦',cap:0,cw:40,cs:35,cat:'civic'},{id:'guild',n:'Gremio',e:'🤝',cap:0,cw:30,cs:25,cat:'civic'},
+{id:'embassy',n:'Embajada',e:'🏛️',cap:0,cw:35,cs:30,cat:'civic'},{id:'prison',n:'Prisión',e:'⛓️',cap:0,cw:25,cs:25,cat:'civic'},
+{id:'gallows',n:'Patíbulo',e:'☠️',cap:0,cw:10,cs:10,cat:'civic'},{id:'cemetery',n:'Cementerio',e:'🪦',cap:0,cw:10,cs:10,cat:'civic'},
+{id:'park',n:'Parque',e:'🌳',cap:0,cw:8,cs:3,cat:'civic'},{id:'plaza',n:'Plaza',e:'🏛️',cap:0,cw:15,cs:15,cat:'civic'},
+{id:'bridge',n:'Puente',e:'🌉',cap:0,cw:15,cs:20,cat:'civic'},{id:'road',n:'Camino',e:'🛤️',cap:0,cw:5,cs:5,cat:'civic'},
+{id:'aqueduct',n:'Acueducto',e:'🏗️',cap:0,cw:20,cs:30,cat:'civic'},{id:'lighthouse',n:'Faro',e:'🗼',cap:0,cw:20,cs:30,cat:'civic'},
+{id:'observatory',n:'Observatorio',e:'🔭',cap:0,cw:35,cs:30,cat:'civic'},{id:'laboratory',n:'Laboratorio',e:'🧪',cap:0,cw:35,cs:30,cat:'civic'},
+{id:'factory',n:'Fábrica',e:'🏭',cap:0,cw:60,cs:50,cat:'prod'},{id:'powerplant',n:'Planta Eléctrica',e:'⚡',cap:0,cw:50,cs:60,cat:'prod'},
+{id:'station',n:'Estación',e:'🚂',cap:0,cw:50,cs:40,cat:'civic'},{id:'airport',n:'Aeropuerto',e:'✈️',cap:0,cw:80,cs:60,cat:'civic'},
+{id:'hospital_mod',n:'Hospital Moderno',e:'🏥',cap:0,cw:60,cs:50,cat:'civic'},{id:'stadium',n:'Estadio',e:'🏟️',cap:0,cw:70,cs:60,cat:'civic'},
+{id:'museum',n:'Museo',e:'🏛️',cap:0,cw:40,cs:35,cat:'civic'},{id:'zoo',n:'Zoológico',e:'🦁',cap:0,cw:35,cs:30,cat:'civic'},
+{id:'wonder_pyramid',n:'Pirámide',e:'🔺',cap:0,cw:100,cs:150,cat:'wonder'},{id:'wonder_colossus',n:'Coloso',e:'🗿',cap:0,cw:80,cs:120,cat:'wonder'},
+{id:'wonder_garden',n:'Jardines Colgantes',e:'🌺',cap:0,cw:60,cs:80,cat:'wonder'},{id:'wonder_lighthouse',n:'Faro Alejandría',e:'🗼',cap:0,cw:70,cs:100,cat:'wonder'},
+{id:'wonder_rome',n:'Coliseo',e:'🏟️',cap:0,cw:90,cs:130,cat:'wonder'},{id:'wonder_taj',n:'Taj Mahal',e:'🕌',cap:0,cw:100,cs:120,cat:'wonder'},
+{id:'wonder_eiffel',n:'Torre Eiffel',e:'🗼',cap:0,cw:80,cs:140,cat:'wonder'},{id:'wonder_space',n:'Puerta Estelar',e:'🚀',cap:0,cw:200,cs:200,cat:'wonder'},
+{id:'tent',n:'Tienda',e:'⛺',cap:1,cw:5,cs:0,cat:'house'},{id:'longhouse',n:'Casa Larga',e:'🏠',cap:6,cw:25,cs:10,cat:'house'},
+{id:'igloo',n:'Iglú',e:'🏔️',cap:2,cw:5,cs:10,cat:'house'},{id:'yurt',n:'Yurta',e:'⛺',cap:3,cw:10,cs:5,cat:'house'},
+{id:'cabin',n:'Cabaña',e:'🛖',cap:3,cw:15,cs:5,cat:'house'},{id:'villa',n:'Villa',e:'🏡',cap:8,cw:40,cs:30,cat:'house'},
+{id:'tower_house',n:'Casa Torre',e:'🏰',cap:5,cw:30,cs:40,cat:'house'},{id:'apartment',n:'Apartamento',e:'🏢',cap:12,cw:60,cs:50,cat:'house'}];
+WK.D.TECHS=[
+{id:'huts',n:'Choza',e:'🛖',era:0,cost:20,req:[]},{id:'fire',n:'Fuego',e:'🔥',era:0,cost:50,req:[]},
+{id:'dog_taming',n:'Domar Perros',e:'🐕',era:0,cost:60,req:['fire']},{id:'dog_breeding',n:'Crianza Canina',e:'🐶',era:0,cost:90,req:['dog_taming']},
+{id:'stone_tools',n:'Herramientas',e:'🪓',era:0,cost:120,req:['fire']},{id:'language',n:'Lenguaje',e:'💬',era:0,cost:160,req:['stone_tools']},
+{id:'well_dig',n:'Excavación',e:'⛲',era:0,cost:70,req:['stone_tools']},{id:'fishing',n:'Pesca',e:'🎣',era:0,cost:90,req:['fire']},
+{id:'agriculture',n:'Agricultura',e:'🌾',era:1,cost:300,req:['stone_tools','language']},{id:'pottery',n:'Cerámica',e:'🏺',era:1,cost:340,req:['fire','agriculture']},
+{id:'wood_houses',n:'Casa Madera',e:'🏠',era:1,cost:420,req:['huts','stone_tools']},{id:'mysticism',n:'Misticismo',e:'🌙',era:1,cost:380,req:['fire','language']},
+{id:'medicine',n:'Medicina',e:'🏥',era:1,cost:250,req:['language']},{id:'writing',n:'Escritura',e:'📜',era:2,cost:600,req:['language','pottery']},
+{id:'bronze',n:'Bronce',e:'⚱️',era:2,cost:700,req:['pottery','stone_tools']},{id:'masonry',n:'Albañilería',e:'🧱',era:2,cost:850,req:['writing','bronze']},
+{id:'stone_houses',n:'Casa Piedra',e:'🏡',era:2,cost:950,req:['masonry','wood_houses']},{id:'iron',n:'Hierro',e:'⚔️',era:3,cost:1200,req:['bronze','masonry']},
+{id:'currency',n:'Moneda',e:'🪙',era:3,cost:1300,req:['writing','iron']},{id:'philosophy',n:'Filosofía',e:'🏛️',era:3,cost:1500,req:['writing','currency']},
+{id:'gunpowder',n:'Pólvora',e:'🧨',era:4,cost:2000,req:['iron','philosophy']},{id:'printing',n:'Imprenta',e:'📚',era:4,cost:2300,req:['philosophy','currency']},
+{id:'steam',n:'Vapor',e:'🚂',era:5,cost:3200,req:['gunpowder','printing']},{id:'electricity',n:'Electricidad',e:'⚡',era:5,cost:4200,req:['steam']},
+{id:'flight',n:'Vuelo',e:'✈️',era:6,cost:5500,req:['electricity','steam']},{id:'internet',n:'Internet',e:'🌐',era:6,cost:7000,req:['electricity','flight']},
+{id:'ai_tech',n:'IA',e:'🤖',era:7,cost:9000,req:['internet']},{id:'space',n:'Era Espacial',e:'🚀',era:7,cost:12000,req:['ai_tech']}];
+WK.D.PANTHEON=[
+{id:'ares',n:'Ares',e:'⚔️',dom:'Guerra',fx:'+50% daño',cost:100},{id:'aphrodite',n:'Afrodita',e:'💖',dom:'Amor',fx:'x2 nacimientos',cost:80},
+{id:'demeter',n:'Deméter',e:'🌾',dom:'Cosecha',fx:'+80% granjas',cost:90},{id:'poseidon',n:'Poseidón',e:'🌊',dom:'Mar',fx:'x2 pesca',cost:85},
+{id:'zeus',n:'Zeus',e:'⚡',dom:'Cielo',fx:'Rayos',cost:120},{id:'athena',n:'Atenea',e:'🦉',dom:'Sabiduría',fx:'+100% saber',cost:100},
+{id:'hephaestus',n:'Hefesto',e:'🔨',dom:'Forja',fx:'+60% construcción',cost:95},{id:'artemis',n:'Artemisa',e:'🏹',dom:'Caza',fx:'+80% caza',cost:75}];
+WK.D.PERS=[{id:'worker',n:'Trabajador',e:'⚒️'},{id:'wise',n:'Sabio',e:'🦉'},{id:'warrior',n:'Guerrero',e:'⚔️'},{id:'social',n:'Sociable',e:'🎭'},{id:'pious',n:'Piadoso',e:'🕊️'},{id:'merchant',n:'Mercader',e:'🪙'},{id:'explorer',n:'Explorador',e:'🧭'},{id:'farmer',n:'Granjero',e:'🌾'}];
+WK.D.TRAITS=[{id:'strong',n:'Fuerte',e:'💪'},{id:'smart',n:'Inteligente',e:'🧠'},{id:'fertile',n:'Fértil',e:'🌱'},{id:'charismatic',n:'Carismático',e:'✨'},{id:'brave',n:'Valiente',e:'🦁'},{id:'swift',n:'Veloz',e:'⚡'},{id:'sickly',n:'Enfermizo',e:'🤒'},{id:'glutton',n:'Glotón',e:'🍖'}];
+WK.D.LIKES=['la música','la caza','el agua','el fuego','las estrellas','la tierra','los animales','la lluvia','el oro','la fe','los perros','la cocina','la aventura','la paz'];
+WK.D.DOG_NAMES=['Firulais','Toby','Nala','Simba','Bobby','Kira','Leo','Mia','Zeus','Thor','Lola','Bruno','Canela','Rocky','Sasha','Rex','Max','Luna','Shadow','Duke'];
+WK.D.NAMES=['Aria','Borin','Cael','Dara','Elio','Fael','Gael','Hira','Ilo','Jora','Kael','Lyra','Miro','Nia','Orin','Pia','Rion','Sia','Tiro','Ulia','Vane','Wren','Xio','Yara','Zane'];
+WK.D.RIVALS=['Los Salvajes','Los Nómadas','Los Bárbaros','Los Errantes','Los Sombríos','Los Feroces'];
+WK.D.AVATARS=['👑','⚡','🔱','🌟','🔥','🌊','🦉','☀️','🌙','⭐'];
+WK.D.ACHV=[{id:'first_build',n:'Constructor',e:'🏗️',d:'Primer edificio'},{id:'first_puppy',n:'Vida Canina',e:'🐶',d:'Primer cachorro'},{id:'first_war',n:'Victoria',e:'⚔️',d:'Gana una guerra'},{id:'pop20',n:'Aldea',e:'👥',d:'20 habitantes'},{id:'pop50',n:'Ciudad',e:'🏙️',d:'50 habitantes'},{id:'era1',n:'Agricultura',e:'🌾',d:'Era Agrícola'},{id:'era3',n:'Hierro',e:'⚔️',d:'Era del Hierro'},{id:'era5',n:'Industrial',e:'🚂',d:'Era Industrial'},{id:'gods8',n:'Panteón',e:'🏛️',d:'8 dioses activos'},{id:'dogs10',n:'Señor Perros',e:'🐕',d:'10 perros'},{id:'walls',n:'Fortaleza',e:'🧱',d:'Muralla completa'},{id:'space',n:'Estrellas',e:'🚀',d:'Era Espacial'},{id:'npc_created',n:'Creación Divina',e:'👤',d:'Crea un NPC'}];
+console.log('[WK] Parte 1: OK ('+WK.D.ANIMALS.length+' animales, '+WK.D.WEAPONS.length+' armas, '+WK.D.BUILDINGS.length+' edificios)');
+</script>
+
+
+<script>
+// ================================================================
+// PARTE 2: MAPA, CÁMARA, ENTIDADES, MUROS (SINTAXIS CORREGIDA)
+// ================================================================
+WK.Map={
+  grid:null,explored:null,miniBase:null,waterSpot:null,
+  generate:function(){
+    var C=WK.CFG.COLS,R=WK.CFG.ROWS,U=WK.U;
+    this.grid=new Uint8Array(C*R);this.explored=new Uint8Array(C*R);
+    for(var y=0;y<R;y++)for(var x=0;x<C;x++){
+      var e=U.fbm(x*.055,y*.055),m=U.fbm(x*.09+137,y*.09+137);
+      var bx=x/C,by=y/R,edge=Math.min(bx,1-bx,by,1-by),t;
+      if(edge<.05+U.h2(x,y)*.02)t=0;
+      else if(e<.36)t=0;
+      else if(e<.41)t=1;
+      else if(e>.74)t=(U.h2(x*3,y*3)>.78?5:4);
+      else if(m>.58)t=3;
+      else t=2;
+      this.grid[y*C+x]=t;
+    }
+    var cx=Math.floor(C/2),cy=Math.floor(R/2);
+    for(var y2=cy-8;y2<=cy+8;y2++)for(var x2=cx-8;x2<=cx+8;x2++)
+      if(Math.hypot(x2-cx,y2-cy)<=8&&y2>=0&&y2<R&&x2>=0&&x2<C)this.grid[y2*C+x2]=2;
+    var best=null,bd=1e9;
+    for(var y3=0;y3<R;y3++)for(var x3=0;x3<C;x3++)
+      if(this.grid[y3*C+x3]===0){var d=Math.hypot(x3-cx,y3-cy);if(d<bd){bd=d;best={x:x3*WK.CFG.TILE+20,y:y3*WK.CFG.TILE+20};}}
+    this.waterSpot=best;this.buildMini();
+  },
+  tileAt:function(x,y){
+    var c=Math.floor(x/WK.CFG.TILE),r=Math.floor(y/WK.CFG.TILE);
+    if(c<0||r<0||c>=WK.CFG.COLS||r>=WK.CFG.ROWS)return 0;
+    return this.grid[r*WK.CFG.COLS+c];
+  },
+  isWater:function(x,y){return this.tileAt(x,y)===0},
+  isGrass:function(x,y){return this.tileAt(x,y)===2},
+  randomLand:function(){
+    for(var i=0;i<60;i++){
+      var x=WK.U.rand(60,WK.CFG.WW-60),y=WK.U.rand(60,WK.CFG.WH-60);
+      var t=this.tileAt(x,y);if(t>=1&&t<=3)return{x:x,y:y};
+    }
+    return{x:WK.CFG.WW/2,y:WK.CFG.WH/2};
+  },
+  edgeLand:function(){
+    for(var i=0;i<60;i++){
+      var s=WK.U.ri(0,4),x,y;
+      if(s===0){x=WK.U.rand(40,WK.CFG.WW-40);y=60;}
+      else if(s===1){x=WK.U.rand(40,WK.CFG.WW-40);y=WK.CFG.WH-60;}
+      else if(s===2){x=60;y=WK.U.rand(40,WK.CFG.WH-40);}
+      else{x=WK.CFG.WW-60;y=WK.U.rand(40,WK.CFG.WH-40);}
+      if(!this.isWater(x,y))return{x:x,y:y};
+    }
+    return this.randomLand();
+  },
+  buildMini:function(){
+    this.miniBase=document.createElement('canvas');
+    this.miniBase.width=WK.CFG.COLS;this.miniBase.height=WK.CFG.ROWS;
+    var mc=this.miniBase.getContext('2d');
+    var cols=['#0c4a6e','#fde68a','#15803d','#14532d','#57534e','#78716c'];
+    for(var y=0;y<WK.CFG.ROWS;y++)for(var x=0;x<WK.CFG.COLS;x++){
+      mc.fillStyle=cols[this.grid[y*WK.CFG.COLS+x]];mc.fillRect(x,y,1,1);
+    }
+  },
+  reveal:function(x,y,r){
+    var c=Math.floor(x/WK.CFG.TILE),ro=Math.floor(y/WK.CFG.TILE);
+    for(var dy=-r;dy<=r;dy++)for(var dx=-r;dx<=r;dx++)
+      if(dx*dx+dy*dy<=r*r){
+        var nx=c+dx,ny=ro+dy;
+        if(nx>=0&&ny>=0&&nx<WK.CFG.COLS&&ny<WK.CFG.ROWS)this.explored[ny*WK.CFG.COLS+nx]=1;
+      }
+  },
+  exploredAt:function(x,y){
+    var c=Math.floor(x/WK.CFG.TILE),r=Math.floor(y/WK.CFG.TILE);
+    if(c<0||r<0||c>=WK.CFG.COLS||r>=WK.CFG.ROWS)return false;
+    return this.explored[r*WK.CFG.COLS+c]===1;
+  }
+};
+
+WK.Cam={
+  x:0,y:0,zoom:1,keys:{},mx:-100,my:-100,drag:false,moved:0,
+  clamp:function(){
+    var W=window.innerWidth,H=window.innerHeight;
+    this.x=WK.U.clamp(this.x,0,Math.max(0,WK.CFG.WW-W/this.zoom));
+    this.y=WK.U.clamp(this.y,0,Math.max(0,WK.CFG.WH-H/this.zoom));
+  },
+  centerOn:function(x,y){this.x=x-(window.innerWidth/this.zoom)/2;this.y=y-(window.innerHeight/this.zoom)/2;this.clamp();},
+  setZoom:function(nz){
+    nz=WK.U.clamp(nz,.4,3);
+    var cx=this.x+(window.innerWidth/this.zoom)/2,cy=this.y+(window.innerHeight/this.zoom)/2;
+    this.zoom=nz;
+    this.x=cx-(window.innerWidth/nz)/2;this.y=cy-(window.innerHeight/nz)/2;this.clamp();
+  },
+  zoomBy:function(f){this.setZoom(this.zoom*f)},
+  toWorld:function(sx,sy){return{x:sx/this.zoom+this.x,y:sy/this.zoom+this.y}},
+  update:function(){
+    var sp=16/this.zoom;
+    if(this.keys['ArrowLeft']||this.keys['a'])this.x-=sp;
+    if(this.keys['ArrowRight']||this.keys['d'])this.x+=sp;
+    if(this.keys['ArrowUp']||this.keys['w'])this.y-=sp;
+    if(this.keys['ArrowDown']||this.keys['s'])this.y+=sp;
+    if(this.mx>=0&&!this.drag&&!('ontouchstart' in window)){
+      var m=20,W=window.innerWidth,H=window.innerHeight;
+      if(this.mx<m)this.x-=12/this.zoom;
+      if(this.mx>W-m)this.x+=12/this.zoom;
+      if(this.my>50&&this.my<m+50)this.y-=12/this.zoom;
+      if(this.my>H-m)this.y+=12/this.zoom;
+    }
+    this.clamp();
+  }
+};
+WK.SX=function(x){return(x-WK.Cam.x)*WK.Cam.zoom};
+WK.SY=function(y){return(y-WK.Cam.y)*WK.Cam.zoom};
+WK.SZ=function(v){return v*WK.Cam.zoom};
+
+WK.Walls={
+  slots:[],center:{x:0,y:0},
+  init:function(){
+    this.slots=[];
+    var c=WK.Game?WK.Game.villageCenter():{x:WK.CFG.WW/2,y:WK.CFG.WH/2};
+    this.center=c;
+    var N=WK.CFG.WALL_N,R=WK.CFG.WALL_R;
+    var gateIdx=Math.floor(N/2);
+    for(var i=0;i<N;i++){
+      var ang=(i/N)*Math.PI*2-Math.PI/2;
+      this.slots.push({x:c.x+Math.cos(ang)*R,y:c.y+Math.sin(ang)*R,ang:ang,gate:i===gateIdx,built:false});
+    }
+  },
+  isInside:function(x,y){return Math.hypot(x-this.center.x,y-this.center.y)<WK.CFG.WALL_R-8},
+  isComplete:function(){for(var i=0;i<this.slots.length;i++)if(!this.slots[i].gate&&!this.slots[i].built)return false;return true;},
+  countBuilt:function(){var n=0;for(var i=0;i<this.slots.length;i++)if(this.slots[i].built)n++;return n;},
+  getGate:function(){for(var i=0;i<this.slots.length;i++)if(this.slots[i].gate)return this.slots[i];return this.slots[0];},
+  segIntersect:function(x1,y1,x2,y2,x3,y3,x4,y4){
+    var den=(x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
+    if(Math.abs(den)<.0001)return false;
+    var t=((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/den;
+    var u=-((x1-x2)*(y1-y3)-(y1-y2)*(x1-x3))/den;
+    return t>=0&&t<=1&&u>=0&&u<=1;
+  },
+  crossesWall:function(x1,y1,x2,y2){
+    if(!this.isComplete())return false;
+    for(var i=0;i<this.slots.length;i++){
+      var s=this.slots[i];
+      if(s.gate||!s.built)continue;
+      var next=this.slots[(i+1)%this.slots.length];
+      if(this.segIntersect(x1,y1,x2,y2,s.x,s.y,next.x,next.y))return true;
+    }
+    return false;
+  },
+  buildNext:function(){
+    for(var i=0;i<this.slots.length;i++){
+      if(!this.slots[i].gate&&!this.slots[i].built){this.slots[i].built=true;return this.slots[i];}
+    }
+    return null;
+  },
+  buildAll:function(){for(var i=0;i<this.slots.length;i++)this.slots[i].built=true;},
+  defenseBonus:function(){return this.countBuilt()*3;},
+  draw:function(ctx){
+    for(var i=0;i<this.slots.length;i++){
+      var s=this.slots[i];
+      var sx=WK.SX(s.x),sy=WK.SY(s.y);
+      if(sx<-50||sx>window.innerWidth+50||sy<-50||sy>window.innerHeight+50)continue;
+      if(s.gate){
+        ctx.fillStyle='#8b5cf6';ctx.fillRect(sx-WK.SZ(10),sy-WK.SZ(14),WK.SZ(20),WK.SZ(28));
+        ctx.fillStyle='#451a03';ctx.fillRect(sx-WK.SZ(6),sy-WK.SZ(8),WK.SZ(12),WK.SZ(20));
+        ctx.font=WK.SZ(14)+'px serif';ctx.textAlign='center';
+        ctx.fillText('🚪',sx,sy-WK.SZ(16));
+      }else if(s.built){
+        var next=this.slots[(i+1)%this.slots.length];
+        var px=WK.SX(next.x),py=WK.SY(next.y);
+        ctx.strokeStyle='#57534e';ctx.lineWidth=WK.SZ(10);ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(px,py);ctx.stroke();
+        ctx.strokeStyle='#78716c';ctx.lineWidth=WK.SZ(3);
+        ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(px,py);ctx.stroke();
+        if(i%4===0){
+          ctx.fillStyle='#44403c';ctx.fillRect(sx-WK.SZ(8),sy-WK.SZ(12),WK.SZ(16),WK.SZ(16));
+          ctx.fillStyle='#57534e';ctx.fillRect(sx-WK.SZ(9),sy-WK.SZ(14),WK.SZ(18),WK.SZ(4));
+        }
+      }else{
+        var next2=this.slots[(i+1)%this.slots.length];
+        ctx.strokeStyle='rgba(120,113,108,0.25)';ctx.lineWidth=WK.SZ(2);
+        ctx.setLineDash([WK.SZ(4),WK.SZ(4)]);
+        ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(WK.SX(next2.x),WK.SY(next2.y));ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+  }
+};
+
+WK.Build={
+  active:false,selected:null,ghostX:0,ghostY:0,
+  start:function(def){
+    this.active=true;this.selected=def;
+    document.getElementById('buildHint').style.display='block';
+    document.getElementById('buildHint').textContent='🏗️ '+def.e+' '+def.n+' · Click=colocar · ESC=cancelar';
+  },
+  cancel:function(){this.active=false;this.selected=null;document.getElementById('buildHint').style.display='none';},
+  place:function(wx,wy){
+    if(!this.active||!this.selected)return;
+    var def=this.selected,G=WK.Game;
+    if(G.stock.wood<(def.cw||0)){WK.UI.notify('🪵 Falta madera ('+def.cw+')');return;}
+    if(G.stock.stone<(def.cs||0)){WK.UI.notify('🪨 Falta piedra ('+def.cs+')');return;}
+    if(WK.Map.isWater(wx,wy)){WK.UI.notify('🚫 No se puede construir en agua');return;}
+    G.stock.wood-=(def.cw||0);G.stock.stone-=(def.cs||0);
+    var b=new WK.Building(wx,wy,def);b.buildingProgress=0;
+    G.buildings.push(b);G.assignHomeless();
+    G.log('🏗️ '+G.profile.name+' construyó '+def.n,'gold');
+    WK.Audio.play('build');G.checkAchv('first_build');
+    if(def.id==='wall'||def.id==='gate'){
+      var nearest=null,nd=1e9;
+      for(var i=0;i<WK.Walls.slots.length;i++){
+        var d=Math.hypot(WK.Walls.slots[i].x-wx,WK.Walls.slots[i].y-wy);
+        if(d<nd){nd=d;nearest=i;}
+      }
+      if(nearest!==null&&nd<80)WK.Walls.slots[nearest].built=true;
+    }
+    this.cancel();
+  },
+  buildWallRing:function(){
+    var G=WK.Game,unbuilt=0;
+    for(var i=0;i<WK.Walls.slots.length;i++)
+      if(!WK.Walls.slots[i].gate&&!WK.Walls.slots[i].built)unbuilt++;
+    var cost=unbuilt*15;
+    if(G.stock.stone<cost){WK.UI.notify('🪨 Necesitas '+cost+' piedra');return;}
+    G.stock.stone-=cost;WK.Walls.buildAll();
+    G.log('🧱 ¡Muralla completa! ('+WK.Walls.countBuilt()+' segmentos)','gold');
+    WK.UI.banner('🧱 ¡Aldea amurallada! Solo entrada por 🚪','gold');
+    WK.Audio.play('build');G.checkAchv('walls');
+  }
+};
+
+// ============ ENTIDADES (SINTAXIS ES6 CORREGIDA) ============
+WK.Entity=class{
+  constructor(x,y){
+    this.id=WK.U.uid();this.x=x;this.y=y;this.vx=0;this.vy=0;
+    this.alive=true;this.facing=1;this.isBoat=false;
+    this.ignoreWalls=false;this.pathToGate=false;
+  }
+  update(){
+    var nx=this.x+this.vx,ny=this.y+this.vy;
+    if(!this.isBoat&&WK.Map.isWater(nx,ny)){
+      this.vx=0;this.vy=0;
+      if(WK.Map.isWater(this.x,this.y))this.y-=1.5;
+    }
+    if(!this.ignoreWalls&&WK.Walls.isComplete()&&(Math.abs(this.vx)>0.1||Math.abs(this.vy)>0.1)){
+      var wasInside=WK.Walls.isInside(this.x,this.y);
+      var willBeInside=WK.Walls.isInside(nx,ny);
+      if(wasInside!==willBeInside){
+        if(WK.Walls.crossesWall(this.x,this.y,nx,ny)){
+          this.vx=0;this.vy=0;this.pathToGate=true;return;
+        }
+      }
+    }
+    this.x=nx;this.y=ny;
+    this.vx*=.85;this.vy*=.85;
+    if(Math.abs(this.vx)>.1)this.facing=this.vx>0?1:-1;
+    this.x=WK.U.clamp(this.x,10,WK.CFG.WW-10);
+    this.y=WK.U.clamp(this.y,10,WK.CFG.WH-10);
+  }
+};
+
+WK.Resource=class extends WK.Entity{
+  constructor(x,y,type,toolData){
+    super(x,y);this.type=type;this.toolData=toolData||null;
+    this.amount=type==='tool'?1:(type==='berry'?WK.U.ri(15,30):WK.U.ri(30,60));
+    this.max=this.amount;this.regen=0;
+  }
+  update(){if(this.amount<=0&&this.type!=='tool'){this.regen++;if(this.regen>2500){this.amount=this.max;this.regen=0;}}}
+};
+
+WK.Animal=class extends WK.Entity{
+  constructor(x,y,data){
+    super(x,y);this.data=data;this.hp=data.hp;this.maxHp=data.hp;
+    this.state='idle';this.timer=WK.U.rand(100,300);
+    this.tx=x;this.ty=y;this.isBoat=!!data.w;
+  }
+  update(){
+    if(!this.alive)return;
+    this.timer--;
+    var G=WK.Game;
+    if(this.data.h&&this.state!=='flee'){
+      var prey=null,bd=170;
+      for(var i=0;i<G.villagers.length;i++){
+        var d=WK.U.dist(this,G.villagers[i]);
+        if(d<bd){bd=d;prey=G.villagers[i];}
+      }
+      if(prey){
+        this.tx=prey.x;this.ty=prey.y;
+        if(bd<16){
+          prey.hp-=.3;
+          if(prey.state!=='flee'&&!(prey.weapon&&prey.weapon.d>0)&&!prey.hasTrait('brave')){
+            prey.state='flee';prey.target={x:prey.x+(prey.x-this.x)*2,y:prey.y+(prey.y-this.y)*2};prey.timer=70;
+          }
+        }
+        var dx=this.tx-this.x,dy=this.ty-this.y,dd=Math.hypot(dx,dy);
+        if(dd>5){this.vx=(dx/dd)*this.data.sp;this.vy=(dy/dd)*this.data.sp;}
+        super.update();return;
+      }
+    }
+    if(this.state==='flee'){
+      if(this.timer<=0)this.state='idle';
+      else{
+        var fdx=this.tx-this.x,fdy=this.ty-this.y,fdd=Math.hypot(fdx,fdy);
+        if(fdd>5){this.vx=(fdx/fdd)*this.data.sp*1.3;this.vy=(fdy/fdd)*this.data.sp*1.3;}
+        super.update();return;
+      }
+    }
+    if(this.timer<=0){var p=WK.Map.randomLand();this.tx=p.x;this.ty=p.y;this.timer=WK.U.rand(200,500);}
+    var dx2=this.tx-this.x,dy2=this.ty-this.y,d2=Math.hypot(dx2,dy2);
+    if(d2>5){var s=this.data.sp*.4;this.vx=(dx2/d2)*s;this.vy=(dy2/d2)*s;}
+    super.update();
+  }
+  flee(fromX,fromY){
+    this.state='flee';this.timer=130;
+    this.tx=this.x+(this.x-fromX)*2.5;
+    this.ty=this.y+(this.y-fromY)*2.5;
+  }
+};
+
+WK.Dog=class extends WK.Entity{
+  constructor(x,y,name,emoji,gender,isPuppy){
+    super(x,y);
+    this.name=name||WK.U.pick(WK.D.DOG_NAMES);
+    this.emoji=emoji||'🐕';
+    this.gender=gender||(Math.random()>.5?'M':'F');
+    this.isPuppy=!!isPuppy;
+    this.age=this.isPuppy?0:WK.U.rand(2,6);
+    this.maxAge=WK.U.rand(14,20);
+    this.hp=100;this.maxHp=100;
+    this.barkCD=0;this.barkShow=0;
+    this.patrolAngle=WK.U.rand(0,Math.PI*2);
+    this.state='patrol';
+    this.companionOf=null;
+    this.pregnancyTimer=0;
+    this.motherId=null;
+    this.ignoreWalls=true;
+    if(this.isPuppy)this.emoji='🐶';
+  }
+  update(){
+    if(!this.alive)return;
+    var G=WK.Game;
+    if(this.barkCD>0)this.barkCD--;
+    if(this.barkShow>0)this.barkShow--;
+    this.age+=WK.CFG.AGING*2.5;
+    if(!this.isPuppy&&this.age>=this.maxAge){
+      this.alive=false;G.log('🐕 '+this.name+' murió de viejo','death');return;
+    }
+    if(this.isPuppy&&this.age>=1.5){
+      this.isPuppy=false;this.emoji=WK.U.pick(['🐕','🐕‍🦺','🐩','🦮']);
+      G.log('🐶 ¡'+this.name+' creció!','dog');WK.UI.banner('🐕 ¡'+this.name+' es guardián!','dog');
+    }
+    if(this.pregnancyTimer>0){this.pregnancyTimer--;if(this.pregnancyTimer<=0)this.giveBirth();}
+    if(!this.isPuppy&&!this.pregnancyTimer&&G.dogs.length<WK.CFG.MAX_DOGS&&Math.random()<.002){
+      var partner=null;
+      for(var i=0;i<G.dogs.length;i++){
+        var d=G.dogs[i];
+        if(d!==this&&d.alive&&!d.isPuppy&&d.gender!==this.gender&&!d.pregnancyTimer&&WK.U.dist(this,d)<100){partner=d;break;}
+      }
+      if(partner&&Math.random()<.5*(G.techs['dog_breeding']?2:1)){
+        if(this.gender==='F')this.pregnancyTimer=400;else partner.pregnancyTimer=400;
+        G.log('🐕 '+this.name+' y '+partner.name+' se emparejaron','dog');
+      }
+    }
+    var c=G.villageCenter();
+    if(this.isPuppy){
+      var mother=null;
+      for(var m=0;m<G.dogs.length;m++)if(G.dogs[m].id===this.motherId&&G.dogs[m].alive)mother=G.dogs[m];
+      var tgt=mother||{x:c.x,y:c.y};
+      var pdx=tgt.x-this.x,pdy=tgt.y-this.y,pdd=Math.hypot(pdx,pdy);
+      if(pdd>40){this.vx=(pdx/pdd)*2.2;this.vy=(pdy/pdd)*2.2;}
+      else{this.vx=0;this.vy=0;}
+      super.update();WK.Map.reveal(this.x,this.y,1);return;
+    }
+    if(this.companionOf){
+      var hunter=null;
+      for(var v=0;v<G.villagers.length;v++)
+        if(G.villagers[v].id===this.companionOf&&G.villagers[v].alive)hunter=G.villagers[v];
+      if(hunter){
+        this.state='companion';
+        var hdx=hunter.x-this.x,hdy=hunter.y-this.y,hdd=Math.hypot(hdx,hdy);
+        if(hdd>30){this.vx=(hdx/hdd)*2.8;this.vy=(hdy/hdd)*2.8;}
+        else{this.vx=0;this.vy=0;}
+        if(hunter.state==='hunt'&&this.barkCD<=0){this.barkCD=80;this.barkShow=30;}
+        super.update();WK.Map.reveal(this.x,this.y,2);return;
+      }else this.companionOf=null;
+    }
+    var threat=null,tDist=this.isPuppy?120:250;
+    for(var j=0;j<G.animals.length;j++){
+      var a=G.animals[j];
+      if(!a.alive||!a.data.h)continue;
+      var dd=WK.U.dist(this,a);
+      if(dd<tDist){tDist=dd;threat=a;}
+    }
+    for(var w=0;w<G.warParties.length;w++){
+      var wp=G.warParties[w];
+      if(!wp.alive||wp.isPlayerAttack)continue;
+      var dw=WK.U.dist(this,wp);
+      if(dw<tDist){tDist=dw;threat=wp;}
+    }
+    if(threat){
+      this.state='guard';
+      var gdx=threat.x-this.x,gdy=threat.y-this.y,gdd=Math.hypot(gdx,gdy);
+      if(gdd>50){this.vx=(gdx/gdd)*2.8;this.vy=(gdy/gdd)*2.8;}
+      else{this.vx=0;this.vy=0;}
+      if(this.barkCD<=0){
+        this.barkCD=55;this.barkShow=45;
+        this.scare(threat);WK.Audio.play('bark');
+      }
+    }else{
+      this.state='patrol';
+      this.patrolAngle+=.012;
+      var pr=180+Math.sin(this.patrolAngle*.3)*40;
+      var px=c.x+Math.cos(this.patrolAngle)*pr;
+      var py=c.y+Math.sin(this.patrolAngle)*pr;
+      var dx2=px-this.x,dy2=py-this.y,dd2=Math.hypot(dx2,dy2);
+      if(dd2>25){this.vx=(dx2/dd2)*2;this.vy=(dy2/dd2)*2;}
+      else{this.vx*=.5;this.vy*=.5;}
+    }
+    super.update();WK.Map.reveal(this.x,this.y,2);
+  }
+  scare(threat){
+    var G=WK.Game,radius=280,scared=0;
+    for(var i=0;i<G.animals.length;i++){
+      var a=G.animals[i];
+      if(!a.alive||!a.data.h)continue;
+      if(WK.U.dist(this,a)<radius){a.flee(this.x,this.y);scared++;}
+    }
+    if(scared>0&&!this.isPuppy)G.log('🐕 '+this.name+' espantó '+scared,'dog');
+  }
+  giveBirth(){
+    var G=WK.Game;if(G.dogs.length>=WK.CFG.MAX_DOGS)return;
+    var litter=WK.U.ri(1,4),born=[];
+    for(var i=0;i<litter;i++){
+      if(G.dogs.length>=WK.CFG.MAX_DOGS)break;
+      var puppy=new WK.Dog(this.x+WK.U.rand(-20,20),this.y+WK.U.rand(-20,20),null,'🐶',Math.random()>.5?'M':'F',true);
+      puppy.motherId=this.id;G.dogs.push(puppy);born.push(puppy.name);
+    }
+    if(born.length>0){
+      G.log('🐶 ¡'+this.name+' tuvo '+born.length+'!','dog');
+      WK.UI.banner('🐶 ¡'+born.length+' cachorros!','dog');
+      WK.Audio.play('birth');G.checkAchv('first_puppy');
+    }
+  }
+};
+
+WK.Villager=class extends WK.Entity{
+  constructor(x,y,age,opts){
+    super(x,y);opts=opts||{};
+    this.name=opts.name||(WK.Game?WK.Game.genName():'Aldeano');
+    this.gender=opts.gender||(Math.random()>.5?'M':'F');
+    this.age=age||0;this.maxAge=WK.U.ri(60,90);
+    this.hp=100;this.hunger=100;this.energy=100;this.social=100;this.mood=100;
+    this.state='idle';this.target=null;this.timer=WK.U.ri(10,60);
+    this.spouseId=null;this.houseId=null;this.isChief=false;this.believer=false;
+    this.sick=false;this.sickTimer=0;this.parentId=null;
+    this.inv={w:0,s:0,o:0,f:0,m:0};this.weapon=null;
+    this.skills={hunt:0,fish:0,farm:0,build:0,social:0,wisdom:0};
+    this.profession='Ocioso';this.known=['huts'];
+    this.pers=opts.pers||WK.U.pick(WK.D.PERS);
+    this.traits=opts.traits||[WK.U.pick(WK.D.TRAITS).id,WK.U.pick(WK.D.TRAITS).id];
+    this.like=opts.like||WK.U.pick(WK.D.LIKES);
+    this.skinColor='hsl('+WK.U.rand(20,40)+','+WK.U.rand(40,60)+'%,'+WK.U.rand(40,60)+'%)';
+    this.shirtColor='hsl('+WK.U.rand(0,360)+',50%,40%)';
+    this.arrivalStory=opts.story||null;
+    if(this.hasTrait('sickly'))this.hp=70;
+  }
+  get isChild(){return this.age<16}
+  get isElder(){return this.age>=55}
+  hasTrait(id){return this.traits.indexOf(id)>=0}
+  persIs(id){return this.pers&&this.pers.id===id}
+  hasDogCompanion(){
+    var G=WK.Game;if(!G)return false;
+    for(var i=0;i<G.dogs.length;i++)if(G.dogs[i].companionOf===this.id&&G.dogs[i].alive)return true;
+    return false;
+  }
+};
+
+WK.Building=class extends WK.Entity{
+  constructor(x,y,def){super(x,y);this.def=def;this.occIds=[];this.growth=0;this.buildingProgress=undefined;this.ignoreWalls=true;}
+};
+
+// CORREGIDO: class con método sin :function
+WK.RivalVillage=class{
+  constructor(x,y,name,color){
+    this.id=WK.U.uid();this.x=x;this.y=y;this.name=name;this.color=color;
+    this.pop=WK.U.ri(8,15);this.strength=this.pop*3+WK.U.ri(0,20);
+    this.alive=true;this.warCooldown=0;this.hostile=Math.random()<.3;
+  }
+  update(){
+    if(!this.alive)return;
+    if(this.warCooldown>0)this.warCooldown--;
+    this.pop+=.001;this.strength=Math.floor(this.pop*3);
+    WK.Map.reveal(this.x,this.y,2);
+  }
+};
+
+// CORREGIDO: class con métodos sin :function
+WK.WarParty=class extends WK.Entity{
+  constructor(x,y,tx,ty,fromRival,count){
+    super(x,y);this.targetX=tx;this.targetY=ty;this.fromRival=fromRival;
+    this.count=count;this.phase='marching';this.timer=0;
+    this.isPlayerAttack=false;this.targetRival=null;this.ignoreWalls=true;
+  }
+  update(){
+    if(!this.alive)return;
+    var G=WK.Game;
+    if(this.phase==='marching'){
+      var dx=this.targetX-this.x,dy=this.targetY-this.y,d=Math.hypot(dx,dy);
+      if(d<40){
+        this.phase='fighting';this.timer=200;
+        if(!this.isPlayerAttack){
+          G.log('⚔️ ¡'+this.fromRival.name+' ataca!','war');
+          WK.UI.banner('⚔️ ¡Invasión!','war');WK.Audio.play('war');
+        }
+      }else{this.vx=(dx/d)*1.8;this.vy=(dy/d)*1.8;}
+    }else if(this.phase==='fighting'){
+      this.vx=0;this.vy=0;this.timer--;
+      if(!this.isPlayerAttack){
+        for(var i=0;i<G.villagers.length;i++){
+          var v=G.villagers[i];
+          if(v.alive&&!v.isChild&&Math.hypot(v.x-this.x,v.y-this.y)<60)v.hp-=.4;
+        }
+      }
+      if(this.timer<=0||this.count<=0)this.resolve();
+    }
+    super.update();WK.Map.reveal(this.x,this.y,3);
+  }
+  resolve(){
+    var G=WK.Game;
+    if(this.isPlayerAttack){
+      var rival=this.targetRival;
+      if(rival&&this.count*4>rival.strength){
+        G.log('⚔️ ¡Victoria sobre '+rival.name+'!','war');
+        WK.UI.banner('⚔️ ¡'+rival.name+' conquistada!','gold');
+        G.stock.food+=40;G.stock.wood+=30;G.stock.gold+=30;G.stock.knowledge+=50;
+        var captives=Math.min(4,Math.floor(rival.pop/2));
+        for(var i=0;i<captives;i++){
+          var nv=new WK.Villager(rival.x+WK.U.rand(-30,30),rival.y+WK.U.rand(-30,30),WK.U.ri(18,35));
+          G.villagers.push(nv);G.log('🧍 '+nv.name+' se une','birth');
+        }
+        rival.alive=false;G.checkAchv('first_war');
+      }else{
+        G.log('💀 Derrota contra '+rival.name,'war');
+        WK.UI.banner('💀 ¡Derrota!','danger');
+      }
+      this.alive=false;return;
+    }
+    if(G.defenseRating()>this.count*4){
+      G.log('🛡️ ¡Victoria!','war');WK.UI.banner('🛡️ ¡Victoria!','gold');
+      G.stock.food+=30;G.stock.wood+=20;G.stock.gold+=20;
+      this.fromRival.alive=false;
+      var surv=Math.min(3,Math.floor(this.fromRival.pop/3));
+      for(var i2=0;i2<surv;i2++){
+        var nv2=new WK.Villager(this.x+WK.U.rand(-30,30),this.y+WK.U.rand(-30,30),WK.U.ri(18,35));
+        G.villagers.push(nv2);
+      }
+      G.checkAchv('first_war');
+    }else{
+      G.log('💀 Saqueo de '+this.fromRival.name,'war');
+      WK.UI.banner('💀 ¡Saqueo!','danger');
+      G.stock.food=Math.max(0,G.stock.food-40);
+      G.stock.wood=Math.max(0,G.stock.wood-30);
+      G.stock.gold=Math.max(0,G.stock.gold-25);
+    }
+    this.alive=false;
+  }
+};
+
+// CORREGIDO: class con método sin :function
+WK.Projectile=class extends WK.Entity{
+  constructor(x,y,target,dmg,type){
+    super(x,y);this.target=target;this.dmg=dmg;this.type=type;
+    this.spd=type==='arrow'?7:5;this.life=120;this.ignoreWalls=true;
+  }
+  update(){
+    if(!this.target||!this.target.alive){this.alive=false;return;}
+    var dx=this.target.x-this.x,dy=this.target.y-this.y,d=Math.hypot(dx,dy);
+    if(d<16){
+      this.target.hp-=this.dmg;
+      if(this.target.hp<=0){
+        this.target.alive=false;
+        var h=WK.Game.nearestVillager(this.target.x,this.target.y,200);
+        if(h)h.inv.m+=(this.target.data?this.target.data.m:5);
+        WK.Game.log('🏹 Cazado','evolve');
+      }else{
+        if(this.target.flee)this.target.flee(this.x,this.y);
+        else{this.target.state='flee';this.target.timer=150;}
+      }
+      this.alive=false;
+    }else{this.vx=(dx/d)*this.spd;this.vy=(dy/d)*this.spd;}
+    if(--this.life<=0)this.alive=false;
+    super.update();
+  }
+};
+
+// CORREGIDO: class con método sin :function
+WK.Caravan=class extends WK.Entity{
+  constructor(x,y){
+    super(x,y);this.phase='arriving';this.timer=0;this.traded=false;
+    this.emoji=WK.U.pick(['🐫','🐴','🐪','🛒']);
+    this.exitPoint=WK.Map.edgeLand();this.ignoreWalls=true;
+  }
+  update(){
+    if(!this.alive)return;
+    var G=WK.Game,c=G.villageCenter();
+    if(this.phase==='arriving'){
+      var dx=c.x-this.x,dy=c.y-this.y,d=Math.hypot(dx,dy);
+      if(d<40){this.phase='trading';this.timer=500;G.log('🐫 Caravana llegó','evolve');}
+      else{this.vx=(dx/d)*1.4;this.vy=(dy/d)*1.4;}
+    }else if(this.phase==='trading'){
+      this.vx=0;this.vy=0;this.timer--;
+      if(!this.traded&&this.timer<400){this.traded=true;var r=G.caravanTrade();G.log('💱 '+r,'evolve');}
+      if(this.timer<=0)this.phase='leaving';
+    }else if(this.phase==='leaving'){
+      var dx2=this.exitPoint.x-this.x,dy2=this.exitPoint.y-this.y,d2=Math.hypot(dx2,dy2);
+      if(d2<40)this.alive=false;
+      else{this.vx=(dx2/d2)*1.6;this.vy=(dy2/d2)*1.6;}
+    }
+    super.update();WK.Map.reveal(this.x,this.y,3);
+  }
+};
+
+console.log('[WK] Parte 2: OK (sintaxis corregida)');
+</script>
+
+
+
+
+<script>
+WK.Brain={
+  project:null,thinkTimer:100,
+  hasSpecial:function(id){var G=WK.Game;for(var i=0;i<G.buildings.length;i++)if(G.buildings[i].def.id===id)return true;return false;},
+  countSpecial:function(id){var n=0,G=WK.Game;for(var i=0;i<G.buildings.length;i++)if(G.buildings[i].def.id===id)n++;return n;},
+  housingCap:function(){var c=0,G=WK.Game;for(var i=0;i<G.buildings.length;i++)c+=G.buildings[i].def.cap||0;return c;},
+  canAfford:function(cw,cs){var S=WK.Game.stock;return S.wood>=cw&&S.stone>=cs;},
+  findSpot:function(minR,maxR){
+    var c=WK.Game.villageCenter();
+    for(var i=0;i<30;i++){
+      var ang=WK.U.rand(0,Math.PI*2),r=WK.U.rand(minR,maxR);
+      var x=c.x+Math.cos(ang)*r,y=c.y+Math.sin(ang)*r;
+      if(!WK.Map.isGrass(x,y))continue;
+      var clash=false;
+      for(var j=0;j<WK.Game.buildings.length;j++)
+        if(Math.hypot(WK.Game.buildings[j].x-x,WK.Game.buildings[j].y-y)<45){clash=true;break;}
+      if(!clash)return{x:x,y:y};
+    }
+    return null;
+  },
+  think:function(){
+    var G=WK.Game,T=G.techs,pop=G.villagers.length;
+    if(this.project)return;
+    if(this.housingCap()<pop+2){
+      var tier=null;
+      if(T['stone_houses'])tier=WK.D.BUILDINGS.find(function(b){return b.id==='stone_house'});
+      else if(T['wood_houses'])tier=WK.D.BUILDINGS.find(function(b){return b.id==='wood_house'});
+      else tier=WK.D.BUILDINGS.find(function(b){return b.id==='hut'});
+      if(tier&&this.canAfford(tier.cw,tier.cs)){var s=this.findSpot(60,200);if(s){this.start(tier,s.x,s.y);return;}}
+    }
+    var specials=[
+      {id:'campfire',tech:'fire'},{id:'well',tech:'well_dig'},
+      {id:'farm',tech:'agriculture',repeat:true},{id:'temple',tech:'mysticism'},
+      {id:'hospital',tech:'medicine'},{id:'kennel',tech:'dog_breeding'},
+      {id:'library',tech:'writing'},{id:'market',tech:'currency'},{id:'tower',tech:'masonry'}
+    ];
+    for(var i=0;i<specials.length;i++){
+      var sp=specials[i];
+      if(!T[sp.tech])continue;
+      if(!sp.repeat&&this.hasSpecial(sp.id))continue;
+      if(sp.id==='farm'&&this.countSpecial('farm')>=Math.ceil(pop/4))continue;
+      var def=WK.D.BUILDINGS.find(function(b){return b.id===sp.id});
+      if(def&&this.canAfford(def.cw,def.cs)){
+        var spot=sp.id==='farm'?this.findSpot(80,250):this.findSpot(20,120);
+        if(spot){this.start(def,spot.x,spot.y);return;}
+      }
+    }
+    if(T['masonry']&&this.hasSpecial('campfire')){
+      var unbuilt=0;
+      for(var w=0;w<WK.Walls.slots.length;w++)
+        if(!WK.Walls.slots[w].gate&&!WK.Walls.slots[w].built)unbuilt++;
+      if(unbuilt>0&&G.stock.stone>=15){
+        G.stock.stone-=15;
+        var seg=WK.Walls.buildNext();
+        if(seg){
+          G.log('🧱 Muralla ('+WK.Walls.countBuilt()+'/'+WK.Walls.slots.length+')','evolve');
+          if(WK.Walls.isComplete()){G.checkAchv('walls');WK.UI.banner('🧱 ¡Muralla completa!','gold');}
+        }
+        return;
+      }
+    }
+    this.craftTools();
+  },
+  start:function(def,x,y){
+    WK.Game.stock.wood-=def.cw;WK.Game.stock.stone-=def.cs;
+    this.project={def:def,x:x,y:y,progress:0,time:300};
+  },
+  work:function(amount){if(!this.project)return;this.project.progress+=amount;if(this.project.progress>=this.project.time)this.complete();},
+  complete:function(){
+    var G=WK.Game,p=this.project;if(!p)return;
+    var b=new WK.Building(p.x,p.y,p.def);
+    G.buildings.push(b);G.assignHomeless();
+    G.log('🏗️ '+p.def.n,'evolve');WK.Audio.play('build');G.checkAchv('first_build');
+    this.project=null;this.thinkTimer=120;
+  },
+  craftTools:function(){
+    var G=WK.Game,S=G.stock,T=G.techs;
+    var count=function(pred){var n=0;for(var i=0;i<G.villagers.length;i++)if(G.villagers[i].weapon&&pred(G.villagers[i].weapon))n++;return n;};
+    var c=G.villageCenter();
+    var spawn=function(id){var def=WK.D.WEAPONS.find(function(w){return w.id===id});if(def)G.resources.push(new WK.Resource(c.x+WK.U.rand(-40,40),c.y+WK.U.rand(-40,40),'tool',def));};
+    var adults=G.villagers.filter(function(v){return!v.isChild}).length;
+    if(T['stone_tools']&&count(function(w){return w.t==='axe'})<Math.min(4,Math.ceil(adults/4))&&S.wood>=6){S.wood-=5;spawn(T['iron']?'w27':(T['bronze']?'w13':'w6'));return;}
+    if(T['fishing']&&count(function(w){return w.t==='fish'||w.t==='net'})<2&&S.wood>=5){S.wood-=4;spawn('w21');return;}
+    if(count(function(w){return w.d>0})<3&&S.wood>=6){S.wood-=5;if(T['iron']&&S.ore>=3){S.ore-=3;spawn('w26');}else spawn('w7');return;}
+  }
+};
+
+WK.Game={
+  profile:null,running:false,paused:false,speed:1,
+  time:0,timeOfDay:.3,day:1,weather:'sunny',era:0,
+  currentSeason:0,seasonTimer:0,
+  villagers:[],dogs:[],animals:[],resources:[],buildings:[],projectiles:[],caravans:[],rivals:[],warParties:[],
+  techs:{huts:1},activeGods:{},
+  stock:{food:60,wood:30,stone:0,ore:0,gold:0,faith:0,knowledge:30},
+  chiefOrder:null,chiefThinkTimer:0,
+  plagueTimer:0,birthBoost:0,shake:0,
+  lastCaravanDay:0,caravanInterval:4,
+  logs:[],achievements:{},deadVillagers:[],
+  villageStart:{x:0,y:0},autoSaveTimer:0,
+
+  init:function(profile){
+    this.profile=profile;this.reset();
+    WK.Map.generate();
+    var cx=WK.CFG.WW/2,cy=WK.CFG.WH/2;
+    this.villageStart={x:cx,y:cy};
+    WK.Walls.init();
+    var roster=[
+      {n:'Kael',g:'M',p:'warrior',age:28},{n:'Borin',g:'M',p:'worker',age:32},
+      {n:'Darian',g:'M',p:'wise',age:58},{n:'Tarek',g:'M',p:'explorer',age:24},
+      {n:'Oren',g:'M',p:'merchant',age:30},{n:'Lyra',g:'F',p:'pious',age:26},
+      {n:'Aria',g:'F',p:'farmer',age:27},{n:'Selene',g:'F',p:'social',age:25},
+      {n:'Mira',g:'F',p:'worker',age:29},{n:'Nadia',g:'F',p:'wise',age:31}
+    ];
+    for(var i=0;i<roster.length;i++){
+      var r=roster[i],pers=WK.D.PERS.find(function(p){return p.id===r.p});
+      this.villagers.push(new WK.Villager(cx+WK.U.rand(-90,90),cy+WK.U.rand(-90,90),r.age,{name:r.n,gender:r.g,pers:pers}));
+    }
+    this.assignChief();
+    var dogRoster=[{n:'Rex',e:'🐕',g:'M'},{n:'Max',e:'🐕‍🦺',g:'M'},{n:'Luna',e:'🐩',g:'F'},{n:'Rocky',e:'🦮',g:'F'}];
+    for(var d=0;d<dogRoster.length;d++){
+      var dr=dogRoster[d];
+      this.dogs.push(new WK.Dog(cx+WK.U.rand(-60,60),cy+WK.U.rand(-60,60),dr.n,dr.e,dr.g,false));
+    }
+    var hutDef=WK.D.BUILDINGS.find(function(b){return b.id==='hut'});
+    var hut=new WK.Building(cx,cy,hutDef);
+    hut.occIds=[this.villagers[0].id,this.villagers[1].id];
+    this.buildings.push(hut);
+    var diff=WK.CFG.DIFF[profile.difficulty||'normal'];
+    for(var i2=0;i2<420*diff.r;i2++){
+      var p=WK.Map.randomLand(),t=WK.Map.tileAt(p.x,p.y);
+      if(t===3&&Math.random()<.8)this.resources.push(new WK.Resource(p.x,p.y,'wood'));
+      else if(t===2&&Math.random()<.5)this.resources.push(new WK.Resource(p.x,p.y,Math.random()<.5?'wood':'berry'));
+    }
+    for(var i3=0;i3<160*diff.r;i3++){
+      var p2=WK.Map.randomLand(),t2=WK.Map.tileAt(p2.x,p2.y);
+      if(t2===4)this.resources.push(new WK.Resource(p2.x,p2.y,'stone'));
+      else if(t2===5)this.resources.push(new WK.Resource(p2.x,p2.y,'ore'));
+    }
+    for(var i4=0;i4<30;i4++)this.spawnAnimal();
+    for(var i5=0;i5<3;i5++){
+      var ang=(i5/3)*Math.PI*2+WK.U.rand(-.3,.3),rad=1500+WK.U.rand(0,400);
+      var rx=WK.U.clamp(cx+Math.cos(ang)*rad,200,WK.CFG.WW-200);
+      var ry=WK.U.clamp(cy+Math.sin(ang)*rad,200,WK.CFG.WH-200);
+      if(!WK.Map.isWater(rx,ry)){
+        this.rivals.push(new WK.RivalVillage(rx,ry,WK.U.pick(WK.D.RIVALS),['#b45309','#7f1d1d','#1e3a8a'][i5]));
+      }
+    }
+    WK.Map.reveal(cx,cy,9);WK.Cam.centerOn(cx,cy);
+    this.log('🌅 '+profile.name+' desciende','gold');
+    this.running=true;
+  },
+  reset:function(){
+    this.time=0;this.timeOfDay=.3;this.day=1;this.weather='sunny';this.era=0;
+    this.currentSeason=0;this.seasonTimer=0;
+    this.villagers=[];this.dogs=[];this.animals=[];this.resources=[];this.buildings=[];
+    this.projectiles=[];this.caravans=[];this.rivals=[];this.warParties=[];
+    this.techs={huts:1};this.activeGods={};
+    this.stock={food:60,wood:30,stone:0,ore:0,gold:0,faith:0,knowledge:30};
+    this.chiefOrder=null;this.plagueTimer=0;this.birthBoost=0;this.shake=0;
+    this.logs=[];this.achievements=this.profile?this.profile.achievements||{}:{};this.deadVillagers=[];
+  },
+  villageCenter:function(){
+    var camp=this.nearestBuilding('campfire');
+    if(camp)return{x:camp.x,y:camp.y};
+    if(this.buildings.length>0)return{x:this.buildings[0].x,y:this.buildings[0].y};
+    return this.villageStart;
+  },
+  nearestBuilding:function(id){for(var i=0;i<this.buildings.length;i++)if(this.buildings[i].def.id===id)return this.buildings[i];return null;},
+  hasBuilding:function(id){return!!this.nearestBuilding(id)},
+  nearestVillager:function(x,y,maxD){var best=null,bd=maxD;for(var i=0;i<this.villagers.length;i++){var v=this.villagers[i];if(!v.alive)continue;var d=Math.hypot(v.x-x,v.y-y);if(d<bd){bd=d;best=v;}}return best;},
+  nearestAnimal:function(x,y,maxD){var best=null,bd=maxD;for(var i=0;i<this.animals.length;i++){var a=this.animals[i];if(!a.alive||a.data.h)continue;var d=Math.hypot(a.x-x,a.y-y);if(d<bd){bd=d;best=a;}}return best;},
+  assignHomeless:function(){
+    for(var i=0;i<this.villagers.length;i++){
+      var v=this.villagers[i],has=false;
+      for(var b=0;b<this.buildings.length;b++)
+        if(this.buildings[b].def.cap>0&&this.buildings[b].occIds.indexOf(v.id)>=0){has=true;break;}
+      if(has)continue;
+      for(var j=0;j<this.buildings.length;j++){
+        var bd=this.buildings[j];
+        if(bd.def.cap>0&&bd.occIds.length<bd.def.cap){bd.occIds.push(v.id);break;}
+      }
+    }
+  },
+  assignChief:function(){
+    var adults=this.villagers.filter(function(v){return!v.isChild&&v.alive});
+    if(adults.length===0)return;
+    for(var i=0;i<this.villagers.length;i++)this.villagers[i].isChief=false;
+    var oldest=adults.reduce(function(p,c){return p.age>c.age?p:c});
+    oldest.isChief=true;
+  },
+  getChief:function(){for(var i=0;i<this.villagers.length;i++)if(this.villagers[i].isChief&&this.villagers[i].alive)return this.villagers[i];return null;},
+  genName:function(){return WK.U.pick(WK.D.NAMES)+WK.U.ri(1,99)},
+  defenseRating:function(){
+    var towers=0,warriors=0;
+    for(var i=0;i<this.buildings.length;i++)if(this.buildings[i].def.id==='tower')towers++;
+    for(var j=0;j<this.villagers.length;j++)if(this.villagers[j].weapon&&this.villagers[j].weapon.d>0)warriors++;
+    var dogsAlive=this.dogs.filter(function(d){return d.alive&&!d.isPuppy}).length;
+    var d=WK.Walls.defenseBonus()+towers*5+warriors*3+dogsAlive*4;
+    if(this.techs['gunpowder'])d+=10;if(this.activeGods['ares'])d+=15;return d;
+  },
+  gatherMult:function(){var m=1;if(this.techs['stone_tools'])m*=1.5;if(this.techs['bronze'])m*=1.25;if(this.techs['iron'])m*=1.35;return m;},
+  knowledgeMult:function(){var m=1;if(this.techs['writing'])m*=1.5;if(this.techs['printing'])m*=1.5;if(this.techs['internet'])m*=2;if(this.activeGods['athena'])m*=2;return m;},
+  activeGod:function(id){return!!this.activeGods[id]},
+  log:function(msg,type){this.logs.unshift({msg:msg,type:type||'',time:'Día '+this.day});if(this.logs.length>60)this.logs.pop();if(WK.UI)WK.UI.renderLogs();},
+  spawnAnimal:function(forced){
+    var self=this;
+    var pool=WK.D.ANIMALS.filter(function(a){return a.era<=self.era});
+    var def=forced||WK.U.pick(pool);
+    var pos;
+    if(def.w)pos={x:WK.U.rand(60,WK.CFG.WW-60),y:WK.U.rand(60,WK.CFG.WH-60)};
+    else{pos=WK.Map.randomLand();var tries=0;while(Math.hypot(pos.x-this.villageStart.x,pos.y-this.villageStart.y)<300&&tries++<20)pos=WK.Map.randomLand();}
+    this.animals.push(new WK.Animal(pos.x,pos.y,def));
+  },
+  caravanTrade:function(){
+    var S=this.stock,msgs=[];
+    var surplus=S.food-this.villagers.length*3;
+    if(surplus>20){var sell=Math.min(surplus*.5,40);S.food-=sell;S.gold+=Math.floor(sell*.5);msgs.push('vendió comida');}
+    if(S.wood<30&&S.gold>=15){S.gold-=15;S.wood+=30;msgs.push('compró madera');}
+    if(msgs.length===0)msgs.push('intercambió');
+    return 'La caravana '+msgs.join(', ');
+  },
+  killVillager:function(v,cause){
+    v.alive=false;this.log('💀 '+v.name+' murió de '+cause,'death');WK.Audio.play('death');
+    for(var i=0;i<this.villagers.length;i++)if(this.villagers[i].spouseId===v.id)this.villagers[i].spouseId=null;
+    for(var d=0;d<this.dogs.length;d++)if(this.dogs[d].companionOf===v.id)this.dogs[d].companionOf=null;
+    if(v.isChief)this.assignChief();
+  },
+  addCustomNPC:function(data){
+    var edge=WK.Map.edgeLand();
+    var pers=WK.D.PERS.find(function(p){return p.id===data.pers})||WK.D.PERS[0];
+    var v=new WK.Villager(edge.x,edge.y,data.age,{name:data.name,gender:data.gender,pers:pers,traits:data.traits,like:data.like,story:data.story});
+    v.arrivalStory=data.story;
+    this.villagers.push(v);this.assignHomeless();
+    var storyMsg={refuge:'🏚️ '+data.name+' buscó refugio',family:'👨‍👩‍👧 '+data.name+' buscó a un familiar',adventure:'🧭 '+data.name+' llegó por aventura',exile:'⚔️ '+data.name+' fue exiliado',divine:'✨ '+data.name+' enviado divino'};
+    this.log(storyMsg[data.story]||storyMsg.refuge,'birth');
+    WK.UI.banner('👤 ¡'+data.name+' llegó!','magic');WK.Audio.play('birth');this.checkAchv('npc_created');
+    return v;
+  },
+  updateSeason:function(){
+    this.seasonTimer++;
+    if(this.seasonTimer>=WK.CFG.SEASON_LEN){
+      this.seasonTimer=0;this.currentSeason=(this.currentSeason+1)%4;
+      var s=WK.CFG.SEASONS[this.currentSeason];
+      this.log(s.e+' '+s.n,'evolve');WK.UI.banner(s.e+' '+s.n+'!','gold');
+    }
+  },
+  chiefThink:function(){
+    var chief=this.getChief();if(!chief)return;
+    var task;
+    if(this.stock.food<this.villagers.length*3)task='food';
+    else if(this.stock.wood<40)task='wood';
+    else if(this.threatNear()||this.warParties.length>0)task='defense';
+    else if(WK.Brain.project)task='build';
+    else task='research';
+    if(this.chiefOrder&&this.chiefOrder.task===task)return;
+    this.chiefOrder={task:task};WK.UI.showOrder('👑 '+chief.name+': '+this.orderLabel(task));
+  },
+  orderLabel:function(t){return{food:'¡Comida!',wood:'¡Madera!',build:'¡Construid!',defense:'¡Defended!',research:'¡Investigad!'}[t]||t;},
+  threatNear:function(){var c=this.villageCenter();for(var i=0;i<this.animals.length;i++){var a=this.animals[i];if(a.alive&&a.data.h&&Math.hypot(a.x-c.x,a.y-c.y)<500)return true;}return false;},
+  tryResearch:function(){
+    var avail=[];
+    for(var i=0;i<WK.D.TECHS.length;i++){
+      var t=WK.D.TECHS[i];if(this.techs[t.id])continue;
+      var ok=true;for(var j=0;j<t.req.length;j++)if(!this.techs[t.req[j]]){ok=false;break;}
+      if(ok)avail.push(t);
+    }
+    if(avail.length===0)return;
+    avail.sort(function(a,b){return a.cost-b.cost});
+    var t=avail[0];
+    if(this.stock.knowledge>=t.cost&&Math.random()<.008){
+      this.stock.knowledge-=t.cost;this.techs[t.id]=this.day;
+      this.log('🌟 ¡'+t.n+'!','gold');WK.UI.banner(t.e+' ¡'+t.n+'!','gold');WK.Audio.play('discover');
+      if(t.id==='dog_taming'){var nd=new WK.Dog(this.villageCenter().x,this.villageCenter().y,null,'🐕',null,false);this.dogs.push(nd);this.log('🐕 Nuevo perro','dog');}
+      this.updateEra();
+      if(t.id==='space'){this.checkAchv('space');WK.UI.banner('🚀 ¡VICTORIA!','gold');}
+    }
+  },
+  updateEra:function(){
+    var maxEra=0;
+    for(var i=0;i<WK.D.TECHS.length;i++)if(this.techs[WK.D.TECHS[i].id]&&WK.D.TECHS[i].era>maxEra)maxEra=WK.D.TECHS[i].era;
+    if(maxEra>this.era){
+      this.era=maxEra;this.log('🏛️ Nueva Era: '+WK.CFG.ERAS[this.era],'gold');
+      if(this.era>=1)this.checkAchv('era1');
+      if(this.era>=3)this.checkAchv('era3');
+      if(this.era>=5)this.checkAchv('era5');
+    }
+  },
+  assignDogCompanions:function(){
+    var freeDogs=this.dogs.filter(function(d){return d.alive&&!d.isPuppy&&!d.companionOf});
+    var hunters=this.villagers.filter(function(v){return v.alive&&!v.isChild&&v.weapon&&v.weapon.d>0});
+    for(var i=0;i<hunters.length&&freeDogs.length>0;i++){
+      if(!hunters[i].hasDogCompanion()){
+        var dog=freeDogs.shift();dog.companionOf=hunters[i].id;
+        this.log('🐕 '+dog.name+' con '+hunters[i].name,'dog');
+      }
+    }
+  },
+  activateGod:function(id){
+    var god=WK.D.PANTHEON.find(function(g){return g.id===id});if(!god)return;
+    if(this.activeGods[id]){WK.UI.notify(god.n+' ya activo');return;}
+    if(this.stock.faith<god.cost){WK.UI.notify('Necesitas '+god.cost+' Fe');return;}
+    this.stock.faith-=god.cost;this.activeGods[id]=true;
+    this.log('🏛️ '+god.n,'faith');WK.UI.banner(god.e+' ¡'+god.n+'!','magic');WK.Audio.play('miracle');
+    if(Object.keys(this.activeGods).length>=8)this.checkAchv('gods8');
+  },
+  declareWarOn:function(rivalId){
+    var rival=this.rivals.find(function(r){return r.id===rivalId});if(!rival||!rival.alive)return;
+    rival.hostile=true;
+    var warriors=this.villagers.filter(function(v){return!v.isChild&&v.weapon&&v.weapon.d>0}).length;
+    var troops=Math.max(3,Math.min(6,warriors));
+    var party=new WK.WarParty(this.villageCenter().x,this.villageCenter().y,rival.x,rival.y,{name:this.profile.name,color:'#10b981'},troops);
+    party.isPlayerAttack=true;party.targetRival=rival;
+    this.warParties.push(party);
+    this.log('⚔️ Guerra vs '+rival.name,'war');WK.UI.banner('⚔️ ¡Guerra!','war');WK.Audio.play('war');
+  },
+  tryDeclareWar:function(){
+    var diff=WK.CFG.DIFF[this.profile.difficulty||'normal'];
+    var candidates=this.rivals.filter(function(r){return r.alive&&r.warCooldown<=0});
+    if(candidates.length===0)return;
+    var rival=WK.U.pick(candidates);
+    if((rival.hostile||rival.strength>this.defenseRating()*.5)&&Math.random()<.3*diff.t){
+      rival.warCooldown=WK.U.ri(15,30);
+      var troops=Math.min(8,Math.floor(rival.pop/2));
+      this.warParties.push(new WK.WarParty(rival.x,rival.y,this.villageCenter().x,this.villageCenter().y,rival,troops));
+      this.log('⚔️ '+rival.name+' declara guerra','war');
+    }
+  },
+  randomEvent:function(){
+    if(Math.random()>.35)return;
+    var roll=Math.random();
+    if(roll<.25){this.stock.food+=30;this.log('🍇 +30 comida','evolve');}
+    else if(roll<.45){this.stock.knowledge+=60;this.log('💫 +60 saber','evolve');}
+    else if(roll<.65&&this.villagers.length<WK.CFG.MAX_POP){
+      var c=this.villageCenter();
+      var nv=new WK.Villager(c.x+WK.U.rand(-100,100),c.y+WK.U.rand(-100,100),WK.U.ri(18,35));
+      nv.arrivalStory='refuge';
+      this.villagers.push(nv);this.assignHomeless();
+      this.log('🏚️ '+nv.name+' llegó','birth');
+    }else if(roll<.85){
+      var c2=this.villageCenter();var wolfDef=WK.D.ANIMALS.find(function(a){return a.id==='a5'});
+      for(var w=0;w<2;w++){
+        var ang=WK.U.rand(0,Math.PI*2);
+        this.animals.push(new WK.Animal(c2.x+Math.cos(ang)*450,c2.y+Math.sin(ang)*450,wolfDef));
+      }
+      this.log('🐺 ¡Lobos!','war');
+    }else{this.weather='rain';this.log('🌧️ Lluvias','evolve');}
+  },
+  checkAchv:function(id){
+    if(this.achievements[id])return;
+    var achv=WK.D.ACHV.find(function(a){return a.id===id});if(!achv)return;
+    this.achievements[id]=true;
+    if(this.profile){this.profile.achievements=this.achievements;WK.Auth.saveProfiles();}
+    WK.UI.notify('🏆 '+achv.n);WK.Audio.play('achv');this.log('🏆 '+achv.n,'gold');
+  },
+  update:function(){
+    if(!this.running||this.paused)return;
+    this.time+=WK.CFG.TICK*this.speed;
+    this.timeOfDay=(this.time%WK.CFG.DAY)/WK.CFG.DAY;
+    if(this.time%WK.CFG.DAY<WK.CFG.TICK){
+      this.day++;this.randomEvent();
+      if(this.weather==='rain'&&Math.random()<.5)this.weather='sunny';
+    }
+    this.updateSeason();
+    if(this.plagueTimer>0)this.plagueTimer--;
+    if(this.birthBoost>0)this.birthBoost--;
+    WK.Cam.update();
+    this.autoSaveTimer+=WK.CFG.TICK*this.speed;
+    if(this.autoSaveTimer>60000){this.autoSaveTimer=0;if(WK.Save)WK.Save.save(true);}
+    var i;
+    for(i=0;i<this.villagers.length;i++)this.updateVillager(this.villagers[i]);
+    for(i=0;i<this.dogs.length;i++)this.dogs[i].update();
+    for(i=0;i<this.animals.length;i++)this.animals[i].update();
+    for(i=0;i<this.resources.length;i++)this.resources[i].update();
+    for(i=0;i<this.projectiles.length;i++)this.projectiles[i].update();
+    for(i=0;i<this.caravans.length;i++)this.caravans[i].update();
+    for(i=0;i<this.rivals.length;i++)if(this.rivals[i]&&typeof this.rivals[i].update==='function')this.rivals[i].update();
+    for(i=0;i<this.warParties.length;i++)this.warParties[i].update();
+    this.villagers=this.villagers.filter(function(v){return v.alive});
+    this.dogs=this.dogs.filter(function(d){return d.alive});
+    this.animals=this.animals.filter(function(a){return a.alive});
+    this.resources=this.resources.filter(function(r){return r.alive});
+    this.projectiles=this.projectiles.filter(function(p){return p.alive});
+    this.caravans=this.caravans.filter(function(c){return c.alive});
+    this.warParties=this.warParties.filter(function(wp){return wp.alive});
+    if(this.villagers.length===0){this.log('☠️ Fin','death');this.paused=true;WK.UI.banner('☠️ Fin','danger');}
+    if(this.animals.length<40&&Math.random()<.02)this.spawnAnimal();
+    if(this.techs['currency']&&this.hasBuilding('market')&&this.caravans.length===0&&this.day-this.lastCaravanDay>=this.caravanInterval){
+      this.caravans.push(new WK.Caravan(WK.Map.edgeLand().x,WK.Map.edgeLand().y));
+      this.lastCaravanDay=this.day;this.caravanInterval=WK.U.ri(3,6);
+    }
+    if(this.day>5&&Math.random()<.003)this.tryDeclareWar();
+    if(this.day%2===0&&this.time%1000<WK.CFG.TICK)this.assignDogCompanions();
+    this.chiefThinkTimer--;
+    if(this.chiefThinkTimer<=0){this.chiefThink();this.chiefThinkTimer=350;}
+    WK.Brain.thinkTimer--;
+    if(WK.Brain.thinkTimer<=0){WK.Brain.think();WK.Brain.thinkTimer=200;}
+    if(WK.Brain.project)WK.Brain.work(.03*this.speed);
+    var elders=0,adults=0;
+    for(i=0;i<this.villagers.length;i++){if(this.villagers[i].isElder)elders++;else if(!this.villagers[i].isChild)adults++;}
+    this.stock.knowledge+=(adults*.006+elders*.02)*this.knowledgeMult();
+    if(this.hasBuilding('campfire'))this.stock.knowledge+=.01*this.knowledgeMult();
+    if(this.hasBuilding('library'))this.stock.knowledge+=.04*this.knowledgeMult();
+    if(this.hasBuilding('temple'))this.stock.faith+=.02*this.speed;
+    this.tryResearch();
+    var capTotal=0;for(i=0;i<this.buildings.length;i++)capTotal+=this.buildings[i].def.cap||0;
+    var spaceFactor=(capTotal-this.villagers.length)>0?1:.3;
+    var boost=(this.birthBoost>0?3:1)*(this.activeGods['aphrodite']?2:1);
+    if(this.stock.food>this.villagers.length*2&&this.villagers.length<WK.CFG.MAX_POP){
+      for(i=0;i<this.villagers.length;i++){
+        var v=this.villagers[i];
+        if(v.isChild||v.isElder||!v.spouseId)continue;
+        var sp=this.villagers.find(function(x){return x.id===v.spouseId});
+        if(!sp||sp.isElder)continue;
+        var fertileBonus=(v.hasTrait('fertile')?1.5:1)*(sp.hasTrait('fertile')?1.5:1);
+        if(Math.random()<.0025*spaceFactor*boost*fertileBonus){
+          var baby=new WK.Villager(v.x+WK.U.rand(-25,25),v.y+WK.U.rand(-25,25),0);
+          baby.parentId=v.id;this.villagers.push(baby);this.assignHomeless();
+          this.log('👶 '+baby.name+' de '+v.name+' y '+sp.name,'birth');
+          WK.UI.banner('👶 ¡'+baby.name+'!','gold');WK.Audio.play('birth');break;
+        }
+      }
+    }
+    if(this.villagers.length>=20)this.checkAchv('pop20');
+    if(this.villagers.length>=50)this.checkAchv('pop50');
+    if(this.dogs.filter(function(d){return d.alive}).length>=10)this.checkAchv('dogs10');
+    if(WK.UI)WK.UI.updateHUD();
+  },
+  updateVillager:function(v){
+    if(!v.alive)return;
+    v.age+=WK.CFG.AGING;
+    if(v.age>=v.maxAge){this.killVillager(v,'vejez');return;}
+    v.isBoat=v.weapon&&v.weapon.t==='boat';
+    if(!v.isChild){v.hunger-=.0038;v.energy-=.0025;}
+    v.social-=.0015;
+    if(v.hunger<30||v.energy<25)v.mood-=.003;
+    else if(v.social>60&&v.hunger>60)v.mood=Math.min(100,v.mood+.012);
+    if(v.sick){
+      v.sickTimer--;v.hp-=.05;
+      if(v.sickTimer<=0||this.hasBuilding('hospital')){v.sick=false;this.log('💚 '+v.name+' curado','evolve');}
+      if(v.hp<=0){this.killVillager(v,'enfermedad');return;}
+    }
+    if(v.hunger<=0)v.hp-=.15;
+    if(v.hp<=0){this.killVillager(v,'hambre');return;}
+    WK.Map.reveal(v.x,v.y,v.isChild?2:3);
+    v.timer--;
+    if(v.timer<=0||!v.target||(v.target instanceof WK.Entity&&!v.target.alive)){
+      this.decideVillager(v);
+    }
+    this.actVillager(v);
+    v.update();
+  },
+  decideVillager:function(v){
+    var S=this.stock,T=this.techs;
+    var threat=null,td=150;
+    for(var i=0;i<this.animals.length;i++){
+      var a=this.animals[i];if(!a.alive||!a.data.h)continue;
+      var d0=WK.U.dist(v,a);if(d0<td){td=d0;threat=a;}
+    }
+    if(threat){
+      if((v.weapon&&v.weapon.d>0)||v.hasTrait('brave')){v.state='hunt';v.target=threat;v.timer=130;v.profession='Guerrero';}
+      else{v.state='flee';v.target={x:v.x+(v.x-threat.x)*2,y:v.y+(v.y-threat.y)*2};v.timer=70;}
+      return;
+    }
+    if(v.isChild){v.state='play';v.target=WK.Map.randomLand();v.timer=180;return;}
+    if(this.timeOfDay>.78||this.timeOfDay<.22){v.state='sleep';v.timer=160;return;}
+    if(v.hunger<35){v.state='eat';v.timer=40;return;}
+    if(v.energy<25){v.state='sleep';v.timer=160;return;}
+    if(!v.weapon){
+      var tool=null;
+      for(var t=0;t<this.resources.length;t++){
+        var r=this.resources[t];
+        if(r.type==='tool'&&r.amount>0&&WK.U.dist(v,r)<400){tool=r;break;}
+      }
+      if(tool){v.state='pickup';v.target=tool;v.timer=120;return;}
+    }
+    if(WK.Brain.project&&Math.random()<.6){v.state='build';v.target={x:WK.Brain.project.x,y:WK.Brain.project.y};v.timer=240;v.profession='Constructor';return;}
+    if(T['mysticism']&&this.hasBuilding('temple')&&Math.random()<(v.persIs('pious')?.45:.2)){v.state='pray';v.target=this.nearestBuilding('temple');v.timer=240;v.profession='Fiel';return;}
+    if(T['agriculture']){
+      var farm=this.nearestBuilding('farm');
+      if(farm&&(farm.growth>=100||(S.food<this.villagers.length*4&&Math.random()<.5))){v.state='farm';v.target=farm;v.timer=220;v.profession='Granjero';return;}
+    }
+    if(v.weapon&&v.weapon.d>0&&Math.random()<.5){
+      var prey=this.nearestAnimal(v.x,v.y,800);
+      if(prey){v.state='hunt';v.target=prey;v.timer=240;v.profession='Cazador';return;}
+    }
+    if(v.weapon&&(v.weapon.t==='fish'||v.weapon.t==='net')){v.state='fish';v.target=WK.Map.waterSpot||this.villageCenter();v.timer=260;v.profession='Pescador';return;}
+    if(S.wood<60){
+      var wood=null;
+      for(var w=0;w<this.resources.length;w++){
+        var rw=this.resources[w];
+        if(rw.type==='wood'&&rw.amount>0&&WK.U.dist(v,rw)<1200){wood=rw;break;}
+      }
+      if(wood){v.state='gather_w';v.target=wood;v.timer=220;v.profession='Leñador';return;}
+    }
+    if(S.food<this.villagers.length*3){
+      var berry=null;
+      for(var b=0;b<this.resources.length;b++){
+        var rb=this.resources[b];
+        if(rb.type==='berry'&&rb.amount>0&&WK.U.dist(v,rb)<900){berry=rb;break;}
+      }
+      if(berry){v.state='gather_f';v.target=berry;v.timer=200;v.profession='Recolector';return;}
+    }
+    if(v.social<55){
+      var friend=null;
+      for(var f=0;f<this.villagers.length;f++){
+        var vf=this.villagers[f];
+        if(vf!==v&&vf.alive&&!vf.isChild){friend=vf;break;}
+      }
+      if(friend){
+        v.state='social';v.target=friend;v.timer=180;v.profession='Social';
+        var charm=(v.hasTrait('charismatic')?2:1)*(this.activeGods['aphrodite']?3:1);
+        if(!v.spouseId&&!friend.spouseId&&!friend.isChild&&v.gender!==friend.gender&&Math.random()<.005*charm){
+          v.spouseId=friend.id;friend.spouseId=v.id;
+          this.log('💍 '+v.name+' y '+friend.name,'birth');WK.UI.banner('💍 ¡Boda!','magic');
+        }
+        return;
+      }
+    }
+    v.state='wander';v.target=WK.Map.randomLand();v.timer=WK.U.ri(120,260);v.profession='Aldeano';
+  },
+  actVillager:function(v){
+    if(!v.target)return;
+    var tx=v.target.x,ty=v.target.y;
+    if(WK.Walls.isComplete()){
+      var iAmInside=WK.Walls.isInside(v.x,v.y);
+      var targetInside=WK.Walls.isInside(tx,ty);
+      if(iAmInside!==targetInside){
+        var gate=WK.Walls.getGate();
+        var distToGate=Math.hypot(v.x-gate.x,v.y-gate.y);
+        if(distToGate>30){tx=gate.x;ty=gate.y;v.pathToGate=true;}else{v.pathToGate=false;}
+      }else v.pathToGate=false;
+    }
+    var d=WK.U.dist(v,{x:tx,y:ty});
+    var eff=v.mood>50?1:.5;if(v.sick)eff*=.5;
+    if(d>22){
+      var dx=tx-v.x,dy=ty-v.y;
+      var spd=v.isElder?1:(v.isChild?1.3:1.7);
+      if(v.state==='flee')spd=2.4;if(v.hasTrait('swift'))spd*=1.2;
+      v.vx=(dx/d)*spd;v.vy=(dy/d)*spd;return;
+    }
+    v.vx=0;v.vy=0;
+    if(v.state==='pickup'&&v.target.type==='tool'){v.weapon=v.target.toolData;v.target.alive=false;this.log('🛠️ '+v.name+' tomó '+v.weapon.n,'evolve');}
+    else if(v.state==='eat'){
+      if(this.stock.food>=1){this.stock.food-=1;v.hunger=100;}
+      else if(v.inv.f>0){v.inv.f--;v.hunger=90;}
+    }
+    else if(v.state==='sleep'){v.energy=Math.min(100,v.energy+.6*eff);if(v.energy>=99){v.state='idle';v.timer=0;}}
+    else if(v.state==='pray'){
+      this.stock.faith+=.06*eff*(v.persIs('pious')?1.5:1);
+      v.mood=Math.min(100,v.mood+.05);
+      if(!v.believer&&Math.random()<.012){v.believer=true;this.log('🕊️ '+v.name+' fiel','faith');}
+    }
+    else if(v.state==='social'&&v.target instanceof WK.Villager){
+      v.social=Math.min(100,v.social+1);v.target.social=Math.min(100,v.target.social+1);
+      this.stock.knowledge+=.02*this.knowledgeMult();
+    }
+    else if(v.state==='farm'&&v.target.def&&v.target.def.id==='farm'){
+      var seasonMult=WK.CFG.SEASONS[this.currentSeason].f;
+      var farmBoost=this.activeGods['demeter']?1.8:1;
+      if(v.target.growth>=100){v.target.growth=0;this.stock.food+=14*farmBoost;this.log('🌾 Cosecha','evolve');}
+      else v.target.growth+=.2*eff*seasonMult*farmBoost*(v.persIs('farmer')?1.3:1);
+    }
+    else if(v.state==='fish'){
+      if(WK.Map.isWater(v.x,v.y)||WK.Map.isWater(v.x,v.y+30)){v.inv.f+=(v.weapon.t==='net'?.5:.25)*eff*(this.activeGods['poseidon']?2:1);}
+    }
+    else if(v.state==='hunt'&&(v.target instanceof WK.Animal||v.target instanceof WK.WarParty)){
+      if(v.target.alive&&v.weapon&&v.weapon.d>0){
+        var dogBoost=v.hasDogCompanion()?1.5:1;
+        var dmg=v.weapon.d*eff*dogBoost*(this.activeGods['ares']?1.5:1)*(this.activeGods['artemis']?1.8:1);
+        this.projectiles.push(new WK.Projectile(v.x,v.y,v.target,dmg,v.weapon.e==='🏹'?'arrow':'spear'));
+        v.timer=55;
+        if(v.target instanceof WK.WarParty)v.target.count-=.5;
+      }
+    }
+    else if(v.state==='gather_w'&&v.target.type==='wood'){
+      var yw=2.2*this.gatherMult()*eff*(v.weapon&&v.weapon.t==='axe'?2:1);
+      v.inv.w+=yw;v.target.amount-=yw;
+    }
+    else if(v.state==='gather_f'&&v.target.type==='berry'){v.inv.f+=3*eff;v.target.amount-=3;}
+    var carry=v.inv.w+v.inv.s+v.inv.o+v.inv.f+v.inv.m;
+    if(carry>=8&&['gather_w','gather_f','fish','hunt'].indexOf(v.state)>=0){v.state='deposit';v.target=this.villageCenter();v.timer=300;}
+    else if(v.state==='deposit'){
+      this.stock.wood+=v.inv.w;this.stock.food+=v.inv.f+v.inv.m;
+      v.inv={w:0,s:0,o:0,f:0,m:0};v.state='idle';v.timer=5;
+    }
+  }
+};
+console.log('[WK] Parte 3: OK');
+</script>
+
+
+
+
+
+<script>
+WK.Render={
+  canvas:null,ctx:null,mini:null,miniCtx:null,
+  init:function(){
+    this.canvas=document.getElementById('gc');
+    this.ctx=this.canvas.getContext('2d');
+    this.mini=document.getElementById('mm');
+    this.miniCtx=this.mini.getContext('2d');
+    this.resize();
+    window.addEventListener('resize',this.resize.bind(this));
+  },
+  resize:function(){
+    var dpr=Math.min(window.devicePixelRatio||1,2);
+    this.canvas.width=window.innerWidth*dpr;
+    this.canvas.height=window.innerHeight*dpr;
+    this.canvas.style.width=window.innerWidth+'px';
+    this.canvas.style.height=window.innerHeight+'px';
+    this.ctx.setTransform(dpr,0,0,dpr,0,0);
+  },
+  draw:function(){
+    var G=WK.Game,ctx=this.ctx,W=window.innerWidth,H=window.innerHeight,z=WK.Cam.zoom;
+    if(!G||!G.running)return;
+    var nf=0;
+    if(G.timeOfDay>.75)nf=(G.timeOfDay-.75)*4;
+    else if(G.timeOfDay<.25)nf=(.25-G.timeOfDay)*4;
+    ctx.fillStyle='#0c4a6e';ctx.fillRect(0,0,W,H);
+    ctx.save();
+    if(G.shake>0){ctx.translate(WK.U.rand(-G.shake,G.shake)*.4,WK.U.rand(-G.shake,G.shake)*.4);G.shake--;}
+    var season=WK.CFG.SEASONS[G.currentSeason];
+    var cols=['#155e8a','#fde68a',
+      G.currentSeason===3?'#94a3b8':(G.currentSeason===2?'#a16207':(G.currentSeason===0?'#4ade80':'#2f9e44')),
+      '#1b4332','#57534e','#78716c'];
+    var viewW=W/z,viewH=H/z;
+    var c0=Math.max(0,Math.floor(WK.Cam.x/WK.CFG.TILE)),r0=Math.max(0,Math.floor(WK.Cam.y/WK.CFG.TILE));
+    var c1=Math.min(WK.CFG.COLS-1,Math.ceil((WK.Cam.x+viewW)/WK.CFG.TILE));
+    var r1=Math.min(WK.CFG.ROWS-1,Math.ceil((WK.Cam.y+viewH)/WK.CFG.TILE));
+    for(var r=r0;r<=r1;r++)for(var c=c0;c<=c1;c++){
+      var tile=WK.Map.grid[r*WK.CFG.COLS+c];
+      var sx=WK.SX(c*WK.CFG.TILE),sy=WK.SY(r*WK.CFG.TILE),tsz=WK.CFG.TILE*z+1;
+      ctx.fillStyle=cols[tile];ctx.fillRect(sx,sy,tsz,tsz);
+      if(WK.Map.explored[r*WK.CFG.COLS+c]===0){ctx.fillStyle='#050810';ctx.fillRect(sx,sy,tsz,tsz);}
+    }
+    if(nf>.5){
+      ctx.fillStyle='rgba(255,255,255,'+(nf*.8)+')';
+      for(var st=0;st<40;st++){
+        var stx=WK.U.h2(st,1)*W,sty=WK.U.h2(st,2)*H*.4;
+        ctx.globalAlpha=nf*(Math.sin(G.time/300+st)*.5+.5);
+        ctx.fillRect(stx,sty,2,2);
+      }
+      ctx.globalAlpha=1;
+    }
+    var i;
+    for(i=0;i<G.resources.length;i++){var rr=G.resources[i];if(WK.Map.exploredAt(rr.x,rr.y))this.drawResource(rr);}
+    for(i=0;i<G.buildings.length;i++){var bb=G.buildings[i];if(WK.Map.exploredAt(bb.x,bb.y))this.drawBuilding(bb);}
+    if(WK.Brain.project){
+      var bp=WK.Brain.project;
+      ctx.globalAlpha=.5;ctx.font=WK.SZ(26)+'px serif';ctx.textAlign='center';
+      ctx.fillText(bp.def.e,WK.SX(bp.x),WK.SY(bp.y));ctx.globalAlpha=1;
+      ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(WK.SX(bp.x)-WK.SZ(18),WK.SY(bp.y)+WK.SZ(8),WK.SZ(36),WK.SZ(5));
+      ctx.fillStyle='#4ade80';ctx.fillRect(WK.SX(bp.x)-WK.SZ(18),WK.SY(bp.y)+WK.SZ(8),WK.SZ(36)*WK.U.clamp(bp.progress/bp.time,0,1),WK.SZ(5));
+    }
+    WK.Walls.draw(ctx);
+    if(WK.Build.active&&WK.Build.selected){
+      var gx=WK.SX(WK.Build.ghostX),gy=WK.SY(WK.Build.ghostY);
+      ctx.globalAlpha=.6;ctx.strokeStyle='#10b981';ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(gx,gy,WK.SZ(25),0,Math.PI*2);ctx.stroke();
+      ctx.font=WK.SZ(24)+'px serif';ctx.textAlign='center';
+      ctx.fillText(WK.Build.selected.e,gx,gy+WK.SZ(8));
+      ctx.font=WK.SZ(9)+'px sans-serif';ctx.fillStyle='#10b981';
+      ctx.fillText(WK.Build.selected.n,gx,gy+WK.SZ(32));
+      ctx.globalAlpha=1;
+    }
+    for(i=0;i<G.animals.length;i++){var aa=G.animals[i];if(aa.alive&&WK.Map.exploredAt(aa.x,aa.y))this.drawAnimal(aa);}
+    for(i=0;i<G.rivals.length;i++)this.drawRival(G.rivals[i]);
+    for(i=0;i<G.caravans.length;i++)this.drawCaravan(G.caravans[i]);
+    for(i=0;i<G.warParties.length;i++)this.drawWarParty(G.warParties[i]);
+    for(i=0;i<G.dogs.length;i++)this.drawDog(G.dogs[i]);
+    for(i=0;i<G.villagers.length;i++)this.drawVillager(G.villagers[i]);
+    for(i=0;i<G.projectiles.length;i++){
+      var pp=G.projectiles[i];
+      ctx.strokeStyle=pp.type==='arrow'?'#fbbf24':'#cbd5e1';ctx.lineWidth=WK.SZ(2);
+      ctx.beginPath();ctx.moveTo(WK.SX(pp.x),WK.SY(pp.y));
+      ctx.lineTo(WK.SX(pp.x)-pp.vx*2,WK.SY(pp.y)-pp.vy*2);ctx.stroke();
+    }
+    if(G.weather==='rain'){
+      ctx.strokeStyle='rgba(147,197,253,.4)';ctx.lineWidth=1;
+      for(var q=0;q<60;q++){var rx=WK.U.rand(0,W),ry=WK.U.rand(0,H);ctx.beginPath();ctx.moveTo(rx,ry);ctx.lineTo(rx-3,ry+14);ctx.stroke();}
+    }
+    if(G.currentSeason===3&&Math.random()<.3){
+      ctx.fillStyle='rgba(255,255,255,.7)';
+      for(var sn=0;sn<15;sn++){ctx.beginPath();ctx.arc(WK.U.rand(0,W),WK.U.rand(0,H),2,0,Math.PI*2);ctx.fill();}
+    }
+    if(nf>0){ctx.fillStyle='rgba(2,6,23,'+(nf*.62)+')';ctx.fillRect(0,0,W,H);}
+    ctx.restore();
+    this.drawMinimap();
+  },
+  drawResource:function(r){
+    if(r.amount<=0&&r.type!=='tool')return;
+    var ctx=this.ctx,sx=WK.SX(r.x),sy=WK.SY(r.y);
+    if(r.type==='wood'){ctx.fillStyle='#78350f';ctx.fillRect(sx-WK.SZ(3),sy-WK.SZ(5),WK.SZ(6),WK.SZ(15));ctx.fillStyle='#166534';ctx.beginPath();ctx.arc(sx,sy-WK.SZ(14),WK.SZ(14),0,Math.PI*2);ctx.fill();}
+    else if(r.type==='stone'){ctx.fillStyle='#64748b';ctx.beginPath();ctx.arc(sx,sy,WK.SZ(11),0,Math.PI*2);ctx.fill();}
+    else if(r.type==='ore'){ctx.fillStyle='#57534e';ctx.beginPath();ctx.arc(sx,sy,WK.SZ(11),0,Math.PI*2);ctx.fill();ctx.fillStyle='#f59e0b';ctx.fillRect(sx-WK.SZ(4),sy-WK.SZ(3),WK.SZ(3),WK.SZ(3));}
+    else if(r.type==='berry'){ctx.fillStyle='#166534';ctx.beginPath();ctx.arc(sx,sy-WK.SZ(5),WK.SZ(9),0,Math.PI*2);ctx.fill();ctx.fillStyle='#ef4444';ctx.beginPath();ctx.arc(sx-WK.SZ(4),sy-WK.SZ(6),WK.SZ(2.5),0,Math.PI*2);ctx.fill();}
+    else if(r.type==='tool'){ctx.font=WK.SZ(22)+'px serif';ctx.textAlign='center';ctx.fillText(r.toolData.e,sx,sy+WK.SZ(8));}
+  },
+  drawBuilding:function(b){
+    var ctx=this.ctx,sx=WK.SX(b.x),sy=WK.SY(b.y),G=WK.Game;
+    var col=['#8b5cf6','#f59e0b','#cbd5e1','#3b82f6','#a855f7','#22d3ee','#f472b6','#10b981'][WK.U.clamp(G.era,0,7)];
+    if(b.def.cap>0){
+      ctx.fillStyle=col;ctx.fillRect(sx-WK.SZ(17),sy-WK.SZ(12),WK.SZ(34),WK.SZ(26));
+      ctx.fillStyle='#991b1b';ctx.beginPath();
+      ctx.moveTo(sx-WK.SZ(21),sy-WK.SZ(12));ctx.lineTo(sx,sy-WK.SZ(30));ctx.lineTo(sx+WK.SZ(21),sy-WK.SZ(12));ctx.fill();
+      ctx.fillStyle='#451a03';ctx.fillRect(sx-WK.SZ(5),sy+WK.SZ(2),WK.SZ(10),WK.SZ(12));
+    }
+    ctx.font=WK.SZ(20)+'px serif';ctx.textAlign='center';
+    ctx.fillText(b.def.e,sx,sy-(b.def.cap>0?WK.SZ(34):WK.SZ(6)));
+    if(b.def.id==='campfire'&&(G.timeOfDay>.7||G.timeOfDay<.3)){
+      ctx.globalAlpha=.18;ctx.fillStyle='#fb923c';ctx.beginPath();ctx.arc(sx,sy,WK.SZ(46),0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+    }
+    if(b.def.id==='farm'&&b.growth<100){
+      ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillRect(sx-WK.SZ(15),sy+WK.SZ(16),WK.SZ(30),WK.SZ(4));
+      ctx.fillStyle='#4ade80';ctx.fillRect(sx-WK.SZ(15),sy+WK.SZ(16),WK.SZ(30)*b.growth/100,WK.SZ(4));
+    }
+  },
+  drawAnimal:function(a){
+    var ctx=this.ctx,sx=WK.SX(a.x),sy=WK.SY(a.y);
+    ctx.font=WK.SZ(20)+'px serif';ctx.textAlign='center';ctx.fillText(a.data.e,sx,sy);
+    if(a.hp<a.maxHp){ctx.fillStyle='#ef4444';ctx.fillRect(sx-WK.SZ(10),sy-WK.SZ(22),WK.SZ(20)*(a.hp/a.maxHp),WK.SZ(3));}
+  },
+  drawDog:function(d){
+    if(!d.alive)return;
+    var ctx=this.ctx,sx=WK.SX(d.x),sy=WK.SY(d.y),s=d.isPuppy?.6:1;
+    ctx.font=WK.SZ(18)*s+'px serif';ctx.textAlign='center';
+    ctx.save();
+    if(d.facing<0){ctx.translate(sx,sy);ctx.scale(-1,1);ctx.fillText(d.emoji,0,0);}
+    else ctx.fillText(d.emoji,sx,sy);
+    ctx.restore();
+    if(d.pregnancyTimer>0){ctx.font=WK.SZ(10)+'px serif';ctx.fillText('💕',sx+WK.SZ(10),sy-WK.SZ(12));}
+    if(d.barkShow>0&&!d.isPuppy){
+      ctx.font='bold '+WK.SZ(10)+'px sans-serif';ctx.fillStyle='#fde047';
+      ctx.fillText('¡GUAU!',sx,sy-WK.SZ(18)+Math.sin(d.barkShow*.3)*3);
+      ctx.strokeStyle='rgba(253,224,71,.45)';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.arc(sx,sy-WK.SZ(6),WK.SZ((45-d.barkShow)*1.6),0,Math.PI*2);ctx.stroke();
+    }
+    ctx.font=WK.SZ(7)+'px sans-serif';ctx.fillStyle=d.isPuppy?'#fbbf24':'#93c5fd';
+    ctx.fillText(d.name,sx,sy+WK.SZ(14)*s);
+  },
+  drawVillager:function(v){
+    if(!v.alive)return;
+    var ctx=this.ctx,sx=WK.SX(v.x),sy=WK.SY(v.y),cs=v.isChild?.65:1;
+    ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(sx,sy+WK.SZ(3),WK.SZ(6),WK.SZ(3),0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#1e293b';ctx.fillRect(sx-WK.SZ(3)*cs,sy-WK.SZ(2),WK.SZ(2)*cs,WK.SZ(6)*cs);ctx.fillRect(sx+WK.SZ(1)*cs,sy-WK.SZ(2),WK.SZ(2)*cs,WK.SZ(6)*cs);
+    ctx.fillStyle=v.shirtColor;ctx.fillRect(sx-WK.SZ(4)*cs,sy-WK.SZ(10)*cs,WK.SZ(8)*cs,WK.SZ(10)*cs);
+    ctx.fillStyle=v.skinColor;ctx.beginPath();ctx.arc(sx,sy-WK.SZ(14)*cs,WK.SZ(4)*cs,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle=v.skinColor;ctx.lineWidth=WK.SZ(2)*cs;
+    var working=['gather_w','gather_f','build','farm','hunt','fish'].indexOf(v.state)>=0;
+    if(working){var swing=Math.sin(WK.Game.time/100)*WK.SZ(5);ctx.beginPath();ctx.moveTo(sx,sy-WK.SZ(8)*cs);ctx.lineTo(sx+v.facing*WK.SZ(8)*cs,sy-WK.SZ(5)*cs+swing);ctx.stroke();}
+    else{ctx.beginPath();ctx.moveTo(sx,sy-WK.SZ(8)*cs);ctx.lineTo(sx+v.facing*WK.SZ(5)*cs,sy-WK.SZ(2)*cs);ctx.stroke();}
+    if(v.weapon){ctx.font=WK.SZ(11)*cs+'px serif';ctx.textAlign='center';ctx.fillText(v.weapon.e,sx+v.facing*WK.SZ(9),sy-WK.SZ(4));}
+    if(v.isChief){ctx.fillStyle='#fbbf24';ctx.beginPath();ctx.moveTo(sx-WK.SZ(4),sy-WK.SZ(18)*cs);ctx.lineTo(sx-WK.SZ(2),sy-WK.SZ(22)*cs);ctx.lineTo(sx,sy-WK.SZ(19)*cs);ctx.lineTo(sx+WK.SZ(2),sy-WK.SZ(22)*cs);ctx.lineTo(sx+WK.SZ(4),sy-WK.SZ(18)*cs);ctx.fill();}
+    if(v.sick){ctx.font=WK.SZ(10)+'px serif';ctx.textAlign='center';ctx.fillText('🤒',sx+WK.SZ(8),sy-WK.SZ(18)*cs);}
+    if(v.pathToGate){ctx.font=WK.SZ(9)+'px serif';ctx.textAlign='center';ctx.fillStyle='#fbbf24';ctx.fillText('🚪',sx,sy-WK.SZ(20)*cs);}
+    if(v.hasDogCompanion()&&v.state==='hunt'){ctx.font=WK.SZ(9)+'px serif';ctx.textAlign='center';ctx.fillText('🐕',sx-WK.SZ(8),sy-WK.SZ(18)*cs);}
+  },
+  drawRival:function(r){
+    if(!r||!r.alive)return;
+    var ctx=this.ctx,sx=WK.SX(r.x),sy=WK.SY(r.y);
+    ctx.fillStyle=r.hostile?'#7f1d1d':r.color;
+    ctx.fillRect(sx-WK.SZ(20),sy-WK.SZ(15),WK.SZ(40),WK.SZ(30));
+    ctx.fillStyle='#450a0a';ctx.beginPath();
+    ctx.moveTo(sx-WK.SZ(25),sy-WK.SZ(15));ctx.lineTo(sx,sy-WK.SZ(35));ctx.lineTo(sx+WK.SZ(25),sy-WK.SZ(15));ctx.fill();
+    ctx.font=WK.SZ(18)+'px serif';ctx.textAlign='center';ctx.fillText(r.hostile?'⚔️':'🏘️',sx,sy-WK.SZ(38));
+    ctx.font='bold '+WK.SZ(9)+'px sans-serif';ctx.fillStyle=r.hostile?'#fca5a5':'#fde68a';
+    ctx.fillText(r.name,sx,sy+WK.SZ(22));
+  },
+  drawCaravan:function(c){if(!c.alive)return;var ctx=this.ctx;ctx.font=WK.SZ(24)+'px serif';ctx.textAlign='center';ctx.fillText(c.emoji,WK.SX(c.x),WK.SY(c.y));},
+  drawWarParty:function(wp){
+    if(!wp.alive)return;
+    var ctx=this.ctx,sx=WK.SX(wp.x),sy=WK.SY(wp.y);
+    ctx.fillStyle=wp.fromRival.color||'#dc2626';
+    for(var i=0;i<Math.min(wp.count,5);i++){ctx.beginPath();ctx.arc(sx+Math.cos(i)*WK.SZ(10),sy+Math.sin(i)*WK.SZ(10),WK.SZ(5),0,Math.PI*2);ctx.fill();}
+    ctx.font=WK.SZ(16)+'px serif';ctx.textAlign='center';ctx.fillText('⚔️',sx,sy-WK.SZ(10));
+  },
+  drawMinimap:function(){
+    var G=WK.Game,mc=this.miniCtx;
+    mc.clearRect(0,0,110,80);mc.drawImage(WK.Map.miniBase,0,0);
+    mc.fillStyle='rgba(0,0,0,.75)';
+    for(var mr=0;mr<WK.CFG.ROWS;mr+=2)for(var mc2=0;mc2<WK.CFG.COLS;mc2+=2)
+      if(WK.Map.explored[mr*WK.CFG.COLS+mc2]===0)mc.fillRect(mc2,mr,2,2);
+    mc.fillStyle='#4ade80';
+    for(var i=0;i<G.villagers.length;i++)mc.fillRect(G.villagers[i].x/WK.CFG.TILE,G.villagers[i].y/WK.CFG.TILE,1.5,1.5);
+    mc.fillStyle='#38bdf8';
+    for(var d=0;d<G.dogs.length;d++)mc.fillRect(G.dogs[d].x/WK.CFG.TILE,G.dogs[d].y/WK.CFG.TILE,2,2);
+    mc.fillStyle='#fbbf24';
+    for(var b=0;b<G.buildings.length;b++)mc.fillRect(G.buildings[b].x/WK.CFG.TILE,G.buildings[b].y/WK.CFG.TILE,2,2);
+    mc.fillStyle='#dc2626';
+    for(var r=0;r<G.rivals.length;r++)if(G.rivals[r].alive)mc.fillRect(G.rivals[r].x/WK.CFG.TILE,G.rivals[r].y/WK.CFG.TILE,3,3);
+    mc.strokeStyle='#fff';mc.lineWidth=.6;
+    mc.strokeRect(WK.Cam.x/WK.CFG.TILE,WK.Cam.y/WK.CFG.TILE,(window.innerWidth/WK.Cam.zoom)/WK.CFG.TILE,(window.innerHeight/WK.Cam.zoom)/WK.CFG.TILE);
+  }
+};
+
+WK.UI={
+  bannerTimer:null,notifyTimer:null,obTimer:null,
+  banner:function(text,cls){
+    var el=document.getElementById('banner');if(!el)return;
+    el.textContent=text;el.className='show '+(cls||'');
+    clearTimeout(this.bannerTimer);this.bannerTimer=setTimeout(function(){el.className='';},4200);
+  },
+  notify:function(text){
+    var el=document.getElementById('notif');if(!el)return;
+    el.textContent=text;el.classList.add('show');
+    clearTimeout(this.notifyTimer);this.notifyTimer=setTimeout(function(){el.classList.remove('show');},3000);
+  },
+  showOrder:function(text){
+    var el=document.getElementById('obanner');if(!el)return;
+    el.textContent=text;el.classList.add('show');
+    clearTimeout(this.obTimer);this.obTimer=setTimeout(function(){el.classList.remove('show');},5000);
+  },
+  openNpcModal:function(){
+    var modal=document.getElementById('npcModal');
+    if(modal){modal.classList.add('show');WK.Audio.resume();WK.Audio.play('click');}
+  },
+  updateHUD:function(){
+    var G=WK.Game;if(!G||!G.profile)return;
+    var h=Math.floor(G.timeOfDay*24),m=Math.floor((G.timeOfDay*24*60)%60);
+    document.getElementById('uTime').textContent='🕒 '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+    document.getElementById('uDay').textContent='Día '+G.day;
+    document.getElementById('uWea').textContent=G.weather==='rain'?'🌧️':'🌤';
+    document.getElementById('uNm').textContent=G.profile.name;
+    document.getElementById('uAv').textContent=G.profile.avatar;
+    document.getElementById('uEra').textContent=WK.CFG.ERAS[G.era];
+    var season=WK.CFG.SEASONS[G.currentSeason];
+    document.getElementById('uSeas').textContent=season.e+' '+season.n;
+    document.getElementById('uSeas').style.background=season.c;
+    document.getElementById('uPop').textContent='👥 '+G.villagers.length;
+    document.getElementById('uDog').textContent='🐕 '+G.dogs.filter(function(d){return d.alive}).length;
+    document.getElementById('uFood').textContent='🍎 '+Math.floor(G.stock.food);
+    document.getElementById('uWood').textContent='🪵 '+Math.floor(G.stock.wood);
+    document.getElementById('uStone').textContent='🪨 '+Math.floor(G.stock.stone);
+    document.getElementById('uGold').textContent='🪙 '+Math.floor(G.stock.gold);
+    document.getElementById('uFaith').textContent='🕊️ '+Math.floor(G.stock.faith);
+    document.getElementById('uKnow').textContent='🧠 '+Math.floor(G.stock.knowledge);
+    document.getElementById('uDef').textContent='🛡️ '+G.defenseRating();
+  },
+  renderLogs:function(){
+    var el=document.getElementById('logC');if(!el)return;
+    var html='';
+    for(var i=0;i<WK.Game.logs.length;i++){
+      var l=WK.Game.logs[i];
+      html+='<div class="lentry '+l.type+'"><span class="ltime">'+l.time+'</span> '+l.msg+'</div>';
+    }
+    el.innerHTML=html;
+  },
+  renderPowers:function(){
+    var G=WK.Game,el=document.getElementById('powC');if(!el)return;
+    var sections=[
+      {title:'📦 Recursos',items:[
+        {e:'🍇',n:'Bayas',fn:function(){G.stock.food+=30;}},
+        {e:'🪵',n:'Madera',fn:function(){G.stock.wood+=30;}},
+        {e:'🪨',n:'Piedra',fn:function(){G.stock.stone+=30;}},
+        {e:'⛏️',n:'Mineral',fn:function(){G.stock.ore+=20;}},
+        {e:'🪙',n:'Oro',fn:function(){G.stock.gold+=50;}},
+        {e:'🕊️',n:'Fe',fn:function(){G.stock.faith+=50;}}
+      ]},
+      {title:'🏗️ Construcción',items:[
+        {e:'🧱',n:'Muralla',fn:function(){WK.Build.buildWallRing();}},
+        {e:'🏠',n:'Casa',fn:function(){WK.Build.start(WK.D.BUILDINGS.find(function(b){return b.id==='wood_house'}));}},
+        {e:'🌾',n:'Granja',fn:function(){WK.Build.start(WK.D.BUILDINGS.find(function(b){return b.id==='farm'}));}},
+        {e:'🏛️',n:'Templo',fn:function(){WK.Build.start(WK.D.BUILDINGS.find(function(b){return b.id==='temple'}));}},
+        {e:'🗼',n:'Torre',fn:function(){WK.Build.start(WK.D.BUILDINGS.find(function(b){return b.id==='tower'}));}},
+        {e:'🏥',n:'Hospital',fn:function(){WK.Build.start(WK.D.BUILDINGS.find(function(b){return b.id==='hospital'}));}}
+      ]},
+      {title:'✨ Milagros',items:[
+        {e:'💚',n:'Sanar',fn:function(){if(G.stock.faith<60){WK.UI.notify('Necesitas 60 Fe');return;}G.stock.faith-=60;for(var i=0;i<G.villagers.length;i++){G.villagers[i].hp=100;G.villagers[i].sick=false;}WK.Audio.play('miracle');}},
+        {e:'🌾',n:'Cosechas',fn:function(){if(G.stock.faith<40){WK.UI.notify('Necesitas 40 Fe');return;}G.stock.faith-=40;for(var i=0;i<G.buildings.length;i++)if(G.buildings[i].def.id==='farm')G.buildings[i].growth=100;}},
+        {e:'🐕',n:'Nuevo Perro',fn:function(){if(G.stock.faith<50){WK.UI.notify('Necesitas 50 Fe');return;}G.stock.faith-=50;G.dogs.push(new WK.Dog(G.villageCenter().x,G.villageCenter().y,null,'🐕',null,false));}},
+        {e:'🐶',n:'Cachorro',fn:function(){if(G.stock.faith<30){WK.UI.notify('Necesitas 30 Fe');return;}G.stock.faith-=30;G.dogs.push(new WK.Dog(G.villageCenter().x,G.villageCenter().y,null,'🐶',null,true));}},
+        {e:'🌧️',n:'Lluvia',fn:function(){G.weather='rain';}},
+        {e:'💡',n:'Saber',fn:function(){G.stock.knowledge+=200;}}
+      ]},
+      {title:'🗡️ Arsenal',items:WK.D.WEAPONS.slice(0,12).map(function(w){
+        return{e:w.e,n:w.n,fn:function(){var c=G.villageCenter();G.resources.push(new WK.Resource(c.x+WK.U.rand(-40,40),c.y+WK.U.rand(-40,40),'tool',w));}};
+      })},
+      {title:'🐾 Fauna',items:WK.D.ANIMALS.slice(0,12).map(function(a){
+        return{e:a.e,n:a.n,fn:function(){G.spawnAnimal(a);}};
+      })}
+    ];
+    var html='';
+    for(var s=0;s<sections.length;s++){
+      var sec=sections[s];
+      html+='<div class="sec'+(s<2?' act':'')+'"><div class="sect" data-sec="'+s+'">'+sec.title+'</div><div class="secb"><div class="secc"><div class="pgrid">';
+      for(var i=0;i<sec.items.length;i++){
+        html+='<div class="pbtn" data-s="'+s+'" data-i="'+i+'"><span class="ic">'+sec.items[i].e+'</span>'+sec.items[i].n+'</div>';
+      }
+      html+='</div></div></div></div>';
+    }
+    el.innerHTML=html;
+    var btns=el.querySelectorAll('.pbtn');
+    for(var b=0;b<btns.length;b++){
+      btns[b].addEventListener('click',function(){
+        var s=parseInt(this.getAttribute('data-s')),idx=parseInt(this.getAttribute('data-i'));
+        sections[s].items[idx].fn();WK.Audio.play('click');
+      });
+    }
+    var titles=el.querySelectorAll('.sect');
+    for(var t=0;t<titles.length;t++){
+      titles[t].addEventListener('click',function(){this.parentElement.classList.toggle('act');});
+    }
+  },
+  renderTech:function(){
+    var G=WK.Game,el=document.getElementById('techC');if(!el)return;
+    var html='';
+    for(var i=0;i<WK.D.TECHS.length;i++){
+      var t=WK.D.TECHS[i],done=!!G.techs[t.id],reqOk=true;
+      for(var j=0;j<t.req.length;j++)if(!G.techs[t.req[j]])reqOk=false;
+      var cls=done?'done':(reqOk?'avl':'lck');
+      html+='<div class="icard '+cls+'"><span class="ico">'+t.e+'</span><span class="inm"><b>'+t.n+'</b>';
+      if(!done&&reqOk){var pct=WK.U.clamp(G.stock.knowledge/t.cost*100,0,100);html+='<div class="prog"><div style="width:'+pct+'%"></div></div>';}
+      html+='</span>'+(done?'<span style="color:var(--ac)">✔</span>':(reqOk?'<span style="color:var(--gold);font-size:.6rem">'+Math.floor(Math.min(G.stock.knowledge,t.cost))+'/'+t.cost+'</span>':'<span>🔒</span>'))+'</div>';
+    }
+    el.innerHTML=html;
+  },
+  renderPantheon:function(){
+    var G=WK.Game,el=document.getElementById('panC');if(!el)return;
+    var html='<h3 style="margin-bottom:6px;font-size:.8rem;">🏛️ Dioses</h3>';
+    for(var i=0;i<WK.D.PANTHEON.length;i++){
+      var g=WK.D.PANTHEON[i],active=G.activeGods[g.id],afford=G.stock.faith>=g.cost;
+      html+='<div class="icard'+(active?' done':'')+'"><span class="ico">'+g.e+'</span><span class="inm"><b>'+g.n+'</b><small>'+g.dom+': '+g.fx+'</small></span>';
+      html+=active?'<span style="color:var(--gold)">✨</span>':'<button '+(afford?'':'disabled')+' data-god="'+g.id+'">'+g.cost+'🕊️</button>';
+      html+='</div>';
+    }
+    html+='<h3 style="margin:10px 0 6px;font-size:.8rem;">🐕 Perros ('+G.dogs.filter(function(d){return d.alive}).length+'/'+WK.CFG.MAX_DOGS+')</h3>';
+    for(var d=0;d<G.dogs.length;d++){
+      var dog=G.dogs[d];if(!dog.alive)continue;
+      var status=dog.isPuppy?'🐶 Cachorro':(dog.pregnancyTimer>0?'🤰 Embarazada':(dog.companionOf?'🏹 Con cazador':(dog.state==='guard'?'⚔️ ¡Guardando!':'🐾 Patrullando')));
+      html+='<div class="icard'+(dog.isPuppy?' avl':'')+'"><span class="ico">'+dog.emoji+'</span><span class="inm"><b>'+dog.name+'</b> '+(dog.gender==='M'?'♂':'♀')+'<small>'+status+' · '+Math.floor(dog.age)+' años</small></span><span>❤️'+Math.floor(dog.hp)+'</span></div>';
+    }
+    html+='<h3 style="margin:10px 0 6px;font-size:.8rem;">⚔️ Rivales</h3>';
+    var alive=G.rivals.filter(function(r){return r.alive});
+    if(alive.length===0)html+='<p style="font-size:.65rem;color:var(--td);">Has conquistado todo. 🏆</p>';
+    else for(var r=0;r<alive.length;r++){
+      var rv=alive[r];
+      html+='<div class="icard"><span class="ico">'+(rv.hostile?'⚔️':'🏘️')+'</span><span class="inm"><b>'+rv.name+'</b><small>👥'+Math.floor(rv.pop)+' · Fuerza '+rv.strength+'</small></span><button class="abtn" data-rival="'+rv.id+'">Atacar</button></div>';
+    }
+    html+='<h3 style="margin:10px 0 6px;font-size:.8rem;">🧱 Muralla: '+WK.Walls.countBuilt()+'/'+WK.Walls.slots.length+'</h3>';
+    el.innerHTML=html;
+    var godBtns=el.querySelectorAll('[data-god]');
+    for(var gb=0;gb<godBtns.length;gb++){godBtns[gb].addEventListener('click',function(){G.activateGod(this.getAttribute('data-god'));WK.UI.renderPantheon();});}
+    var rivalBtns=el.querySelectorAll('[data-rival]');
+    for(var rb=0;rb<rivalBtns.length;rb++){rivalBtns[rb].addEventListener('click',function(){G.declareWarOn(this.getAttribute('data-rival'));WK.UI.renderPantheon();});}
+  },
+  renderAchievements:function(){
+    var G=WK.Game,el=document.getElementById('achC');if(!el)return;
+    var html='';
+    for(var i=0;i<WK.D.ACHV.length;i++){
+      var a=WK.D.ACHV[i],unlocked=G.achievements[a.id];
+      html+='<div class="icard'+(unlocked?' done':'')+'"><span class="ico" style="font-size:1.3rem;'+(unlocked?'':'filter:grayscale(1);opacity:.4')+'">'+a.e+'</span><span class="inm"><b>'+a.n+'</b><small>'+a.d+'</small></span>'+(unlocked?'<span>✔</span>':'')+'</div>';
+    }
+    el.innerHTML=html;
+  },
+  togglePanel:function(id){
+    var el=document.getElementById(id);if(!el)return;
+    var isShown=el.style.display==='flex';
+    el.style.display=isShown?'none':'flex';
+    if(!isShown){
+      if(id==='pTech')this.renderTech();
+      if(id==='pPan')this.renderPantheon();
+      if(id==='pAch')this.renderAchievements();
+    }
+    WK.Audio.play('click');
+  },
+  showPopup:function(title,content){
+    var pop=document.getElementById('popup');if(!pop)return;
+    document.getElementById('popT').innerHTML=title+' <span class="pcl" data-c="popup">✕</span>';
+    document.getElementById('popC').innerHTML=content;
+    pop.classList.add('show');
+    this.bindClosers();
+  },
+  bindClosers:function(){
+    var closers=document.querySelectorAll('[data-c]');
+    for(var i=0;i<closers.length;i++){
+      closers[i].onclick=function(){
+        var id=this.getAttribute('data-c');var el=document.getElementById(id);
+        if(id==='popup')el.classList.remove('show');else el.style.display='none';
+      };
+    }
+  }
+};
+
+WK.Auth={
+  KEY:'worlkalm_profiles',profiles:[],
+  loadProfiles:function(){try{this.profiles=JSON.parse(localStorage.getItem(this.KEY))||[];}catch(e){this.profiles=[];}},
+  saveProfiles:function(){try{localStorage.setItem(this.KEY,JSON.stringify(this.profiles));}catch(e){}},
+  createProfile:function(name,avatar,diff){
+    var p={id:WK.U.uid(),name:name,avatar:avatar,difficulty:diff,created:Date.now(),lastPlayed:Date.now(),achievements:{},saves:{}};
+    this.profiles.push(p);this.saveProfiles();return p;
+  },
+  deleteProfile:function(id){this.profiles=this.profiles.filter(function(p){return p.id!==id});this.saveProfiles();},
+  getProfile:function(id){return this.profiles.find(function(p){return p.id===id})}
+};
+
+WK.Save={
+  save:function(silent){
+    var G=WK.Game,p=G.profile;if(!p)return;
+    var data={
+      v:'WK4',time:G.time,day:G.day,era:G.era,weather:G.weather,
+      season:G.currentSeason,seasonTimer:G.seasonTimer,
+      techs:G.techs,activeGods:G.activeGods,stock:G.stock,achievements:G.achievements,
+      villagers:G.villagers.map(function(v){return{id:v.id,n:v.name,x:v.x,y:v.y,age:v.age,g:v.gender,hp:v.hp,hu:v.hunger,en:v.energy,so:v.social,mo:v.mood,sp:v.spouseId,ch:v.isChief,be:v.believer,inv:v.inv,wep:v.weapon?v.weapon.id:null,sk:v.skills,pr:v.profession,kn:v.known,pe:v.pers?v.pers.id:null,tr:v.traits,li:v.like,sc:v.skinColor,sh:v.shirtColor,story:v.arrivalStory};}),
+      dogs:G.dogs.map(function(d){return{id:d.id,x:d.x,y:d.y,n:d.name,e:d.emoji,g:d.gender,hp:d.hp,puppy:d.isPuppy,age:d.age,comp:d.companionOf,preg:d.pregnancyTimer,mother:d.motherId};}),
+      buildings:G.buildings.map(function(b){return{id:b.id,x:b.x,y:b.y,did:b.def.id,occ:b.occIds,gr:b.growth};}),
+      rivals:G.rivals.map(function(r){return{id:r.id,x:r.x,y:r.y,n:r.name,c:r.color,p:r.pop,s:r.strength,a:r.alive,h:r.hostile,wc:r.warCooldown};}),
+      walls:WK.Walls.slots.map(function(s){return s.built;})
+    };
+    p.saves['main']=data;p.lastPlayed=Date.now();WK.Auth.saveProfiles();
+    if(!silent)WK.UI.notify('💾 Guardada');
+  },
+  load:function(){
+    var G=WK.Game,p=G.profile;if(!p||!p.saves['main'])return false;
+    var d=p.saves['main'];
+    G.time=d.time;G.day=d.day;G.era=d.era;G.weather=d.weather;
+    G.currentSeason=d.season;G.seasonTimer=d.seasonTimer;
+    G.techs=d.techs;G.activeGods=d.activeGods;G.stock=d.stock;G.achievements=d.achievements;
+    G.villagers=d.villagers.map(function(vd){
+      var pers=WK.D.PERS.find(function(p2){return p2.id===vd.pe});
+      var v=new WK.Villager(vd.x,vd.y,vd.age,{name:vd.n,gender:vd.g,pers:pers,traits:vd.tr,like:vd.li,story:vd.story});
+      v.id=vd.id;v.hp=vd.hp;v.hunger=vd.hu;v.energy=vd.en;v.social=vd.so;v.mood=vd.mo;
+      v.spouseId=vd.sp;v.isChief=vd.ch;v.believer=vd.be;v.inv=vd.inv;v.skills=vd.sk;
+      v.profession=vd.pr;v.known=vd.kn;v.skinColor=vd.sc;v.shirtColor=vd.sh;v.arrivalStory=vd.story;
+      if(vd.wep){var w=WK.D.WEAPONS.find(function(w2){return w2.id===vd.wep});if(w)v.weapon=w;}
+      return v;
+    });
+    G.dogs=d.dogs.map(function(dd){
+      var dog=new WK.Dog(dd.x,dd.y,dd.n,dd.e,dd.g,dd.puppy);
+      dog.id=dd.id;dog.hp=dd.hp;dog.age=dd.age;dog.companionOf=dd.comp;dog.pregnancyTimer=dd.preg;dog.motherId=dd.mother;
+      return dog;
+    });
+    G.buildings=d.buildings.map(function(bd){
+      var def=WK.D.BUILDINGS.find(function(b){return b.id===bd.did})||WK.D.BUILDINGS[0];
+      var b=new WK.Building(bd.x,bd.y,def);b.id=bd.id;b.occIds=bd.occ||[];b.growth=bd.gr||0;return b;
+    });
+    G.rivals=d.rivals.map(function(rd){
+      var r=new WK.RivalVillage(rd.x,rd.y,rd.n,rd.c);r.id=rd.id;r.pop=rd.p;r.strength=rd.s;r.alive=rd.a;r.hostile=rd.h;r.warCooldown=rd.wc;return r;
+    });
+    if(d.walls){for(var i=0;i<Math.min(d.walls.length,WK.Walls.slots.length);i++)WK.Walls.slots[i].built=d.walls[i];}
+    G.assignChief();return true;
+  }
+};
+
+WK.Input={
+  init:function(){
+    var canvas=WK.Render.canvas;
+    var resumeAudio=function(){WK.Audio.resume();window.removeEventListener('click',resumeAudio);window.removeEventListener('touchstart',resumeAudio);};
+    window.addEventListener('click',resumeAudio);
+    window.addEventListener('touchstart',resumeAudio);
+
+    window.addEventListener('keydown',function(e){
+      WK.Cam.keys[e.key]=true;
+      if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].indexOf(e.key)>=0)e.preventDefault();
+      if(e.key==='Escape'&&WK.Build.active)WK.Build.cancel();
+    });
+    window.addEventListener('keyup',function(e){WK.Cam.keys[e.key]=false;});
+    canvas.addEventListener('mousemove',function(e){
+      WK.Cam.mx=e.clientX;WK.Cam.my=e.clientY;
+      if(WK.Build.active){var w=WK.Cam.toWorld(e.clientX,e.clientY);WK.Build.ghostX=w.x;WK.Build.ghostY=w.y;}
+      if(WK.Cam.drag){WK.Cam.x-=e.movementX/WK.Cam.zoom;WK.Cam.y-=e.movementY/WK.Cam.zoom;WK.Cam.clamp();WK.Cam.moved+=Math.abs(e.movementX)+Math.abs(e.movementY);}
+    });
+    canvas.addEventListener('mousedown',function(e){if(e.button===0){WK.Cam.drag=true;WK.Cam.moved=0;}});
+    window.addEventListener('mouseup',function(e){
+      if(e.button===0&&WK.Cam.drag){
+        WK.Cam.drag=false;
+        if(WK.Cam.moved<6){
+          var w=WK.Cam.toWorld(e.clientX,e.clientY);
+          if(WK.Build.active)WK.Build.place(w.x,w.y);
+          else WK.Input.handleClick(w.x,w.y);
+        }
+      }
+    });
+    var T={lastX:0,lastY:0,moved:0,count:0,startX:0,startY:0,lastDist:0};
+    canvas.addEventListener('touchstart',function(e){
+      e.preventDefault();
+      if(e.touches.length===1){T.count=1;T.moved=0;T.lastX=T.startX=e.touches[0].clientX;T.lastY=T.startY=e.touches[0].clientY;}
+      else if(e.touches.length===2){T.count=2;T.lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}
+    },{passive:false});
+    canvas.addEventListener('touchmove',function(e){
+      e.preventDefault();
+      if(e.touches.length===1&&T.count===1){
+        var t=e.touches[0],dx=t.clientX-T.lastX,dy=t.clientY-T.lastY;
+        WK.Cam.x-=dx/WK.Cam.zoom;WK.Cam.y-=dy/WK.Cam.zoom;WK.Cam.clamp();
+        T.lastX=t.clientX;T.lastY=t.clientY;T.moved+=Math.abs(dx)+Math.abs(dy);
+      }else if(e.touches.length===2){
+        var d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+        if(T.lastDist>0)WK.Cam.setZoom(WK.Cam.zoom*(d/T.lastDist));
+        T.lastDist=d;
+      }
+    },{passive:false});
+    canvas.addEventListener('touchend',function(e){
+      e.preventDefault();
+      if(T.count===1&&T.moved<12){var w=WK.Cam.toWorld(T.startX,T.startY);WK.Input.handleClick(w.x,w.y);}
+      T.count=e.touches.length;
+    },{passive:false});
+    document.getElementById('mm').addEventListener('click',function(e){
+      var r=this.getBoundingClientRect();
+      WK.Cam.centerOn((e.clientX-r.left)/r.width*WK.CFG.WW,(e.clientY-r.top)/r.height*WK.CFG.WH);
+    });
+    document.getElementById('zIn').addEventListener('click',function(){WK.Cam.zoomBy(1.25);});
+    document.getElementById('zOut').addEventListener('click',function(){WK.Cam.zoomBy(.8);});
+    document.getElementById('cPause').addEventListener('click',function(){
+      WK.Game.paused=!WK.Game.paused;this.textContent=WK.Game.paused?'▶ REANUDAR':'⏸ PAUSA';
+    });
+    document.getElementById('cExit').addEventListener('click',function(){if(confirm('¿Salir?')){WK.Save.save(true);location.reload();}});
+    document.getElementById('cNpc').addEventListener('click',function(){WK.UI.openNpcModal();});
+    document.getElementById('bRain').addEventListener('click',function(){WK.Game.weather='rain';WK.Game.log('🌧️ Lluvia','evolve');});
+    document.getElementById('bLog').addEventListener('click',function(){WK.UI.togglePanel('pLog');});
+    document.getElementById('bPow').addEventListener('click',function(){WK.UI.togglePanel('pPow');});
+    document.getElementById('bTech').addEventListener('click',function(){WK.UI.togglePanel('pTech');});
+    document.getElementById('bPan').addEventListener('click',function(){WK.UI.togglePanel('pPan');});
+    document.getElementById('bAch').addEventListener('click',function(){WK.UI.togglePanel('pAch');});
+    document.getElementById('bNpc').addEventListener('click',function(){WK.UI.openNpcModal();});
+    document.getElementById('bPause').addEventListener('click',function(){
+      WK.Game.paused=!WK.Game.paused;this.textContent=WK.Game.paused?'▶':'⏸';
+    });
+    document.getElementById('bSpd').addEventListener('click',function(){
+      var speeds=[.5,1,2,4,8],idx=speeds.indexOf(WK.Game.speed);
+      WK.Game.speed=speeds[WK.U.clamp(idx+1,0,speeds.length-1)];
+      this.textContent='▶x'+WK.Game.speed;
+    });
+    document.getElementById('bSave').addEventListener('click',function(){WK.Save.save();});
+    document.getElementById('bExit').addEventListener('click',function(){if(confirm('¿Salir?')){WK.Save.save(true);location.reload();}});
+    WK.UI.bindClosers();
+    this.initNpcModal();
+  },
+  handleClick:function(wx,wy){
+    var G=WK.Game;
+    for(var i=0;i<G.buildings.length;i++){
+      var b=G.buildings[i];
+      if(Math.hypot(b.x-wx,b.y-wy)<34){
+        var html='';
+        if(b.def.cap>0){
+          html+='<p style="margin-bottom:6px;">Cap: '+b.occIds.length+'/'+b.def.cap+'</p>';
+          for(var o=0;o<b.occIds.length;o++){
+            var v=G.villagers.find(function(x){return x.id===b.occIds[o]});
+            if(v)html+='<div class="resident"><span>'+(v.gender==='M'?'👨':'👩')+' '+v.name+' ('+Math.floor(v.age)+'a)</span><span class="role">'+(v.isChief?'👑 Jefe':v.profession)+'</span></div>';
+          }
+        }else if(b.def.id==='farm'){html+='<p>🌾 '+Math.floor(b.growth)+'%</p>';}
+        else html+='<p>'+b.def.e+' '+b.def.n+'</p>';
+        WK.UI.showPopup(b.def.e+' '+b.def.n,html);return;
+      }
+    }
+    for(var j=0;j<G.villagers.length;j++){
+      var v2=G.villagers[j];
+      if(v2.alive&&Math.hypot(v2.x-wx,v2.y-wy)<20){
+        var traitStr='';
+        for(var t=0;t<v2.traits.length;t++){var tr=WK.D.TRAITS.find(function(x){return x.id===v2.traits[t]});if(tr)traitStr+=tr.e+' ';}
+        var html2='<p><b>'+(v2.gender==='M'?'👨':'👩')+' '+v2.name+'</b> · '+Math.floor(v2.age)+' años</p>';
+        html2+='<p style="margin:4px 0;">'+(v2.pers?v2.pers.e+' '+v2.pers.n:'')+' · '+traitStr+'</p>';
+        html2+='<p style="color:var(--td);font-size:.65rem;">Le gusta '+v2.like+'</p>';
+        if(v2.arrivalStory){
+          var stories={refuge:'🏚️ Buscó refugio',family:'👨‍👩‍👧 Buscó familiar',adventure:'🧭 Aventurero',exile:'⚔️ Exiliado',divine:'✨ Enviado divino'};
+          html2+='<p style="color:var(--gold);font-size:.65rem;">'+(stories[v2.arrivalStory]||'')+'</p>';
+        }
+        html2+='<p style="margin-top:4px;">'+v2.profession+(v2.isChief?' 👑':'')+'</p>';
+        html2+='<p>❤️'+Math.floor(v2.hp)+' 🍎'+Math.floor(v2.hunger)+' ⚡'+Math.floor(v2.energy)+'</p>';
+        if(v2.sick)html2+='<p style="color:var(--danger);">🤒 Enfermo</p>';
+        if(v2.hasDogCompanion())html2+='<p>🐕 Con perro</p>';
+        WK.UI.showPopup(v2.name,html2);return;
+      }
+    }
+  },
+  initNpcModal:function(){
+    var modal=document.getElementById('npcModal');
+    var persSel=document.getElementById('npcPers');
+    var likeSel=document.getElementById('npcLike');
+    var traitsDiv=document.getElementById('npcTraits');
+    var ageInput=document.getElementById('npcAge');
+    var ageVal=document.getElementById('npcAgeVal');
+    var pHtml='';
+    for(var i=0;i<WK.D.PERS.length;i++)pHtml+='<option value="'+WK.D.PERS[i].id+'">'+WK.D.PERS[i].e+' '+WK.D.PERS[i].n+'</option>';
+    persSel.innerHTML=pHtml;
+    var lHtml='';
+    for(var j=0;j<WK.D.LIKES.length;j++)lHtml+='<option value="'+WK.D.LIKES[j]+'">'+WK.D.LIKES[j]+'</option>';
+    likeSel.innerHTML=lHtml;
+    var tHtml='';
+    for(var k=0;k<WK.D.TRAITS.length;k++)tHtml+='<span class="trait-opt" data-trait="'+WK.D.TRAITS[k].id+'">'+WK.D.TRAITS[k].e+' '+WK.D.TRAITS[k].n+'</span>';
+    traitsDiv.innerHTML=tHtml;
+    var traitOpts=traitsDiv.querySelectorAll('.trait-opt');
+    for(var t=0;t<traitOpts.length;t++){
+      traitOpts[t].addEventListener('click',function(){
+        var selected=traitsDiv.querySelectorAll('.trait-opt.sel');
+        if(this.classList.contains('sel'))this.classList.remove('sel');
+        else if(selected.length<3)this.classList.add('sel');
+        else WK.UI.notify('Máximo 3 rasgos');
+      });
+    }
+    ageInput.addEventListener('input',function(){ageVal.textContent=this.value;});
+    document.getElementById('npcCreate').addEventListener('click',function(){
+      var name=document.getElementById('npcName').value.trim();
+      if(!name){WK.UI.notify('⚠️ Ponle nombre');return;}
+      var age=parseInt(ageInput.value)||25;
+      var gender=document.getElementById('npcGender').value;
+      var pers=document.getElementById('npcPers').value;
+      var like=document.getElementById('npcLike').value;
+      var story=document.getElementById('npcStory').value;
+      var traits=[];
+      var selTraits=traitsDiv.querySelectorAll('.trait-opt.sel');
+      for(var s=0;s<selTraits.length;s++)traits.push(selTraits[s].getAttribute('data-trait'));
+      if(traits.length===0)traits=[WK.U.pick(WK.D.TRAITS).id];
+      WK.Game.addCustomNPC({name:name,age:age,gender:gender,pers:pers,traits:traits,like:like,story:story});
+      modal.classList.remove('show');
+      document.getElementById('npcName').value='';
+      ageInput.value=25;ageVal.textContent='25';
+      traitsDiv.querySelectorAll('.trait-opt.sel').forEach(function(el){el.classList.remove('sel');});
+    });
+    document.getElementById('npcCancel').addEventListener('click',function(){modal.classList.remove('show');});
+  }
+};
+
+WK.Main={
+  lastPanelUpdate:0,
+  loop:function(){
+    if(WK.Game)WK.Game.update();
+    if(WK.Render&&WK.Cam)WK.Render.draw();
+    var now=Date.now();
+    if(now-WK.Main.lastPanelUpdate>1000&&WK.Game&&WK.Game.running){
+      WK.Main.lastPanelUpdate=now;
+      if(document.getElementById('pTech').style.display==='flex')WK.UI.renderTech();
+      if(document.getElementById('pPan').style.display==='flex')WK.UI.renderPantheon();
+      if(document.getElementById('pAch').style.display==='flex')WK.UI.renderAchievements();
+    }
+    requestAnimationFrame(WK.Main.loop);
+  }
+};
+
+WK.App={
+  selectedAvatar:'👑',selectedDiff:'normal',
+  init:function(){
+    WK.Audio.init();WK.Render.init();WK.Input.init();WK.Auth.loadProfiles();
+    this.renderAuth();requestAnimationFrame(WK.Main.loop);
+  },
+  renderAuth:function(){
+    var profSection=document.getElementById('authProfiles');
+    var createSection=document.getElementById('authCreate');
+    if(WK.Auth.profiles.length>0){
+      profSection.style.display='block';createSection.style.display='none';
+      var list=document.getElementById('profList');var html='';
+      for(var i=0;i<WK.Auth.profiles.length;i++){
+        var p=WK.Auth.profiles[i];
+        var achvCount=p.achievements?Object.keys(p.achievements).length:0;
+        html+='<div class="pf" data-id="'+p.id+'"><span class="av">'+p.avatar+'</span><span class="inf"><span class="nm">'+p.name+'</span><span class="mt">🏆'+achvCount+'</span></span><span class="dl" data-del="'+p.id+'">🗑️</span></div>';
+      }
+      list.innerHTML=html;
+      var cards=list.querySelectorAll('.pf');
+      for(var c=0;c<cards.length;c++){
+        cards[c].addEventListener('click',function(e){
+          if(e.target.hasAttribute('data-del'))return;
+          WK.App.startWithProfile(WK.Auth.getProfile(this.getAttribute('data-id')));
+        });
+      }
+      var dels=list.querySelectorAll('[data-del]');
+      for(var d=0;d<dels.length;d++){
+        dels[d].addEventListener('click',function(e){
+          e.stopPropagation();
+          if(confirm('¿Eliminar?')){WK.Auth.deleteProfile(this.getAttribute('data-del'));WK.App.renderAuth();}
+        });
+      }
+      document.getElementById('btnNewProf').onclick=function(){profSection.style.display='none';createSection.style.display='block';WK.App.renderCreate();};
+    }else{profSection.style.display='none';createSection.style.display='block';this.renderCreate();}
+  },
+  renderCreate:function(){
+    var avPick=document.getElementById('avPick');var html='';
+    for(var i=0;i<WK.D.AVATARS.length;i++){
+      html+='<span class="avopt'+(WK.D.AVATARS[i]===this.selectedAvatar?' sel':'')+'" data-av="'+WK.D.AVATARS[i]+'">'+WK.D.AVATARS[i]+'</span>';
+    }
+    avPick.innerHTML=html;
+    var avOpts=avPick.querySelectorAll('.avopt');
+    for(var a=0;a<avOpts.length;a++){
+      avOpts[a].addEventListener('click',function(){
+        WK.App.selectedAvatar=this.getAttribute('data-av');
+        avPick.querySelectorAll('.avopt').forEach(function(x){x.classList.remove('sel');});
+        this.classList.add('sel');
+      });
+    }
+    var diffPick=document.getElementById('diffPick');
+    var diffs=[{id:'peaceful',l:'🕊️ Pacífico'},{id:'normal',l:'⚖️ Normal'},{id:'hard',l:'🔥 Difícil'},{id:'brutal',l:'💀 Brutal'}];
+    var dHtml='';
+    for(var d=0;d<diffs.length;d++)dHtml+='<button class="dbtn'+(diffs[d].id===this.selectedDiff?' act':'')+'" data-diff="'+diffs[d].id+'">'+diffs[d].l+'</button>';
+    diffPick.innerHTML=dHtml;
+    var dBtns=diffPick.querySelectorAll('.dbtn');
+    for(var db=0;db<dBtns.length;db++){
+      dBtns[db].addEventListener('click',function(){
+        diffPick.querySelectorAll('.dbtn').forEach(function(x){x.classList.remove('act');});
+        this.classList.add('act');WK.App.selectedDiff=this.getAttribute('data-diff');
+      });
+    }
+    document.getElementById('btnCreate').onclick=function(){
+      var name=document.getElementById('inpName').value.trim()||'Dios';
+      var profile=WK.Auth.createProfile(name,WK.App.selectedAvatar,WK.App.selectedDiff);
+      WK.App.startWithProfile(profile);
+    };
+    document.getElementById('btnBack').onclick=function(){WK.App.renderAuth();};
+  },
+  startWithProfile:function(profile){
+    if(!profile)return;
+    WK.Audio.resume();
+    document.getElementById('auth').style.display='none';
+    document.getElementById('tb').style.display='flex';
+    document.getElementById('ctrls').style.display='flex';
+    document.getElementById('mmw').style.display='block';
+    document.getElementById('zoomc').style.display='flex';
+    WK.Game.init(profile);
+    if(profile.saves&&profile.saves['main']){
+      if(confirm('¿Cargar partida guardada?')){WK.Save.load();WK.UI.notify('📂 Cargada');}
+    }
+    WK.UI.renderPowers();WK.UI.updateHUD();
+    WK.UI.banner('🌍 ¡Bienvenido, '+profile.name+'!','gold');
+  }
+};
+
+window.addEventListener('load',function(){WK.App.init();});
+console.log('[WK] ✅ JUEGO COMPLETO Y FUNCIONAL');
+console.log('[WK] Los muros bloquean: aldeanos van a la puerta 🚪');
+console.log('[WK] WK.UI.openNpcModal funciona correctamente');
+console.log('[WK] Audio se activa al primer click');
+</script>
+</body>
+</html>
