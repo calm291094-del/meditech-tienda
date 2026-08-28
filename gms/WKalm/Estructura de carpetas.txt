@@ -1,0 +1,20 @@
+worl-kalm-phaser/
+│
+├── index.html
+│
+└── js/
+    ├── main.js
+    │
+    ├── data/
+    │   └── content.js
+    │
+    ├── systems/
+    │   └── Navigation.js
+    │
+    ├── core/
+    │   └── Sim.js
+    │
+    └── scenes/
+        ├── BootScene.js
+        ├── WorldScene.js
+        └── HUDScene.js
