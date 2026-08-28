@@ -1,9 +1,8 @@
 // ============================================================
-// NAVIGATION.JS - CON SISTEMA DE FASES (como el original)
+// NAVIGATION.JS - Sistema de navegación con cruce de puerta
 // ============================================================
 
 window.Navigation = {
-
   worldWidth: 2560,
   worldHeight: 1920,
   center: { x: 1280, y: 960 },
@@ -59,7 +58,7 @@ window.Navigation = {
     return this._gateOpening;
   },
 
-  // ✅ Sistema de pathfinding con fases para cruzar puerta
+  // Sistema de pathfinding con waypoints para cruzar puerta
   buildPath(from, to) {
     const fromInside = this.isInside(from.x, from.y);
     const toInside = this.isInside(to.x, to.y);

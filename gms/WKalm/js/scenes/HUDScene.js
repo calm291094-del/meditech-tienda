@@ -121,30 +121,57 @@ class HUDScene extends Phaser.Scene {
     this.updateSelectedSkills(); 
   }
 
-  updateStats() {
-    const s = this.sim;
-    const stock = s.stock;
-    const bizCount = Economy.businesses.length;
-    const compact = this.isMobile;
-    
-    if (compact) {
-      this.statsText.setText(
-        `📅 D${s.day} 👥${s.countType('npc')} 🐾${s.countType('animal')}\n` +
-        `🏪${bizCount} 🐕${s.countType('dog')}\n` +
-        `🍖${Math.floor(stock.food)} 🪵${Math.floor(stock.wood)}\n` +
-        `🪨${Math.floor(stock.stone)} 💰${Math.floor(stock.gold)}`
-      );
-    } else {
-      this.statsText.setText(
-        `📅 Día ${s.day}\n` +
-        `👥 NPCs: ${s.countType('npc')} | 🐾 Anim: ${s.countType('animal')} | 🐕 Perros: ${s.countType('dog')}\n` +
-        `🏪 Negocios: ${bizCount}\n` +
-        `─────────────────\n` +
-        `🍖 ${Math.floor(stock.food)} | 🪵 ${Math.floor(stock.wood)} | 🪨 ${Math.floor(stock.stone)}\n` +
-        `⛏️ ${Math.floor(stock.ore)} | 💰 ${Math.floor(stock.gold)} | ✨ ${Math.floor(stock.faith)}`
-      );
-    }
+updateStats() {
+  const s = this.sim;
+  const stock = s.stock;
+  const bizCount = s.buildings.length;
+  const compact = this.isMobile;
+
+  // Hora del día
+  const hours = Math.floor(s.timeOfDay * 24);
+  const minutes = Math.floor((s.timeOfDay * 24 * 60) % 60);
+  const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  const timeIcon = s.isNight() ? '🌙' : '☀️';
+
+  // Estación
+  const seasons = ['🌸 Primavera', '☀️ Verano', '🍂 Otoño', '❄️ Invierno'];
+  const seasonStr = seasons[s.currentSeason];
+
+  // Clima
+  const weatherStr = s.getWeatherName ? s.getWeatherName() : '☀️';
+
+  // Luna
+  const moonPhases = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
+  const moonStr = moonPhases[s.moonPhase || 0];
+
+  // Rivales en guerra
+  const warsCount = s.rivals ? s.rivals.filter(r => s.relations[r.id]?.war).length : 0;
+
+  if (compact) {
+    this.statsText.setText(
+      `${timeIcon} ${timeStr} ${moonStr}\n` +
+      `${weatherStr}\n` +
+      `📅 D${s.day} ${seasonStr}\n` +
+      `👥${s.countType('npc')} 🐾${s.countType('animal')} 🐕${s.countType('dog')}\n` +
+      `🏪${bizCount} ⚔️${warsCount} 🌀${s.dungeon?.maxFloor || 1}\n` +
+      `🍖${Math.floor(stock.food)} 🪵${Math.floor(stock.wood)} 💰${Math.floor(stock.gold)}`
+    );
+  } else {
+    this.statsText.setText(
+      `${timeIcon} ${timeStr}  ${moonStr} Luna\n` +
+      `${weatherStr}\n` +
+      `${seasonStr}  |  Día ${s.day}\n` +
+      `─────────────────\n` +
+      `👥 NPCs: ${s.countType('npc')}  |  🐾 Animales: ${s.countType('animal')}\n` +
+      `🐕 Perros: ${s.countType('dog')}  |  🏪 Edificios: ${bizCount}\n` +
+      `⚔️ Guerras: ${warsCount}  |  🌀 Mazmorra: Piso ${s.dungeon?.maxFloor || 1}\n` +
+      `─────────────────\n` +
+      `🍖 Comida: ${Math.floor(stock.food)}  |  🪵 Madera: ${Math.floor(stock.wood)}\n` +
+      `🪨 Piedra: ${Math.floor(stock.stone)}  |  ⛏️ Mineral: ${Math.floor(stock.ore)}\n` +
+      `💰 Oro: ${Math.floor(stock.gold)}  |  ✨ Fe: ${Math.floor(stock.faith)}`
+    );
   }
+}
 
   updateSelected() {
     const sel = this.sim.getById(this.sim.selectedId);

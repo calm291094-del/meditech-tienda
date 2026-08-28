@@ -124,5 +124,38 @@ class MinimapScene extends Phaser.Scene {
 
     this.entityGfx.lineStyle(1, 0xffffff, 1);
     this.entityGfx.strokeRect(vx, vy, vw, vh);
+
+    // Dibujar rivales
+    for (const rival of (this.sim.rivals || [])) {
+      if (!rival.alive) continue;
+      const x = rival.x * this.mapScale;
+      const y = rival.y * this.mapScale;
+      const color = Phaser.Display.Color.HexStringToColor(rival.color).color;
+      this.entityGfx.fillStyle(color, 1);
+      this.entityGfx.fillCircle(x, y, 5);
+      this.entityGfx.lineStyle(1, 0xffffff, 0.5);
+      this.entityGfx.strokeCircle(x, y, 5);
+    }
+
+    // Dibujar mazmorra
+    if (this.sim.dungeon) {
+      const dx = this.sim.dungeon.x * this.mapScale;
+      const dy = this.sim.dungeon.y * this.mapScale;
+      this.entityGfx.fillStyle(0x9333ea, 1);
+      this.entityGfx.fillCircle(dx, dy, 6);
+      this.entityGfx.lineStyle(2, 0xfbbf24, 1);
+      this.entityGfx.strokeCircle(dx, dy, 6);
+    }
+
+    // Dibujar partidas de guerra
+    for (const party of (this.sim.warParties || [])) {
+      if (!party.alive) continue;
+      const x = party.x * this.mapScale;
+      const y = party.y * this.mapScale;
+      const color = Phaser.Display.Color.HexStringToColor(party.color).color;
+      this.entityGfx.fillStyle(color, 0.9);
+      this.entityGfx.fillCircle(x, y, 4);
+    }
+
   }
 }
