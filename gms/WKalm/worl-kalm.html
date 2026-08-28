@@ -1,231 +1,82 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🌍 Worl Kalm - Simulación Divina</title>
-<style>
-:root { --bg: #0a0f1d; --panel: rgba(15, 23, 42, 0.95); --border: rgba(255, 255, 255, 0.1); --ac: #10b981; --acg: rgba(16, 185, 129, 0.4); --gold: #fbbf24; --danger: #ef4444; --magic: #a855f7; --tx: #f8fafc; --td: #94a3b8; }
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; overflow: hidden; overscroll-behavior: none; background: var(--bg); color: var(--tx); touch-action: none; }
-button { cursor: pointer; font-family: inherit; border: none; outline: none; }
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 3px; }
-#auth { position: fixed; inset: 0; z-index: 1000; background: linear-gradient(135deg, #0a0f1d, #1e293b); display: flex; align-items: center; justify-content: center; }
-#auth .box { text-align: center; max-width: 480px; width: 92%; }
-#auth h1 { font-size: 3rem; background: linear-gradient(90deg, var(--ac), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-#auth .sub { color: var(--td); margin: 8px 0 24px; }
-#credit { color: var(--td); font-size: 0.85rem; margin-top: 10px; font-style: italic; }
-.card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 24px; backdrop-filter: blur(12px); }
-.card h2 { margin-bottom: 16px; font-size: 1.1rem; }
-.inp { width: 100%; padding: 12px; font-size: 1rem; background: rgba(255,255,255,.05); border: 2px solid var(--ac); border-radius: 10px; color: #fff; text-align: center; outline: none; margin-bottom: 12px; }
-.btn { padding: 12px 24px; border-radius: 10px; font-weight: bold; font-size: .95rem; width: 100%; margin-top: 8px; transition: all .2s; }
-.btn-p { background: linear-gradient(135deg, var(--ac), #059669); color: #fff; }
-.btn-p:hover { transform: translateY(-2px); box-shadow: 0 8px 20px var(--acg); }
-.btn-g { background: transparent; border: 1px solid var(--border); color: var(--td); }
-.btn-g:hover { border-color: var(--ac); color: var(--tx); }
-.profiles { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; max-height: 240px; overflow-y: auto; }
-.pf { display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; text-align: left; }
-.pf:hover { border-color: var(--ac); }
-.pf .av { font-size: 1.8rem; } .pf .inf { flex: 1; } .pf .nm { font-weight: bold; } .pf .mt { font-size: .7rem; color: var(--td); }
-.pf .dl { color: var(--danger); opacity: .5; padding: 4px 8px; } .pf .dl:hover { opacity: 1; }
-.avpick { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
-.avopt { font-size: 1.6rem; padding: 6px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; background: rgba(255,255,255,.04); }
-.avopt.sel { border-color: var(--gold); background: rgba(251,191,36,.15); }
-.diffs { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
-.dbtn { flex: 1; padding: 8px 4px; background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 8px; color: var(--td); font-size: .72rem; }
-.dbtn.act { border-color: var(--ac); color: var(--tx); background: rgba(16,185,129,.12); }
-canvas#gc { position: absolute; inset: 0; z-index: 1; cursor: grab; }
-canvas#gc:active { cursor: grabbing; }
-.ui { position: absolute; z-index: 10; pointer-events: none; }
-.ui > * { pointer-events: auto; }
-#tb { top: 6px; left: 50%; transform: translateX(-50%); display: none; gap: 10px; align-items: center; padding: 6px 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; backdrop-filter: blur(12px); max-width: 97vw; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
-#tb::-webkit-scrollbar { display: none; }
-.st { font-size: .8rem; font-weight: 600; color: var(--ac); }
-.gbadge { font-size: 1.2rem; } .gname { font-weight: bold; color: var(--gold); font-size: .85rem; }
-.ebadge { background: linear-gradient(135deg, var(--gold), #d97706); color: #000; padding: 2px 7px; border-radius: 20px; font-size: .6rem; font-weight: bold; }
-.sbadge { padding: 2px 7px; border-radius: 20px; font-size: .6rem; font-weight: bold; background: #4ade80; color: #000; }
-.ibtn { background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 8px; padding: 6px 9px; font-size: .9rem; color: var(--tx); }
-.ibtn:hover { background: var(--acg); border-color: var(--ac); }
-.pnl { position: absolute; width: 285px; max-height: 65vh; background: var(--panel); border: 1px solid var(--border); border-radius: 14px; backdrop-filter: blur(12px); display: none; flex-direction: column; overflow: hidden; }
-.pl { top: 60px; left: 10px; } .pr { top: 60px; right: 10px; } .pt { top: 60px; right: 305px; width: 295px; } .pp { top: 60px; left: 305px; width: 295px; }
-.ph { padding: 10px 12px; border-bottom: 1px solid var(--border); font-weight: bold; display: flex; justify-content: space-between; align-items: center; font-size: .85rem; }
-.pc { padding: 8px; overflow-y: auto; flex: 1; font-size: .75rem; }
-.pcl { cursor: pointer; opacity: .6; padding: 2px 6px; } .pcl:hover { opacity: 1; }
-.sec { margin-bottom: 6px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-.sect { padding: 8px 10px; background: rgba(255,255,255,.05); cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; font-size: .72rem; }
-.sect::after { content: '▼'; font-size: .55rem; transition: transform .3s; }
-.sec.act .sect::after { transform: rotate(180deg); }
-.secb { max-height: 0; overflow: hidden; transition: max-height .3s; }
-.sec.act .secb { max-height: 400px; overflow-y: auto; }
-.secc { padding: 6px; }
-.pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
-.pbtn { background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 6px; padding: 6px 3px; text-align: center; cursor: pointer; font-size: .58rem; transition: all .2s; }
-.pbtn:hover { background: var(--acg); border-color: var(--ac); }
-.pbtn .ic { font-size: 1.1rem; display: block; }
-.icard { display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: 6px; margin-bottom: 3px; background: rgba(255,255,255,.03); font-size: .68rem; }
-.icard.done { border-left: 3px solid var(--ac); } .icard.avl { border-left: 3px solid var(--gold); } .icard.lck { opacity: .4; border-left: 3px solid #475569; }
-.icard .ico { font-size: 1.1rem; } .icard .inm { flex: 1; }
-.icard .inm small { display: block; color: var(--td); font-size: .6rem; }
-.icard button { background: var(--gold); color: #000; border: none; padding: 2px 6px; border-radius: 4px; font-size: .6rem; font-weight: bold; cursor: pointer; }
-.icard button:disabled { background: #475569; color: #888; cursor: not-allowed; }
-.icard .abtn { background: var(--danger); color: #fff; }
-.prog { height: 3px; background: rgba(255,255,255,.1); border-radius: 2px; overflow: hidden; margin-top: 2px; }
-.prog div { height: 100%; background: var(--gold); }
-#popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(360px, 92vw); max-height: 75vh; background: var(--panel); border: 2px solid var(--gold); border-radius: 14px; z-index: 500; display: none; flex-direction: column; overflow: hidden; }
-#popup.show { display: flex; }
-#npcModal { position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,.7); display: none; align-items: center; justify-content: center; }
-#npcModal.show { display: flex; }
-#npcModal .inner { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px; width: min(420px, 92vw); max-height: 85vh; overflow-y: auto; }
-#npcModal h3 { margin-bottom: 12px; }
-.frow { margin-bottom: 10px; }
-.frow label { display: block; font-size: .7rem; color: var(--td); margin-bottom: 4px; }
-.frow input, .frow select { width: 100%; padding: 8px; background: rgba(255,255,255,.05); border: 1px solid var(--border); border-radius: 8px; color: var(--tx); font-size: .85rem; }
-.frow input[type=range] { padding: 0; }
-.trait-grid { display: flex; flex-wrap: wrap; gap: 4px; }
-.trait-opt { padding: 4px 8px; background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 6px; font-size: .68rem; cursor: pointer; }
-.trait-opt.sel { border-color: var(--ac); background: rgba(16,185,129,.15); }
-#banner { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); padding: 10px 22px; border-radius: 12px; font-weight: bold; background: linear-gradient(135deg, rgba(16,185,129,.95), rgba(5,150,105,.95)); box-shadow: 0 6px 25px var(--acg); z-index: 400; pointer-events: none; opacity: 0; transition: opacity .4s; text-align: center; max-width: 90vw; font-size: .9rem; }
-#banner.show { opacity: 1; }
-#banner.gold { background: linear-gradient(135deg, rgba(251,191,36,.95), rgba(217,119,6,.95)); color: #000; }
-#banner.danger { background: linear-gradient(135deg, rgba(239,68,68,.95), rgba(153,27,27,.95)); }
-#banner.war { background: linear-gradient(135deg, rgba(220,38,38,.95), rgba(127,29,29,.95)); }
-#banner.dog { background: linear-gradient(135deg, rgba(56,189,248,.95), rgba(30,64,175,.95)); }
-#banner.magic { background: linear-gradient(135deg, rgba(168,85,247,.95), rgba(88,28,135,.95)); }
-#notif { position: fixed; top: 16px; right: 16px; padding: 12px 18px; background: var(--panel); border: 1px solid var(--gold); border-radius: 10px; z-index: 2000; opacity: 0; transform: translateY(-10px); transition: all .3s; pointer-events: none; max-width: 280px; font-size: .8rem; }
-#notif.show { opacity: 1; transform: translateY(0); }
-#buildHint { position: absolute; bottom: 65px; left: 50%; transform: translateX(-50%); padding: 7px 18px; border-radius: 8px; background: rgba(16,185,129,.9); color: #000; font-weight: bold; z-index: 390; display: none; font-size: .8rem; }
-#ctrls { bottom: 12px; left: 50%; transform: translateX(-50%); display: none; gap: 5px; flex-wrap: wrap; justify-content: center; }
-.cbtn { padding: 9px 13px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; color: var(--tx); font-weight: bold; font-size: .85rem; }
-.cbtn:hover { background: var(--ac); } .cbtn.ext { border-color: var(--danger); color: var(--danger); } .cbtn.ext:hover { background: var(--danger); color: #fff; }
-#zoomc { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: none; flex-direction: column; gap: 5px; z-index: 10; }
-#zoomc button { width: 38px; height: 38px; border-radius: 9px; background: var(--panel); border: 1px solid var(--border); color: var(--tx); font-size: 1.2rem; font-weight: bold; }
-#mmw { position: absolute; bottom: 12px; right: 10px; z-index: 10; border: 2px solid var(--border); border-radius: 8px; overflow: hidden; background: #000; display: none; }
-#mm { display: block; width: 160px; height: 116px; cursor: pointer; image-rendering: pixelated; }
-@media(max-width: 900px) {
-    .pnl { width: 86vw; max-height: 48vh; }
-    .pl { left: 7vw; } .pr { right: 7vw; } .pt, .pp { left: 7vw; right: auto; width: 86vw; }
-    #mm { width: 100px; height: 73px; }
-    .st { font-size: .7rem; }
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Worl Kalm - Phaser 3</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #020617;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      overscroll-behavior: none;
+    }
+    #game {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+    canvas {
+      display: block;
+      touch-action: none;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+
+  <script src="js/data/content.js"></script>
+
+  <script src="js/systems/Navigation.js"></script>
+  <script src="js/systems/Walls.js"></script>
+  <script src="js/systems/Guards.js"></script>
+  <script src="js/systems/Social.js"></script>
+  <script src="js/systems/Dogs.js"></script>
+  <script src="js/systems/MapGenerator.js"></script>
+  <script src="js/systems/Needs.js"></script>
+  <script src="js/systems/Combat.js"></script>
+  <script src="js/systems/Economy.js"></script>
+  <script src="js/systems/Dogs.js"></script>
+
+  <!-- NUEVOS FASE 6 -->
+  <script src="js/systems/Events.js"></script>
+  <script src="js/systems/Achievements.js"></script>
+  <script src="js/scenes/NpcModalScene.js"></script>
+  <script src="js/scenes/AnimalModalScene.js"></script>
+  <script src="js/scenes/WeaponModalScene.js"></script>
+  <script src="js/systems/Tech.js"></script>
+  <script src="js/systems/Pantheon.js"></script>
+  <script src="js/systems/Diplomacy.js"></script>
+  <script src="js/systems/Weather.js"></script>
+  <script src="js/systems/DayNight.js"></script>
+
+  <script src="js/core/Sim.js"></script>
+
+  <script src="js/scenes/BootScene.js"></script>
+  <script src="js/scenes/WorldScene.js"></script>
+  <script src="js/scenes/MinimapScene.js"></script>
+  <script src="js/scenes/HUDScene.js"></script>
+  <script src="js/scenes/EconomyScene.js"></script>
+  <script src="js/scenes/PowersScene.js"></script>
+  <script src="js/scenes/TechScene.js"></script>
+  <script src="js/scenes/AchievementsScene.js"></script>
+  <script src="js/systems/Events.js"></script>
+
+  <script src="js/main.js"></script>
 </head>
+
 <body>
-<div id="auth">
-    <div class="box">
-        <h1>🌍 WORL KALM</h1>
-        <p class="sub">Simulación Divina · Guía tu civilización desde la piedra hasta las estrellas</p>
-        <div id="credit">Por <b>Carlos A. Lorenzo Maro</b> — con ☕café, 🎌anime e 🤖IA</div>
-        <div id="authProfiles" style="display:none">
-            <div class="card">
-                <h2>Elige tu Dios</h2>
-                <div class="profiles" id="profList"></div>
-                <button class="btn btn-p" id="btnNewProf">➕ Crear Nuevo Dios</button>
-            </div>
-        </div>
-        <div id="authCreate" style="display:none">
-            <div class="card">
-                <h2>Crea tu Dios</h2>
-                <input class="inp" id="inpName" placeholder="Nombre del Dios" maxlength="20">
-                <div class="avpick" id="avPick"></div>
-                <div class="diffs" id="diffPick"></div>
-                <button class="btn btn-p" id="btnCreate">🌅 Descender al Mundo</button>
-                <button class="btn btn-g" id="btnBack">← Volver</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<canvas id="gc"></canvas>
-<div id="mmw"><canvas id="mm" width="110" height="80"></canvas></div>
-
-<div class="ui" id="tb">
-    <span class="gbadge" id="uAv">👑</span><span class="gname" id="uNm">Dios</span>
-    <span class="ebadge" id="uEra">Piedra</span><span class="sbadge" id="uSeas">🌸</span>
-    <span class="st" id="uTime">🕒 08:00</span><span class="st" id="uWea">🌤</span><span class="st" id="uDay">Día 1</span>
-    <span class="st" id="uPop">👥 0</span><span class="st" id="uDog">🐕 0</span>
-    <span class="st" id="uFood">🍎 0</span><span class="st" id="uWood">🪵 0</span><span class="st" id="uStone">🪨 0</span>
-    <span class="st" id="uGold">🪙 0</span><span class="st" id="uFaith">🕊️ 0</span><span class="st" id="uKnow">🧠 0</span><span class="st" id="uDef">🛡️ 0</span>
-    <button class="ibtn" id="bRain" title="Invocar Lluvia">🌧️</button>
-    <button class="ibtn" id="bLog" title="Crónicas">📜</button>
-    <button class="ibtn" id="bPow" title="Poderes">✨</button>
-    <button class="ibtn" id="bTech" title="Tecnologías">🧪</button>
-    <button class="ibtn" id="bPan" title="Panteón">🏛️</button>
-    <button class="ibtn" id="bNpc" title="Crear NPC">👤+</button>
-    <button class="ibtn" id="bAch" title="Logros">🏆</button>
-    <button class="ibtn" id="bPause" title="Pausar">⏸</button>
-    <button class="ibtn" id="bSpd" title="Velocidad">▶x1</button>
-    <button class="ibtn" id="bSave" title="Guardar">💾</button>
-    <button class="ibtn" id="bExit" title="Salir">🚪</button>
-    <button class="ibtn" id="bExport" title="Exportar">📤</button>
-    <button class="ibtn" id="bImport" title="Importar">📥</button>
-    <button class="ibtn" id="bMapEdit" title="Editor">🗺️</button>
-</div>
-
-<div class="ui pnl pl" id="pLog"><div class="ph">📜 Crónicas <span class="pcl" data-c="pLog">✕</span></div><div class="pc" id="logC"></div></div>
-<div class="ui pnl pr" id="pPow"><div class="ph">✨ Poderes <span class="pcl" data-c="pPow">✕</span></div><div class="pc" id="powC"></div></div>
-<div class="ui pnl pt" id="pTech"><div class="ph">🧪 Tecnologías <span class="pcl" data-c="pTech">✕</span></div><div class="pc" id="techC"></div></div>
-<div class="ui pnl pp" id="pPan"><div class="ph">🏛️ Panteón y Mundo <span class="pcl" data-c="pPan">✕</span></div><div class="pc" id="panC"></div></div>
-<div class="ui pnl pp" id="pAch"><div class="ph">🏆 Logros <span class="pcl" data-c="pAch">✕</span></div><div class="pc" id="achC"></div></div>
-
-<div id="popup"><div class="ph" id="popT">Info <span class="pcl" data-c="popup">✕</span></div><div class="pc" id="popC"></div></div>
-
-<div id="npcModal">
-    <div class="inner">
-        <h3>👤 Crear NPC Divino</h3>
-        <div class="frow"><label>Nombre</label><input id="npcName" placeholder="Nombre del NPC" maxlength="20"></div>
-        <div class="frow"><label>Edad: <span id="npcAgeVal">25</span></label><input type="range" id="npcAge" min="1" max="70" value="25"></div>
-        <div class="frow"><label>Género</label><select id="npcGender"><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
-        <div class="frow"><label>Personalidad</label><select id="npcPers"></select></div>
-        <div class="frow"><label>Rasgos (hasta 3)</label><div class="trait-grid" id="npcTraits"></div></div>
-        <div class="frow"><label>Gusto</label><select id="npcLike"></select></div>
-        <div class="frow"><label>Historia de llegada</label>
-            <select id="npcStory">
-                <option value="refuge">🏚️ Buscó refugio</option>
-                <option value="family">👨‍👩‍👧 Buscó familiar</option>
-                <option value="adventure">🧭 Aventurero</option>
-                <option value="exile">⚔️ Exiliado</option>
-                <option value="divine">✨ Enviado divino</option>
-            </select>
-        </div>
-        <button class="btn btn-p" id="npcCreate">🌟 Crear y Enviar</button>
-        <button class="btn btn-g" id="npcCancel">Cancelar</button>
-    </div>
-</div>
-
-<div id="banner"></div>
-<div id="notif"></div>
-<div id="buildHint">🏗️ Click para colocar · ESC cancela</div>
-<div class="ui" id="ctrls">
-    <button class="cbtn" id="cPause">⏸ PAUSA</button>
-    <button class="cbtn" id="cNpc">👤+ CREAR NPC</button>
-    <button class="cbtn ext" id="cExit">🚪 SALIR</button>
-</div>
-<div id="zoomc">
-    <button id="zIn">+</button>
-    <button id="zOut">−</button>
-</div>
-
-<script src="static/config.js"></script>
-<script src="static/utils.js"></script>
-<script src="static/audio.js"></script>
-<script src="static/data.js"></script>
-<script src="static/map.js"></script>
-<script src="static/camera.js"></script>
-<script src="static/walls.js"></script>
-<script src="static/entities.js"></script>
-<script src="static/game.js"></script>
-<script src="static/ai.js"></script>
-<script src="static/events.js"></script>
-<script src="static/quests.js"></script>
-<script src="static/diplomacy.js"></script>
-<script src="static/ui.js"></script>
-<script src="static/input.js"></script>
-<script src="static/powers.js"></script>
-<script src="static/save.js"></script>
-<script src="static/editor.js"></script>
-<script src="static/managers.js"></script>
-<script src="static/advanced.js"></script>
-<script src="static/app.js"></script>
+  <div id="game"></div>
 </body>
 </html>
