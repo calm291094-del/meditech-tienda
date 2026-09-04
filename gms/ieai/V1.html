@@ -1,0 +1,3239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mugen Aethoria: The First Monarch</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#000;font-family:'Segoe UI',Roboto,sans-serif;color:#eef2f7;user-select:none}
+canvas#c{position:fixed;inset:0;display:block;cursor:none}
+
+/* ===== MENU INICIAL ===== */
+#menu{position:fixed;inset:0;z-index:100;background:linear-gradient(160deg,#0a0514 0%,#1a0a2e 40%,#0f3460 100%);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:20px;overflow-y:auto}
+#menu.hidden{opacity:0;pointer-events:none;display:none}
+.title{font-size:44px;font-weight:900;background:linear-gradient(135deg,#b58cff,#ff6b9d,#4cc9f0,#ffd700);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 30px rgba(181,140,255,.5);text-align:center;letter-spacing:1px}
+.subtitle{color:#b58cff;font-size:15px;font-weight:700;letter-spacing:4px;margin-top:-8px}
+.sub{color:#8fa2b8;font-size:13px;margin-bottom:8px;text-align:center;max-width:560px;line-height:1.5}
+.class-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:560px;width:100%}
+.class-card{padding:10px;background:rgba(255,255,255,.05);border:2px solid rgba(181,140,255,.2);border-radius:12px;cursor:pointer;transition:all .2s;text-align:center}
+.class-card:hover{border-color:#b58cff;background:rgba(181,140,255,.1);transform:translateY(-2px)}
+.class-card.selected{border-color:#b58cff;background:rgba(181,140,255,.2);box-shadow:0 0 20px rgba(181,140,255,.4)}
+.class-card .ico{font-size:28px;display:block;margin-bottom:3px}
+.class-card .nm{font-weight:700;color:#ffd700;font-size:13px}
+.class-card .ds{font-size:10px;color:#8fa2b8;margin-top:2px}
+.btn{padding:12px 36px;font-size:16px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:linear-gradient(135deg,#b58cff,#7a4df0);color:#fff;box-shadow:0 4px 15px rgba(181,140,255,.4);transition:all .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(181,140,255,.6)}
+.btn.gold{background:linear-gradient(135deg,#ffd700,#ff9f43);color:#1a0a2e}
+.btn.dark{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}
+.name-inp{padding:10px 16px;background:rgba(255,255,255,.1);border:1px solid rgba(181,140,255,.3);border-radius:8px;color:#fff;font-size:15px;width:280px;text-align:center}
+
+/* ===== HUD SUPERIOR ===== */
+#hud{position:fixed;top:10px;left:10px;z-index:50;display:flex;flex-direction:column;gap:5px;pointer-events:none}
+.hbar{background:rgba(10,5,25,.92);backdrop-filter:blur(10px);border:1px solid rgba(181,140,255,.3);border-radius:10px;padding:8px 12px;min-width:230px;font-size:12px}
+.bar-line{display:flex;align-items:center;gap:6px;margin:2px 0}
+.bar-line .lbl{width:22px;font-size:11px}
+.bar-line .bar{flex:1;height:11px;background:rgba(0,0,0,.6);border-radius:5px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.1)}
+.bar-line .bar>div{height:100%;transition:width .3s}
+.bar-hp>div{background:linear-gradient(90deg,#ff3b3b,#ff6b6b)}
+.bar-mp>div{background:linear-gradient(90deg,#3b82f6,#6ba3ff)}
+.bar-xp>div{background:linear-gradient(90deg,#ffd700,#ffed4e)}
+.bar-sh>div{background:linear-gradient(90deg,#b58cff,#7a4df0)}
+.bar-txt{position:absolute;top:0;left:0;right:0;text-align:center;font-size:9px;font-weight:700;line-height:11px;text-shadow:0 1px 2px #000;color:#fff}
+.stats-row{display:flex;gap:8px;margin-top:3px;font-size:11px;flex-wrap:wrap}
+.stats-row span{color:#ffd700}
+.hbar h3{color:#b58cff;font-size:13px;margin-bottom:2px;letter-spacing:.5px}
+
+/* ===== HOTBAR INFERIOR ===== */
+#hotbar{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:5px;background:rgba(10,5,25,.9);padding:7px;border-radius:12px;border:1px solid rgba(181,140,255,.3)}
+.skill-slot{width:56px;height:56px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;cursor:pointer;transition:all .15s;overflow:hidden}
+.skill-slot:hover{border-color:#b58cff}
+.skill-slot.on-cd{opacity:.6}
+.skill-slot .key{position:absolute;top:2px;left:4px;font-size:9px;color:#ffd700;font-weight:700}
+.skill-slot .ico{font-size:20px}
+.skill-slot .nm{font-size:7px;color:#cfd8e3;margin-top:1px;text-align:center;line-height:1}
+.skill-cd{position:absolute;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff}
+.skill-slot.empty{opacity:.35}
+.skill-slot.arise{border-color:#b58cff;background:rgba(181,140,255,.2);animation:arisePulse 1.5s infinite}
+@keyframes arisePulse{0%,100%{box-shadow:0 0 10px rgba(181,140,255,.6)}50%{box-shadow:0 0 25px rgba(181,140,255,.9)}}
+
+/* ===== MINIMAPA ===== */
+#minimap{position:fixed;top:10px;right:10px;width:200px;height:200px;border-radius:10px;border:2px solid rgba(181,140,255,.5);background:rgba(10,5,25,.9);z-index:50}
+
+/* ===== CROSSHAIR ===== */
+#crosshair{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:40;pointer-events:none;width:20px;height:20px}
+#crosshair::before,#crosshair::after{content:'';position:absolute;background:rgba(255,255,255,.85);box-shadow:0 0 3px rgba(0,0,0,.9)}
+#crosshair::before{width:2px;height:14px;left:50%;top:50%;transform:translate(-50%,-50%)}
+#crosshair::after{width:14px;height:2px;left:50%;top:50%;transform:translate(-50%,-50%)}
+#crosshair .dot{position:absolute;width:4px;height:4px;background:#fff;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)}
+#crosshair.aiming::before{background:#ff6b6b;height:24px}
+#crosshair.aiming::after{background:#ff6b6b;width:24px}
+#crosshair.aiming .dot{background:#ff6b6b;width:6px;height:6px}
+
+/* ===== DIALOGO ===== */
+#dialogBox{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);width:min(620px,92vw);z-index:60;background:rgba(10,5,25,.96);backdrop-filter:blur(12px);border:2px solid rgba(181,140,255,.5);border-radius:14px;padding:16px;display:none;max-height:60vh;overflow-y:auto}
+#dialogBox.show{display:block}
+.dlg-nm{font-size:17px;font-weight:700;color:#ffd700;margin-bottom:2px}
+.dlg-ttl{font-size:11px;color:#b58cff;margin-bottom:8px;font-style:italic}
+.dlg-txt{font-size:14px;line-height:1.55;color:#cfd8e3;margin-bottom:12px}
+.dlg-ch{display:flex;flex-direction:column;gap:5px}
+.dlg-opt{padding:8px 14px;background:rgba(181,140,255,.08);border:1px solid rgba(181,140,255,.25);border-radius:8px;cursor:pointer;transition:all .2s;font-size:13px;text-align:left;color:#fff}
+.dlg-opt:hover{background:rgba(181,140,255,.2);border-color:#b58cff}
+.dlg-opt small{color:#8fa2b8;display:block;margin-top:2px;font-size:10px}
+
+/* ===== TOASTS ===== */
+#toastWrap{position:fixed;top:55px;left:50%;transform:translateX(-50%);z-index:70;display:flex;flex-direction:column;gap:5px;pointer-events:none;max-width:90vw}
+.toast{background:rgba(10,5,25,.96);border:1px solid rgba(181,140,255,.5);padding:8px 18px;border-radius:8px;font-size:13px;animation:tin .3s ease-out;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:420px}
+.toast.combat{border-color:rgba(255,59,59,.7);background:rgba(60,10,20,.95)}
+.toast.quest{border-color:rgba(76,201,240,.7);background:rgba(10,30,60,.95)}
+.toast.level{border-color:rgba(255,215,0,.8);background:rgba(50,40,5,.95);font-weight:700}
+.toast.loot{border-color:rgba(46,204,113,.7);background:rgba(10,50,30,.95)}
+.toast.ach{border-color:rgba(181,140,255,.8);background:rgba(40,20,60,.95)}
+.toast.dungeon{border-color:rgba(255,107,157,.7);background:rgba(50,10,30,.95)}
+.toast.arise{border-color:rgba(181,140,255,.9);background:linear-gradient(135deg,rgba(40,10,60,.95),rgba(80,30,100,.95));font-weight:700;color:#e0c3fc;text-shadow:0 0 8px #b58cff}
+@keyframes tin{from{opacity:0;transform:translateY(-10px)}to{opacity:1}}
+
+/* ===== PROMPT ===== */
+#prompt{position:fixed;bottom:30%;left:50%;transform:translateX(-50%);z-index:55;background:rgba(10,5,25,.94);border:1px solid rgba(181,140,255,.5);padding:10px 22px;border-radius:9px;font-size:14px;display:none;animation:pulse 1.5s infinite}
+#prompt.show{display:block}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(181,140,255,.5)}50%{box-shadow:0 0 20px 5px rgba(181,140,255,.2)}}
+
+/* ===== PANELES ===== */
+.panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:75;background:rgba(10,5,25,.97);border:2px solid rgba(181,140,255,.5);border-radius:15px;padding:20px;width:min(620px,92vw);max-height:85vh;overflow-y:auto;display:none;backdrop-filter:blur(12px)}
+.panel.show{display:block}
+.panel h2{color:#b58cff;margin-bottom:12px;font-size:20px;letter-spacing:.5px}
+.inv-tabs{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+.inv-tab{padding:6px 12px;background:rgba(181,140,255,.08);border:1px solid rgba(181,140,255,.2);border-radius:7px;cursor:pointer;font-size:11px;color:#fff;transition:all .2s}
+.inv-tab:hover{border-color:#b58cff}
+.inv-tab.active{background:rgba(181,140,255,.25);color:#ffd700;border-color:#b58cff}
+.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:5px}
+.inv-slot{aspect-ratio:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:10px;cursor:pointer;transition:all .15s;padding:3px;position:relative}
+.inv-slot:hover{border-color:#b58cff;background:rgba(181,140,255,.1)}
+.inv-slot .ico{font-size:22px}
+.inv-slot.equipped{border-color:#4cc9f0;background:rgba(76,201,240,.15)}
+.inv-slot.rare{border-color:#b58cff}
+.inv-slot.legend{border-color:#ffd700;box-shadow:inset 0 0 10px rgba(255,215,0,.3)}
+.inv-slot .qty{position:absolute;bottom:1px;right:3px;font-size:9px;color:#ffd700;font-weight:700}
+.stat-line{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(181,140,255,.1);font-size:12px}
+.stat-line b{color:#ffd700}
+.skill-card{padding:8px;background:rgba(181,140,255,.05);border-left:3px solid #b58cff;margin:5px 0;border-radius:4px;font-size:11px;cursor:pointer;transition:all .2s}
+.skill-card:hover{background:rgba(181,140,255,.12)}
+.skill-card.locked{opacity:.4;border-color:#555;cursor:not-allowed}
+.skill-card .sk-name{font-weight:700;color:#b58cff;font-size:12px}
+.skill-card .sk-desc{color:#8fa2b8;margin-top:2px;font-size:10px}
+.shadow-card{display:flex;align-items:center;gap:8px;padding:8px;background:rgba(181,140,255,.08);border:1px solid rgba(181,140,255,.2);border-radius:6px;margin:4px 0;cursor:pointer;transition:all .2s}
+.shadow-card:hover{border-color:#b58cff;background:rgba(181,140,255,.15)}
+.shadow-card .sh-ico{font-size:24px}
+.shadow-card .sh-info{flex:1;font-size:11px}
+.shadow-card .sh-nm{color:#b58cff;font-weight:700;font-size:12px}
+.shadow-card .sh-lv{color:#8fa2b8}
+
+/* ===== DUNGEON UI ===== */
+#dungeonUI{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:60;background:rgba(10,5,25,.95);border:2px solid rgba(255,107,157,.6);border-radius:12px;padding:10px 20px;display:none;text-align:center;min-width:250px}
+#dungeonUI.show{display:block}
+.dungeon-title{color:#ff6b9d;font-size:15px;font-weight:700;margin-bottom:3px;letter-spacing:.5px}
+.dungeon-floor{color:#ffd700;font-size:14px}
+.dungeon-info{font-size:10px;color:#8fa2b8;margin-top:3px}
+
+/* ===== BUFFS ===== */
+#buffBar{position:fixed;top:220px;left:10px;z-index:55;display:flex;flex-direction:column;gap:4px;pointer-events:none}
+.buff{background:rgba(10,5,25,.9);border:1px solid rgba(181,140,255,.5);padding:3px 10px;border-radius:6px;font-size:10px;color:#b58cff}
+
+/* ===== ARISE OVERLAY ===== */
+#ariseOverlay{position:fixed;inset:0;z-index:85;background:rgba(20,5,40,.7);display:none;align-items:center;justify-content:center;flex-direction:column;pointer-events:none}
+#ariseOverlay.show{display:flex;animation:ariseFade .8s ease-out}
+@keyframes ariseFade{from{opacity:0}to{opacity:1}}
+.arise-text{font-size:80px;font-weight:900;color:#b58cff;text-shadow:0 0 30px #b58cff,0 0 60px #7a4df0;letter-spacing:8px;animation:ariseText 1.5s ease-out}
+@keyframes ariseText{0%{transform:scale(.5);opacity:0}30%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+
+/* ===== HELP ===== */
+#help{position:fixed;bottom:10px;left:10px;color:#ddd;background:rgba(10,5,25,.85);padding:7px 11px;border-radius:7px;font-size:10px;z-index:40;max-width:300px;border:1px solid rgba(181,140,255,.2)}
+kbd{background:rgba(181,140,255,.25);padding:2px 5px;border-radius:3px;font-size:9px;border:1px solid rgba(181,140,255,.3);font-family:monospace;color:#fff}
+
+/* ===== DAMAGE NUMBERS ===== */
+.dmg-num{position:fixed;pointer-events:none;font-weight:900;font-size:20px;text-shadow:0 0 3px #000,0 2px 4px rgba(0,0,0,.9);z-index:45;animation:dmgFloat 1.2s ease-out forwards}
+.dmg-num.crit{font-size:28px;color:#ffd700 !important}
+@keyframes dmgFloat{0%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-80px)}}
+
+/* ===== PUERTA MAZMORRA ===== */
+.dungeon-gate{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:80;background:rgba(10,5,25,.98);border:3px solid rgba(181,140,255,.6);border-radius:20px;padding:25px;text-align:center;display:none;max-width:480px;box-shadow:0 0 40px rgba(181,140,255,.4)}
+.dungeon-gate.show{display:block}
+.dungeon-gate h2{color:#b58cff;font-size:26px;margin-bottom:10px;letter-spacing:1px}
+.dungeon-gate p{color:#cfd8e3;margin-bottom:15px;line-height:1.6}
+.dungeon-gate .btn-row{display:flex;gap:10px;justify-content:center}
+
+/* ===== MENSAJE POINTER LOCK ===== */
+#pointerLockMsg{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);z-index:90;background:rgba(10,5,25,.95);border:2px solid #b58cff;padding:15px 25px;border-radius:10px;font-size:14px;text-align:center;display:none;box-shadow:0 0 30px rgba(181,140,255,.5)}
+#pointerLockMsg.show{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ===== MUERTE ===== */
+#deathScreen{position:fixed;inset:0;z-index:95;background:rgba(10,0,0,.92);display:none;align-items:center;justify-content:center;flex-direction:column;gap:15px}
+#deathScreen.show{display:flex}
+.death-title{font-size:60px;font-weight:900;color:#ff3b3b;text-shadow:0 0 30px #ff3b3b;letter-spacing:3px}
+.death-sub{color:#cfd8e3;font-size:16px;font-style:italic;max-width:400px;text-align:center}
+
+/* ===== CRAFTING ===== */
+.recipe{padding:10px;background:rgba(181,140,255,.08);border:1px solid rgba(181,140,255,.2);border-radius:6px;margin:5px 0;cursor:pointer;transition:all .2s}
+.recipe:hover{border-color:#b58cff;background:rgba(181,140,255,.15)}
+.recipe-nm{color:#ffd700;font-weight:700;font-size:13px}
+.recipe-mats{color:#8fa2b8;font-size:11px;margin-top:3px}
+</style>
+</head>
+<body>
+
+<div id="menu">
+  <div class="title">MUGEN AETHORIA</div>
+  <div class="subtitle">THE FIRST MONARCH</div>
+  <div class="sub">Inspirado en Solo Leveling · Overlord · Shield Hero · Bofuri · Slime Isekai · Kumakuma · Apothecary Diaries<br>
+  <b style="color:#b58cff">CLICK en el juego para capturar el mouse · ESC para liberar</b></div>
+  <input class="name-inp" id="nm" placeholder="Nombre del Monarca" value="Sung Jinwoo" maxlength="20">
+  <div style="color:#8fa2b8;font-size:11px">Elige tu clase inicial:</div>
+  <div class="class-grid" id="cgrid"></div>
+  <div style="display:flex;gap:8px">
+    <button class="btn" id="btnStart">🌑 DESCENDER</button>
+    <button class="btn dark" id="btnLoad">📂 CONTINUAR</button>
+  </div>
+  <div style="font-size:10px;color:#6d7a8a;margin-top:8px;text-align:center">By Carlos Andres Lorenzo Marro ☕🎌🤖</div>
+</div>
+
+<div id="hud" style="display:none">
+  <div class="hbar">
+    <h3 id="hName">Monarca</h3>
+    <div style="font-size:11px;color:#b58cff" id="hClass">Clase</div>
+    <div class="bar-line"><span class="lbl">❤️</span><div class="bar bar-hp"><div id="hpBar" style="width:100%"></div><div class="bar-txt" id="hpTxt">100/100</div></div></div>
+    <div class="bar-line"><span class="lbl">💧</span><div class="bar bar-mp"><div id="mpBar" style="width:100%"></div><div class="bar-txt" id="mpTxt">50/50</div></div></div>
+    <div class="bar-line"><span class="lbl">⭐</span><div class="bar bar-xp"><div id="xpBar" style="width:0%"></div><div class="bar-txt" id="xpTxt">0/100</div></div></div>
+    <div class="bar-line"><span class="lbl">👻</span><div class="bar bar-sh"><div id="shBar" style="width:0%"></div><div class="bar-txt" id="shTxt">0/0</div></div></div>
+    <div class="stats-row">
+      <span>💰<b id="hGold">0</b></span>
+      <span>🏹<b id="hArr">0</b></span>
+      <span>📊<b id="hFame">0</b></span>
+    </div>
+  </div>
+  <div class="hbar" style="font-size:10px">
+    <div>📍 <span id="hLoc">-</span></div>
+    <div>⚔️<b id="hSTR">10</b> 🏹<b id="hDEX">10</b> 🔮<b id="hINT">10</b> 🛡️<b id="hCON">10</b></div>
+  </div>
+</div>
+
+<canvas id="minimap" width="200" height="200" style="display:none"></canvas>
+<div id="crosshair"><div class="dot"></div></div>
+<div id="buffBar"></div>
+
+<div id="hotbar" style="display:none">
+  <div class="skill-slot" id="sk0"><span class="key">1</span><span class="ico">🏹</span><span class="nm">Disparo</span></div>
+  <div class="skill-slot" id="sk1"><span class="key">2</span><span class="ico">-</span><span class="nm">Slot 2</span></div>
+  <div class="skill-slot" id="sk2"><span class="key">3</span><span class="ico">-</span><span class="nm">Slot 3</span></div>
+  <div class="skill-slot" id="sk3"><span class="key">4</span><span class="ico">-</span><span class="nm">Slot 4</span></div>
+  <div class="skill-slot" id="sk4"><span class="key">5</span><span class="ico">👻</span><span class="nm">ARISE</span></div>
+  <div class="skill-slot" id="sk5"><span class="key">Q</span><span class="ico">🧪</span><span class="nm">Poción</span></div>
+  <div class="skill-slot" id="sk6"><span class="key">F</span><span class="ico">🐢</span><span class="nm">Mascota</span></div>
+</div>
+
+<div id="dialogBox"></div>
+<div id="prompt"></div>
+<div id="toastWrap"></div>
+
+<div class="panel" id="invPanel"></div>
+
+<div id="dungeonUI">
+  <div class="dungeon-title">🏰 MAZMORRA</div>
+  <div class="dungeon-floor">Rango <span id="dgRank">E</span> · Piso <span id="dgFloor">1</span></div>
+  <div class="dungeon-info" id="dgInfo">-</div>
+</div>
+
+<div id="help" style="display:none">
+  <kbd>Click</kbd> Capturar mouse · <kbd>WASD</kbd> mover · <kbd>Shift</kbd> correr · <kbd>Space</kbd> saltar<br>
+  <kbd>Click Izq</kbd> atacar · <kbd>Click Der</kbd> apuntar · <kbd>1-5</kbd> skills · <kbd>Q</kbd> poción<br>
+  <kbd>F</kbd> mascota · <kbd>E</kbd> interactuar · <kbd>I</kbd> inv · <kbd>K</kbd> skills · <kbd>J</kbd> sombras · <kbd>ESC</kbd> liberar
+</div>
+
+<div class="dungeon-gate" id="dungeonEntrance">
+  <h2 id="dgGateTitle">🏰 Puerta de Mazmorra</h2>
+  <p id="dgGateDesc">Una grieta dimensional...</p>
+  <div class="btn-row">
+    <button class="btn" id="btnEnterDungeon">⚔️ DESCENDER</button>
+    <button class="btn dark" id="btnCloseDungeon">❌ Cancelar</button>
+  </div>
+</div>
+
+<div id="ariseOverlay"><div class="arise-text">ARISE</div></div>
+
+<div id="pointerLockMsg">🎮 <b>CLICK en el juego</b> para controlar cámara<br><small>ESC para liberar</small></div>
+
+<div id="deathScreen">
+  <div class="death-title">HAS CAÍDO</div>
+  <div class="death-sub">La muerte no es el final para un Monarca...</div>
+  <button class="btn gold" onclick="respawn()">⚔️ RENACER</button>
+  <button class="btn dark" onclick="location.reload()">🏠 MENÚ</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+"use strict";
+
+// ====================================================================
+// MUGEN AETHORIA: THE FIRST MONARCH
+// By Carlos Andres Lorenzo Marro ☕🎌🤖
+// ====================================================================
+
+const CLASSES = [
+  {id:'archer',name:'Cazador Sombrío',ico:'🏹',desc:'Arquero estilo Solo Leveling',str:8,dex:16,int:8,con:10,hp:95,mp:55,
+    skills:[
+      {id:'shot',name:'Disparo',ico:'🏹',cd:0.4,mp:0,type:'projectile',unlock:1,dmgMul:1},
+      {id:'multi',name:'Lluvia',ico:'🌧️',cd:8,mp:20,type:'aoe',unlock:3,dmgMul:0.6,count:6},
+      {id:'piercing',name:'Perforante',ico:'🎯',cd:12,mp:25,type:'projectile',unlock:5,dmgMul:2.5,piercing:true},
+      {id:'ruler',name:'Mano del Monarca',ico:'✋',cd:20,mp:40,type:'pull',unlock:8,dmgMul:1.5}
+    ]},
+  {id:'shielder',name:'Escudo Eterno',ico:'🛡️',desc:'Tanque impenetrable (Bofuri)',str:6,dex:7,int:10,con:18,hp:200,mp:70,
+    skills:[
+      {id:'bash',name:'Golpe Escudo',ico:'🛡️',cd:0.6,mp:3,type:'melee',unlock:1,dmgMul:1.0},
+      {id:'cover',name:'Fortaleza',ico:'🏰',cd:20,mp:30,type:'buff',unlock:3,duration:10,buffType:'fortress'},
+      {id:'counter',name:'Contraataque',ico:'💥',cd:8,mp:15,type:'melee',unlock:5,dmgMul:2.0},
+      {id:'turtle',name:'Invocar Tortuga',ico:'🐢',cd:40,mp:60,type:'summon_pet',unlock:8}
+    ]},
+  {id:'mage',name:'Archimago',ico:'🔮',desc:'Magia sin cánticos',str:5,dex:8,int:18,con:8,hp:75,mp:140,
+    skills:[
+      {id:'fireball',name:'Bola Fuego',ico:'🔥',cd:0.8,mp:8,type:'projectile',unlock:1,dmgMul:1.5,element:'fire'},
+      {id:'ice',name:'Lanza Hielo',ico:'❄️',cd:1.5,mp:12,type:'projectile',unlock:3,dmgMul:1.8,element:'ice'},
+      {id:'lightning',name:'Relámpago',ico:'⚡',cd:3,mp:20,type:'chain',unlock:6,dmgMul:2.0,chains:3},
+      {id:'meteor',name:'Meteoros',ico:'☄️',cd:40,mp:80,type:'aoe',unlock:12,dmgMul:4.0,count:12}
+    ]},
+  {id:'slime',name:'Slime Devorador',ico:'🟢',desc:'Depredador (Rimuru)',str:10,dex:12,int:14,con:12,hp:110,mp:100,
+    skills:[
+      {id:'whip',name:'Látigo Agua',ico:'💧',cd:0.5,mp:3,type:'projectile',unlock:1,dmgMul:1.2},
+      {id:'predator',name:'Depredador',ico:'🌀',cd:10,mp:20,type:'devour',unlock:3,dmgMul:3.0},
+      {id:'mimic',name:'Mimetismo',ico:'🎭',cd:25,mp:35,type:'buff',unlock:6,duration:15,buffType:'mimic'},
+      {id:'megiddo',name:'Megiddo',ico:'☀️',cd:30,mp:60,type:'beam',unlock:10,dmgMul:5.0}
+    ]},
+  {id:'necro',name:'Soberano Oscuro',ico:'💀',desc:'Nigromante (Overlord)',str:8,dex:10,int:16,con:11,hp:90,mp:120,
+    skills:[
+      {id:'bolt',name:'Rayo Muerte',ico:'💜',cd:0.7,mp:6,type:'projectile',unlock:1,dmgMul:1.4,element:'dark'},
+      {id:'raise',name:'Levantar Muerto',ico:'⬆️',cd:15,mp:30,type:'summon_temp',unlock:3,duration:20},
+      {id:'curse',name:'Maldición',ico:'☠️',cd:10,mp:20,type:'debuff',unlock:5,duration:8},
+      {id:'falling',name:'Caída del Cielo',ico:'🌑',cd:35,mp:70,type:'aoe',unlock:10,dmgMul:4.0,count:10}
+    ]},
+  {id:'knight',name:'Caballero Sagrado',ico:'⚔️',desc:'Guerrero divino',str:14,dex:10,int:10,con:14,hp:140,mp:60,
+    skills:[
+      {id:'slash',name:'Tajo Sagrado',ico:'⚔️',cd:0.6,mp:4,type:'melee',unlock:1,dmgMul:1.3},
+      {id:'aura',name:'Aura Sagrada',ico:'✨',cd:20,mp:25,type:'buff',unlock:3,duration:12,buffType:'aura'},
+      {id:'smite',name:'Castigo',ico:'⚡',cd:8,mp:18,type:'melee',unlock:5,dmgMul:2.5},
+      {id:'avatar',name:'Avatar Divino',ico:'👼',cd:45,mp:60,type:'buff',unlock:10,duration:15,buffType:'avatar'}
+    ]}
+];
+
+let selClass = 'archer';
+const cgrid = document.getElementById('cgrid');
+CLASSES.forEach(c => {
+  const d = document.createElement('div');
+  d.className = 'class-card' + (c.id==='archer'?' selected':'');
+  d.innerHTML = `<span class="ico">${c.ico}</span><div class="nm">${c.name}</div><div class="ds">${c.desc}</div>`;
+  d.onclick = () => {
+    selClass = c.id;
+    document.querySelectorAll('.class-card').forEach(x=>x.classList.remove('selected'));
+    d.classList.add('selected');
+  };
+  cgrid.appendChild(d);
+});
+
+// ===== ESTADO =====
+const WORLD = 600;
+const LIMIT = 290;
+const WALL = 160;
+const STREET_W = 12;
+
+let scene, camera, renderer, clock;
+let playerGroup = null;
+let player = null;
+const keys = {};
+let cameraYaw = 0, cameraPitch = 0.3, cameraDist = 9;
+let isAiming = false;
+let isPointerLocked = false;
+let vy = 0, onGround = true;
+let gameStarted = false;
+let dialogOpen = false;
+let invOpen = false;
+let currentPanelTab = 'inv';
+
+const buildings = [];
+const npcs = [];
+const enemies = [];
+const projectiles = [];
+const particles = [];
+const lootDrops = [];
+const signs = []; // carteles de dirección
+const corpses = []; // cadáveres para ARISE
+
+let worldGroup, interiorGroup, dungeonGroup;
+let activeInterior = null;
+let playerInInterior = false;
+
+let inDungeon = false;
+let currentDungeonFloor = 1;
+let currentDungeonRank = 'E';
+let dungeonRooms = [];
+let dungeonEnemies = [];
+let dungeonTreasures = [];
+let currentDungeonGate = null;
+let currentRoom = null;
+
+// ===== SISTEMA DE SOMBRAS (Solo Leveling) =====
+let shadowArmy = [];
+let shadowCapacity = 0;
+let shadowMax = 0;
+let shadowManaCost = 0;
+
+// Mascota (Bofuri/Kumakuma)
+let pet = null;
+
+const minimapCanvas = document.getElementById('minimap');
+const mctx = minimapCanvas.getContext('2d');
+let hudT = 0;
+
+// ===== RECETAS DE CRAFTEO =====
+const RECIPES = [
+  {id:'potion_s',name:'Poción Vida Pequeña',ico:'🧪',type:'consumable',heal:40,mats:{herb:2},output:1},
+  {id:'potion_m',name:'Poción Vida Mediana',ico:'🧪',type:'consumable',heal:100,mats:{herb:3,gem:1},output:1},
+  {id:'potion_mp',name:'Poción Maná',ico:'💧',type:'mana',mana:50,mats:{herb:2,crystal:1},output:1},
+  {id:'arrows_20',name:'Flechas x20',ico:'🏹',type:'arrows',qty:20,mats:{wood:2},output:20},
+  {id:'arrows_50',name:'Flechas x50',ico:'🏹',type:'arrows',qty:50,mats:{wood:4,iron:1},output:50},
+  {id:'bow_basic',name:'Arco Básico',ico:'🏹',type:'weapon',slot:'weapon',rarity:'common',stats:{dmg:10,range:25},mats:{wood:3,iron:1},output:1},
+  {id:'armor_basic',name:'Armadura Cuero',ico:'🦺',type:'armor',slot:'armor',rarity:'common',stats:{def:4},mats:{leather:3},output:1}
+];
+
+// ===== INICIO =====
+window.startGame = function() {
+  const name = document.getElementById('nm').value.trim() || 'Monarca';
+  const cls = CLASSES.find(c=>c.id===selClass);
+  
+  player = {
+    name, cls: cls.id, clsName: cls.name, clsIco: cls.ico, clsData: cls,
+    level: 1, xp: 0, xpNext: 100, skillPoints: 0,
+    hp: cls.hp, hpMax: cls.hp, mp: cls.mp, mpMax: cls.mp,
+    str: cls.str, dex: cls.dex, int: cls.int, con: cls.con,
+    gold: 100, arrows: 0, fame: 0,
+    materials: {herb:0, wood:3, iron:0, leather:0, crystal:0, gem:0},
+    equipment: { weapon:null, armor:null, helmet:null, boots:null, ring:null },
+    inventory: [],
+    unlockedSkills: cls.skills.filter(s=>s.unlock<=1).map(s=>s.id),
+    equippedSkills: [cls.skills[0].id, null, null, null, null],
+    quests: [],
+    achievements: [],
+    kills: 0, shots: 0, hits: 0, questsDone: 0, moneyEarned: 0,
+    isAdventurer: false, hunterRank: 'E', guildRank: 'Civil',
+    dungeonBestFloor: 0, dungeonCleared: {},
+    // Sombras (Solo Leveling)
+    shadows: [], shadowCapacity: 3,
+    // Mascota
+    petActive: false, petType: null
+  };
+  
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('hud').style.display='flex';
+  document.getElementById('minimap').style.display='block';
+  document.getElementById('help').style.display='block';
+  document.getElementById('hotbar').style.display='flex';
+  updateHotbar();
+  
+  initGame();
+};
+
+window.loadGame = function() {
+  const save = localStorage.getItem('mugen_aethoria_save');
+  if (!save) { toast('❌ No hay partida guardada','combat'); return; }
+  try {
+    player = JSON.parse(save);
+    document.getElementById('menu').classList.add('hidden');
+    document.getElementById('hud').style.display='flex';
+    document.getElementById('minimap').style.display='block';
+    document.getElementById('help').style.display='block';
+    document.getElementById('hotbar').style.display='flex';
+    updateHotbar();
+    initGame();
+    toast('📂 Partida cargada','quest');
+  } catch(e) { toast('❌ Error al cargar','combat'); }
+};
+
+document.getElementById('btnStart').onclick = window.startGame;
+document.getElementById('btnLoad').onclick = window.loadGame;
+
+function initGame() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x87CEEB);
+  scene.fog = new THREE.Fog(0x87CEEB, 100, 400);
+
+  camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 1200);
+  renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  document.body.appendChild(renderer.domElement);
+  renderer.domElement.id='c';
+  clock = new THREE.Clock();
+
+  scene.add(new THREE.HemisphereLight(0xffeecc,0x445566,0.75));
+  const sun = new THREE.DirectionalLight(0xfff4d6, 1.1);
+  sun.position.set(120,180,90);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048,2048);
+  const sc = sun.shadow.camera;
+  sc.left=-220;sc.right=220;sc.top=220;sc.bottom=-220;sc.far=600;
+  sun.shadow.bias=-0.0005;
+  scene.add(sun);
+
+  worldGroup = new THREE.Group(); scene.add(worldGroup);
+  interiorGroup = new THREE.Group(); interiorGroup.visible = false; scene.add(interiorGroup);
+  dungeonGroup = new THREE.Group(); dungeonGroup.visible = false; scene.add(dungeonGroup);
+
+  buildGround();
+  buildStreets();
+  buildWalls();
+  buildCentralBuildings();
+  buildHousesAlongStreets();
+  buildMarket();
+  buildDirectionalSigns();
+  buildForest();
+  buildDungeonGates();
+  spawnNPCs();
+  spawnEnemies();
+
+  playerGroup = createPlayer();
+  playerGroup.position.set(0, 0, WALL + 8);
+  scene.add(playerGroup);
+
+  setupControls();
+  gameStarted = true;
+
+  toast(`🌑 ¡Bienvenido, ${player.name}, Primer Monarca!`,'level');
+  setTimeout(()=>toast('💰 Tienes 100 oros. Compra arco en Herrería','quest'),2000);
+  setTimeout(()=>toast('🎮 CLICK en el juego para capturar mouse','arise'),4500);
+  setTimeout(()=>toast('👻 ARISE: extrae sombras de enemigos muertos','arise'),7000);
+
+  animate();
+}
+
+function buildGround() {
+  const g = new THREE.Mesh(new THREE.PlaneGeometry(WORLD*2,WORLD*2), new THREE.MeshLambertMaterial({color:0x4a7d3a}));
+  g.rotation.x = -Math.PI/2; g.receiveShadow = true; worldGroup.add(g);
+}
+
+function buildStreets() {
+  const streetMat = new THREE.MeshLambertMaterial({color:0x6a6058});
+  // Calles en grid principal dentro de la ciudad
+  const mainSt = new THREE.MeshLambertMaterial({color:0x555048});
+  // Avenida principal N-S
+  const mainNS = new THREE.Mesh(new THREE.PlaneGeometry(STREET_W, WALL*2+20), mainSt);
+  mainNS.rotation.x=-Math.PI/2; mainNS.position.y=0.03; worldGroup.add(mainNS);
+  // Avenida principal E-O
+  const mainEW = new THREE.Mesh(new THREE.PlaneGeometry(WALL*2+20, STREET_W), mainSt);
+  mainEW.rotation.x=-Math.PI/2; mainEW.position.y=0.03; worldGroup.add(mainEW);
+  
+  // Calles secundarias cada 50 unidades (dentro de la ciudad)
+  for (let p = -100; p <= 100; p += 50) {
+    if (p === 0) continue;
+    const s1 = new THREE.Mesh(new THREE.PlaneGeometry(STREET_W*0.7, WALL*2+10), streetMat);
+    s1.rotation.x=-Math.PI/2; s1.position.set(p,0.025,0); worldGroup.add(s1);
+    const s2 = new THREE.Mesh(new THREE.PlaneGeometry(WALL*2+10, STREET_W*0.7), streetMat);
+    s2.rotation.x=-Math.PI/2; s2.position.set(0,0.025,p); worldGroup.add(s2);
+  }
+  
+  // Suelo de la ciudad (adoquines)
+  const cityFloor = new THREE.Mesh(new THREE.PlaneGeometry(WALL*2, WALL*2), new THREE.MeshLambertMaterial({color:0x8a8278}));
+  cityFloor.rotation.x=-Math.PI/2; cityFloor.position.y=0.015; cityFloor.receiveShadow=true;
+  worldGroup.add(cityFloor);
+}
+
+function buildWalls() {
+  const wallMat = new THREE.MeshLambertMaterial({color:0x8a8070});
+  const H = 10, doorW = 14;
+  const walls = [
+    {a:[-WALL,-WALL], b:[-doorW/2,-WALL], axis:'x'},
+    {a:[doorW/2,-WALL], b:[WALL,-WALL], axis:'x'},
+    {a:[-WALL,WALL], b:[-doorW/2,WALL], axis:'x'},
+    {a:[doorW/2,WALL], b:[WALL,WALL], axis:'x'},
+    {a:[-WALL,-WALL], b:[-WALL,-doorW/2], axis:'z'},
+    {a:[-WALL,doorW/2], b:[-WALL,WALL], axis:'z'},
+    {a:[WALL,-WALL], b:[WALL,-doorW/2], axis:'z'},
+    {a:[WALL,doorW/2], b:[WALL,WALL], axis:'z'}
+  ];
+  walls.forEach(w => {
+    const dx = w.b[0]-w.a[0], dz = w.b[1]-w.a[1];
+    const len = Math.hypot(dx,dz);
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w.axis==='x'?len:3, H, w.axis==='z'?len:3), wallMat);
+    mesh.position.set((w.a[0]+w.b[0])/2, H/2, (w.a[1]+w.b[1])/2);
+    mesh.castShadow = mesh.receiveShadow = true; worldGroup.add(mesh);
+  });
+  for (const [x,z] of [[-WALL,-WALL],[WALL,-WALL],[-WALL,WALL],[WALL,WALL]]) {
+    const tower = new THREE.Mesh(new THREE.CylinderGeometry(6,6.5,14,8), wallMat);
+    tower.position.set(x,7,z); tower.castShadow = true; worldGroup.add(tower);
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(6.5,5,8), new THREE.MeshLambertMaterial({color:0x8b0000}));
+    roof.position.set(x,16.5,z); worldGroup.add(roof);
+  }
+}
+
+function buildCentralBuildings() {
+  // Edificios centrales en posiciones específicas
+  addBuilding(0, -70, 40, 35, 'castle', 'Castillo Real', {npc:{name:'Rey Aldric',role:'king',ico:'👑'},type:'castle',owner:'Rey Aldric'});
+  addBuilding(-80, 0, 22, 18, 'guild', 'Gremio de Cazadores', {npc:{name:'Gareth',role:'guildmaster',ico:'⚔️'},type:'guild',owner:'Maestro Gareth'});
+  addBuilding(80, 0, 20, 16, 'tavern', 'Taberna del Dragón', {npc:{name:'Brom',role:'tavernkeeper',ico:'🍺'},type:'tavern',owner:'Brom'});
+  addBuilding(0, 70, 22, 16, 'temple', 'Templo de la Luz', {npc:{name:'Elara',role:'priest',ico:'⛪'},type:'temple',owner:'Sacerdotisa Elara'});
+  addBuilding(-80, -70, 18, 14, 'smith', 'Herrería de Thorin', {npc:{name:'Thorin',role:'blacksmith',ico:'🔨',shop:'weapons'},type:'shop',owner:'Thorin'});
+  addBuilding(80, -70, 18, 14, 'tailor', 'Sastrería Élfica', {npc:{name:'Celeste',role:'tailor',ico:'🧵',shop:'armor'},type:'shop',owner:'Celeste'});
+  addBuilding(-80, 70, 16, 12, 'potion', 'Pociones de Martha', {npc:{name:'Martha',role:'alchemist',ico:'🧪',shop:'potions'},type:'shop',owner:'Martha'});
+  addBuilding(80, 70, 16, 12, 'general', 'Bazar de Zoltan', {npc:{name:'Zoltan',role:'merchant',ico:'🛒',shop:'general'},type:'shop',owner:'Zoltan'});
+}
+
+// ===== CASAS ORDENADAS A LO LARGO DE LAS CALLES =====
+function buildHousesAlongStreets() {
+  const palette = [0xb59b7a, 0xa08060, 0xc4a882, 0x8a7050, 0x9b8060, 0xb08060];
+  let houseId = 1;
+  
+  // Casas a ambos lados de la avenida principal N-S (X=0), con Z entre -130 y 130
+  for (let z = -130; z <= 130; z += 20) {
+    if (Math.abs(z) < 25 || (Math.abs(z-70) < 15) || (Math.abs(z+70) < 15)) continue;
+    // Lado oeste
+    addBuilding(-15, z, 8, 10, 'house'+houseId, `Casa ${houseId}`, {type:'house',owner:`Familia ${houseId}`,color:pick(palette)});
+    houseId++;
+    // Lado este
+    addBuilding(15, z, 8, 10, 'house'+houseId, `Casa ${houseId}`, {type:'house',owner:`Familia ${houseId}`,color:pick(palette)});
+    houseId++;
+  }
+  
+  // Casas a ambos lados de la avenida E-O (Z=0)
+  for (let x = -130; x <= 130; x += 20) {
+    if (Math.abs(x) < 25 || (Math.abs(x-80) < 15) || (Math.abs(x+80) < 15)) continue;
+    // Lado norte
+    addBuilding(x, -15, 10, 8, 'house'+houseId, `Casa ${houseId}`, {type:'house',owner:`Familia ${houseId}`,color:pick(palette)});
+    houseId++;
+    // Lado sur
+    addBuilding(x, 15, 10, 8, 'house'+houseId, `Casa ${houseId}`, {type:'house',owner:`Familia ${houseId}`,color:pick(palette)});
+    houseId++;
+  }
+  
+  // Casas en calles secundarias
+  for (let p = -100; p <= 100; p += 50) {
+    if (p === 0) continue;
+    for (let z = -130; z <= 130; z += 25) {
+      if (Math.abs(z) < 25) continue;
+      // Verificar que no colisione con edificios existentes
+      const x1 = p - 12, x2 = p + 12;
+      let canBuild1 = !buildings.some(b => Math.abs(b.x - x1) < 10 && Math.abs(b.z - z) < 10);
+      let canBuild2 = !buildings.some(b => Math.abs(b.x - x2) < 10 && Math.abs(b.z - z) < 10);
+      if (canBuild1 && Math.abs(x1) < WALL - 10) {
+        addBuilding(x1, z, 7, 9, 'house'+houseId, `Casa ${houseId}`, {type:'house',owner:`Familia ${houseId}`,color:pick(palette)});
+        houseId++;
+      }
+      if (canBuild2 && Math.abs(x2) < WALL - 10) {
+        addBuilding(x2, z, 7, 9, 'house'+houseId, `Casa ${houseId}`, {type:'house',owner:`Familia ${houseId}`,color:pick(palette)});
+        houseId++;
+      }
+    }
+  }
+}
+
+// ===== CARTELES DIRECCIONALES EN CALLES =====
+function buildDirectionalSigns() {
+  // Carteles con flechas apuntando a edificios importantes
+  const signData = [
+    {pos:[30,0], text:'🏰 Castillo →', rot:Math.PI/2, color:'#8b0000'},
+    {pos:[-30,0], text:'← Herrería', rot:-Math.PI/2, color:'#5a5a5a'},
+    {pos:[0,-40], text:'↑ Castillo', rot:0, color:'#8b0000'},
+    {pos:[0,40], text:'↓ Templo', rot:Math.PI, color:'#e0d8c0'},
+    {pos:[50,30], text:'🛡️ Sastrería →', rot:Math.PI/2, color:'#b58cff'},
+    {pos:[-50,30], text:'← 🧪 Pociones', rot:-Math.PI/2, color:'#5a9b6f'},
+    {pos:[50,-30], text:'🍺 Taberna →', rot:Math.PI/2, color:'#8b5a2b'},
+    {pos:[-50,-30], text:'← ⚔️ Gremio', rot:-Math.PI/2, color:'#8b6f47'},
+    {pos:[0,WALL-10], text:'🏪 Mercado Sur ↓', rot:Math.PI, color:'#ffd700'},
+    {pos:[0,-WALL+10], text:'🏰 Norte ↑', rot:0, color:'#8b0000'},
+    {pos:[WALL-10,0], text:'→ Salida Este', rot:Math.PI/2, color:'#5a9b6f'},
+    {pos:[-WALL+10,0], text:'Salida Oeste ←', rot:-Math.PI/2, color:'#5a9b6f'}
+  ];
+  
+  signData.forEach(s => {
+    const group = new THREE.Group();
+    // Poste
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.18, 3.5, 6), new THREE.MeshLambertMaterial({color:0x4a3520}));
+    pole.position.y = 1.75; group.add(pole);
+    // Cartel (sprite)
+    const sign = makeSignSprite(s.text, 22, '#fff', s.color);
+    sign.position.set(0, 3.5, 0);
+    sign.scale.set(3.5, 1, 1);
+    group.add(sign);
+    group.position.set(s.pos[0], 0, s.pos[1]);
+    group.rotation.y = s.rot;
+    worldGroup.add(group);
+  });
+}
+
+function buildMarket() {
+  const marketGroup = new THREE.Group();
+  marketGroup.position.set(0, 0, WALL - 30);
+  
+  const marketFloor = new THREE.Mesh(new THREE.PlaneGeometry(60, 40), new THREE.MeshLambertMaterial({color:0x9a8878}));
+  marketFloor.rotation.x=-Math.PI/2; marketFloor.position.y=0.04; marketFloor.receiveShadow=true;
+  marketGroup.add(marketFloor);
+  
+  // Fuente central
+  const fBase = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 4, 1, 16), new THREE.MeshLambertMaterial({color:0xa0a0a0}));
+  fBase.position.y=0.5; marketGroup.add(fBase);
+  const fWater = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 0.8, 16), new THREE.MeshLambertMaterial({color:0x4a9ed9,transparent:true,opacity:0.8}));
+  fWater.position.y=0.9; marketGroup.add(fWater);
+  
+  const stalls = [
+    {name:'Frutas',ico:'🍎',color:0xe74c3c,owner:'Tom'},
+    {name:'Pescados',ico:'🐟',color:0x3498db,owner:'Finn'},
+    {name:'Pan',ico:'🍞',color:0xf39c12,owner:'Hans'},
+    {name:'Quesos',ico:'🧀',color:0xf1c40f,owner:'Ana'},
+    {name:'Vinos',ico:'🍷',color:0x8b0000,owner:'Marco'},
+    {name:'Flores',ico:'🌸',color:0xe91e63,owner:'Rosa'}
+  ];
+  
+  stalls.forEach((st,i) => {
+    const angle = (i/stalls.length) * Math.PI * 2;
+    const dist = 16;
+    const x = Math.cos(angle) * dist, z = Math.sin(angle) * dist;
+    const stall = new THREE.Group();
+    const table = new THREE.Mesh(new THREE.BoxGeometry(5,1,2.5), new THREE.MeshLambertMaterial({color:0x8b6f47}));
+    table.position.y=0.5; table.castShadow=true; stall.add(table);
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(6,0.3,3.5), new THREE.MeshLambertMaterial({color:st.color}));
+    roof.position.y=3.2; stall.add(roof);
+    for (const px of [-2.5,2.5]) {
+      for (const pz of [-1.2,1.2]) {
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,2.8,6), new THREE.MeshLambertMaterial({color:0x6b4423}));
+        pole.position.set(px,1.8,pz); stall.add(pole);
+      }
+    }
+    const sign = makeSignSprite(st.ico+' '+st.name, 20, '#fff', st.color);
+    sign.position.set(0,4,0); stall.add(sign);
+    stall.position.set(x,0,z);
+    stall.rotation.y = angle + Math.PI;
+    stall.userData = {type:'market_stall', name:st.name, owner:st.owner, ico:st.ico};
+    marketGroup.add(stall);
+    buildings.push({mesh:stall, doorX:x, doorZ:z+WALL-30+2, x:x, z:z+WALL-30, w:5, d:2.5, h:4, name:st.name, type:'market_stall', owner:st.owner, ico:st.ico, collider:{minX:x-2.5, maxX:x+2.5, minZ:z+WALL-30-1.25, maxZ:z+WALL-30+1.25}});
+  });
+  
+  worldGroup.add(marketGroup);
+  
+  // Letrero gigante del mercado
+  const bigSign = new THREE.Group();
+  const signPole = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,8,8), new THREE.MeshLambertMaterial({color:0x5a3a1a}));
+  signPole.position.y=4; bigSign.add(signPole);
+  const signTop = makeSignSprite('🏪 GRAN MERCADO', 28, '#ffd700', '#2a1a0a');
+  signTop.position.set(0,7.5,0); signTop.scale.set(5,1.3,1); bigSign.add(signTop);
+  bigSign.position.set(0,0,WALL-5);
+  worldGroup.add(bigSign);
+}
+
+function buildDungeonGates() {
+  const gates = [
+    {rank:'E', color:0x888888, x:-WALL-30, z:40, lvl:1, desc:'Criptas antiguas. Nivel 1+.'},
+    {rank:'D', color:0x2ecc71, x:WALL+30, z:40, lvl:10, desc:'Bosque Oscuro. Nivel 10+.'},
+    {rank:'C', color:0x3498db, x:-WALL-30, z:-40, lvl:20, desc:'Ruinas Malditas. Nivel 20+.'},
+    {rank:'B', color:0xb58cff, x:WALL+30, z:-40, lvl:30, desc:'Inframundo. Nivel 30+.'},
+    {rank:'A', color:0xff6b9d, x:0, z:WALL+30, lvl:45, desc:'Dimensión Oscura. Nivel 45+.'},
+    {rank:'S', color:0xffd700, x:0, z:-WALL-30, lvl:60, desc:'Palacio del Rey Demonio. Nivel 60+.'}
+  ];
+  
+  gates.forEach(gate => {
+    const g = new THREE.Group();
+    const portalFrame = new THREE.Mesh(new THREE.BoxGeometry(5,7,0.5), new THREE.MeshLambertMaterial({color:0x2a2a3a}));
+    portalFrame.position.y=3.5; g.add(portalFrame);
+    const portal = new THREE.Mesh(new THREE.CircleGeometry(2.2,32), new THREE.MeshBasicMaterial({color:gate.color,transparent:true,opacity:0.75,side:THREE.DoubleSide}));
+    portal.position.set(0,3.5,0.3); g.add(portal);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(2.4,0.18,8,32), new THREE.MeshLambertMaterial({color:gate.color,emissive:gate.color,emissiveIntensity:0.9}));
+    ring.position.set(0,3.5,0.3); g.add(ring);
+    const rankSign = makeSignSprite('PUERTA RANGO '+gate.rank, 22, '#fff', '#000');
+    rankSign.position.set(0,8,0); rankSign.scale.set(3.5,0.9,1); g.add(rankSign);
+    const light = new THREE.PointLight(gate.color, 1.8, 18);
+    light.position.set(0,3.5,1); g.add(light);
+    g.position.set(gate.x,0,gate.z);
+    g.rotation.y = Math.atan2(-gate.x,-gate.z);
+    g.userData = {type:'dungeon_gate', rank:gate.rank, color:gate.color, lvl:gate.lvl, desc:gate.desc, name:`Mazmorra Rango ${gate.rank}`};
+    worldGroup.add(g);
+    buildings.push({mesh:g, doorX:gate.x, doorZ:gate.z, x:gate.x, z:gate.z, w:5, d:2, h:8, name:`Mazmorra Rango ${gate.rank}`, type:'dungeon_gate', rank:gate.rank, lvl:gate.lvl, desc:gate.desc, collider:{minX:gate.x-2.5, maxX:gate.x+2.5, minZ:gate.z-1, maxZ:gate.z+1}});
+  });
+}
+
+function addBuilding(x, z, w, d, id, name, data) {
+  const g = new THREE.Group();
+  const h = data.type==='castle' ? 18 : data.type==='guild'||data.type==='temple' ? 11 : data.type==='tavern' ? 9 : data.type==='shop' ? 8 : 5 + Math.random()*1.5;
+  const palette = {castle:0x9a9088,guild:0x8b6f47,tavern:0x8b5a2b,smith:0x5a5a5a,tailor:0xb58cff,potion:0x5a9b6f,general:0x9b6f47,temple:0xe0d8c0,market:0x8b6f47,house:data.color||pick([0xb59b7a,0xa08060,0xc4a882,0x8a7050,0x9b8060])};
+  const color = palette[data.type] || 0x8b7355;
+  const wallMat = new THREE.MeshLambertMaterial({color});
+  const body = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), wallMat);
+  body.position.y=h/2; body.castShadow = body.receiveShadow = true; g.add(body);
+
+  if (data.type !== 'castle') {
+    const roofMat = new THREE.MeshLambertMaterial({color:pick([0x8b0000,0x654321,0x4a2511,0x5a3a1a,0x6a4a2a])});
+    const roof = new THREE.Mesh(new THREE.BoxGeometry(w+0.5,0.5,d+0.5), roofMat);
+    roof.position.y=h+0.25; roof.castShadow=true; g.add(roof);
+    // Techo a dos aguas
+    const roofTop = new THREE.Mesh(new THREE.ConeGeometry(Math.max(w,d)*0.6, 2.5, 4), roofMat);
+    roofTop.position.y=h+1.75; roofTop.rotation.y=Math.PI/4; roofTop.castShadow=true; g.add(roofTop);
+  } else {
+    for (const dx of [-w/2+3, w/2-3]) {
+      for (const dz of [-d/2+3, d/2-3]) {
+        const t = new THREE.Mesh(new THREE.CylinderGeometry(3,3,h+8,8),wallMat);
+        t.position.set(dx,(h+8)/2,dz);t.castShadow=true;g.add(t);
+        const r = new THREE.Mesh(new THREE.ConeGeometry(3.5,5,8),new THREE.MeshLambertMaterial({color:0x8b0000}));
+        r.position.set(dx,h+10.5,dz);g.add(r);
+      }
+    }
+  }
+
+  const doorMat = new THREE.MeshLambertMaterial({color:0x3a2510});
+  const door = new THREE.Mesh(new THREE.BoxGeometry(1.8,3,0.2),doorMat);
+  door.position.set(0,1.5,d/2+0.11); g.add(door);
+  
+  // Ventanas
+  if (data.type !== 'castle') {
+    const winMat = new THREE.MeshLambertMaterial({color:0x4a5a7a, emissive:0xffd98a, emissiveIntensity:0.2});
+    const winCount = Math.floor(w/3);
+    for (let i=0; i<winCount; i++) {
+      const win = new THREE.Mesh(new THREE.PlaneGeometry(0.8,1.2),winMat);
+      win.position.set(-w/2+1.5+i*3, h*0.5, d/2+0.02); g.add(win);
+    }
+  }
+  
+  // CARTEL grande con nombre del edificio
+  if (data.type !== 'house') {
+    const ico = data.npc?.ico || '🏠';
+    const sign = makeSignSprite(ico+' '+name, 18, '#fff', '#3a2510');
+    sign.position.set(0, h+1, d/2+0.6);
+    sign.scale.set(3.5, 0.9, 1);
+    g.add(sign);
+    if (data.owner) {
+      const ownerS = makeSprite('👑 '+data.owner, 13, '#ffd700');
+      ownerS.position.set(0, h+2.3, d/2+0.6);
+      g.add(ownerS);
+    }
+  } else {
+    // Casas con cartel pequeño
+    const sign = makeSignSprite('🏠 '+name, 14, '#fff', '#6b4423');
+    sign.position.set(0, h+0.3, d/2+0.4);
+    sign.scale.set(2.2, 0.6, 1);
+    g.add(sign);
+  }
+
+  g.position.set(x,0,z);
+  g.userData = { id, name, ...data };
+  worldGroup.add(g);
+  buildings.push({mesh:g, doorX:x, doorZ:z+d/2+1.8, x, z, w, d, h, name, type:data.type, owner:data.owner, npc:data.npc, shop:data.shop, collider:{minX:x-w/2, maxX:x+w/2, minZ:z-d/2, maxZ:z+d/2}});
+  if (data.type !== 'house') {
+    createInterior({mesh:g,x,z,w:Math.min(w,20),d:Math.min(d,20),h,name,type:data.type,owner:data.owner,npc:data.npc,shop:data.shop});
+  }
+}
+
+function createInterior(b) {
+  const g = new THREE.Group();
+  const W = 20, D = 20, H = 6;
+  const floorMat = new THREE.MeshLambertMaterial({color: b.type==='castle'?0x5a5048 : b.type==='tavern'?0x6b4423 : 0x8b6f47});
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(W,D), floorMat);
+  floor.rotation.x=-Math.PI/2; floor.position.y=0; floor.receiveShadow=true; g.add(floor);
+  const wallMat = new THREE.MeshLambertMaterial({color: b.type==='castle'?0x8a8078:0xc4a882, side:THREE.DoubleSide});
+  [
+    {pos:[0,H/2,-D/2], rot:[0,0,0]},
+    {pos:[0,H/2,D/2], rot:[0,Math.PI,0]},
+    {pos:[-W/2,H/2,0], rot:[0,Math.PI/2,0]},
+    {pos:[W/2,H/2,0], rot:[0,-Math.PI/2,0]}
+  ].forEach(w => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w.pos[0]===0?W:D,H), wallMat);
+    m.position.set(...w.pos); m.rotation.set(...w.rot); g.add(m);
+  });
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(W,D), new THREE.MeshLambertMaterial({color:0x6a5a48,side:THREE.DoubleSide}));
+  ceil.rotation.x=Math.PI/2; ceil.position.y=H; g.add(ceil);
+  const pL = new THREE.PointLight(0xffd98a, 1.3, 22);
+  pL.position.set(0,H-1,0); g.add(pL);
+  const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.3,8,6), new THREE.MeshLambertMaterial({color:0xffffaa,emissive:0xffd98a,emissiveIntensity:1.5}));
+  lamp.position.set(0,H-1,0); g.add(lamp);
+  
+  if (b.type === 'shop') {
+    const counter = new THREE.Mesh(new THREE.BoxGeometry(8,1,1.5), new THREE.MeshLambertMaterial({color:0x6b4423}));
+    counter.position.set(0,0.5,-6); g.add(counter);
+    for (let i=0; i<3; i++) {
+      const shelf = new THREE.Mesh(new THREE.BoxGeometry(0.3,4,5), new THREE.MeshLambertMaterial({color:0x5a3a1a}));
+      shelf.position.set(-8+i*8,2,5); g.add(shelf);
+    }
+  } else if (b.type === 'tavern') {
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(10,1.2,1.5), new THREE.MeshLambertMaterial({color:0x6b4423}));
+    bar.position.set(0,0.6,-7); g.add(bar);
+    for (const [x,z] of [[-5,3],[5,3],[-5,-3],[5,-3]]) {
+      const t = new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.8,0.8,10), new THREE.MeshLambertMaterial({color:0x8b6f47}));
+      t.position.set(x,0.4,z); g.add(t);
+    }
+  } else if (b.type === 'guild') {
+    const board = new THREE.Mesh(new THREE.BoxGeometry(3,2.5,0.2), new THREE.MeshLambertMaterial({color:0x6b4423}));
+    board.position.set(-7,2.5,0); g.add(board);
+  } else if (b.type === 'castle') {
+    const throne = new THREE.Mesh(new THREE.BoxGeometry(2,3,1.5), new THREE.MeshLambertMaterial({color:0xffd700}));
+    throne.position.set(0,1.5,-7); g.add(throne);
+  }
+  
+  const exit = new THREE.Mesh(new THREE.PlaneGeometry(2,3), new THREE.MeshBasicMaterial({color:0xb58cff,transparent:true,opacity:0.3,side:THREE.DoubleSide}));
+  exit.position.set(0,1.5,8); exit.rotation.y=Math.PI; exit.userData={isExit:true}; g.add(exit);
+  g.visible = false;
+  interiorGroup.add(g);
+  b.interior = g;
+}
+
+function buildForest() {
+  const treeMat = new THREE.MeshLambertMaterial({color:0x1f6b2a});
+  const trunkMat = new THREE.MeshLambertMaterial({color:0x6b4a2b});
+  for (let i=0; i<300; i++) {
+    const angle = Math.random()*Math.PI*2;
+    const dist = WALL + 25 + Math.random()*80;
+    const x = Math.cos(angle)*dist, z = Math.sin(angle)*dist;
+    const tree = new THREE.Group();
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.4,3,6),trunkMat);
+    trunk.position.y=1.5;trunk.castShadow=true;tree.add(trunk);
+    const leaves = new THREE.Mesh(new THREE.ConeGeometry(1.8+Math.random(),4+Math.random()*2,7),treeMat);
+    leaves.position.y=5;leaves.castShadow=true;tree.add(leaves);
+    tree.position.set(x,0,z);
+    worldGroup.add(tree);
+  }
+}
+
+function spawnNPCs() {
+  const citizenRoles = [
+    {name:'Ciudadano',ico:'👨',role:'citizen'},{name:'Ciudadana',ico:'👩',role:'citizen'},
+    {name:'Campesino',ico:'👨‍🌾',role:'peasant'},{name:'Niño',ico:'👦',role:'child'},
+    {name:'Guardia',ico:'💂',role:'guard'},{name:'Noble',ico:'🤴',role:'noble'},
+    {name:'Dama',ico:'👸',role:'noble'},{name:'Mago Errante',ico:'🧙',role:'mage'},
+    {name:'Bardo',ico:'🎵',role:'bard'},{name:'Monje',ico:'🧘',role:'monk'},
+    {name:'Enano',ico:'🧔',role:'dwarf'},{name:'Elfo',ico:'🧝',role:'elf'},
+    {name:'Cazador',ico:'🏹',role:'hunter'}
+  ];
+  for (let i=0;i<60;i++) {
+    const r = pick(citizenRoles);
+    const x = (Math.random()-0.5) * WALL*1.8;
+    const z = (Math.random()-0.5) * WALL*1.8;
+    spawnNPC(r.name+' '+(i+1), r.ico, r.role, x, z, {
+      homeX:x, homeZ:z, speed: 1.3 + Math.random()*1.3,
+      gold: Math.floor(5 + Math.random()*50),
+      likes: pick(['el vino','la cerveza','el pan','las manzanas','los gatos','la música','la lluvia','los libros','la aventura','la magia']),
+      dialog: pick([
+        '¡Saludos, Monarca!','¿Has oído de las Puertas de Mazmorra?','El gremio paga bien.',
+        'La taberna tiene la mejor cerveza.','Cuidado fuera de las murallas.','El rey busca héroes.',
+        'Dicen que un Monarca puede extraer sombras de los muertos...','¿Eres un Cazador?',
+        'Thorin vende los mejores arcos.','Martha tiene pociones curativas.',
+        'Vi una Puerta Rango S...','Ve al mercado, está lleno hoy.'
+      ])
+    });
+  }
+}
+
+function spawnNPC(name, ico, role, x, z, data={}) {
+  const group = new THREE.Group();
+  const color = role==='guard'?0x1a3a7a : role==='noble'?0x8b008b : role==='mage'?0x4a2a8a : role==='dwarf'?0x8b5a2b : role==='elf'?0x90EE90 : pick([0x8b6f47,0x5a5a5a,0x6b4423,0x4a3520,0x9b6f47,0xb59b7a,0x7a5a3a]);
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.45,1.3,10), new THREE.MeshLambertMaterial({color}));
+  body.position.y=0.85;body.castShadow=true; group.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.28,10,10), new THREE.MeshLambertMaterial({color:0xFFDBAC}));
+  head.position.y=1.75; group.add(head);
+  const icoS = makeSprite(ico, 26); icoS.position.y=2.2; group.add(icoS);
+  const nmS = makeSprite(name, 14, '#ffd700'); nmS.position.y=2.5; group.add(nmS);
+  group.position.set(x,0,z); worldGroup.add(group);
+  npcs.push({mesh:group, name, ico, role, homeX:x, homeZ:z, speed:data.speed||2, state:'idle', stateT:Math.random()*3, targetX:x, targetZ:z, gold:data.gold||10, likes:data.likes||'cerveza', dialog:data.dialog||'Saludos.'});
+}
+
+function spawnEnemies() {
+  const types = [
+    {name:'Lobo',ico:'🐺',color:0x696969,hp:35,dmg:7,xp:18,gold:6,speed:4,size:1,count:10,shadowChance:0.3},
+    {name:'Goblin',ico:'👺',color:0x556B2F,hp:45,dmg:9,xp:22,gold:12,speed:3,size:1,count:12,shadowChance:0.35},
+    {name:'Orco',ico:'👹',color:0x3a5a2f,hp:90,dmg:18,xp:55,gold:30,speed:2.5,size:1.3,count:5,shadowChance:0.5},
+    {name:'Esqueleto',ico:'💀',color:0xd0d0d0,hp:30,dmg:8,xp:20,gold:10,speed:2.8,size:1,count:8,shadowChance:0.7},
+    {name:'Bandido',ico:'🗡️',color:0x3a2a1a,hp:65,dmg:14,xp:38,gold:35,speed:3.5,size:1,count:6,shadowChance:0.6},
+    {name:'Troll',ico:'🧌',color:0x5a6a3a,hp:180,dmg:28,xp:120,gold:70,speed:2,size:1.6,count:3,shadowChance:0.7},
+    {name:'Araña',ico:'🕷️',color:0x1a1a1a,hp:50,dmg:11,xp:28,gold:15,speed:3.5,size:1.2,count:6,shadowChance:0.4},
+    {name:'Slime',ico:'🟢',color:0x4caf50,hp:25,dmg:5,xp:14,gold:5,speed:2,size:0.8,count:10,shadowChance:0.2}
+  ];
+  types.forEach(t => {
+    for (let i=0;i<t.count;i++) {
+      const angle = Math.random()*Math.PI*2;
+      const dist = WALL + 35 + Math.random()*80;
+      spawnEnemy(t, Math.cos(angle)*dist, Math.sin(angle)*dist);
+    }
+  });
+}
+
+function spawnEnemy(type,x,z) {
+  const group = new THREE.Group();
+  const s = type.size;
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4*s,0.5*s,1.4*s,10), new THREE.MeshLambertMaterial({color:type.color}));
+  body.position.y=0.7*s;body.castShadow=true; group.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.3*s,10,10), new THREE.MeshLambertMaterial({color:type.color}));
+  head.position.y=1.7*s; group.add(head);
+  const icoS = makeSprite(type.ico, 30); icoS.position.y=2.3*s; group.add(icoS);
+  const hpS = makeSprite(`${type.name} Nv.${Math.ceil(type.hp/20)}`, 13, '#ff6b6b'); hpS.position.y=2.6*s; group.add(hpS);
+  group.position.set(x,0,z); worldGroup.add(group);
+  enemies.push({mesh:group, type, hp:type.hp, hpMax:type.hp, dmg:type.dmg, xp:type.xp, gold:type.gold, speed:type.speed, state:'idle', stateT:Math.random()*3, targetX:x, targetZ:z, homeX:x, homeZ:z, aggro:false, aggroRange:18, attackRange:2.5, attackCd:0, shadowChance:type.shadowChance||0.3});
+}
+
+function createPlayer() {
+  const g = new THREE.Group();
+  const clsColor = {archer:0x2e7d32,shielder:0xffd700,mage:0x4a2a8a,slime:0x4caf50,necro:0x2a1a3a,knight:0xb58cff}[player.cls] || 0x8b6f47;
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.5,1.4,12), new THREE.MeshLambertMaterial({color:clsColor}));
+  body.position.y=0.7;body.castShadow=true; g.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.3,12,12), new THREE.MeshLambertMaterial({color:0xFFDBAC}));
+  head.position.y=1.75;head.castShadow=true; g.add(head);
+  const cape = new THREE.Mesh(new THREE.BoxGeometry(0.9,1.2,0.1), new THREE.MeshLambertMaterial({color:clsColor}));
+  cape.position.set(0,1.1,0.3); g.add(cape);
+  // Arco visual si es arquero
+  if (player.cls === 'archer') {
+    const bow = new THREE.Mesh(new THREE.TorusGeometry(0.35,0.04,6,10,Math.PI), new THREE.MeshLambertMaterial({color:0x6b4423}));
+    bow.rotation.y=Math.PI/2; bow.rotation.z=Math.PI/2; bow.position.set(0.45,1.2,-0.1); g.add(bow);
+  }
+  return g;
+}
+
+function makeSprite(text, fontSize, color='#FFFFFF') {
+  const c = document.createElement('canvas');
+  const ctx = c.getContext('2d');
+  c.width = 256; c.height = 64;
+  ctx.font = `bold ${fontSize}px Arial`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(0,0,0,0.75)';
+  ctx.fillRect(0,0,c.width,c.height);
+  ctx.fillStyle = color;
+  ctx.fillText(text, c.width/2, c.height/2);
+  const tex = new THREE.CanvasTexture(c);
+  const mat = new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false});
+  const s = new THREE.Sprite(mat);
+  s.scale.set(2.5,0.6,1);
+  return s;
+}
+
+function makeSignSprite(text, fontSize, textColor, bgColor) {
+  const c = document.createElement('canvas');
+  const ctx = c.getContext('2d');
+  c.width = 512; c.height = 128;
+  ctx.fillStyle = bgColor || '#3a2510';
+  ctx.fillRect(0,0,c.width,c.height);
+  ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 5;
+  ctx.strokeRect(3,3,c.width-6,c.height-6);
+  ctx.font = `bold ${fontSize}px Arial`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = textColor || '#fff';
+  ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
+  ctx.fillText(text, c.width/2, c.height/2);
+  const tex = new THREE.CanvasTexture(c);
+  const mat = new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false});
+  const s = new THREE.Sprite(mat);
+  s.scale.set(4,1,1);
+  return s;
+}
+
+// ===== CONTROLES CON POINTER LOCK =====
+function setupControls() {
+  addEventListener('keydown', e => {
+    keys[e.code] = true;
+    if (e.code === 'Space') e.preventDefault();
+    if (e.code === 'KeyE') tryInteract();
+    if (e.code === 'KeyI') toggleInventory('inv');
+    if (e.code === 'KeyK') toggleInventory('skills');
+    if (e.code === 'KeyJ') toggleInventory('shadows');
+    if (e.code === 'KeyC') toggleInventory('craft');
+    if (e.code === 'KeyF') togglePet();
+    if (e.code === 'Escape') {
+      if (invOpen) toggleInventory();
+      else if (dialogOpen) closeDialog();
+    }
+    if (e.code === 'Digit1') useSkill(0);
+    if (e.code === 'Digit2') useSkill(1);
+    if (e.code === 'Digit3') useSkill(2);
+    if (e.code === 'Digit4') useSkill(3);
+    if (e.code === 'Digit5') tryArise(); // ARISE slot
+    if (e.code === 'KeyQ') usePotion();
+  });
+  addEventListener('keyup', e => { keys[e.code]=false; });
+
+  // Click en el canvas: captura mouse si no está capturado
+  renderer.domElement.addEventListener('click', () => {
+    if (!isPointerLocked && !dialogOpen && !invOpen) {
+      renderer.domElement.requestPointerLock();
+    }
+  });
+
+  document.addEventListener('pointerlockchange', () => {
+    isPointerLocked = (document.pointerLockElement === renderer.domElement);
+    const msg = document.getElementById('pointerLockMsg');
+    if (isPointerLocked) {
+      msg.classList.remove('show');
+      document.body.style.cursor = 'none';
+    } else if (gameStarted && !dialogOpen && !invOpen) {
+      msg.classList.add('show');
+      document.body.style.cursor = 'default';
+      setTimeout(()=>msg.classList.remove('show'), 3000);
+    }
+  });
+
+  // Movimiento del mouse
+  document.addEventListener('mousemove', e => {
+    if (!isPointerLocked) return;
+    cameraYaw -= e.movementX * 0.0025;
+    cameraPitch = Math.max(-0.4, Math.min(1.3, cameraPitch - e.movementY * 0.0025));
+  });
+
+  // Botones del mouse
+  renderer.domElement.addEventListener('mousedown', e => {
+    if (!isPointerLocked) return;
+    if (e.button === 0) useSkill(0); // disparar/atacar
+    if (e.button === 2) { isAiming = true; document.getElementById('crosshair').classList.add('aiming'); cameraDist = 5; }
+  });
+  renderer.domElement.addEventListener('mouseup', e => {
+    if (e.button === 2) { isAiming = false; document.getElementById('crosshair').classList.remove('aiming'); cameraDist = 9; }
+  });
+  renderer.domElement.addEventListener('contextmenu', e=>e.preventDefault());
+
+  addEventListener('wheel', e => {
+    cameraDist = Math.max(3, Math.min(20, cameraDist + e.deltaY * 0.01));
+  }, {passive:true});
+
+  addEventListener('resize', () => {
+    camera.aspect = innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+  });
+}
+
+// ===== SISTEMA DE SKILLS =====
+function useSkill(slotIdx) {
+  if (!playerGroup || dialogOpen || invOpen) return;
+  if (playerInInterior && slotIdx > 0) return; // solo ataque básico en interiores
+  
+  const skillId = player.equippedSkills[slotIdx];
+  if (!skillId) { toast('❌ Slot vacío','combat'); return; }
+  
+  const skill = player.clsData.skills.find(s=>s.id===skillId);
+  if (!skill) return;
+  
+  const now = performance.now();
+  if (skill.cooldownEnd && now < skill.cooldownEnd) {
+    const r = ((skill.cooldownEnd - now)/1000).toFixed(1);
+    toast(`⏱️ ${skill.name}: ${r}s`,'combat');
+    return;
+  }
+  if (player.mp < skill.mp) { toast('💧 Sin maná','combat'); return; }
+  if (!player.unlockedSkills.includes(skill.id)) { toast(`🔒 Nivel ${skill.unlock}`,'combat'); return; }
+  
+  player.mp -= skill.mp;
+  skill.cooldownEnd = now + skill.cd * 1000;
+  
+  if (skill.type === 'projectile') shootProjectile(skill);
+  else if (skill.type === 'melee') meleeAttack(skill);
+  else if (skill.type === 'aoe') aoeAttack(skill);
+  else if (skill.type === 'buff') applyBuff(skill);
+  else if (skill.type === 'heal') healSkill(skill);
+  else if (skill.type === 'chain') chainAttack(skill);
+  else if (skill.type === 'pull') pullAttack(skill);
+  else if (skill.type === 'devour') devourAttack(skill);
+  else if (skill.type === 'beam') beamAttack(skill);
+  else if (skill.type === 'debuff') applyDebuff(skill);
+  else if (skill.type === 'summon_pet') summonPetSkill();
+  else if (skill.type === 'summon_temp') summonTemp(skill);
+  
+  updateHotbar();
+}
+
+function shootProjectile(skill) {
+  if (player.arrows <= 0 && (skill.id === 'shot' || skill.id === 'piercing' || skill.id === 'multi')) {
+    toast('🏹 ¡Sin flechas! Compra en Herrería','combat');
+    return;
+  }
+  if (skill.id === 'shot' || skill.id === 'piercing') { player.arrows--; player.shots++; }
+  
+  const g = new THREE.Group();
+  const color = skill.element==='fire'?0xff6600 : skill.element==='ice'?0x88ccff : skill.element==='dark'?0xb58cff : skill.id==='piercing'?0xff00ff : 0x6b4423;
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.2,6), new THREE.MeshLambertMaterial({color,emissive:color,emissiveIntensity:0.6}));
+  shaft.rotation.x=Math.PI/2; g.add(shaft);
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(0.1,0.3,6), new THREE.MeshLambertMaterial({color:0xffffff,emissive:color,emissiveIntensity:1}));
+  tip.rotation.x=-Math.PI/2; tip.position.z=-0.75; g.add(tip);
+  const light = new THREE.PointLight(color, 1.2, 6); g.add(light);
+  
+  g.position.set(playerGroup.position.x, playerGroup.position.y+1.5, playerGroup.position.z);
+  const dir = new THREE.Vector3();
+  camera.getWorldDirection(dir);
+  g.lookAt(playerGroup.position.x+dir.x*10, playerGroup.position.y+1.5+dir.y*10, playerGroup.position.z+dir.z*10);
+  worldGroup.add(g);
+  
+  const weapon = player.equipment.weapon;
+  const baseDmg = weapon?.stats?.dmg || 5;
+  const bonus = Math.floor(player.dex*0.8 + player.int*0.3);
+  const dmg = Math.floor((baseDmg + bonus) * skill.dmgMul);
+  
+  projectiles.push({mesh:g, vx:dir.x*55, vy:dir.y*55, vz:dir.z*55, life:2.5, dmg, range:50, traveled:0, piercing:skill.piercing, element:skill.element, hitIds:new Set()});
+  if (skill.id === 'multi') {
+    // 6 flechas en abanico
+    for (let i=1; i<6; i++) {
+      const spread = (i - 2.5) * 0.12;
+      const dx = Math.cos(cameraYaw + spread) * 55;
+      const dz = Math.sin(cameraYaw + spread) * 55;
+      const p = new THREE.Mesh(new THREE.SphereGeometry(0.12,6,4), new THREE.MeshBasicMaterial({color:0xffaa00}));
+      p.position.copy(g.position);
+      worldGroup.add(p);
+      projectiles.push({mesh:p, vx:-dx, vy:0, vz:-dz, life:2, dmg:Math.floor(dmg*0.6), range:40, traveled:0, hitIds:new Set()});
+    }
+  }
+  toast(`🎯 ${skill.name}`,'skill');
+}
+
+function meleeAttack(skill) {
+  const weapon = player.equipment.weapon;
+  const baseDmg = weapon?.stats?.dmg || 5;
+  const bonus = Math.floor(player.str*1.0 + player.dex*0.3);
+  let dmg = Math.floor((baseDmg + bonus) * skill.dmgMul);
+  
+  const berserkMul = getBuffMultiplier('berserk');
+  const avatarMul = getBuffMultiplier('avatar');
+  dmg = Math.floor(dmg * berserkMul * avatarMul);
+  
+  const targets = inDungeon ? dungeonEnemies : enemies;
+  let hit = false;
+  targets.forEach(e => {
+    if (e.dead) return;
+    const d = Math.hypot(e.mesh.position.x-playerGroup.position.x, e.mesh.position.z-playerGroup.position.z);
+    if (d < 4) {
+      const crit = Math.random() < 0.2;
+      const finalDmg = crit ? dmg*2 : dmg;
+      e.hp -= finalDmg;
+      player.hits++;
+      showDamageNum(finalDmg, e.mesh.position, crit?'#ffd700':'#ffaa44', crit);
+      spawnParticles(e.mesh.position, 0xff6b6b, 10);
+      if (e.hp <= 0) { if (inDungeon) killDungeonEnemy(e); else killEnemy(e); }
+      hit = true;
+    }
+  });
+  if (hit) toast(`⚔️ ${skill.name}`,'skill');
+}
+
+function aoeAttack(skill) {
+  const weapon = player.equipment.weapon;
+  const baseDmg = weapon?.stats?.dmg || 5;
+  const bonus = Math.floor((player.str+player.int)*0.7);
+  const dmg = Math.floor((baseDmg + bonus) * skill.dmgMul);
+  const count = skill.count || 8;
+  for (let i=0; i<count; i++) {
+    const angle = (i/count) * Math.PI * 2;
+    const vx = Math.cos(angle) * 40, vz = Math.sin(angle) * 40;
+    const p = new THREE.Mesh(new THREE.SphereGeometry(0.22,8,6), new THREE.MeshBasicMaterial({color:0xff6600}));
+    p.position.set(playerGroup.position.x, playerGroup.position.y+1.5, playerGroup.position.z);
+    worldGroup.add(p);
+    projectiles.push({mesh:p, vx, vy:0, vz, life:1.5, dmg:Math.floor(dmg/count*2), range:30, traveled:0, hitIds:new Set()});
+  }
+  spawnParticles(playerGroup.position, 0xff6600, 30);
+  toast(`💥 ${skill.name}`,'skill');
+}
+
+function chainAttack(skill) {
+  const targets = (inDungeon ? dungeonEnemies : enemies).filter(e=>!e.dead);
+  if (targets.length === 0) { toast('❌ Sin enemigos','combat'); return; }
+  const weapon = player.equipment.weapon;
+  const dmg = Math.floor((weapon?.stats?.dmg || 5 + player.int) * skill.dmgMul);
+  let current = targets[Math.floor(Math.random()*targets.length)];
+  const chained = [];
+  for (let i=0; i<skill.chains && current; i++) {
+    current.hp -= Math.floor(dmg * (1 - i*0.15));
+    showDamageNum(Math.floor(dmg * (1 - i*0.15)), current.mesh.position, '#ffdd00');
+    spawnParticles(current.mesh.position, 0xffdd00, 8);
+    if (current.hp <= 0) { if (inDungeon) killDungeonEnemy(current); else killEnemy(current); }
+    chained.push(current);
+    let next = null, minD = Infinity;
+    targets.forEach(e => {
+      if (e.dead || chained.includes(e)) return;
+      const d = Math.hypot(e.mesh.position.x-current.mesh.position.x, e.mesh.position.z-current.mesh.position.z);
+      if (d < minD && d < 15) { minD = d; next = e; }
+    });
+    current = next;
+  }
+  toast(`⚡ ${skill.name}`,'skill');
+}
+
+function pullAttack(skill) {
+  // Mano del Monarca: atrae enemigos cercanos
+  const weapon = player.equipment.weapon;
+  const dmg = Math.floor((weapon?.stats?.dmg || 5 + player.dex*0.8) * skill.dmgMul);
+  const targets = inDungeon ? dungeonEnemies : enemies;
+  targets.forEach(e => {
+    if (e.dead) return;
+    const dx = playerGroup.position.x - e.mesh.position.x;
+    const dz = playerGroup.position.z - e.mesh.position.z;
+    const d = Math.hypot(dx,dz);
+    if (d < 15 && d > 3) {
+      e.mesh.position.x += (dx/d) * 5;
+      e.mesh.position.z += (dz/d) * 5;
+      e.hp -= dmg;
+      showDamageNum(dmg, e.mesh.position, '#b58cff');
+      if (e.hp <= 0) { if (inDungeon) killDungeonEnemy(e); else killEnemy(e); }
+    }
+  });
+  spawnParticles(playerGroup.position, 0xb58cff, 20);
+  toast(`✋ ${skill.name}`,'skill');
+}
+
+function devourAttack(skill) {
+  // Depredador estilo Slime Isekai - mata instantáneamente enemigos débiles
+  const targets = (inDungeon ? dungeonEnemies : enemies).filter(e=>!e.dead);
+  const target = targets.find(e => {
+    const d = Math.hypot(e.mesh.position.x-playerGroup.position.x, e.mesh.position.z-playerGroup.position.z);
+    return d < 5;
+  });
+  if (!target) { toast('❌ Sin enemigos cerca','combat'); return; }
+  if (target.hpMax < player.hpMax * 0.5) {
+    // Devorar
+    target.hp = 0;
+    player.hp = Math.min(player.hpMax, player.hp + Math.floor(target.hpMax*0.3));
+    if (inDungeon) killDungeonEnemy(target); else killEnemy(target);
+    toast(`🌀 ¡DEVORADO! +HP`,'arise');
+    spawnParticles(playerGroup.position, 0x4caf50, 25);
+  } else {
+    const dmg = Math.floor((player.str+player.int)*skill.dmgMul);
+    target.hp -= dmg;
+    showDamageNum(dmg, target.mesh.position, '#4caf50');
+    if (target.hp <= 0) { if (inDungeon) killDungeonEnemy(target); else killEnemy(target); }
+    toast(`🌀 ${skill.name}`,'skill');
+  }
+}
+
+function beamAttack(skill) {
+  // Megiddo - rayo concentrado desde el cielo
+  const weapon = player.equipment.weapon;
+  const dmg = Math.floor((weapon?.stats?.dmg || 5 + player.int) * skill.dmgMul);
+  // Rayo desde el cielo sobre el jugador
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 2, 50, 8), new THREE.MeshBasicMaterial({color:0xffdd00, transparent:true, opacity:0.7}));
+  beam.position.set(playerGroup.position.x, 25, playerGroup.position.z);
+  worldGroup.add(beam);
+  setTimeout(()=>worldGroup.remove(beam), 500);
+  
+  const targets = inDungeon ? dungeonEnemies : enemies;
+  targets.forEach(e => {
+    if (e.dead) return;
+    const d = Math.hypot(e.mesh.position.x-playerGroup.position.x, e.mesh.position.z-playerGroup.position.z);
+    if (d < 8) {
+      e.hp -= dmg;
+      showDamageNum(dmg, e.mesh.position, '#ffdd00', true);
+      if (e.hp <= 0) { if (inDungeon) killDungeonEnemy(e); else killEnemy(e); }
+    }
+  });
+  spawnParticles(playerGroup.position, 0xffdd00, 40);
+  toast(`☀️ ${skill.name}`,'skill');
+}
+
+function applyBuff(skill) {
+  const buff = {id: skill.buffType, name: skill.name, ico: skill.ico, duration: skill.duration, endTime: performance.now() + skill.duration*1000};
+  player.buffs = (player.buffs||[]).filter(b=>b.id !== buff.id);
+  player.buffs.push(buff);
+  if (skill.buffType === 'regen') {
+    buff.interval = setInterval(()=>{
+      if (!player) {clearInterval(buff.interval);return}
+      player.hp = Math.min(player.hpMax, player.hp + Math.floor(player.hpMax*0.05));
+    }, 1000);
+  }
+  toast(`✨ ${skill.name}`,'skill');
+  updateBuffsUI();
+}
+
+function applyDebuff(skill) {
+  const targets = (inDungeon ? dungeonEnemies : enemies).filter(e=>!e.dead);
+  let hit = 0;
+  targets.forEach(e => {
+    const d = Math.hypot(e.mesh.position.x-playerGroup.position.x, e.mesh.position.z-playerGroup.position.z);
+    if (d < 10) {
+      e.cursed = true; e.cursedEnd = performance.now() + skill.duration*1000;
+      e.cursedMul = 1.5; // toma 50% más daño
+      spawnParticles(e.mesh.position, 0xb58cff, 10);
+      hit++;
+    }
+  });
+  if (hit > 0) toast(`☠️ ${hit} malditos`,'skill');
+  else toast('❌ Sin enemigos','combat');
+}
+
+function healSkill(skill) {
+  const heal = Math.floor((player.int * 2 + 20) * skill.healMul);
+  player.hp = Math.min(player.hpMax, player.hp + heal);
+  spawnParticles(playerGroup.position, 0x00ff88, 15);
+  toast(`💚 +${heal} HP`,'skill');
+}
+
+function summonPetSkill() {
+  if (pet) { toast('🐢 Ya tienes mascota','combat'); return; }
+  // Invocar tortuga tanque estilo Bofuri
+  const petGroup = new THREE.Group();
+  const shell = new THREE.Mesh(new THREE.SphereGeometry(1.2, 12, 8, 0, Math.PI*2, 0, Math.PI/2), new THREE.MeshLambertMaterial({color:0x4a7a3a}));
+  shell.scale.y = 0.7; shell.position.y = 0.6; shell.castShadow=true; petGroup.add(shell);
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(1, 1.1, 0.5, 10), new THREE.MeshLambertMaterial({color:0x5a9a4a}));
+  body.position.y = 0.3; petGroup.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 10, 8), new THREE.MeshLambertMaterial({color:0x6aaa5a}));
+  head.position.set(0, 0.5, 1.1); petGroup.add(head);
+  const nameS = makeSprite('🐢 Tortuga Tanque', 14, '#4cc9f0');
+  nameS.position.y = 2; petGroup.add(nameS);
+  
+  petGroup.position.copy(playerGroup.position);
+  petGroup.position.x += 2;
+  worldGroup.add(petGroup);
+  
+  pet = {mesh:petGroup, type:'turtle', hp:200, hpMax:200, dmg:25, speed:5, attackCd:0};
+  player.petActive = true;
+  player.petType = 'turtle';
+  toast(`🐢 ¡Tortuga Tanque invocada! (Bofuri style)`,'skill');
+}
+
+function summonTemp(skill) {
+  // Levantar muerto temporal
+  const targets = (inDungeon ? dungeonEnemies : enemies).filter(e=>e.dead);
+  if (targets.length === 0) { toast('❌ Sin cadáveres','combat'); return; }
+  const corpse = targets[0];
+  // Resucitar como aliado
+  const sumG = corpse.mesh.clone();
+  sumG.traverse(c => {
+    if (c.material) {
+      const mat = c.material.clone();
+      mat.color = new THREE.Color(0xb58cff);
+      mat.emissive = new THREE.Color(0xb58cff);
+      mat.emissiveIntensity = 0.3;
+      c.material = mat;
+    }
+  });
+  sumG.position.copy(corpse.mesh.position);
+  worldGroup.add(sumG);
+  const sum = {mesh:sumG, endTime:performance.now()+skill.duration*1000, attackCd:0, dmg:Math.floor(player.int*0.8+15), speed:5, type:'temp_summon'};
+  summons.push(sum);
+  toast(`⬆️ ¡Esqueleto invocado ${skill.duration}s!`,'skill');
+}
+
+let summons = [];
+let activeBuffs = [];
+
+function updateSummons(dt) {
+  for (let i=summons.length-1; i>=0; i--) {
+    const s = summons[i];
+    s.attackCd = Math.max(0, s.attackCd - dt);
+    if (performance.now() > s.endTime) {
+      worldGroup.remove(s.mesh);
+      summons.splice(i,1);
+      continue;
+    }
+    const targets = inDungeon ? dungeonEnemies : enemies;
+    let nearest = null, minD = 20;
+    targets.forEach(e => {
+      if (e.dead) return;
+      const d = Math.hypot(e.mesh.position.x-s.mesh.position.x, e.mesh.position.z-s.mesh.position.z);
+      if (d < minD) { minD = d; nearest = e; }
+    });
+    if (nearest) {
+      const dx = nearest.mesh.position.x - s.mesh.position.x;
+      const dz = nearest.mesh.position.z - s.mesh.position.z;
+      const d = Math.hypot(dx,dz);
+      if (d > 1.5) {
+        s.mesh.position.x += (dx/d) * s.speed * dt;
+        s.mesh.position.z += (dz/d) * s.speed * dt;
+        s.mesh.rotation.y = Math.atan2(dx,dz);
+      } else if (s.attackCd <= 0) {
+        nearest.hp -= s.dmg;
+        showDamageNum(s.dmg, nearest.mesh.position, '#b58cff');
+        s.attackCd = 1.0;
+        if (nearest.hp <= 0) { if (inDungeon) killDungeonEnemy(nearest); else killEnemy(nearest); }
+      }
+    }
+  }
+  // Sombras del ejército
+  shadowArmy.forEach(sh => {
+    sh.attackCd = Math.max(0, sh.attackCd - dt);
+    // Seguir al jugador (a cierta distancia)
+    const dx = playerGroup.position.x - sh.mesh.position.x;
+    const dz = playerGroup.position.z - sh.mesh.position.z;
+    const d = Math.hypot(dx,dz);
+    if (d > 4) {
+      sh.mesh.position.x += (dx/d) * 4 * dt;
+      sh.mesh.position.z += (dz/d) * 4 * dt;
+    }
+    // Buscar enemigos cercanos
+    const targets = inDungeon ? dungeonEnemies : enemies;
+    let nearest = null, minD = 10;
+    targets.forEach(e => {
+      if (e.dead) return;
+      const dd = Math.hypot(e.mesh.position.x-sh.mesh.position.x, e.mesh.position.z-sh.mesh.position.z);
+      if (dd < minD) { minD = dd; nearest = e; }
+    });
+    if (nearest && sh.attackCd <= 0) {
+      if (minD < 2) {
+        nearest.hp -= sh.dmg;
+        showDamageNum(sh.dmg, nearest.mesh.position, '#b58cff');
+        sh.attackCd = 1.2;
+        if (nearest.hp <= 0) { if (inDungeon) killDungeonEnemy(nearest); else killEnemy(nearest); }
+      } else {
+        sh.mesh.position.x += ((nearest.mesh.position.x-sh.mesh.position.x)/minD) * sh.speed * dt;
+        sh.mesh.position.z += ((nearest.mesh.position.z-sh.mesh.position.z)/minD) * sh.speed * dt;
+      }
+    }
+  });
+  // Mascota
+  if (pet) {
+    pet.attackCd = Math.max(0, pet.attackCd - dt);
+    const dx = playerGroup.position.x - pet.mesh.position.x;
+    const dz = playerGroup.position.z - pet.mesh.position.z;
+    const d = Math.hypot(dx,dz);
+    if (d > 3) {
+      pet.mesh.position.x += (dx/d) * pet.speed * dt;
+      pet.mesh.position.z += (dz/d) * pet.speed * dt;
+      pet.mesh.rotation.y = Math.atan2(dx,dz);
+    }
+    const targets = inDungeon ? dungeonEnemies : enemies;
+    let nearest = null, minD = 5;
+    targets.forEach(e => {
+      if (e.dead) return;
+      const dd = Math.hypot(e.mesh.position.x-pet.mesh.position.x, e.mesh.position.z-pet.mesh.position.z);
+      if (dd < minD) { minD = dd; nearest = e; }
+    });
+    if (nearest && pet.attackCd <= 0 && minD < 3) {
+      nearest.hp -= pet.dmg;
+      showDamageNum(pet.dmg, nearest.mesh.position, '#4cc9f0');
+      spawnParticles(nearest.mesh.position, 0x4cc9f0, 5);
+      pet.attackCd = 1.0;
+      if (nearest.hp <= 0) { if (inDungeon) killDungeonEnemy(nearest); else killEnemy(nearest); }
+    }
+  }
+}
+
+function usePotion() {
+  const potionIdx = player.inventory.findIndex(it=>it.type==='consumable' && it.heal && !it.equipped);
+  if (potionIdx < 0) { toast('🧪 Sin pociones','combat'); return; }
+  const pot = player.inventory[potionIdx];
+  player.hp = Math.min(player.hpMax, player.hp + (pot.heal||30));
+  toast(`🧪 +${pot.heal}HP`,'loot');
+  player.inventory.splice(potionIdx,1);
+  updateHotbar();
+}
+
+function togglePet() {
+  if (pet) {
+    // Guardar mascota
+    worldGroup.remove(pet.mesh);
+    pet = null;
+    player.petActive = false;
+    toast('🐢 Mascota guardada','quest');
+  } else if (player.petType === 'turtle') {
+    // Re-invocar
+    summonPetSkill();
+  } else {
+    toast('🐢 Sin mascota. Usa skill de invocación','quest');
+  }
+}
+
+function updateHotbar() {
+  for (let i=0; i<5; i++) {
+    const slot = document.getElementById('sk'+i);
+    const skillId = player.equippedSkills[i];
+    if (i === 4) {
+      // ARISE slot
+      const canArise = corpses.some(c => !c.extracted && c.worldPos && Math.hypot(c.worldPos.x-playerGroup.position.x, c.worldPos.z-playerGroup.position.z) < 4);
+      slot.innerHTML = `<span class="key">5</span><span class="ico">👻</span><span class="nm">ARISE</span>`;
+      slot.classList.toggle('arise', canArise);
+      continue;
+    }
+    if (!skillId) {
+      slot.innerHTML = `<span class="key">${i+1}</span><span class="ico">-</span><span class="nm">Vacío</span>`;
+      slot.classList.add('empty');
+      continue;
+    }
+    slot.classList.remove('empty');
+    const skill = player.clsData.skills.find(s=>s.id===skillId);
+    const locked = !player.unlockedSkills.includes(skillId);
+    slot.innerHTML = `<span class="key">${i+1}</span><span class="ico">${locked?'🔒':skill.ico}</span><span class="nm">${skill.name}</span>`;
+  }
+}
+
+function updateSkillCooldowns() {
+  const now = performance.now();
+  for (let i=0; i<5; i++) {
+    if (i === 4) continue;
+    const slot = document.getElementById('sk'+i);
+    const skillId = player.equippedSkills[i];
+    if (!skillId) continue;
+    const skill = player.clsData.skills.find(s=>s.id===skillId);
+    const cdEnd = skill.cooldownEnd || 0;
+    if (now < cdEnd) {
+      const remaining = ((cdEnd - now)/1000).toFixed(1);
+      slot.classList.add('on-cd');
+      let cdDiv = slot.querySelector('.skill-cd');
+      if (!cdDiv) { cdDiv = document.createElement('div'); cdDiv.className='skill-cd'; slot.appendChild(cdDiv); }
+      cdDiv.textContent = remaining;
+    } else {
+      slot.classList.remove('on-cd');
+      const cdDiv = slot.querySelector('.skill-cd');
+      if (cdDiv) cdDiv.remove();
+    }
+  }
+}
+
+function updateBuffs(dt) {
+  if (!player.buffs) player.buffs = [];
+  const now = performance.now();
+  for (let i=player.buffs.length-1; i>=0; i--) {
+    const b = player.buffs[i];
+    if (now > b.endTime) {
+      if (b.interval) clearInterval(b.interval);
+      player.buffs.splice(i,1);
+    }
+  }
+  updateBuffsUI();
+}
+
+function updateBuffsUI() {
+  const bar = document.getElementById('buffBar');
+  if (!player.buffs) return;
+  bar.innerHTML = player.buffs.map(b=>{
+    const remaining = Math.ceil((b.endTime - performance.now())/1000);
+    return `<div class="buff">${b.ico} ${b.name} (${remaining}s)</div>`;
+  }).join('');
+}
+
+function getBuffMultiplier(type) {
+  if (!player.buffs) return 1;
+  const has = player.buffs.some(b=>b.id===type);
+  if (type==='berserk') return has ? 1.5 : 1;
+  if (type==='avatar') return has ? 2.0 : 1;
+  if (type==='fortress') return has ? 0.3 : 1; // toma 70% menos daño
+  if (type==='mimic') return has ? 1.8 : 1;
+  if (type==='aura') return has ? 1.4 : 1;
+  return 1;
+}
+
+function updatePlayer(dt) {
+  if (!playerGroup) return;
+  const sprint = keys['ShiftLeft'] || keys['ShiftRight'];
+  const buffSpd = player.buffs?.some(b=>b.id==='avatar') ? 1.3 : 1;
+  const speed = sprint ? 13 : 6;
+  let mx = 0, mz = 0;
+  if (keys['KeyW']||keys['ArrowUp']) mz -= 1;
+  if (keys['KeyS']||keys['ArrowDown']) mz += 1;
+  if (keys['KeyA']||keys['ArrowLeft']) mx -= 1;
+  if (keys['KeyD']||keys['ArrowRight']) mx += 1;
+  
+  const moving = mx!==0 || mz!==0;
+  if (moving) {
+    const len = Math.hypot(mx,mz);
+    mx/=len; mz/=len;
+    const sin = Math.sin(cameraYaw), cos = Math.cos(cameraYaw);
+    const dx = (mx*cos - mz*sin) * speed * buffSpd * dt;
+    const dz = (mx*sin + mz*cos) * speed * buffSpd * dt;
+    const newX = playerGroup.position.x + dx;
+    const newZ = playerGroup.position.z + dz;
+    
+    if (playerInInterior) {
+      playerGroup.position.x = Math.max(-9, Math.min(9, newX));
+      playerGroup.position.z = Math.max(-9, Math.min(9, newZ));
+    } else if (inDungeon) {
+      // Colisión con paredes de mazmorra
+      if (checkDungeonCollision(newX, playerGroup.position.z)) {
+        // intentar solo en X
+        if (!checkDungeonCollision(newX, playerGroup.position.z)) playerGroup.position.x = newX;
+      } else {
+        playerGroup.position.x = newX;
+      }
+      if (!checkDungeonCollision(playerGroup.position.x, newZ)) playerGroup.position.z = newZ;
+    } else {
+      const nx = clampBuildings(newX, playerGroup.position.z, 0.5);
+      const nz = clampBuildings(playerGroup.position.x, newZ, 0.5);
+      playerGroup.position.x = Math.max(-LIMIT,Math.min(LIMIT,nx.x));
+      playerGroup.position.z = Math.max(-LIMIT,Math.min(LIMIT,nz.z));
+    }
+    playerGroup.rotation.y = cameraYaw;
+  }
+
+  if (keys['Space'] && onGround && !playerInInterior && !inDungeon) { vy = 8; onGround=false; }
+  if (!onGround && !playerInInterior && !inDungeon) {
+    playerGroup.position.y += vy * dt;
+    vy -= 22 * dt;
+    if (playerGroup.position.y <= 0) { playerGroup.position.y = 0; vy = 0; onGround = true; }
+  }
+
+  if (player.mp < player.mpMax) player.mp = Math.min(player.mpMax, player.mp + dt*3);
+}
+
+function checkDungeonCollision(x, z) {
+  if (!currentRoom) return false;
+  const walls = currentRoom.walls || [];
+  const r = 0.5;
+  for (const w of walls) {
+    if (x+r > w.minX && x-r < w.maxX && z+r > w.minZ && z-r < w.maxZ) return true;
+  }
+  return false;
+}
+
+function clampBuildings(x, z, r) {
+  for (const b of buildings) {
+    const c = b.collider;
+    if (!c) continue;
+    if (x+r > c.minX && x-r < c.maxX && z+r > c.minZ && z-r < c.maxZ) {
+      const dxL = (x+r) - c.minX, dxR = c.maxX - (x-r);
+      const dzT = (z+r) - c.minZ, dzB = c.maxZ - (z-r);
+      const m = Math.min(dxL,dxR,dzT,dzB);
+      if (m === dxL) x = c.minX - r;
+      else if (m === dxR) x = c.maxX + r;
+      else if (m === dzT) z = c.minZ - r;
+      else z = c.maxZ + r;
+    }
+  }
+  return {x,z};
+}
+
+function updateCamera(dt) {
+  if (!playerGroup) return;
+  const targetPos = playerGroup.position.clone();
+  targetPos.y += 1.6;
+  const ox = Math.sin(cameraYaw) * Math.cos(cameraPitch) * cameraDist;
+  const oy = Math.sin(cameraPitch) * cameraDist;
+  const oz = Math.cos(cameraYaw) * Math.cos(cameraPitch) * cameraDist;
+  const camTarget = new THREE.Vector3(targetPos.x + ox, targetPos.y + oy, targetPos.z + oz);
+  camera.position.lerp(camTarget, Math.min(1, 15*dt));
+  camera.lookAt(targetPos);
+}
+
+function updateNPCs(dt) {
+  npcs.forEach(npc => {
+    npc.stateT -= dt;
+    if (npc.stateT <= 0) {
+      if (Math.random() < 0.5) {
+        npc.state = 'wander';
+        npc.targetX = npc.homeX + (Math.random()-0.5)*30;
+        npc.targetZ = npc.homeZ + (Math.random()-0.5)*30;
+        npc.stateT = 3 + Math.random()*5;
+      } else {
+        npc.state = 'idle';
+        npc.stateT = 2 + Math.random()*3;
+      }
+    }
+    if (npc.state === 'wander') {
+      const dx = npc.targetX - npc.mesh.position.x;
+      const dz = npc.targetZ - npc.mesh.position.z;
+      const dist = Math.hypot(dx,dz);
+      if (dist > 0.5) {
+        const sp = npc.speed * dt;
+        const nx = npc.mesh.position.x + (dx/dist)*sp;
+        const nz = npc.mesh.position.z + (dz/dist)*sp;
+        const c = clampBuildings(nx, nz, 0.5);
+        npc.mesh.position.x = c.x; npc.mesh.position.z = c.z;
+        npc.mesh.rotation.y = Math.atan2(dx,dz);
+      } else npc.state = 'idle';
+    }
+  });
+}
+
+function updateEnemies(dt) {
+  if (!playerGroup) return;
+  const now = performance.now();
+  enemies.forEach(e => {
+    if (e.dead) return;
+    e.attackCd = Math.max(0, e.attackCd - dt);
+    if (e.cursedEnd && now > e.cursedEnd) e.cursed = false;
+    const dx = playerGroup.position.x - e.mesh.position.x;
+    const dz = playerGroup.position.z - e.mesh.position.z;
+    const dist = Math.hypot(dx,dz);
+    const outOfWalls = Math.abs(e.mesh.position.x)>WALL || Math.abs(e.mesh.position.z)>WALL;
+    if (dist < e.aggroRange && outOfWalls) e.aggro = true;
+    else if (dist > e.aggroRange*2) e.aggro = false;
+    
+    if (e.aggro) {
+      if (dist > e.attackRange) {
+        const sp = e.speed*dt;
+        e.mesh.position.x += (dx/dist)*sp;
+        e.mesh.position.z += (dz/dist)*sp;
+        e.mesh.rotation.y = Math.atan2(dx,dz);
+      } else if (e.attackCd <= 0) {
+        const dmg = e.dmg + Math.floor(Math.random()*4);
+        const armor = (player.equipment.armor?.stats?.def || 0) + (player.equipment.helmet?.stats?.def || 0) + (player.equipment.boots?.stats?.def || 0);
+        const fortressMul = getBuffMultiplier('fortress');
+        const finalDmg = Math.max(1, Math.floor((dmg - armor) * fortressMul));
+        player.hp -= finalDmg;
+        e.attackCd = 1.2;
+        showDamageNum(finalDmg, playerGroup.position, '#ff6b6b');
+        if (player.hp <= 0) playerDeath();
+      }
+    } else {
+      e.stateT -= dt;
+      if (e.stateT <= 0) {
+        e.targetX = e.homeX + (Math.random()-0.5)*20;
+        e.targetZ = e.homeZ + (Math.random()-0.5)*20;
+        e.stateT = 3 + Math.random()*4;
+      }
+      const tdx = e.targetX - e.mesh.position.x;
+      const tdz = e.targetZ - e.mesh.position.z;
+      const td = Math.hypot(tdx,tdz);
+      if (td > 1) {
+        e.mesh.position.x += (tdx/td) * e.speed*0.3 * dt;
+        e.mesh.position.z += (tdz/td) * e.speed*0.3 * dt;
+        e.mesh.rotation.y = Math.atan2(tdx,tdz);
+      }
+    }
+  });
+}
+
+function updateProjectiles(dt) {
+  for (let i=projectiles.length-1; i>=0; i--) {
+    const p = projectiles[i];
+    p.mesh.position.x += p.vx*dt;
+    p.mesh.position.y += p.vy*dt;
+    p.mesh.position.z += p.vz*dt;
+    p.vy -= 9*dt; p.life -= dt;
+    p.traveled += Math.hypot(p.vx,p.vy,p.vz)*dt;
+    
+    let hit = false;
+    const targets = inDungeon ? dungeonEnemies : enemies;
+    for (const e of targets) {
+      if (e.dead || p.hitIds.has(e)) continue;
+      const dx = p.mesh.position.x - e.mesh.position.x;
+      const dz = p.mesh.position.z - e.mesh.position.z;
+      const dy = p.mesh.position.y - (e.mesh.position.y + 1);
+      const d = Math.hypot(dx,dz,dy);
+      if (d < 1.3) {
+        const berserkMul = getBuffMultiplier('berserk');
+        const avatarMul = getBuffMultiplier('avatar');
+        const mimicMul = getBuffMultiplier('mimic');
+        const curseMul = e.cursed ? 1.5 : 1;
+        const crit = Math.random() < (player.dex/80);
+        let finalDmg = Math.floor(p.dmg * berserkMul * avatarMul * mimicMul * curseMul);
+        if (crit) finalDmg *= 2;
+        e.hp -= finalDmg;
+        player.hits++;
+        showDamageNum(finalDmg, e.mesh.position, crit?'#ffd700':'#ffaa44', crit);
+        const partColor = p.element==='fire'?0xff6600:p.element==='ice'?0x88ccff:p.element==='dark'?0xb58cff:0xff6b6b;
+        spawnParticles(e.mesh.position, partColor, 10);
+        if (e.hp <= 0) {
+          if (inDungeon) killDungeonEnemy(e);
+          else killEnemy(e);
+        }
+        p.hitIds.add(e);
+        if (!p.piercing) { hit = true; break; }
+      }
+    }
+    
+    if (hit || p.life <= 0 || p.mesh.position.y < 0 || p.traveled > p.range) {
+      worldGroup.remove(p.mesh);
+      projectiles.splice(i,1);
+    }
+  }
+}
+
+function killEnemy(e) {
+  e.dead = true;
+  e.deathTime = performance.now();
+  // Dejar cadáver para ARISE
+  corpses.push({mesh:e.mesh, type:e.type, worldPos:{x:e.mesh.position.x, z:e.mesh.position.z}, extracted:false, shadowChance:e.shadowChance||0.3, deathTime:e.deathTime});
+  // Efecto de muerte
+  spawnParticles(e.mesh.position, 0xff3030, 20);
+  player.kills++;
+  gainXP(e.xp);
+  const gold = e.gold + Math.floor(Math.random()*e.gold);
+  player.gold += gold;
+  player.moneyEarned += gold;
+  player.fame += Math.floor(e.xp/10);
+  toast(`☠️ ${e.type.name} +${e.xp}XP +${gold}💰`,'loot');
+  // Drop materiales
+  dropMaterials(e);
+  if (Math.random() < 0.3) dropLoot(e.mesh.position.x, e.mesh.position.z);
+  checkAchievements();
+  checkQuestProgress('kill', e.type.name);
+  // Respawn
+  setTimeout(() => {
+    const idx = corpses.findIndex(c => c.mesh === e.mesh);
+    if (idx>=0) {
+      worldGroup.remove(corpses[idx].mesh);
+      corpses.splice(idx,1);
+    }
+    const angle = Math.random()*Math.PI*2;
+    const dist = WALL + 35 + Math.random()*80;
+    spawnEnemy(e.type, Math.cos(angle)*dist, Math.sin(angle)*dist);
+  }, 20000);
+  updateHotbar();
+}
+
+function killDungeonEnemy(e) {
+  e.dead = true;
+  corpses.push({mesh:e.mesh, type:e.type, worldPos:{x:e.mesh.position.x, z:e.mesh.position.z}, extracted:false, shadowChance:e.shadowChance||0.5, deathTime:performance.now(), isDungeon:true});
+  spawnParticles(e.mesh.position, 0xff3030, 20);
+  player.kills++;
+  gainXP(e.xp);
+  const gold = Math.floor(10 + currentDungeonFloor*5 + Math.random()*30);
+  player.gold += gold;
+  toast(`☠️ ${e.typeName} +${e.xp}XP +${gold}💰`,'loot');
+  dropMaterials(e);
+  if (e.isBoss) {
+    toast(`👑 ¡JEFE DERROTADO!`,'dungeon');
+    player.fame += 100;
+    dropRareLoot(e.mesh.position.x, e.mesh.position.z);
+    player.dungeonCleared[currentDungeonRank] = (player.dungeonCleared[currentDungeonRank]||0)+1;
+    // Bonus de sombra de jefe garantizado
+    corpses[corpses.length-1].shadowChance = 1.0;
+    corpses[corpses.length-1].isBoss = true;
+  }
+  checkAchievements();
+  updateDungeonUI();
+  updateHotbar();
+}
+
+function dropMaterials(e) {
+  // Drops de materiales para crafting
+  const mats = ['herb','wood','iron','leather','crystal','gem'];
+  const chance = Math.random();
+  if (chance < 0.4) {
+    const mat = pick(mats.slice(0,3));
+    const qty = 1 + Math.floor(Math.random()*2);
+    player.materials[mat] = (player.materials[mat]||0) + qty;
+    toast(`📦 +${qty} ${mat}`,'loot');
+  }
+}
+
+function dropLoot(x,z) {
+  const loot = pick([
+    {id:'herb',name:'Hierba',ico:'🌿',type:'consumable',heal:25},
+    {id:'gem',name:'Gema',ico:'💎',type:'gem',value:30,rarity:'rare'},
+    {id:'potion',name:'Poción',ico:'🧪',type:'consumable',heal:50},
+    {id:'coin',name:'Oro',ico:'💰',type:'gold',value:20}
+  ]);
+  const g = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5), new THREE.MeshLambertMaterial({color:loot.rarity==='rare'?0xb58cff:0xffd700,emissive:0xffd700,emissiveIntensity:0.5}));
+  g.position.set(x, 0.5, z);
+  g.userData.loot = loot;
+  worldGroup.add(g);
+  lootDrops.push({mesh:g, life:60, loot});
+}
+
+function dropRareLoot(x,z) {
+  const loots = [
+    {id:'sword_rare',name:'Espada Real',ico:'⚔️',type:'weapon',slot:'weapon',rarity:'rare',stats:{dmg:35,range:5},price:800},
+    {id:'armor_rare',name:'Armadura Real',ico:'🛡️',type:'armor',slot:'armor',rarity:'rare',stats:{def:18},price:1000},
+    {id:'ring_rare',name:'Anillo Mágico',ico:'💍',type:'armor',slot:'ring',rarity:'rare',stats:{int:5},price:500}
+  ];
+  const loot = pick(loots);
+  const g = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6), new THREE.MeshLambertMaterial({color:0xb58cff,emissive:0xb58cff,emissiveIntensity:1}));
+  g.position.set(x, 0.5, z);
+  g.userData.loot = loot;
+  dungeonGroup.add(g);
+  dungeonTreasures.push({mesh:g, loot});
+}
+
+function updateLoot(dt) {
+  for (let i=lootDrops.length-1;i>=0;i--) {
+    const L = lootDrops[i];
+    L.life -= dt;
+    L.mesh.rotation.y += dt*2;
+    L.mesh.position.y = 0.5 + Math.sin(L.life*2)*0.2;
+    if (playerGroup) {
+      const d = Math.hypot(L.mesh.position.x-playerGroup.position.x, L.mesh.position.z-playerGroup.position.z);
+      if (d < 1.5) {
+        const l = L.loot;
+        if (l.type==='consumable') { player.hp = Math.min(player.hpMax, player.hp+l.heal); toast(`✨ ${l.name} +${l.heal}HP`,'loot'); }
+        else if (l.type==='gold') { player.gold += l.value; toast(`💰 +${l.value}`,'loot'); }
+        else { addItem(l); toast(`💎 ${l.name}`,'loot'); }
+        worldGroup.remove(L.mesh);
+        lootDrops.splice(i,1);
+        continue;
+      }
+    }
+    if (L.life <= 0) { worldGroup.remove(L.mesh); lootDrops.splice(i,1); }
+  }
+  // Limpiar cadáveres viejos (después de 30 segundos)
+  const now = performance.now();
+  for (let i=corpses.length-1; i>=0; i--) {
+    const c = corpses[i];
+    if (c.extracted || (c.deathTime && now - c.deathTime > 30000)) {
+      if (c.mesh.parent) c.mesh.parent.remove(c.mesh);
+      else worldGroup.remove(c.mesh);
+      corpses.splice(i,1);
+    }
+  }
+}
+
+function spawnParticles(pos, color, count) {
+  for (let i=0;i<count;i++) {
+    const p = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.1), new THREE.MeshBasicMaterial({color}));
+    p.position.copy(pos); p.position.y += 1;
+    worldGroup.add(p);
+    particles.push({mesh:p, vx:(Math.random()-0.5)*6, vy:Math.random()*5+2, vz:(Math.random()-0.5)*6, life:0.8});
+  }
+}
+
+function updateParticles(dt) {
+  for (let i=particles.length-1;i>=0;i--) {
+    const p = particles[i];
+    p.mesh.position.x += p.vx*dt;
+    p.mesh.position.y += p.vy*dt;
+    p.mesh.position.z += p.vz*dt;
+    p.vy -= 15*dt; p.life -= dt;
+    if (p.life<=0 || p.mesh.position.y<-1) { worldGroup.remove(p.mesh); particles.splice(i,1); }
+  }
+}
+
+function showDamageNum(dmg, pos, color, crit=false) {
+  const vec = pos.clone(); vec.y += 2.5;
+  vec.project(camera);
+  const x = (vec.x*0.5+0.5)*innerWidth;
+  const y = (-vec.y*0.5+0.5)*innerHeight;
+  const d = document.createElement('div');
+  d.className = 'dmg-num' + (crit?' crit':'');
+  d.style.left = x+'px'; d.style.top = y+'px';
+  d.style.color = color;
+  d.textContent = (crit?'¡CRÍT! ':'') + '-' + dmg;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),1200);
+}
+
+function playerDeath() {
+  document.getElementById('deathScreen').classList.add('show');
+  player.hp = 0;
+}
+
+window.respawn = function() {
+  document.getElementById('deathScreen').classList.remove('show');
+  player.hp = Math.floor(player.hpMax*0.5);
+  player.gold = Math.max(0, player.gold - 30);
+  player.fame = Math.max(0, player.fame - 5);
+  playerGroup.position.set(60, 0, 20);
+  if (inDungeon) exitDungeon();
+};
+
+function gainXP(amount) {
+  player.xp += amount;
+  while (player.xp >= player.xpNext) {
+    player.xp -= player.xpNext;
+    player.level++;
+    player.xpNext = Math.floor(player.xpNext * 1.35);
+    player.skillPoints += 2;
+    player.str += 1 + (player.cls==='knight'?1:0);
+    player.dex += 1 + (player.cls==='archer'?1:0);
+    player.int += 1 + (player.cls==='mage'||player.cls==='necro'?1:0);
+    player.con += 1 + (player.cls==='shielder'?1:0);
+    player.hpMax += 8 + player.con;
+    player.mpMax += 5 + Math.floor(player.int/2);
+    player.shadowCapacity += 1; // +1 capacidad de sombra por nivel (Solo Leveling)
+    player.shadowMax = player.shadowCapacity;
+    player.hp = player.hpMax;
+    player.mp = player.mpMax;
+    toast(`🎉 ¡NIVEL ${player.level}! +2 pts skill · +1 sombra`,'level');
+    player.clsData.skills.forEach(s=>{
+      if (s.unlock <= player.level && !player.unlockedSkills.includes(s.id)) {
+        player.unlockedSkills.push(s.id);
+        for (let i=0; i<5; i++) {
+          if (!player.equippedSkills[i]) { player.equippedSkills[i] = s.id; break; }
+        }
+        toast(`🆕 ¡Skill: ${s.name}!`,'skill');
+      }
+    });
+    updateHotbar();
+    checkAchievements();
+  }
+}
+
+// ===== SISTEMA ARISE (Solo Leveling) =====
+function tryArise() {
+  // Buscar cadáver cercano no extraído
+  const nearCorpse = corpses.find(c => 
+    !c.extracted && 
+    c.worldPos && 
+    Math.hypot(c.worldPos.x-playerGroup.position.x, c.worldPos.z-playerGroup.position.z) < 4
+  );
+  if (!nearCorpse) {
+    toast('👻 No hay cadáver cerca','combat');
+    return;
+  }
+  if (player.shadows.length >= player.shadowCapacity) {
+    toast(`👻 Ejército lleno (${player.shadows.length}/${player.shadowCapacity}). Sube de nivel.`,'combat');
+    return;
+  }
+  
+  // Animación ARISE
+  const overlay = document.getElementById('ariseOverlay');
+  overlay.classList.add('show');
+  setTimeout(()=>overlay.classList.remove('show'), 1500);
+  
+  // Intento de extracción
+  const chance = nearCorpse.shadowChance;
+  const success = Math.random() < chance;
+  
+  if (success) {
+    // Extraer sombra
+    nearCorpse.extracted = true;
+    
+    // Crear sombra visual (versión oscura del enemigo)
+    const shadowMesh = nearCorpse.mesh.clone();
+    shadowMesh.traverse(c => {
+      if (c.material) {
+        const mat = c.material.clone();
+        mat.color = new THREE.Color(0x1a0a2e);
+        mat.emissive = new THREE.Color(0xb58cff);
+        mat.emissiveIntensity = 0.4;
+        if (mat.transparent === undefined) mat.transparent = true;
+        mat.opacity = 0.85;
+        c.material = mat;
+      }
+    });
+    shadowMesh.position.copy(nearCorpse.mesh.position);
+    // Hacer más pequeño (estilo sombra)
+    shadowMesh.scale.set(0.9, 0.9, 0.9);
+    worldGroup.add(shadowMesh);
+    
+    // Partículas moradas
+    spawnParticles(nearCorpse.mesh.position, 0xb58cff, 30);
+    
+    const shadowData = {
+      mesh: shadowMesh,
+      name: nearCorpse.type.name + ' Sombrío',
+      ico: nearCorpse.type.ico,
+      type: nearCorpse.type.name,
+      hp: nearCorpse.type.hp,
+      hpMax: nearCorpse.type.hp,
+      dmg: Math.floor(nearCorpse.type.dmg * 0.8),
+      speed: nearCorpse.type.speed,
+      level: Math.ceil(nearCorpse.type.hp/20),
+      attackCd: 0,
+      isBoss: nearCorpse.isBoss
+    };
+    player.shadows.push(shadowData);
+    shadowArmy.push(shadowData);
+    
+    toast(`👻 ¡ARISE! ${shadowData.name} se une a tu ejército (${player.shadows.length}/${player.shadowCapacity})`,'arise');
+    checkAchievements();
+  } else {
+    // Falló
+    nearCorpse.extracted = true;
+    spawnParticles(nearCorpse.mesh.position, 0x666666, 15);
+    toast(`👻 ARISE falló (${Math.floor(chance*100)}%). Cadáver consumido.`,'combat');
+  }
+  
+  updateHotbar();
+}
+
+function tryInteract() {
+  if (dialogOpen || invOpen) return;
+  
+  // Check cadáver cercano para ARISE (también con E)
+  const nearCorpse = corpses.find(c => 
+    !c.extracted && 
+    c.worldPos && 
+    Math.hypot(c.worldPos.x-playerGroup.position.x, c.worldPos.z-playerGroup.position.z) < 3
+  );
+  if (nearCorpse) {
+    tryArise();
+    return;
+  }
+  
+  if (inDungeon) {
+    // Puerta al siguiente piso
+    const door = dungeonGroup.children.find(c => c.userData?.type === 'next_floor_door');
+    if (door) {
+      const d = Math.hypot(door.position.x-playerGroup.position.x, door.position.z-playerGroup.position.z);
+      if (d < 3 && currentDungeonFloor < 10) {
+        currentDungeonFloor++;
+        if (currentDungeonFloor > player.dungeonBestFloor) {
+          player.dungeonBestFloor = currentDungeonFloor;
+          checkAchievements();
+        }
+        generateDungeonFloor(currentDungeonFloor);
+        playerGroup.position.set(0, 0, 0);
+        toast(`⬆️ Piso ${currentDungeonFloor}`,'dungeon');
+        return;
+      }
+    }
+    // Tesoros
+    for (let i=dungeonTreasures.length-1; i>=0; i--) {
+      const t = dungeonTreasures[i];
+      const d = Math.hypot(t.mesh.position.x-playerGroup.position.x, t.mesh.position.z-playerGroup.position.z);
+      if (d < 2) {
+        if (t.loot) { 
+          if (t.loot.type === 'gold') player.gold += t.loot.value;
+          else addItem(t.loot);
+          toast(`💎 ${t.loot.name}`,'loot');
+        }
+        dungeonGroup.remove(t.mesh);
+        dungeonTreasures.splice(i,1);
+        return;
+      }
+    }
+    return;
+  }
+  
+  if (playerInInterior) {
+    const d = Math.hypot(playerGroup.position.x, playerGroup.position.z-8);
+    if (d < 2.5) { exitBuilding(); return; }
+    for (const npc of npcs) {
+      if (!npc.insideMesh) continue;
+      const d = Math.hypot(npc.insideMesh.position.x-playerGroup.position.x, npc.insideMesh.position.z-playerGroup.position.z);
+      if (d < 2.5) { openDialog(npc); return; }
+    }
+    return;
+  }
+
+  for (const b of buildings) {
+    if (!b.collider) continue;
+    const d = Math.hypot(b.doorX-playerGroup.position.x, b.doorZ-playerGroup.position.z);
+    if (d < 3) {
+      if (b.type === 'dungeon_gate') {
+        currentDungeonGate = b;
+        showDungeonEntrance();
+      } else if (b.type === 'market_stall') {
+        const mktNPC = {name:b.owner, ico:b.ico, role:'merchant', dialog:`¡Bienvenido a mi puesto de ${b.name}!`, likes:pick(['las manzanas','el pescado']), shop:'market_'+b.name.toLowerCase()};
+        openDialog(mktNPC);
+      } else if (b.type !== 'house') {
+        enterBuilding(b);
+      } else {
+        toast(`🏠 ${b.name} (privada)`,'quest');
+      }
+      return;
+    }
+  }
+  
+  for (const npc of npcs) {
+    if (npc.insideMesh) continue;
+    const d = Math.hypot(npc.mesh.position.x-playerGroup.position.x, npc.mesh.position.z-playerGroup.position.z);
+    if (d < 2.5) { openDialog(npc); return; }
+  }
+}
+
+window.showDungeonEntrance = function() {
+  if (!currentDungeonGate) return;
+  document.getElementById('dgGateTitle').textContent = `🏰 Puerta Rango ${currentDungeonGate.rank}`;
+  document.getElementById('dgGateDesc').textContent = `${currentDungeonGate.desc} (Nivel recomendado: ${currentDungeonGate.lvl}+)`;
+  document.getElementById('dungeonEntrance').classList.add('show');
+};
+window.closeDungeonEntrance = function() {
+  document.getElementById('dungeonEntrance').classList.remove('show');
+  currentDungeonGate = null;
+};
+document.getElementById('btnEnterDungeon').onclick = function() {
+  closeDungeonEntrance();
+  if (currentDungeonGate) {
+    if (player.level < currentDungeonGate.lvl) toast(`⚠️ Nivel recomendado: ${currentDungeonGate.lvl}`,'combat');
+    enterDungeon(currentDungeonGate.rank);
+  }
+};
+document.getElementById('btnCloseDungeon').onclick = window.closeDungeonEntrance;
+
+function enterDungeon(rank) {
+  inDungeon = true;
+  currentDungeonFloor = 1;
+  currentDungeonRank = rank;
+  worldGroup.visible = false;
+  interiorGroup.visible = false;
+  dungeonGroup.visible = true;
+  // Limpiar niebla y cielo para mazmorra
+  scene.background = new THREE.Color(0x0a0514);
+  scene.fog = new THREE.Fog(0x0a0514, 30, 150);
+  generateDungeonFloor(1);
+  playerGroup.position.set(0, 0, 0);
+  playerGroup.rotation.y = 0;
+  document.getElementById('dungeonUI').classList.add('show');
+  updateDungeonUI();
+  toast(`🏰 ¡Mazmorra Rango ${rank}!`,'dungeon');
+}
+
+function exitDungeon() {
+  inDungeon = false;
+  dungeonGroup.visible = false;
+  worldGroup.visible = true;
+  scene.background = new THREE.Color(0x87CEEB);
+  scene.fog = new THREE.Fog(0x87CEEB, 100, 400);
+  clearDungeon();
+  playerGroup.position.set(0, 0, WALL+8);
+  document.getElementById('dungeonUI').classList.remove('show');
+  toast('👋 Saliste de la mazmorra','dungeon');
+}
+
+// ===== MAZMORRA PROCEDURAL (múltiples salas conectadas) =====
+function generateDungeonFloor(lvl) {
+  clearDungeon();
+  dungeonRooms = [];
+  
+  const rankThemes = {
+    'E': [{name:'Criptas',color:0x3a3a4a,enemies:['Esqueleto','Slime']},{name:'Cuevas',color:0x4a3a2a,enemies:['Slime','Araña']}],
+    'D': [{name:'Bosque Oscuro',color:0x2a3a2a,enemies:['Lobo','Goblin']},{name:'Ruinas',color:0x4a4a3a,enemies:['Goblin','Esqueleto']}],
+    'C': [{name:'Cavernas',color:0x3a2a3a,enemies:['Orco','Troll']},{name:'Templo Maldito',color:0x4a3a4a,enemies:['Esqueleto','Bandido']}],
+    'B': [{name:'Inframundo',color:0x3a1a1a,enemies:['Troll','Demonio']},{name:'Volcán',color:0x4a2a1a,enemies:['Demonio','Orco']}],
+    'A': [{name:'Dimensión Oscura',color:0x2a1a3a,enemies:['Demonio','Dragon']},{name:'Abismo',color:0x1a0a2a,enemies:['Dragon','Troll']}],
+    'S': [{name:'Palacio del Rey Demonio',color:0x4a0a2a,enemies:['Dragon','Demonio']}],
+  };
+  const themes = rankThemes[currentDungeonRank] || rankThemes['E'];
+  const theme = pick(themes);
+  
+  // Generar 3-5 salas conectadas
+  const numRooms = 3 + Math.floor(lvl/3);
+  const maxRooms = Math.min(numRooms, 6);
+  
+  // Crear salas en posiciones relativas
+  const roomPositions = [
+    {x:0, z:0}, // sala inicial
+  ];
+  
+  // Direcciones posibles
+  const directions = [
+    {dx:1, dz:0}, {dx:-1, dz:0},
+    {dx:0, dz:1}, {dx:0, dz:-1}
+  ];
+  
+  for (let i=1; i<maxRooms; i++) {
+    const dir = pick(directions);
+    const lastRoom = roomPositions[roomPositions.length-1];
+    const newPos = {x: lastRoom.x + dir.dx * 40, z: lastRoom.z + dir.dz * 40};
+    // Evitar solapamiento
+    if (!roomPositions.some(r => Math.abs(r.x-newPos.x)<35 && Math.abs(r.z-newPos.z)<35)) {
+      roomPositions.push(newPos);
+    } else {
+      i--; // Reintentar
+    }
+  }
+  
+  // Crear cada sala
+  roomPositions.forEach((pos, idx) => {
+    const isBossRoom = idx === roomPositions.length - 1 && lvl === 10;
+    const isTreasureRoom = !isBossRoom && idx > 0 && Math.random() < 0.3;
+    const isSecretRoom = idx > 0 && Math.random() < 0.15;
+    createDungeonRoom(pos.x, pos.z, lvl, theme, isBossRoom, isTreasureRoom, isSecretRoom, idx);
+  });
+  
+  // Conectar salas con pasillos
+  for (let i=0; i<roomPositions.length-1; i++) {
+    createCorridor(roomPositions[i], roomPositions[i+1], theme);
+  }
+  
+  // Jugador empieza en la primera sala
+  playerGroup.position.set(roomPositions[0].x, 0, roomPositions[0].z + 5);
+  
+  // Sala actual
+  currentRoom = dungeonRooms[0];
+  
+  toast(`🏰 ${theme.name} · Piso ${lvl} · ${roomPositions.length} salas`,'dungeon');
+}
+
+function createDungeonRoom(x, z, lvl, theme, isBossRoom, isTreasureRoom, isSecretRoom, roomIdx) {
+  const roomSize = 30;
+  const wallH = 8;
+  const floorColor = isSecretRoom ? 0x4a2a5a : isBossRoom ? 0x3a0a0a : theme.color;
+  
+  // Suelo
+  const floor = new THREE.Mesh(
+    new THREE.PlaneGeometry(roomSize, roomSize),
+    new THREE.MeshLambertMaterial({color:floorColor})
+  );
+  floor.rotation.x = -Math.PI/2; floor.position.set(x, 0, z); floor.receiveShadow = true;
+  dungeonGroup.add(floor);
+  
+  // Paredes (4)
+  const wallMat = new THREE.MeshLambertMaterial({color:isSecretRoom?0x3a1a4a:0x5a5a6a});
+  const walls = [];
+  for (let i=0; i<4; i++) {
+    const wall = new THREE.Mesh(new THREE.PlaneGeometry(roomSize, wallH), wallMat);
+    wall.position.y = wallH/2;
+    if (i===0) { wall.position.set(x, wallH/2, z - roomSize/2); }
+    else if (i===1) { wall.position.set(x, wallH/2, z + roomSize/2); wall.rotation.y = Math.PI; }
+    else if (i===2) { wall.position.set(x - roomSize/2, wallH/2, z); wall.rotation.y = Math.PI/2; }
+    else { wall.position.set(x + roomSize/2, wallH/2, z); wall.rotation.y = -Math.PI/2; }
+    dungeonGroup.add(wall);
+    walls.push(wall);
+  }
+  
+  // Techo
+  const ceiling = new THREE.Mesh(
+    new THREE.PlaneGeometry(roomSize, roomSize),
+    new THREE.MeshLambertMaterial({color:0x1a1a2a, side:THREE.DoubleSide})
+  );
+  ceiling.rotation.x = Math.PI/2;
+  ceiling.position.set(x, wallH, z);
+  dungeonGroup.add(ceiling);
+  
+  // Luces ambiente
+  const ambient = new THREE.AmbientLight(isBossRoom?0x502020:isSecretRoom?0x402050:0x404050, 0.5);
+  dungeonGroup.add(ambient);
+  const pointLight = new THREE.PointLight(isBossRoom?0xff3030:isSecretRoom?0xb58cff:0xff6b9d, 1, 25);
+  pointLight.position.set(x, wallH-1, z);
+  dungeonGroup.add(pointLight);
+  
+  // Antorchas en esquinas
+  for (const cx of [-1, 1]) {
+    for (const cz of [-1, 1]) {
+      const torch = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 1, 6), new THREE.MeshLambertMaterial({color:0x6b4423}));
+      torch.position.set(x + cx*(roomSize/2-0.5), 3, z + cz*(roomSize/2-0.5));
+      dungeonGroup.add(torch);
+      const flame = new THREE.PointLight(0xff8800, 0.5, 6);
+      flame.position.set(x + cx*(roomSize/2-0.5), 3.5, z + cz*(roomSize/2-0.5));
+      dungeonGroup.add(flame);
+    }
+  }
+  
+  const room = {x, z, size:roomSize, walls:[], idx:roomIdx, isBossRoom, isTreasureRoom, isSecretRoom};
+  
+  // Colisiones para paredes
+  const r = roomSize/2;
+  room.walls = [
+    {minX:x-r, maxX:x+r, minZ:z-r-0.5, maxZ:z-r+0.5},
+    {minX:x-r, maxX:x+r, minZ:z+r-0.5, maxZ:z+r+0.5},
+    {minX:x-r-0.5, maxX:x-r+0.5, minZ:z-r, maxZ:z+r},
+    {minX:x+r-0.5, maxX:x+r+0.5, minZ:z-r, maxZ:z+r}
+  ];
+  
+  // Enemigos (no en sala de tesoro)
+  if (!isTreasureRoom) {
+    const enemyCount = isBossRoom ? 1 : Math.min(3 + Math.floor(lvl/2), 8);
+    for (let i=0; i<enemyCount; i++) {
+      const angle = (i/enemyCount) * Math.PI * 2;
+      const dist = 5 + Math.random()*6;
+      const ex = x + Math.cos(angle)*dist;
+      const ez = z + Math.sin(angle)*dist;
+      if (isBossRoom) {
+        spawnDungeonBoss(lvl, ex, ez);
+      } else {
+        spawnDungeonEnemy(lvl, ex, ez, theme.enemies);
+      }
+    }
+  }
+  
+  // Tesoros
+  if (isTreasureRoom) {
+    for (let i=0; i<3; i++) {
+      const tx = x + (Math.random()-0.5)*15;
+      const tz = z + (Math.random()-0.5)*15;
+      spawnDungeonTreasure(tx, tz, lvl);
+    }
+  } else if (!isBossRoom) {
+    const count = Math.floor(Math.random()*2);
+    for (let i=0; i<count; i++) {
+      const tx = x + (Math.random()-0.5)*15;
+      const tz = z + (Math.random()-0.5)*15;
+      spawnDungeonTreasure(tx, tz, lvl);
+    }
+  }
+  
+  // Puerta al siguiente piso (solo en sala del jefe, piso 10)
+  if (isBossRoom && lvl === 10) {
+    const door = new THREE.Mesh(
+      new THREE.BoxGeometry(3, 5, 0.3),
+      new THREE.MeshLambertMaterial({color:0xffd700, emissive:0xffd700, emissiveIntensity:0.8})
+    );
+    door.position.set(x, 2.5, z - roomSize/2 + 1);
+    door.userData = {type:'next_floor_door'};
+    dungeonGroup.add(door);
+    const doorSign = makeSprite('⬆️ SIGUIENTE PISO', 14, '#ffd700');
+    doorSign.position.set(x, 5.5, z - roomSize/2 + 1);
+    dungeonGroup.add(doorSign);
+  }
+  
+  dungeonRooms.push(room);
+}
+
+function createCorridor(from, to, theme) {
+  const dx = to.x - from.x;
+  const dz = to.z - from.z;
+  const length = Math.hypot(dx, dz);
+  const corridorW = 4;
+  const corridorH = 5;
+  const midX = (from.x + to.x) / 2;
+  const midZ = (from.z + to.z) / 2;
+  
+  // Suelo del pasillo
+  const floorMat = new THREE.MeshLambertMaterial({color:theme.color});
+  if (Math.abs(dx) > Math.abs(dz)) {
+    // Horizontal
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(length, corridorW), floorMat);
+    floor.rotation.x = -Math.PI/2;
+    floor.position.set(midX, 0.01, midZ);
+    dungeonGroup.add(floor);
+    // Paredes laterales
+    const wallMat = new THREE.MeshLambertMaterial({color:0x5a5a6a});
+    const wall1 = new THREE.Mesh(new THREE.PlaneGeometry(length, corridorH), wallMat);
+    wall1.position.set(midX, corridorH/2, midZ - corridorW/2);
+    dungeonGroup.add(wall1);
+    const wall2 = new THREE.Mesh(new THREE.PlaneGeometry(length, corridorH), wallMat);
+    wall2.position.set(midX, corridorH/2, midZ + corridorW/2);
+    wall2.rotation.y = Math.PI;
+    dungeonGroup.add(wall2);
+  } else {
+    // Vertical
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(corridorW, length), floorMat);
+    floor.rotation.x = -Math.PI/2;
+    floor.position.set(midX, 0.01, midZ);
+    dungeonGroup.add(floor);
+    const wallMat = new THREE.MeshLambertMaterial({color:0x5a5a6a});
+    const wall1 = new THREE.Mesh(new THREE.PlaneGeometry(length, corridorH), wallMat);
+    wall1.rotation.y = Math.PI/2;
+    wall1.position.set(midX - corridorW/2, corridorH/2, midZ);
+    dungeonGroup.add(wall1);
+    const wall2 = new THREE.Mesh(new THREE.PlaneGeometry(length, corridorH), wallMat);
+    wall2.rotation.y = -Math.PI/2;
+    wall2.position.set(midX + corridorW/2, corridorH/2, midZ);
+    dungeonGroup.add(wall2);
+  }
+}
+
+function spawnDungeonEnemy(lvl, x, z, enemyTypes) {
+  const typeName = pick(enemyTypes);
+  const baseStats = {
+    'Esqueleto': {hp:35, dmg:9, xp:22, color:0xd0d0d0, size:1, ico:'💀'},
+    'Slime': {hp:25, dmg:6, xp:14, color:0x4caf50, size:0.8, ico:'🟢'},
+    'Araña': {hp:40, dmg:11, xp:25, color:0x1a1a1a, size:0.9, ico:'🕷️'},
+    'Lobo': {hp:50, dmg:13, xp:32, color:0x696969, size:1, ico:'🐺'},
+    'Goblin': {hp:55, dmg:15, xp:38, color:0x556B2F, size:0.9, ico:'👺'},
+    'Orco': {hp:90, dmg:20, xp:55, color:0x3a5a2f, size:1.3, ico:'👹'},
+    'Troll': {hp:140, dmg:28, xp:85, color:0x5a6a3a, size:1.5, ico:'🧌'},
+    'Bandido': {hp:70, dmg:16, xp:42, color:0x3a2a1a, size:1, ico:'🗡️'},
+    'Demonio': {hp:170, dmg:32, xp:110, color:0x8b0000, size:1.4, ico:'👿'},
+    'Dragon': {hp:280, dmg:45, xp:200, color:0xff4500, size:2, ico:'🐉'}
+  };
+  const stats = baseStats[typeName] || baseStats['Esqueleto'];
+  const rankMul = {'E':1,'D':1.3,'C':1.7,'B':2.2,'A':3,'S':4.5}[currentDungeonRank] || 1;
+  const lvlMul = rankMul + (lvl-1)*0.08;
+  
+  const group = new THREE.Group();
+  const s = stats.size;
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4*s,0.5*s,1.4*s,10), new THREE.MeshLambertMaterial({color:stats.color}));
+  body.position.y=0.7*s;body.castShadow=true; group.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.3*s,10,10), new THREE.MeshLambertMaterial({color:stats.color}));
+  head.position.y=1.7*s; group.add(head);
+  const hpS = makeSprite(`${typeName} Nv.${lvl+10}`, 13, '#ff6b6b');
+  hpS.position.y=2.3*s; group.add(hpS);
+  group.position.set(x,0,z);
+  dungeonGroup.add(group);
+  
+  dungeonEnemies.push({
+    mesh:group, typeName, type:stats,
+    hp:Math.floor(stats.hp * lvlMul), hpMax:Math.floor(stats.hp * lvlMul),
+    dmg:Math.floor(stats.dmg * lvlMul), xp:Math.floor(stats.xp * lvlMul),
+    speed:3, aggroRange:15, attackRange:2.5, attackCd:0,
+    shadowChance: 0.5 + (currentDungeonRank === 'S' ? 0.3 : 0)
+  });
+}
+
+function spawnDungeonBoss(lvl, x, z) {
+  const bossTypes = [
+    {name:'Señor Esqueleto', ico:'💀', color:0xe0e0e0, hp:450, dmg:32, xp:550, size:2.2},
+    {name:'Rey Araña', ico:'🕷️', color:0x1a1a1a, hp:600, dmg:40, xp:700, size:2.5},
+    {name:'Jefe Orco', ico:'👹', color:0x3a5a2f, hp:700, dmg:45, xp:800, size:2.7},
+    {name:'Archidemonio', ico:'👿', color:0x8b0000, hp:900, dmg:55, xp:1000, size:2.6},
+    {name:'Dragón Ancestral', ico:'🐉', color:0xff4500, hp:1300, dmg:75, xp:1700, size:3.2},
+    {name:'Rey Demonio', ico:'😈', color:0x4a0080, hp:2200, dmg:110, xp:3500, size:3.8}
+  ];
+  const rankIdx = {'E':0,'D':1,'C':2,'B':3,'A':4,'S':5}[currentDungeonRank] || 0;
+  const boss = bossTypes[rankIdx];
+  
+  const group = new THREE.Group();
+  const s = boss.size;
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5*s,0.6*s,1.6*s,10), new THREE.MeshLambertMaterial({color:boss.color,emissive:boss.color,emissiveIntensity:0.3}));
+  body.position.y=0.8*s;body.castShadow=true; group.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.4*s,10,10), new THREE.MeshLambertMaterial({color:boss.color}));
+  head.position.y=2*s; group.add(head);
+  const nameS = makeSprite(`👑 ${boss.name}`, 16, '#ffd700');
+  nameS.position.y=2.8*s; group.add(nameS);
+  group.position.set(x,0,z);
+  dungeonGroup.add(group);
+  
+  dungeonEnemies.push({
+    mesh:group, typeName:boss.name, type:{name:boss.name, ico:boss.ico},
+    hp:boss.hp, hpMax:boss.hp, dmg:boss.dmg, xp:boss.xp,
+    speed:2.5, aggroRange:25, attackRange:3, attackCd:0, isBoss:true,
+    shadowChance: 1.0
+  });
+  toast(`👑 ¡JEFE: ${boss.name}!`,'dungeon');
+}
+
+function spawnDungeonTreasure(x, z, lvl) {
+  const chest = new THREE.Mesh(new THREE.BoxGeometry(1, 0.8, 0.8), new THREE.MeshLambertMaterial({color:0xffd700,emissive:0xffa500,emissiveIntensity:0.5}));
+  chest.position.set(x, 0.4, z);
+  const gold = Math.floor(20 + lvl*8 + Math.random()*40);
+  dungeonGroup.add(chest);
+  dungeonTreasures.push({mesh:chest, loot:{name:`${gold} oros`,type:'gold',value:gold}});
+}
+
+function clearDungeon() {
+  while(dungeonGroup.children.length > 0) dungeonGroup.remove(dungeonGroup.children[0]);
+  dungeonEnemies = [];
+  dungeonTreasures = [];
+  dungeonRooms = [];
+  currentRoom = null;
+}
+
+function updateDungeonEnemies(dt) {
+  if (!playerGroup) return;
+  const now = performance.now();
+  for (const e of dungeonEnemies) {
+    if (e.dead) continue;
+    e.attackCd = Math.max(0, e.attackCd - dt);
+    if (e.cursedEnd && now > e.cursedEnd) e.cursed = false;
+    const dx = playerGroup.position.x - e.mesh.position.x;
+    const dz = playerGroup.position.z - e.mesh.position.z;
+    const dist = Math.hypot(dx,dz);
+    if (dist < e.aggroRange) {
+      if (dist > e.attackRange) {
+        const sp = e.speed*dt;
+        e.mesh.position.x += (dx/dist)*sp;
+        e.mesh.position.z += (dz/dist)*sp;
+        e.mesh.rotation.y = Math.atan2(dx,dz);
+      } else if (e.attackCd <= 0) {
+        const dmg = e.dmg + Math.floor(Math.random()*5);
+        const armor = (player.equipment.armor?.stats?.def || 0) + (player.equipment.helmet?.stats?.def || 0) + (player.equipment.boots?.stats?.def || 0);
+        const fortressMul = getBuffMultiplier('fortress');
+        const finalDmg = Math.max(1, Math.floor((dmg - armor) * fortressMul));
+        player.hp -= finalDmg;
+        e.attackCd = 1.5;
+        showDamageNum(finalDmg, playerGroup.position, '#ff6b6b');
+        if (player.hp <= 0) {
+          toast('💀 Has muerto en la mazmorra','combat');
+          exitDungeon();
+          playerDeath();
+        }
+      }
+    }
+  }
+}
+
+function updateDungeonUI() {
+  document.getElementById('dgFloor').textContent = currentDungeonFloor;
+  document.getElementById('dgRank').textContent = currentDungeonRank;
+  document.getElementById('dgInfo').textContent = `Enemigos: ${dungeonEnemies.filter(e=>!e.dead).length} · Tesoros: ${dungeonTreasures.length} · Salas: ${dungeonRooms.length}`;
+}
+
+function enterBuilding(b) {
+  playerInInterior = true;
+  activeInterior = b;
+  worldGroup.visible = false;
+  interiorGroup.visible = true;
+  b.interior.visible = true;
+  playerGroup.position.set(0, 0, 6);
+  playerGroup.rotation.y = Math.PI;
+  cameraDist = 8;
+  if (b.npc) {
+    const n = b.npc;
+    const inside = spawnNPC(n.name, n.ico, n.role, 0, -5, {shop:b.shop});
+    inside.insideMesh = inside.mesh;
+    b.insideNPC = inside;
+  }
+  toast(`🚪 ${b.name}`,'quest');
+}
+
+function exitBuilding() {
+  playerInInterior = false;
+  if (activeInterior) {
+    activeInterior.interior.visible = false;
+    if (activeInterior.insideNPC) {
+      worldGroup.remove(activeInterior.insideNPC.mesh);
+      const idx = npcs.indexOf(activeInterior.insideNPC);
+      if (idx>=0) npcs.splice(idx,1);
+      activeInterior.insideNPC = null;
+    }
+  }
+  worldGroup.visible = true;
+  interiorGroup.visible = false;
+  if (activeInterior) {
+    playerGroup.position.set(activeInterior.doorX, 0, activeInterior.doorZ + 1);
+    playerGroup.rotation.y = 0;
+  }
+  cameraDist = 9;
+  activeInterior = null;
+}
+
+// ===== DIÁLOGOS =====
+window.openDialog = function(npc) {
+  dialogOpen = true;
+  const box = document.getElementById('dialogBox');
+  let choices = '';
+  if (npc.role === 'guildmaster') {
+    if (!player.isAdventurer) choices += `<div class="dlg-opt" onclick="joinGuild()">⚔️ Unirme al Gremio de Cazadores</div>`;
+    else choices += `<div class="dlg-opt" onclick="showQuestBoard()">📋 Ver misiones</div><div class="dlg-opt" onclick="showHunterRank()">🏅 Mi rango</div>`;
+  } else if (npc.role === 'king') {
+    choices += `<div class="dlg-opt" onclick="royalQuest()">👑 Misión Real (nv10+)</div>`;
+  } else if (npc.shop) {
+    choices += `<div class="dlg-opt" onclick="openShop('${npc.shop}')">🛒 Tienda</div>`;
+    choices += `<div class="dlg-opt" onclick="sellItems()">💰 Vender</div>`;
+  } else if (npc.role === 'tavernkeeper') {
+    choices += `<div class="dlg-opt" onclick="buyDrink()">🍺 Cerveza (5💰, +25HP)</div>`;
+    choices += `<div class="dlg-opt" onclick="buyMeal()">🍖 Comida (15💰, buff 60s)</div>`;
+    choices += `<div class="dlg-opt" onclick="restAtTavern()">🛏️ Dormir (25💰)</div>`;
+    choices += `<div class="dlg-opt" onclick="hearRumors()">👂 Rumores</div>`;
+  } else if (npc.role === 'priest') {
+    choices += `<div class="dlg-opt" onclick="heal()">✨ Curación (10💰)</div>`;
+    choices += `<div class="dlg-opt" onclick="blessing()">🙏 Bendición (40💰)</div>`;
+  } else {
+    choices += `<div class="dlg-opt" onclick="npcChat('${npc.name}','${npc.dialog.replace(/'/g,"\\'")}')">💬 Hablar</div>`;
+  }
+  choices += `<div class="dlg-opt" onclick="closeDialog()">👋 Adiós</div>`;
+  box.innerHTML = `<div class="dlg-nm">${npc.ico} ${npc.name}</div><div class="dlg-ttl">${npc.role} · Le gusta ${npc.likes}</div><div class="dlg-txt">${npc.dialog}</div><div class="dlg-ch">${choices}</div>`;
+  box.classList.add('show');
+  window._curNPC = npc;
+};
+window.closeDialog = function() {
+  dialogOpen = false;
+  document.getElementById('dialogBox').classList.remove('show');
+};
+window.npcChat = function(name, text) {
+  toast(`💬 ${name}: ${text}`,'quest');
+  closeDialog();
+  player.fame += 1;
+};
+window.joinGuild = function() {
+  player.isAdventurer = true;
+  player.hunterRank = 'E';
+  player.guildRank = 'Cazador Rango E';
+  toast('⚔️ ¡Cazador! Rango E','level');
+  unlockAch('first_adventurer','Primer Cazador');
+  closeDialog();
+};
+window.showHunterRank = function() {
+  toast(`🏅 ${player.hunterRank} · Completadas: ${Object.values(player.dungeonCleared).reduce((a,b)=>a+b,0)}`,'quest');
+  closeDialog();
+};
+window.showQuestBoard = function() {
+  closeDialog();
+  const quests = [
+    {id:'q_wolves',name:'Caza de Lobos',desc:'Mata 5 lobos',type:'kill',target:'Lobo',goal:5,xp:100,gold:50,fame:10,rank:'E'},
+    {id:'q_goblins',name:'Plaga de Goblins',desc:'8 goblins',type:'kill',target:'Goblin',goal:8,xp:200,gold:100,fame:20,rank:'E'},
+    {id:'q_orcs',name:'Amenaza Orca',desc:'3 orcos',type:'kill',target:'Orco',goal:3,xp:400,gold:250,fame:50,rank:'D'},
+    {id:'q_troll',name:'El Troll',desc:'1 troll',type:'kill',target:'Troll',goal:1,xp:600,gold:500,fame:100,rank:'C'}
+  ];
+  const box = document.getElementById('dialogBox');
+  const opts = quests.filter(q=>!player.quests.find(x=>x.id===q.id)).map(q=>`<div class="dlg-opt" onclick="acceptQuest('${q.id}')">📜 ${q.name} <small>[${q.rank}] ${q.desc} · ${q.xp}XP ${q.gold}💰</small></div>`).join('');
+  box.innerHTML = `<div class="dlg-nm">📋 Tablón</div><div class="dlg-ttl">${player.hunterRank} · ${player.quests.length} activas</div><div class="dlg-ch">${opts||'<div class="dlg-opt">Sin misiones</div>'}<div class="dlg-opt" onclick="closeDialog()">❌</div></div>`;
+  box.classList.add('show');
+  dialogOpen = true;
+  window._availQuests = quests;
+};
+window.acceptQuest = function(id) {
+  const q = window._availQuests.find(x=>x.id===id);
+  if (!q) return;
+  player.quests.push({...q, progress:0});
+  toast(`📜 ${q.name}`,'quest');
+  closeDialog();
+};
+function checkQuestProgress(type, target) {
+  player.quests.forEach(q => {
+    if (q.completed) return;
+    if (q.type === type && q.target === target) {
+      q.progress++;
+      if (q.progress >= q.goal) {
+        q.completed = true;
+        gainXP(q.xp);
+        player.gold += q.gold;
+        player.fame += q.fame;
+        player.questsDone++;
+        toast(`🏆 ¡${q.name}! +${q.xp}XP +${q.gold}💰`,'level');
+        unlockAch('first_quest','Primera Misión');
+        if (player.questsDone >= 3 && player.hunterRank==='E') { player.hunterRank='D'; player.guildRank='Cazador Rango D'; toast('⭐ Rango D','level'); }
+        if (player.questsDone >= 8 && player.hunterRank==='D') { player.hunterRank='C'; player.guildRank='Cazador Rango C'; toast('⭐ Rango C','level'); }
+      }
+    }
+  });
+}
+
+const SHOPS = {
+  weapons: [
+    {id:'woodbow',name:'Arco Madera',ico:'🏹',type:'weapon',slot:'weapon',rarity:'common',stats:{dmg:10,range:25},price:40},
+    {id:'shortbow',name:'Arco Corto',ico:'🏹',type:'weapon',slot:'weapon',rarity:'uncommon',stats:{dmg:18,range:30},price:130},
+    {id:'longbow',name:'Arco Largo',ico:'🏹',type:'weapon',slot:'weapon',rarity:'rare',stats:{dmg:30,range:40},price:400},
+    {id:'elfbow',name:'Arco Élfico',ico:'🏹',type:'weapon',slot:'weapon',rarity:'legend',stats:{dmg:50,range:50},price:1200},
+    {id:'sword1',name:'Espada',ico:'⚔️',type:'weapon',slot:'weapon',rarity:'common',stats:{dmg:12,range:3},price:70},
+    {id:'staff1',name:'Bastón',ico:'🪄',type:'weapon',slot:'weapon',rarity:'common',stats:{dmg:8,range:20},price:80},
+    {id:'arrows20',name:'Flechas x20',ico:'🏹',type:'arrows',qty:20,price:18},
+    {id:'arrows50',name:'Flechas x50',ico:'🏹',type:'arrows',qty:50,price:40}
+  ],
+  armor: [
+    {id:'a1',name:'Armadura Cuero',ico:'🦺',type:'armor',slot:'armor',rarity:'common',stats:{def:4},price:70},
+    {id:'a2',name:'Cota Malla',ico:'🦺',type:'armor',slot:'armor',rarity:'uncommon',stats:{def:10},price:280},
+    {id:'a3',name:'Placas',ico:'🛡️',type:'armor',slot:'armor',rarity:'rare',stats:{def:20},price:850},
+    {id:'h1',name:'Casco',ico:'🪖',type:'armor',slot:'helmet',rarity:'common',stats:{def:2},price:45},
+    {id:'b1',name:'Botas',ico:'👢',type:'armor',slot:'boots',rarity:'common',stats:{def:1},price:55},
+    {id:'r1',name:'Anillo Fuerza',ico:'💍',type:'armor',slot:'ring',rarity:'uncommon',stats:{str:3},price:180}
+  ],
+  potions: [
+    {id:'p1',name:'Poción Vida',ico:'🧪',type:'consumable',heal:60,price:28},
+    {id:'p2',name:'Poción Grande',ico:'🧪',type:'consumable',heal:180,price:85},
+    {id:'p3',name:'Poción Maná',ico:'💧',type:'consumable',heal:0,mana:60,price:32},
+    {id:'p4',name:'Elixir',ico:'⚗️',type:'consumable',heal:500,price:320}
+  ],
+  general: [
+    {id:'arrows100',name:'Flechas x100',ico:'🏹',type:'arrows',qty:100,price:75},
+    {id:'food',name:'Ración',ico:'🍖',type:'consumable',heal:30,price:10},
+    {id:'gem',name:'Gema',ico:'💎',type:'gem',rarity:'rare',price:110,value:75}
+  ]
+};
+window.openShop = function(shopId) {
+  const items = SHOPS[shopId] || [];
+  const box = document.getElementById('dialogBox');
+  const opts = items.map(it=>{
+    const rar = it.rarity==='legend'?' · LEGEND':it.rarity==='rare'?' · Raro':it.rarity==='uncommon'?' · Poco común':'';
+    const statStr = it.stats ? Object.entries(it.stats).map(([k,v])=>`+${v}${k}`).join(' '):'';
+    return `<div class="dlg-opt" onclick="buyItem('${shopId}','${it.id}')">${it.ico} <b>${it.name}</b>${rar} — ${it.price}💰<small>${statStr}</small></div>`;
+  }).join('');
+  box.innerHTML = `<div class="dlg-nm">🛒 Tienda</div><div class="dlg-ttl">Oro: 💰${player.gold}</div><div class="dlg-ch">${opts}<div class="dlg-opt" onclick="closeDialog()">❌</div></div>`;
+  box.classList.add('show');
+};
+window.buyItem = function(shopId, itemId) {
+  const it = SHOPS[shopId].find(x=>x.id===itemId);
+  if (!it) return;
+  if (player.gold < it.price) { toast('💰 Sin oro','combat'); return; }
+  player.gold -= it.price;
+  if (it.type === 'arrows') { player.arrows += it.qty; toast(`🏹 +${it.qty}`,'loot'); }
+  else if (it.type === 'consumable') { addItem({...it}); toast(`✨ ${it.name}`,'loot'); }
+  else { addItem({...it}); toast(`✨ ${it.name}`,'loot'); }
+  closeDialog();
+};
+window.sellItems = function() {
+  closeDialog();
+  let total = 0;
+  for (let i=player.inventory.length-1;i>=0;i--) {
+    const it = player.inventory[i];
+    if (it.equipped) continue;
+    total += Math.floor((it.price||20)*0.5);
+    player.inventory.splice(i,1);
+  }
+  player.gold += total;
+  toast(`💰 Vendido: ${total}`,'loot');
+};
+window.buyDrink = function() {
+  if (player.gold < 5) {toast('💰 Sin oro','combat');return}
+  player.gold -= 5;
+  player.hp = Math.min(player.hpMax, player.hp + 25);
+  toast('🍺 +25HP','loot');
+  closeDialog();
+};
+window.buyMeal = function() {
+  if (player.gold < 15) {toast('💰 Sin oro','combat');return}
+  player.gold -= 15;
+  if (!player.buffs) player.buffs = [];
+  player.buffs = player.buffs.filter(b=>b.id!=='meal');
+  player.buffs.push({id:'meal', name:'Comida', ico:'🍖', duration:60, endTime: performance.now()+60000});
+  updateBuffsUI();
+  toast('🍖 +30% DMG 60s','skill');
+  closeDialog();
+};
+window.restAtTavern = function() {
+  if (player.gold < 25) {toast('💰 Sin oro','combat');return}
+  player.gold -= 25;
+  player.hp = player.hpMax; player.mp = player.mpMax;
+  toast('🛏️ Descansaste','quest');
+  closeDialog();
+};
+window.hearRumors = function() {
+  const rumors = [
+    'Puerta Rango S al norte... solo para Monarcas.',
+    'Los goblins se organizan, pronto tendrán rey.',
+    'Thorin forja las mejores armas.',
+    'En mazmorras profundas hay tesoros legendarios.',
+    'Vi un dragón rojo en las montañas.',
+    'El gremio paga 1000 oros por un Archidemonio.',
+    'Los Monarcas pueden extraer sombras de los muertos... (Solo Leveling)',
+    'Si mueres, renaces. La muerte no es el final.'
+  ];
+  toast(`👂 ${pick(rumors)}`,'quest');
+  closeDialog();
+};
+window.heal = function() {
+  if (player.gold < 10) {toast('💰 Sin oro','combat');return}
+  player.gold -= 10; player.hp = player.hpMax;
+  toast('✨ Curación completa','quest');
+  closeDialog();
+};
+window.blessing = function() {
+  if (player.gold < 40) {toast('💰 Sin oro','combat');return}
+  player.gold -= 40;
+  if (!player.buffs) player.buffs = [];
+  player.buffs = player.buffs.filter(b=>b.id!=='fortress');
+  player.buffs.push({id:'fortress', name:'Bendición', ico:'🛡️', duration:120, endTime: performance.now()+120000});
+  updateBuffsUI();
+  toast('🙏 -70% daño 120s','skill');
+  closeDialog();
+};
+window.royalQuest = function() {
+  if (player.level < 10) {toast('👑 Nivel 10+','combat');closeDialog();return}
+  const q = {id:'q_dragon',name:'Matar Dragón',desc:'Jefe Rango A',type:'kill',target:'Dragon',goal:1,xp:3000,gold:2000,fame:600,rank:'S'};
+  if (!player.quests.find(x=>x.id===q.id)) { player.quests.push(q); toast('👑 ¡Misión Real!','quest'); }
+  closeDialog();
+};
+
+function addItem(item) {
+  player.inventory.push({...item, uid:Date.now()+Math.random()});
+}
+function equipItem(idx) {
+  const it = player.inventory[idx];
+  if (!it || !it.slot) return;
+  player.inventory.forEach(x=>{if (x.slot===it.slot) x.equipped=false});
+  it.equipped = true;
+  player.equipment[it.slot] = it;
+  toast(`✨ Equipaste ${it.name}`,'loot');
+}
+window.useItem = function(idx) {
+  const it = player.inventory[idx];
+  if (!it) return;
+  if (it.type === 'consumable') {
+    player.hp = Math.min(player.hpMax, player.hp + (it.heal||0));
+    if (it.mana) player.mp = Math.min(player.mpMax, player.mp + it.mana);
+    toast(`🧪 +${it.heal}HP${it.mana?' +'+it.mana+'MP':''}`,'loot');
+    player.inventory.splice(idx,1);
+  } else if (it.slot) equipItem(idx);
+  if (invOpen) renderInventory(currentPanelTab);
+};
+window.toggleInventory = function(tab='inv') {
+  invOpen = !invOpen;
+  const panel = document.getElementById('invPanel');
+  if (!invOpen) {panel.classList.remove('show');return}
+  currentPanelTab = tab;
+  panel.classList.add('show');
+  renderInventory(tab);
+};
+window.renderInventory = function(tab) {
+  currentPanelTab = tab;
+  const panel = document.getElementById('invPanel');
+  const tabs = `<div class="inv-tabs">
+    <div class="inv-tab ${tab==='inv'?'active':''}" onclick="renderInventory('inv')">🎒 Mochila</div>
+    <div class="inv-tab ${tab==='equip'?'active':''}" onclick="renderInventory('equip')">⚔️ Equipo</div>
+    <div class="inv-tab ${tab==='shadows'?'active':''}" onclick="renderInventory('shadows')">👻 Sombras</div>
+    <div class="inv-tab ${tab==='skills'?'active':''}" onclick="renderInventory('skills')">✨ Skills</div>
+    <div class="inv-tab ${tab==='craft'?'active':''}" onclick="renderInventory('craft')">⚒️ Crafteo</div>
+    <div class="inv-tab ${tab==='stats'?'active':''}" onclick="renderInventory('stats')">📊 Stats</div>
+    <div class="inv-tab ${tab==='quests'?'active':''}" onclick="renderInventory('quests')">📋 Mis</div>
+    <div class="inv-tab" onclick="toggleInventory()">✖</div>
+  </div>`;
+  let content = '';
+  if (tab === 'inv') {
+    if (player.inventory.length === 0) content = '<div style="padding:20px;text-align:center;opacity:.6">Vacío</div>';
+    else {
+      content = '<div class="inv-grid">';
+      player.inventory.forEach((it,i)=>{
+        const rar = it.rarity==='legend'?'legend':it.rarity==='rare'?'rare':'';
+        content += `<div class="inv-slot ${rar} ${it.equipped?'equipped':''}" onclick="useItem(${i})"><div class="ico">${it.ico}</div><div>${it.name}</div></div>`;
+      });
+      content += '</div>';
+    }
+    content += `<div style="margin-top:15px;padding:10px;background:rgba(181,140,255,.08);border-radius:6px;font-size:11px"><b>Materiales:</b> 🌿${player.materials.herb||0} · 🪵${player.materials.wood||0} · ⚙️${player.materials.iron||0} · 🧶${player.materials.leather||0} · 💎${player.materials.crystal||0} · 💠${player.materials.gem||0}</div>`;
+  } else if (tab === 'equip') {
+    content = `<div class="stat-line"><span>🏹 Arma</span><b>${player.equipment.weapon?.name||'(vacío - compra en Herrería)'}</b></div>
+    <div class="stat-line"><span>🛡️ Armadura</span><b>${player.equipment.armor?.name||'(vacío)'}</b></div>
+    <div class="stat-line"><span>🪖 Casco</span><b>${player.equipment.helmet?.name||'(vacío)'}</b></div>
+    <div class="stat-line"><span>👢 Botas</span><b>${player.equipment.boots?.name||'(vacío)'}</b></div>
+    <div class="stat-line"><span>💍 Anillo</span><b>${player.equipment.ring?.name||'(vacío)'}</b></div>`;
+  } else if (tab === 'shadows') {
+    content = `<div style="margin-bottom:10px;font-size:12px;color:#b58cff">Ejército: ${player.shadows.length}/${player.shadowCapacity} · Sube de nivel para +1 capacidad</div>`;
+    if (player.shadows.length === 0) content += '<div style="padding:15px;text-align:center;opacity:.6">Sin sombras. Mata enemigos y usa <kbd>5</kbd> o <kbd>E</kbd> cerca del cadáver para ARISE.</div>';
+    else {
+      player.shadows.forEach((sh,i) => {
+        content += `<div class="shadow-card"><div class="sh-ico">${sh.ico}</div><div class="sh-info"><div class="sh-nm">${sh.name}</div><div class="sh-lv">Lv ${sh.level} · DMG ${sh.dmg} · HP ${sh.hp}</div></div></div>`;
+      });
+    }
+  } else if (tab === 'skills') {
+    content = `<div style="margin-bottom:10px;font-size:11px;color:#8fa2b8">Click en skill desbloqueada para equipar</div>`;
+    player.clsData.skills.forEach(s=>{
+      const unlocked = player.unlockedSkills.includes(s.id);
+      const slotIdx = player.equippedSkills.indexOf(s.id);
+      content += `<div class="skill-card ${unlocked?'':'locked'}" ${unlocked?`onclick="equipSkill('${s.id}')"`:''}>
+        <div class="sk-name">${s.ico} ${s.name} ${slotIdx>=0?`[Slot ${slotIdx+1}]`:''}</div>
+        <div class="sk-desc">${unlocked?`CD: ${s.cd}s · MP: ${s.mp} · ${s.type}`:`🔒 Nivel ${s.unlock}`}</div>
+      </div>`;
+    });
+  } else if (tab === 'craft') {
+    content = `<div style="margin-bottom:10px;font-size:11px;color:#b58cff">Materiales: 🌿${player.materials.herb||0} · 🪵${player.materials.wood||0} · ⚙️${player.materials.iron||0} · 🧶${player.materials.leather||0} · 💎${player.materials.crystal||0} · 💠${player.materials.gem||0}</div>`;
+    RECIPES.forEach(r => {
+      const matsStr = Object.entries(r.mats).map(([k,v])=>`${v}${k}`).join(' + ');
+      const canCraft = Object.entries(r.mats).every(([k,v]) => (player.materials[k]||0) >= v);
+      content += `<div class="recipe" ${canCraft?`onclick="craft('${r.id}')"`:'style="opacity:.5"'}><div class="recipe-nm">${r.ico} ${r.name}</div><div class="recipe-mats">${matsStr} ${canCraft?'✅':'❌'}</div></div>`;
+    });
+  } else if (tab === 'stats') {
+    content = `<div class="stat-line"><span>📛</span><b>${player.name}</b></div>
+    <div class="stat-line"><span>${player.clsIco}</span><b>${player.clsName}</b></div>
+    <div class="stat-line"><span>⭐ Nivel</span><b>${player.level}</b></div>
+    <div class="stat-line"><span>❤️</span><b>${Math.floor(player.hp)}/${player.hpMax}</b></div>
+    <div class="stat-line"><span>💧</span><b>${Math.floor(player.mp)}/${player.mpMax}</b></div>
+    <div class="stat-line"><span>⚔️ FUE</span><b>${player.str}</b></div>
+    <div class="stat-line"><span>🏹 DES</span><b>${player.dex}</b></div>
+    <div class="stat-line"><span>🔮 INT</span><b>${player.int}</b></div>
+    <div class="stat-line"><span>🛡️ CON</span><b>${player.con}</b></div>
+    <div class="stat-line"><span>💰 Oro</span><b>${player.gold}</b></div>
+    <div class="stat-line"><span>🏹 Flechas</span><b>${player.arrows}</b></div>
+    <div class="stat-line"><span>📊 Fama</span><b>${player.fame}</b></div>
+    <div class="stat-line"><span>🏅 Rango</span><b>${player.guildRank}</b></div>
+    <div class="stat-line"><span>👻 Sombras</span><b>${player.shadows.length}/${player.shadowCapacity}</b></div>
+    <div class="stat-line"><span>🏰 Mazmorra</span><b>Piso ${player.dungeonBestFloor}</b></div>
+    <div style="margin-top:10px;display:flex;gap:8px"><button class="btn" onclick="saveGame()">💾 Guardar</button></div>`;
+  } else if (tab === 'quests') {
+    if (player.quests.length === 0) content = '<div style="padding:20px;text-align:center;opacity:.6">Sin misiones</div>';
+    else player.quests.forEach(q=>{
+      content += `<div style="padding:10px;background:rgba(181,140,255,.08);border-left:3px solid ${q.completed?'#4cc9f0':'#ffd700'};margin:5px 0;border-radius:4px">
+        <b>${q.name}</b> <small>[${q.rank}] ${q.completed?'✅':''}</small><br>
+        <small>Progreso: <b>${q.progress}/${q.goal}</b></small>
+      </div>`;
+    });
+  }
+  panel.innerHTML = `<h2>📖 ${player.name} · NV ${player.level}</h2>${tabs}${content}`;
+};
+
+window.craft = function(recipeId) {
+  const recipe = RECIPES.find(r => r.id === recipeId);
+  if (!recipe) return;
+  const canCraft = Object.entries(recipe.mats).every(([k,v]) => (player.materials[k]||0) >= v);
+  if (!canCraft) { toast('❌ Materiales insuficientes','combat'); return; }
+  Object.entries(recipe.mats).forEach(([k,v]) => { player.materials[k] -= v; });
+  
+  if (recipe.type === 'arrows') {
+    player.arrows += recipe.qty;
+    toast(`⚒️ +${recipe.qty} flechas`,'loot');
+  } else if (recipe.type === 'consumable') {
+    addItem({...recipe});
+    toast(`⚒️ ${recipe.name} creada`,'loot');
+  } else {
+    addItem({...recipe});
+    toast(`⚒️ ${recipe.name} creada`,'loot');
+  }
+  renderInventory('craft');
+};
+
+window.saveGame = function() {
+  localStorage.setItem('mugen_aethoria_save', JSON.stringify(player));
+  toast('💾 Partida guardada','quest');
+};
+
+window.equipSkill = function(skillId) {
+  const emptyIdx = player.equippedSkills.findIndex(s=>s===null);
+  if (emptyIdx >= 0) {
+    player.equippedSkills[emptyIdx] = skillId;
+    toast(`✨ Slot ${emptyIdx+1}`,'skill');
+  } else {
+    for (let i=1; i<5; i++) {
+      if (player.equippedSkills[i] !== skillId) {
+        player.equippedSkills[i] = skillId;
+        toast(`✨ Slot ${i+1}`,'skill');
+        break;
+      }
+    }
+  }
+  updateHotbar();
+  renderInventory('skills');
+};
+
+function unlockAch(id, name) {
+  if (!player.achievements) player.achievements = [];
+  if (player.achievements.includes(id)) return;
+  player.achievements.push(id);
+  toast(`🏆 ${name}`,'ach');
+}
+function checkAchievements() {
+  if (!player.achievements) player.achievements = [];
+  if (player.kills >= 10) unlockAch('wolf_hunter','Cazador de Lobos');
+  if (player.shots >= 50 && (player.hits/player.shots)>=0.7) unlockAch('sharpshooter','Tirador');
+  if (player.gold >= 1000) unlockAch('rich','Acaudalado');
+  if (player.shadows.length >= 1) unlockAch('first_shadow','Primera Sombra');
+  if (player.shadows.length >= 5) unlockAch('shadow_lord','Señor de Sombras');
+  if (player.dungeonBestFloor >= 10) unlockAch('dungeon10','Explorador');
+  if (player.hunterRank === 'S') unlockAch('rank_s','Cazador Nacional');
+}
+
+function updateHUD(dt) {
+  hudT += dt;
+  if (hudT < 0.2 || !player) return;
+  hudT = 0;
+  
+  document.getElementById('hName').textContent = `${player.clsIco} ${player.name}`;
+  document.getElementById('hClass').textContent = `${player.clsName} Nv.${player.level} · ${player.guildRank}`;
+  document.getElementById('hpBar').style.width = (player.hp/player.hpMax*100)+'%';
+  document.getElementById('hpTxt').textContent = `${Math.floor(player.hp)}/${player.hpMax}`;
+  document.getElementById('mpBar').style.width = (player.mp/player.mpMax*100)+'%';
+  document.getElementById('mpTxt').textContent = `${Math.floor(player.mp)}/${player.mpMax}`;
+  document.getElementById('xpBar').style.width = (player.xp/player.xpNext*100)+'%';
+  document.getElementById('xpTxt').textContent = `${player.xp}/${player.xpNext}`;
+  document.getElementById('shBar').style.width = (player.shadows.length/player.shadowCapacity*100)+'%';
+  document.getElementById('shTxt').textContent = `${player.shadows.length}/${player.shadowCapacity}`;
+  document.getElementById('hGold').textContent = player.gold;
+  document.getElementById('hArr').textContent = player.arrows;
+  document.getElementById('hFame').textContent = player.fame;
+  document.getElementById('hSTR').textContent = player.str;
+  document.getElementById('hDEX').textContent = player.dex;
+  document.getElementById('hINT').textContent = player.int;
+  document.getElementById('hCON').textContent = player.con;
+  
+  const px = playerGroup.position.x, pz = playerGroup.position.z;
+  let loc = 'Bosque';
+  if (inDungeon) loc = `Mazmorra R${currentDungeonRank} · P${currentDungeonFloor} · Sala ${dungeonRooms.findIndex(r=>r===currentRoom)+1}`;
+  else if (playerInInterior) loc = activeInterior?.name||'Interior';
+  else if (Math.abs(px)<WALL && Math.abs(pz)<WALL) {
+    if (pz > WALL-50) loc = '🏪 Gran Mercado';
+    else if (Math.abs(px)<20 && pz<-30) loc = '🏰 Castillo Real';
+    else if (px<-40 && Math.abs(pz)<30) loc = '⚔️ Gremio';
+    else if (px>40 && Math.abs(pz)<30) loc = '🍺 Taberna';
+    else if (Math.abs(px)<30 && pz>30) loc = '⛪ Templo';
+    else loc = 'Ciudad de Aethoria';
+  }
+  document.getElementById('hLoc').textContent = loc;
+  
+  const p = document.getElementById('prompt');
+  let txt = '';
+  
+  // Cadáver cercano para ARISE
+  const nearCorpse = corpses.find(c => !c.extracted && c.worldPos && Math.hypot(c.worldPos.x-px, c.worldPos.z-pz) < 3);
+  if (nearCorpse) {
+    txt = `👻 ARISE: ${nearCorpse.type.name} (${Math.floor((nearCorpse.shadowChance||0.3)*100)}%) (E)`;
+  } else if (inDungeon) {
+    const door = dungeonGroup.children.find(c => c.userData?.type === 'next_floor_door');
+    if (door && Math.hypot(door.position.x-px, door.position.z-pz) < 3 && currentDungeonFloor < 10) txt = `⬆️ Siguiente Piso (E)`;
+    for (const t of dungeonTreasures) {
+      if (Math.hypot(t.mesh.position.x-px, t.mesh.position.z-pz) < 2) { txt = `💰 ${t.loot?.name||'Cofre'} (E)`; break; }
+    }
+  } else if (playerInInterior) {
+    if (Math.hypot(px, pz-8) < 2.5) txt = '🚪 Salir (E)';
+  } else {
+    for (const b of buildings) {
+      if (!b.collider) continue;
+      if (Math.hypot(b.doorX-px, b.doorZ-pz) < 3) { 
+        txt = `${b.type==='dungeon_gate'?'🏰':b.type==='house'?'🏠':'🚪'} ${b.name} (E)`; break; 
+      }
+    }
+    if (!txt) for (const npc of npcs) {
+      if (npc.insideMesh) continue;
+      if (Math.hypot(npc.mesh.position.x-px, npc.mesh.position.z-pz) < 2.5) { txt = `💬 ${npc.name} (E)`; break; }
+    }
+  }
+  if (txt) { p.textContent = txt; p.classList.add('show'); }
+  else p.classList.remove('show');
+}
+
+function updateMinimap() {
+  if (!playerGroup || !player || inDungeon) return;
+  const S = minimapCanvas.width;
+  const h = S/2;
+  const scale = S / (WALL*2.5);
+  const px = playerGroup.position.x, pz = playerGroup.position.z;
+  
+  mctx.clearRect(0,0,S,S);
+  mctx.fillStyle = '#1a0a2e'; mctx.fillRect(0,0,S,S);
+  
+  // Ciudad
+  mctx.fillStyle = '#3a2a4a';
+  const cityX = h + (-WALL - px)*scale;
+  const cityZ = h + (-WALL - pz)*scale;
+  mctx.fillRect(cityX, cityZ, WALL*2*scale, WALL*2*scale);
+  mctx.strokeStyle = '#b58cff'; mctx.lineWidth = 2;
+  mctx.strokeRect(cityX, cityZ, WALL*2*scale, WALL*2*scale);
+  
+  // Calles principales
+  mctx.fillStyle = '#4a3a5a';
+  mctx.fillRect(h + (-6 - px)*scale, cityZ, 12*scale, WALL*2*scale);
+  mctx.fillRect(cityX, h + (-6 - pz)*scale, WALL*2*scale, 12*scale);
+  
+  // Edificios
+  buildings.forEach(b=>{
+    if (!b.collider) return;
+    if (b.type === 'dungeon_gate') {
+      const rankColors = {'E':'#888','D':'#2ecc71','C':'#3498db','B':'#b58cff','A':'#ff6b9d','S':'#ffd700'};
+      mctx.fillStyle = rankColors[b.rank] || '#888';
+      mctx.beginPath();
+      mctx.arc(h + (b.x-px)*scale, h + (b.z-pz)*scale, 3, 0, Math.PI*2);
+      mctx.fill();
+    } else if (b.type === 'castle') {
+      mctx.fillStyle = '#8b0000';
+      mctx.fillRect(h + (b.x-b.w/2-px)*scale, h + (b.z-b.d/2-pz)*scale, b.w*scale, b.d*scale);
+    } else if (b.type === 'house') {
+      mctx.fillStyle = '#5a4a6a';
+      mctx.fillRect(h + (b.x-b.w/2-px)*scale, h + (b.z-b.d/2-pz)*scale, b.w*scale, b.d*scale);
+    } else if (b.type !== 'market_stall') {
+      mctx.fillStyle = '#b58cff';
+      mctx.fillRect(h + (b.x-b.w/2-px)*scale, h + (b.z-b.d/2-pz)*scale, b.w*scale, b.d*scale);
+    }
+  });
+  
+  // Mercado (área)
+  mctx.fillStyle = '#ffd700';
+  mctx.fillRect(h + (-30-px)*scale, h + (WALL-50-pz)*scale, 60*scale, 40*scale);
+  
+  // Enemigos
+  mctx.fillStyle = '#ff3030';
+  enemies.forEach(e=>{
+    if (e.dead) return;
+    const ex = h + (e.mesh.position.x-px)*scale;
+    const ez = h + (e.mesh.position.z-pz)*scale;
+    if (ex<0||ex>S||ez<0||ez>S) return;
+    mctx.beginPath(); mctx.arc(ex, ez, 1.5, 0, Math.PI*2); mctx.fill();
+  });
+  
+  // NPCs
+  mctx.fillStyle = '#4cc9f0';
+  npcs.forEach(n=>{
+    if (n.insideMesh) return;
+    const nx = h + (n.mesh.position.x-px)*scale;
+    const nz = h + (n.mesh.position.z-pz)*scale;
+    if (nx<0||nx>S||nz<0||nz>S) return;
+    mctx.beginPath(); mctx.arc(nx, nz, 1.2, 0, Math.PI*2); mctx.fill();
+  });
+  
+  // Sombras del ejército
+  mctx.fillStyle = '#b58cff';
+  shadowArmy.forEach(sh => {
+    const sx = h + (sh.mesh.position.x-px)*scale;
+    const sz = h + (sh.mesh.position.z-pz)*scale;
+    if (sx<0||sx>S||sz<0||sz>S) return;
+    mctx.beginPath(); mctx.arc(sx, sz, 2, 0, Math.PI*2); mctx.fill();
+  });
+  
+  // Jugador (triángulo con dirección)
+  mctx.save();
+  mctx.translate(h, h);
+  mctx.rotate(-cameraYaw);
+  mctx.fillStyle = '#ffd700';
+  mctx.beginPath();
+  mctx.moveTo(0, -7); mctx.lineTo(5, 6); mctx.lineTo(0, 3); mctx.lineTo(-5, 6);
+  mctx.closePath(); mctx.fill();
+  mctx.restore();
+  
+  mctx.fillStyle = '#fff'; mctx.font = 'bold 9px Arial'; mctx.textAlign = 'center';
+  mctx.fillText('N', h, 10);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  if (!gameStarted) return;
+  const dt = Math.min(clock.getDelta(), 0.05);
+  
+  updatePlayer(dt);
+  
+  if (inDungeon) {
+    updateDungeonEnemies(dt);
+    updateDungeonUI();
+    // Detectar cambio de sala
+    if (currentRoom) {
+      const d = Math.hypot(playerGroup.position.x-currentRoom.x, playerGroup.position.z-currentRoom.z);
+      if (d > 20) {
+        // Encontrar sala más cercana
+        let newRoom = null, minD = Infinity;
+        dungeonRooms.forEach(r => {
+          const dd = Math.hypot(playerGroup.position.x-r.x, playerGroup.position.z-r.z);
+          if (dd < minD) { minD = dd; newRoom = r; }
+        });
+        if (newRoom && newRoom !== currentRoom) {
+          currentRoom = newRoom;
+          const roomType = newRoom.isBossRoom ? 'JEFE' : newRoom.isTreasureRoom ? 'TESORO' : newRoom.isSecretRoom ? 'SECRETA' : '';
+          toast(`🏰 Sala ${newRoom.idx+1} ${roomType}`,'dungeon');
+        }
+      }
+    }
+  } else {
+    updateNPCs(dt);
+    updateEnemies(dt);
+    updateLoot(dt);
+  }
+  
+  updateProjectiles(dt);
+  updateParticles(dt);
+  updateSummons(dt);
+  updateBuffs(dt);
+  updateCamera(dt);
+  updateHUD(dt);
+  updateSkillCooldowns();
+  updateMinimap();
+  
+  renderer.render(scene, camera);
+}
+
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+window.toast = function(m,t=''){
+  const d = document.createElement('div');
+  d.className = 'toast '+t;
+  d.textContent = m;
+  document.getElementById('toastWrap').appendChild(d);
+  setTimeout(()=>{d.style.opacity='0';d.style.transition='opacity .3s';setTimeout(()=>d.remove(),300)},3500);
+};
+
+</script>
+</body>
+</html>
