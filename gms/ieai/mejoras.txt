@@ -1,0 +1,65 @@
+🎮 Mejoras Críticas Aplicadas
+✅ BUGS CORREGIDOS
+
+    🎯 Cámara arreglada: Pointer Lock API real. Click en el juego = captura mouse, movimiento del mouse = rota cámara 360°, ESC = libera. Funciona como Skyrim/FPS real.
+    🏹 Disparo arreglado: Click izquierdo dispara proyectiles con física real. Arco visible en arquero. Flechas con trails de color según elemento.
+    💾 Guardado funcional: Botón guardar en Stats. Cargar desde menú.
+
+🏰 CIUDAD MEJORADA EXPONENCIALMENTE
+
+    📍 Carteles direccionales en todas las calles con flechas: "🏰 Castillo →", "← ⚔️ Gremio", "↑ Templo", etc.
+    🏠 Casas perfectamente ordenadas a ambos lados de las avenidas principales (grid).
+    🛣️ Calles en grid con avenidas principales y secundarias cada 50u.
+    🏪 Mercado grande con 6 puestos coloridos (Frutas, Pescados, Pan, Quesos, Vinos, Flores) + fuente central.
+    🏷️ Cada edificio con cartel visible + dueño arriba (👑 Thorin, 👑 Brom).
+    🏠 Cada casa con cartel "🏠 Casa X".
+
+🏛️ MAZMORRA PROCEDURAL (no más cuadrada)
+
+    3-6 salas conectadas por pasillos por piso.
+    Salas especiales: Boss room, Treasure room, Secret room.
+    Antorchas en esquinas con luz real.
+    Jefe garantizado en piso 10 de cada rango.
+    Rangos E-S con temas únicos (Criptas, Bosque Oscuro, Inframundo, Palacio del Rey Demonio).
+
+👻 SISTEMA ARISE (Solo Leveling)
+
+    Mata un enemigo → deja cadáver visible.
+    Acércate con E o pulsa 5 → aparece "ARISE" gigante en pantalla.
+    Cada enemigo tiene % de extracción (Slime 20%, Troll 70%, Jefe 100%).
+    Sombras te siguen, atacan enemigos y tienen stats únicos.
+    +1 capacidad por nivel subido.
+    Ejército visible en minimapa (puntos morados).
+
+🐢 MASCOTAS (Bofuri/Kumakuma)
+
+    Clase Shielder puede invocar Tortuga Tanque con caparazón 3D.
+    La tortuga te sigue y ataca enemigos.
+    Tecla F para guardar/invocar mascota.
+
+🧪 CRAFTEO (Apothecary Diaries)
+
+    Panel de crafteo con 7 recetas (pociones, flechas, armas, armaduras).
+    Los enemigos dropean materiales: hierbas, madera, hierro, cuero, cristales, gemas.
+    UI visual con check si tienes materiales suficientes.
+
+📜 INSPIRACIONES IMPLEMENTADAS
+
+    Solo Leveling: ARISE, Puertas Rango E-S, ejército de sombras, cazadores.
+    Slime Isekai: Clase Slime con skill "Depredador" (devora enemigos débiles), "Megiddo" (rayo desde cielo).
+    Overlord: Clase Nigromante, "Levantar Muerto" temporal.
+    Shield Hero/Bofuri: Clase Shielder con "Fortaleza" (-70% daño), Tortuga Tanque.
+    Kumakuma: Sistema de mascotas invocables.
+    Mugen Kalm: UI oscura morada, hotbar con ARISE slot, sistema de sombras.
+    Apothecary Diaries: Crafting de pociones, materiales herbales.
+
+🎯 CONTROLES FINALES
+
+    Click → Captura mouse (cámara FPS)
+    Mouse → Rota cámara 360°
+    Click Izq → Disparar/Atacar
+    Click Der → Apuntar (zoom)
+    WASD → Mover · Shift → Correr · Space → Saltar
+    1-4 → Skills · 5 → ARISE · Q → Poción · F → Mascota
+    E → Interactuar · I → Inv · K → Skills · J → Sombras · C → Crafteo
+    ESC → Liberar mouse/menús
