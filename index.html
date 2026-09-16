@@ -1460,6 +1460,7 @@ try{
 <div class="toasts" id="toasts"></div>
 
 <script>
+(function(){
 'use strict';
 
 const API_URL = 'https://meditech-bot.onrender.com/api';
@@ -1494,9 +1495,6 @@ const CAT_META = {
   gaming     :{ico:'🎮', label:'Gaming',      cls:'gam', grad:'linear-gradient(135deg,#8b5cf6,#ec4899)'}
 };
 
-/* ================================================================
-   🔐 SESIÓN — COMPATIBLE con 'username' y con 'usuario' (legacy)
-   ================================================================ */
 const CATALOGO_DEMO = [
  {id:'1', name:'Enalapril 10mg', desc:'Medicamento para tratar la hipertensión arterial y el fallo cardíaco.', price:280, stock:10, category:'medicamento', feat:true},
  {id:'2', name:'Loratadina 10mg', desc:'Antihistamínico que alivia los síntomas de las alergias.', price:230, stock:10, category:'medicamento', feat:true},
@@ -1517,7 +1515,6 @@ const CATALOGO_DEMO = [
  {id:'17',name:'Furosemida 40mg', desc:'Diurético para hipertensión e insuficiencia cardíaca.', price:230, stock:10, category:'medicamento'}
 ];
 
-/* 🔧 Helpers seguros: aceptan 'username' o 'usuario' */
 function getId(u){ return (u?.username || u?.usuario || u?.user || u?.email || '').toString(); }
 function getName(u){ return u?.name || u?.nombre || getId(u) || 'Usuario'; }
 
@@ -1545,22 +1542,15 @@ function getUsers(){
 }
 function saveUsers(list){ localStorage.setItem(K_USERS, JSON.stringify(list)); }
 
-/* Seed admin (compatible con ambos campos) */
 (function seed(){
   const users = getUsers();
-  const hasAdmin = users.some(u => {
-    const id = getId(u).toLowerCase();
-    return id === 'admin';
-  });
+  const hasAdmin = users.some(u => getId(u).toLowerCase() === 'admin');
   if(!hasAdmin){
     users.push({name:'Administrador', username:'admin', usuario:'admin', email:'admin@mediatech.com', pass:'admin123', role:'admin'});
     saveUsers(users);
   }
 })();
 
-/* ================================================================
-   🛡️ MUROS
-   ================================================================ */
 const MURO = (titulo, frase, dest) => `
   <div class="wall">
     <div class="lock"><i class="fas fa-lock"></i></div>
@@ -1573,13 +1563,13 @@ const MURO = (titulo, frase, dest) => `
       <li><i class="fas fa-check-circle"></i> <b>Acceso a los juegos</b> de MediTech 🎮</li>
     </ul>
     <div class="wall-btns">
-      <button class="btn btn-solid" onclick="pedirLogin('${dest}')"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
-      <button class="btn btn-ghost" onclick="pedirRegistro('${dest}')"><i class="fas fa-user-plus"></i> Crear cuenta gratis</button>
+      <button class="btn btn-solid" onclick="window._mt.pedirLogin('${dest}')"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
+      <button class="btn btn-ghost" onclick="window._mt.pedirRegistro('${dest}')"><i class="fas fa-user-plus"></i> Crear cuenta gratis</button>
     </div>
   </div>`;
 
-let PRODUCTOS = [];
-let catFiltro = 'todas';
+var PRODUCTOS = [];
+var catFiltro = 'todas';
 
 function renderZonas(){
   const u = getUser();
@@ -1617,20 +1607,20 @@ function headerAuth(u){
         <button onclick="window.location.href='admin-crud.html'"><i class="fas fa-database" style="color:#7c3aed"></i> Panel CRUD</button>
         <button onclick="window.location.href='admin-usuarios.html'"><i class="fas fa-users-cog" style="color:#0d9488"></i> Gestión Usuarios</button>
         <button onclick="window.open('telegram-bot.html','_blank')"><i class="fab fa-telegram" style="color:#0ea5e9"></i> Bot Telegram</button>` : ''}
-      <button class="danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>`;
+      <button class="danger" onclick="window._mt.logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>`;
   }else{
     btn.className = 'user-btn guest';
     $('#userLabel').textContent = 'Iniciar Sesión';
     $('#heroRegBtn').style.display = '';
     menu.innerHTML = `
-      <button onclick="openModal('modalLogin')"><i class="fas fa-sign-in-alt" style="color:#0d9488"></i> Iniciar Sesión</button>
-      <button onclick="openModal('modalRegister')"><i class="fas fa-user-plus" style="color:#0d9488"></i> Registrarse</button>`;
+      <button onclick="window._mt.openModal('modalLogin')"><i class="fas fa-sign-in-alt" style="color:#0d9488"></i> Iniciar Sesión</button>
+      <button onclick="window._mt.openModal('modalRegister')"><i class="fas fa-user-plus" style="color:#0d9488"></i> Registrarse</button>`;
   }
 }
 
 async function cargarProductos(){
   if(!haySesion()) return;
-  let lista = null;
+  var lista = null;
   try{
     const ctrl = new AbortController();
     const to = setTimeout(()=>ctrl.abort(), 8000);
@@ -1674,7 +1664,7 @@ function renderCategorias(){
     <div class="cat-grid">
       ${cats.map(c=>{
         const n = PRODUCTOS.filter(p=>p.category===c).length;
-        return `<div class="cat-card" style="background:${CAT_META[c].grad}" onclick="filtrarCat('${c}')">
+        return `<div class="cat-card" style="background:${CAT_META[c].grad}" onclick="window._mt.filtrarCat('${c}')">
           <div class="ic"><i class="fas ${iconos[c]}"></i></div>
           <h5>${nombres[c]}</h5><span>${n} producto${n!==1?'s':''} disponibles</span>
         </div>`;
@@ -1688,13 +1678,13 @@ function renderProductosZona(){
     <div class="sec-head"><span class="tag">🌟 Catálogo</span><h3>Productos Destacados</h3><p>Los más populares entre nuestros clientes</p></div>
     <div class="toolbar">
       <div class="chipset" id="chipsCat">
-        <button class="chip ${catFiltro==='todas'?'act':''}" onclick="filtrarCat('todas')">Todas</button>
-        <button class="chip ${catFiltro==='medicamento'?'act':''}" onclick="filtrarCat('medicamento')">💊 Medicamentos</button>
-        <button class="chip ${catFiltro==='tecnologia'?'act':''}" onclick="filtrarCat('tecnologia')">💻 Tecnología</button>
-        <button class="chip ${catFiltro==='salud'?'act':''}" onclick="filtrarCat('salud')">🩺 Salud</button>
-        <button class="chip ${catFiltro==='gaming'?'act':''}" onclick="filtrarCat('gaming')">🎮 Gaming</button>
+        <button class="chip ${catFiltro==='todas'?'act':''}" onclick="window._mt.filtrarCat('todas')">Todas</button>
+        <button class="chip ${catFiltro==='medicamento'?'act':''}" onclick="window._mt.filtrarCat('medicamento')">💊 Medicamentos</button>
+        <button class="chip ${catFiltro==='tecnologia'?'act':''}" onclick="window._mt.filtrarCat('tecnologia')">💻 Tecnología</button>
+        <button class="chip ${catFiltro==='salud'?'act':''}" onclick="window._mt.filtrarCat('salud')">🩺 Salud</button>
+        <button class="chip ${catFiltro==='gaming'?'act':''}" onclick="window._mt.filtrarCat('gaming')">🎮 Gaming</button>
       </div>
-      <select id="selSort" onchange="renderGrid()">
+      <select id="selSort" onchange="window._mt.renderGrid()">
         <option value="def">Ordenar</option>
         <option value="asc">Precio: menor</option>
         <option value="desc">Precio: mayor</option>
@@ -1705,15 +1695,17 @@ function renderProductosZona(){
     <div class="prod-grid" id="prodGrid"></div>`;
   renderGrid();
 }
+
 function filtrarCat(c){
   catFiltro = c;
   if(!haySesion()){ pedirLogin('#productos'); return; }
   renderProductosZona();
   location.hash = '#productos';
 }
+
 function renderGrid(){
   if(!haySesion()) return;
-  let list = PRODUCTOS.filter(p => catFiltro==='todas' || p.category===catFiltro);
+  var list = PRODUCTOS.filter(p => catFiltro==='todas' || p.category===catFiltro);
   const sort = $('#selSort') ? $('#selSort').value : 'def';
   if(sort==='asc') list.sort((a,b)=>a.price-b.price);
   if(sort==='desc')list.sort((a,b)=>b.price-a.price);
@@ -1736,7 +1728,7 @@ function renderGrid(){
         <div class="p-foot">
           <span class="stock-tag ${out?'stock-out':low?'stock-low':'stock-ok'}">
             ${out?'❌ Agotado':low?'⚠️ ¡Quedan '+p.stock+'!':'✅ '+p.stock+' disponibles'}</span>
-          <button class="add-btn" ${out?'disabled':''} onclick="addCart('${p.id}')" title="Agregar al carrito"><i class="fas fa-plus"></i></button>
+          <button class="add-btn" ${out?'disabled':''} onclick="window._mt.addCart('${p.id}')" title="Agregar al carrito"><i class="fas fa-plus"></i></button>
         </div>
       </div>
     </div>`;
@@ -1754,7 +1746,7 @@ function renderOfertas(){
         <h5>${p.name}</h5>
         <p class="desc">${p.desc.slice(0,90)}${p.desc.length>90?'…':''}</p>
         <div class="price">${fmt(p.price)} MN</div>
-        <button class="btn btn-solid" style="width:100%" onclick="addCart('${p.id}')"><i class="fas fa-cart-plus"></i> Lo quiero</button>
+        <button class="btn btn-solid" style="width:100%" onclick="window._mt.addCart('${p.id}')"><i class="fas fa-cart-plus"></i> Lo quiero</button>
       </div>`).join('')}
       <div class="o-card">
         <span class="badge">🚚 Envíos</span>
@@ -1765,28 +1757,31 @@ function renderOfertas(){
     </div>`;
 }
 
-$('#searchInput').addEventListener('input', function(){
-  const q = this.value.trim().toLowerCase();
-  const box = $('#searchResults');
-  if(!haySesion() || !q){ box.classList.remove('open'); return; }
-  const hits = PRODUCTOS.filter(p => (p.name+' '+(p.desc||'')).toLowerCase().includes(q)).slice(0,5);
-  box.innerHTML = hits.length ? hits.map(p=>`
-    <div class="search-item" onclick="location.hash='#productos';$('#searchResults').classList.remove('open');">
-      <div class="thumb">${(CAT_META[p.category]||CAT_META.salud).ico}</div>
-      <div><b>${p.name}</b><br><small style="color:var(--teal2)">${fmt(p.price)}</small></div>
-    </div>`).join('')
-    : '<div class="search-item" style="color:var(--mut)">Sin resultados 😕</div>';
-  box.classList.add('open');
-});
+var searchInput = $('#searchInput');
+if(searchInput){
+  searchInput.addEventListener('input', function(){
+    const q = this.value.trim().toLowerCase();
+    const box = $('#searchResults');
+    if(!haySesion() || !q){ box.classList.remove('open'); return; }
+    const hits = PRODUCTOS.filter(p => (p.name+' '+(p.desc||'')).toLowerCase().includes(q)).slice(0,5);
+    box.innerHTML = hits.length ? hits.map(p=>`
+      <div class="search-item" onclick="location.hash='#productos';$('#searchResults').classList.remove('open');">
+        <div class="thumb">${(CAT_META[p.category]||CAT_META.salud).ico}</div>
+        <div><b>${p.name}</b><br><small style="color:var(--teal2)">${fmt(p.price)}</small></div>
+      </div>`).join('')
+      : '<div class="search-item" style="color:var(--mut)">Sin resultados 😕</div>';
+    box.classList.add('open');
+  });
+}
 document.addEventListener('click', e=>{
   if(!e.target.closest('.search-box')) $('#searchResults').classList.remove('open');
   if(!e.target.closest('#userWrap'))  $('#userWrap').classList.remove('open');
   if(!e.target.closest('#gamesDrop'))  $('#gamesDrop').classList.remove('open');
 });
 
-const cartKey = () => K_CART + (getId(getUser()) || 'guest');
-const getCart = () => { try{ return JSON.parse(localStorage.getItem(cartKey())) || []; }catch(e){ return []; } };
-const setCart = c => localStorage.setItem(cartKey(), JSON.stringify(c));
+var cartKey = () => K_CART + (getId(getUser()) || 'guest');
+var getCart = () => { try{ return JSON.parse(localStorage.getItem(cartKey())) || []; }catch(e){ return []; } };
+var setCart = c => localStorage.setItem(cartKey(), JSON.stringify(c));
 
 function addCart(id){
   if(!haySesion()){ pedirLogin('#productos'); return; }
@@ -1803,7 +1798,7 @@ function updateCartBadge(){
   $('#cartCount').textContent = n;
 }
 function changeQty(id, d){
-  let cart = getCart();
+  var cart = getCart();
   const item = cart.find(i => String(i.id) === String(id));
   if(!item) return;
   item.qty += d;
@@ -1817,7 +1812,7 @@ function openCart(){
 }
 function renderCart(){
   const cart = getCart();
-  let total = 0;
+  var total = 0;
   $('#cartItems').innerHTML = cart.length ? cart.map(i=>{
     const p = PRODUCTOS.find(x => String(x.id) === String(i.id));
     if(!p) return '';
@@ -1825,8 +1820,8 @@ function renderCart(){
     return `<div class="c-item">
       <div class="thumb">${(CAT_META[p.category]||CAT_META.salud).ico}</div>
       <div class="info"><h6>${p.name}</h6><small>${fmt(p.price)} c/u</small></div>
-      <div class="qty"><button onclick="changeQty('${p.id}',-1)">−</button><span>${i.qty}</span><button onclick="changeQty('${p.id}',1)">+</button></div>
-      <button class="c-del" onclick="delItem('${p.id}')"><i class="fas fa-trash"></i></button>
+      <div class="qty"><button onclick="window._mt.changeQty('${p.id}',-1)">−</button><span>${i.qty}</span><button onclick="window._mt.changeQty('${p.id}',1)">+</button></div>
+      <button class="c-del" onclick="window._mt.delItem('${p.id}')"><i class="fas fa-trash"></i></button>
     </div>`;
   }).join('') : '<div class="c-empty"><i class="fas fa-shopping-cart" style="font-size:2.5rem;opacity:.3;display:block;margin-bottom:.6rem"></i>Tu carrito está vacío</div>';
   $('#cartTotal').textContent = fmt(total);
@@ -1834,7 +1829,7 @@ function renderCart(){
 function checkout(){
   const cart = getCart();
   if(!cart.length) return toast('El carrito está vacío', true);
-  const u = getUser(); let total = 0; const lines = [];
+  const u = getUser(); var total = 0; const lines = [];
   cart.forEach(i=>{
     const p = PRODUCTOS.find(x => String(x.id) === String(i.id));
     if(p){ total += p.price*i.qty; lines.push(`• ${p.name} ×${i.qty} — ${fmt(p.price*i.qty)}`); }
@@ -1844,77 +1839,75 @@ function checkout(){
   toast('📧 Abriendo tu correo para enviar el pedido…');
 }
 
-/* ================================================================
-   🔐 LOGIN / REGISTRO / LOGOUT  (CORREGIDO)
-   ================================================================ */
-let destinoTrasLogin = '';
+var destinoTrasLogin = '';
 function pedirLogin(dest){ destinoTrasLogin = dest || ''; openModal('modalLogin'); }
 function pedirRegistro(dest){ destinoTrasLogin = dest || ''; openModal('modalRegister'); }
 function goCatalog(){ haySesion() ? location.hash='#productos' : pedirLogin('#productos'); }
 
 function setErr(id, msg){ const el = $('#'+id); el.textContent = msg; el.classList.toggle('show', !!msg); }
 
-$('#formLogin').addEventListener('submit', e=>{
-  e.preventDefault();
-  const u = $('#logUser').value.trim(), p = $('#logPass').value;
-  let ok = true;
-  setErr('eLogUser', u?'':'Ingresa tu usuario'); if(!u) ok=false;
-  setErr('eLogPass', p?'':'Ingresa tu contraseña'); if(!p) ok=false;
-  if(!ok) return;
-
-  const users = getUsers();
-  const target = u.toLowerCase();
-
-  // 🔧 Búsqueda TOLERANTE con username/usuario/email
-  const user = users.find(x => {
-    if(!x) return false;
-    const candidates = [x.username, x.usuario, x.user, x.email].filter(Boolean);
-    return candidates.some(c => String(c).toLowerCase() === target);
+var formLogin = $('#formLogin');
+if(formLogin){
+  formLogin.addEventListener('submit', e=>{
+    e.preventDefault();
+    const u = $('#logUser').value.trim(), p = $('#logPass').value;
+    var ok = true;
+    setErr('eLogUser', u?'':'Ingresa tu usuario'); if(!u) ok=false;
+    setErr('eLogPass', p?'':'Ingresa tu contraseña'); if(!p) ok=false;
+    if(!ok) return;
+    const users = getUsers();
+    const target = u.toLowerCase();
+    const user = users.find(x => {
+      if(!x) return false;
+      const candidates = [x.username, x.usuario, x.user, x.email].filter(Boolean);
+      return candidates.some(c => String(c).toLowerCase() === target);
+    });
+    if(!user || user.pass !== p){
+      setErr('eLogPass','Usuario o contraseña incorrectos');
+      return;
+    }
+    saveSession({
+      name: user.name || user.nombre || getId(user),
+      username: getId(user),
+      email: user.email || '',
+      role: user.role || 'cliente'
+    });
+    closeModal('modalLogin'); e.target.reset();
+    toast('✅ ¡Bienvenido, ' + getName(user).split(' ')[0] + '! Catálogo desbloqueado.');
+    renderZonas();
+    if(destinoTrasLogin){ const d = destinoTrasLogin; destinoTrasLogin=''; setTimeout(()=>location.hash=d, 150); }
   });
+}
 
-  if(!user || user.pass !== p){
-    setErr('eLogPass','Usuario o contraseña incorrectos');
-    return;
-  }
-  saveSession({
-    name: user.name || user.nombre || getId(user),
-    username: getId(user),
-    email: user.email || '',
-    role: user.role || 'cliente'
+var formRegister = $('#formRegister');
+if(formRegister){
+  formRegister.addEventListener('submit', e=>{
+    e.preventDefault();
+    const n=$('#regName').value.trim(), u=$('#regUser').value.trim(), m=$('#regMail').value.trim(),
+          p=$('#regPass').value, p2=$('#regPass2').value;
+    var ok=true;
+    const chk=(id,cond,msg)=>{ setErr(id, cond?'':msg); if(!cond) ok=false; };
+    chk('eRegName', n.length>=3, 'Ingresa tu nombre completo');
+    chk('eRegUser', u.length>=3, 'Mínimo 3 caracteres');
+    chk('eRegMail', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m), 'Correo inválido');
+    chk('eRegPass', p.length>=6, 'Mínimo 6 caracteres');
+    chk('eRegPass2', p===p2, 'Las contraseñas no coinciden');
+    if(!ok) return;
+    const users = getUsers();
+    if(users.some(x => getId(x).toLowerCase() === u.toLowerCase()))
+      return setErr('eRegUser','Ese usuario ya existe');
+    if(users.some(x => String(x.email||'').toLowerCase() === m.toLowerCase()))
+      return setErr('eRegMail','Ese correo ya está registrado');
+    const nuevo = {name:n, username:u, usuario:u, email:m, pass:p, role:'cliente'};
+    users.push(nuevo); saveUsers(users);
+    saveSession({name:n, username:u, email:m, role:'cliente'});
+    $('#statUsers').textContent = users.length;
+    closeModal('modalRegister'); e.target.reset();
+    toast('🎉 ¡Cuenta creada! Bienvenido a MediTech.');
+    renderZonas();
+    if(destinoTrasLogin){ const d = destinoTrasLogin; destinoTrasLogin=''; setTimeout(()=>location.hash=d, 150); }
   });
-  closeModal('modalLogin'); e.target.reset();
-  toast('✅ ¡Bienvenido, ' + getName(user).split(' ')[0] + '! Catálogo desbloqueado.');
-  renderZonas();
-  if(destinoTrasLogin){ const d = destinoTrasLogin; destinoTrasLogin=''; setTimeout(()=>location.hash=d, 150); }
-});
-
-$('#formRegister').addEventListener('submit', e=>{
-  e.preventDefault();
-  const n=$('#regName').value.trim(), u=$('#regUser').value.trim(), m=$('#regMail').value.trim(),
-        p=$('#regPass').value, p2=$('#regPass2').value;
-  let ok=true;
-  const chk=(id,cond,msg)=>{ setErr(id, cond?'':msg); if(!cond) ok=false; };
-  chk('eRegName', n.length>=3, 'Ingresa tu nombre completo');
-  chk('eRegUser', u.length>=3, 'Mínimo 3 caracteres');
-  chk('eRegMail', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m), 'Correo inválido');
-  chk('eRegPass', p.length>=6, 'Mínimo 6 caracteres');
-  chk('eRegPass2', p===p2, 'Las contraseñas no coinciden');
-  if(!ok) return;
-  const users = getUsers();
-  // 🔧 Búsqueda segura con fallback a string vacío
-  if(users.some(x => getId(x).toLowerCase() === u.toLowerCase()))
-    return setErr('eRegUser','Ese usuario ya existe');
-  if(users.some(x => String(x.email||'').toLowerCase() === m.toLowerCase()))
-    return setErr('eRegMail','Ese correo ya está registrado');
-  const nuevo = {name:n, username:u, usuario:u, email:m, pass:p, role:'cliente'};
-  users.push(nuevo); saveUsers(users);
-  saveSession({name:n, username:u, email:m, role:'cliente'});
-  $('#statUsers').textContent = users.length;
-  closeModal('modalRegister'); e.target.reset();
-  toast('🎉 ¡Cuenta creada! Bienvenido a MediTech.');
-  renderZonas();
-  if(destinoTrasLogin){ const d = destinoTrasLogin; destinoTrasLogin=''; setTimeout(()=>location.hash=d, 150); }
-});
+}
 
 function logout(){
   clearSession();
@@ -1929,6 +1922,7 @@ document.addEventListener('click', e=>{
   const g = e.target.closest('.games-menu a');
   if(g && !haySesion()){ e.preventDefault(); pedirLogin(''); toast('🎮 Inicia sesión para jugar', true); }
 });
+
 function toggleGames(e){
   e.stopPropagation();
   if(!haySesion()){ pedirLogin(''); return; }
@@ -1936,16 +1930,13 @@ function toggleGames(e){
 }
 function toggleUserMenu(e){ e.stopPropagation(); $('#userWrap').classList.toggle('open'); }
 
-function openModal(id){ $('#'+id).classList.add('open'); }
-function closeModal(id){ $('#'+id).classList.remove('open'); }
+function openModal(id){ var el = $('#'+id); if(el) el.classList.add('open'); }
+function closeModal(id){ var el = $('#'+id); if(el) el.classList.remove('open'); }
 function switchModal(a,b){ closeModal(a); openModal(b); }
 $$('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target === o) o.classList.remove('open'); }));
 document.addEventListener('keydown', e => { if(e.key === 'Escape') $$('.overlay').forEach(o=>o.classList.remove('open')); });
 
-/* ================================================================
-   🤖 CHATBOT — IA gratis + base de conocimientos
-   ================================================================ */
-const CHAT = { hist: [], busy: false, catalogo: null, ts: 0 };
+var CHAT = { hist: [], busy: false, catalogo: null, ts: 0 };
 function toggleChat(){
   const p = $('#chatPanel');
   p.classList.toggle('open');
@@ -1956,7 +1947,7 @@ function renderChatChips(){
   const chips = haySesion()
     ? ['🛍️ Ver productos','💊 Medicamentos','💻 Tecnología','🔥 Ofertas','📦 ¿Cómo compro?']
     : ['🔐 ¿Cómo me registro?','🛍️ ¿Qué venden?','🕐 Horarios'];
-  $('#chatChips').innerHTML = chips.map(c=>`<button onclick="quickChat('${c}')">${c}</button>`).join('');
+  $('#chatChips').innerHTML = chips.map(c=>`<button onclick="window._mt.quickChat('${c}')">${c}</button>`).join('');
 }
 function quickChat(t){ $('#chatInput').value = t; sendChat(); }
 function addMsg(html, who){
@@ -2035,7 +2026,7 @@ async function sendChat(){
   tp.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
   $('#chatMsgs').appendChild(tp); $('#chatMsgs').scrollTop = 9e9;
 
-  let resp = null;
+  var resp = null;
   try{
     resp = await llamarIA(txt);
     if(resp){
@@ -2055,10 +2046,11 @@ const SLIDES = [
   {ico:'🔥', txt:'Ofertas exclusivas para miembros'},
   {ico:'🚚', txt:'Entrega a domicilio según tu zona'}
 ];
-let slideIdx = 0;
+var slideIdx = 0;
 setInterval(()=>{
   slideIdx = (slideIdx+1) % SLIDES.length;
   const box = $('#slideBox');
+  if(!box) return;
   box.style.opacity = 0;
   setTimeout(()=>{
     $('#slideIco').textContent = SLIDES[slideIdx].ico;
@@ -2067,11 +2059,45 @@ setInterval(()=>{
   }, 250);
 }, 4000);
 
+/* ===== Exponer API pública al window (para onclick en HTML) ===== */
+window._mt = {
+  pedirLogin, pedirRegistro, logout, goCatalog,
+  openModal, closeModal, switchModal,
+  addCart, changeQty, delItem, openCart, checkout,
+  filtrarCat, renderGrid,
+  quickChat, toggleChat, sendChat,
+  toggleGames, toggleUserMenu
+};
+
+/* ===== Exponer también al window global (por compatibilidad con tu main.js original) ===== */
+window.openLoginModal = openLoginModal;
+window.closeLoginModal = closeModal.bind(null, 'modalLogin');
+window.openRegisterModal = openLoginModal;
+window.closeRegisterModal = closeModal.bind(null, 'modalRegister');
+window.toggleUserMenu = toggleUserMenu;
+window.logout = logout;
+window.toggleChat = toggleChat;
+window.sendMessage = sendChat;
+window.openCart = openCart;
+window.closeCart = closeModal.bind(null, 'modalCart');
+window.closeQuickView = closeModal.bind(null, 'quick-view');
+window.filterProducts = renderGrid;
+window.searchProducts = function(){};
+
 document.addEventListener('DOMContentLoaded', ()=>{
   $('#year').textContent = new Date().getFullYear();
   $('#statUsers').textContent = getUsers().length;
   renderZonas();
 });
+
+if(document.readyState === 'complete' || document.readyState === 'interactive'){
+  $('#year').textContent = new Date().getFullYear();
+  $('#statUsers').textContent = getUsers().length;
+  renderZonas();
+}
+
+})();
 </script>
+  
 </body>
 </html>
