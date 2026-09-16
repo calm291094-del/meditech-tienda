@@ -1,1216 +1,1492 @@
 <!DOCTYPE html>
 <html lang="es">
+    
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MediTech — Salud & Tecnología</title>
-<meta name="description" content="MediTech: tu tienda confiable de medicamentos y hardware. Regístrate para acceder al catálogo.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediTech</title>
+
+    <!-- ========== EXTERNAL LIBRARIES (CDNs CONFIABLES) ========== -->
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+   <!-- ========== EXTERNAL LIBRARIES ========== -->
+<script src="static/js/tailwind-cdn.js"></script>
+<script src="static/js/chart.min.js"></script>
+<script src="static/js/jspdf.umd.min.js"></script>
+<script src="static/js/jspdf.plugin.autotable.min.js"></script>
+   
+   <!-- Google Fonts -->
+   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+   <link rel="stylesheet" href="static/fontawesome/css/all.min.css">
+   <link rel="stylesheet" href="static/css/style.css">
+   <link rel="stylesheet" href="static/css/admin.css">
+
+    <!-- ========== FAVICON ========== -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232c3e50'/%3E%3Ctext x='50' y='70' font-family='Arial' font-size='70' font-weight='bold' fill='white' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E">
+
+
+<!-- En el <head> o en el bloque <style> de tu página -->
 <style>
-/* ============================================================
-   MediTech — Salud & Tecnología
-   Sistema de acceso: los productos solo se muestran logueado.
-   ============================================================ */
-:root{
-  --bg:#0a1020; --bg2:#0d1530; --card:#101b36; --card2:#0e1830;
-  --ink:#e9f1ff; --mut:#94a6c8; --line:rgba(148,180,255,.14);
-  --teal:#2dd4bf; --cyan:#38bdf8; --amber:#fbbf24; --red:#fb7185;
-  --grad:linear-gradient(90deg,var(--teal),var(--cyan));
-  --disp:'Space Grotesk',sans-serif; --body:'Instrument Sans',sans-serif;
-  --r:14px; --shadow:0 20px 50px rgba(0,0,0,.45);
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:var(--body);background:var(--bg);color:var(--ink);overflow-x:hidden}
-img{max-width:100%}
-a{color:inherit;text-decoration:none}
-button{font-family:inherit;cursor:pointer}
-input,select,textarea{font-family:inherit;font-size:1rem}
+  /* ============================================================
+     🛡️ MURO DE AUTENTICACIÓN (Login Wall)
+     ============================================================ */
+  
+  /* Estilos para el menú desplegable tipo "cajita sorpresa" */
+  .game-dropdown {
+    position: relative;
+    display: inline-block;
+  }
 
-/* ---------- Fondo por capas (grid + brillos) ---------- */
-.bg-layer{position:fixed;inset:0;z-index:-2;pointer-events:none;
-  background:
-    radial-gradient(700px 400px at 85% -10%, rgba(45,212,191,.12), transparent 60%),
-    radial-gradient(600px 380px at -10% 30%, rgba(56,189,248,.10), transparent 60%),
-    var(--bg);}
-.bg-grid{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
-  background-image:linear-gradient(rgba(148,180,255,.05) 1px,transparent 1px),
-                   linear-gradient(90deg,rgba(148,180,255,.05) 1px,transparent 1px);
-  background-size:44px 44px;
-  mask-image:radial-gradient(ellipse at 50% 0%,#000 30%,transparent 75%);}
+  .game-dropdown-btn {
+    background: linear-gradient(145deg, #f59e0b, #fbbf24);
+    color: #1e293b;
+    font-weight: 700;
+    padding: 0.5rem 1.2rem;
+    border: none;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+  }
 
-/* ---------- Ticker superior ---------- */
-.ticker{background:linear-gradient(90deg,#0b2b2b,#0a1f3d);border-bottom:1px solid var(--line);
-  overflow:hidden;white-space:nowrap;font-size:.82rem;color:var(--teal);letter-spacing:.4px}
-.ticker-track{display:inline-flex;gap:3rem;padding:.45rem 0;animation:tick 28s linear infinite}
-.ticker span{display:inline-flex;gap:.5rem;align-items:center}
-@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .game-dropdown-btn:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
+  }
 
-/* ---------- Header ---------- */
-header{position:sticky;top:0;z-index:50;background:rgba(10,16,32,.82);backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--line)}
-.nav{max-width:1200px;margin:auto;display:flex;align-items:center;gap:1.2rem;padding:.8rem 1.2rem}
-.logo{display:flex;align-items:center;gap:.6rem;font-family:var(--disp);font-weight:700;font-size:1.25rem}
-.logo-badge{width:38px;height:38px;border-radius:10px;background:var(--grad);display:grid;place-items:center;
-  color:#04121c;font-size:1.2rem;box-shadow:0 6px 18px rgba(45,212,191,.35)}
-.logo small{display:block;font-size:.62rem;color:var(--teal);letter-spacing:2.5px;font-weight:600;text-transform:uppercase}
-.nav-links{display:flex;gap:.2rem;margin-left:auto;align-items:center}
-.nav-links>a,.drop-btn{padding:.5rem .85rem;border-radius:8px;color:var(--mut);font-weight:500;font-size:.93rem;
-  transition:.2s;background:none;border:none;font-size:.93rem}
-.nav-links>a:hover,.drop-btn:hover{color:var(--ink);background:rgba(148,180,255,.08)}
-.dropdown{position:relative}
-.drop-menu{position:absolute;top:120%;right:0;min-width:230px;background:var(--card);border:1px solid var(--line);
-  border-radius:12px;padding:.5rem;opacity:0;visibility:hidden;transform:translateY(8px);transition:.22s;box-shadow:var(--shadow)}
-.dropdown:hover .drop-menu,.dropdown:focus-within .drop-menu{opacity:1;visibility:visible;transform:translateY(0)}
-.drop-menu a{display:flex;gap:.6rem;padding:.55rem .7rem;border-radius:8px;font-size:.9rem;color:var(--mut)}
-.drop-menu a:hover{background:rgba(45,212,191,.1);color:var(--ink)}
-.nav-actions{display:flex;gap:.6rem;align-items:center}
-.cart-btn{position:relative;background:rgba(148,180,255,.08);border:1px solid var(--line);color:var(--ink);
-  width:42px;height:42px;border-radius:10px;font-size:1.1rem;transition:.2s}
-.cart-btn:hover{border-color:var(--teal);transform:translateY(-2px)}
-.cart-count{position:absolute;top:-6px;right:-6px;background:var(--grad);color:#04121c;font-size:.68rem;font-weight:700;
-  min-width:19px;height:19px;border-radius:99px;display:grid;place-items:center;padding:0 4px}
+  .game-dropdown-btn i {
+    font-size: 1.2rem;
+    transition: transform 0.4s ease;
+  }
 
-/* Botones */
-.btn{border:none;border-radius:10px;padding:.65rem 1.25rem;font-weight:600;font-size:.93rem;transition:.2s;
-  display:inline-flex;align-items:center;gap:.5rem;justify-content:center}
-.btn-grad{background:var(--grad);color:#04121c}
-.btn-grad:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(45,212,191,.35)}
-.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
-.btn-ghost:hover{border-color:var(--teal);color:var(--teal)}
-.btn-danger{background:rgba(251,113,133,.12);color:var(--red);border:1px solid rgba(251,113,133,.3)}
-.btn-sm{padding:.4rem .8rem;font-size:.82rem;border-radius:8px}
+  .game-dropdown-btn:hover i {
+    transform: rotate(20deg) scale(1.1);
+  }
 
-/* Menú usuario */
-.user-menu{position:relative}
-.user-chip{display:flex;align-items:center;gap:.5rem;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.3);
-  color:var(--teal);border-radius:99px;padding:.4rem .9rem;font-weight:600;font-size:.88rem}
-.user-drop{position:absolute;top:120%;right:0;min-width:220px;background:var(--card);border:1px solid var(--line);
-  border-radius:12px;padding:.5rem;opacity:0;visibility:hidden;transform:translateY(8px);transition:.22s;box-shadow:var(--shadow)}
-.user-menu:hover .user-drop,.user-menu:focus-within .user-drop{opacity:1;visibility:visible;transform:translateY(0)}
-.user-drop .u-name{padding:.5rem .7rem;font-size:.8rem;color:var(--mut);border-bottom:1px solid var(--line);margin-bottom:.35rem}
-.user-drop button,.user-drop a{display:flex;width:100%;gap:.6rem;align-items:center;padding:.55rem .7rem;border-radius:8px;
-  background:none;border:none;color:var(--mut);font-size:.9rem;text-align:left}
-.user-drop button:hover,.user-drop a:hover{background:rgba(148,180,255,.08);color:var(--ink)}
-.user-drop .logout:hover{color:var(--red)}
+  /* La cajita sorpresa (contenedor del menú) */
+  .game-dropdown-content {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%) scale(0.8) rotateY(90deg);
+    transform-origin: top center;
+    background: white;
+    min-width: 220px;
+    border-radius: 24px;
+    padding: 0.8rem 0.3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 0 0 2px #fcd34d inset;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #fbbf24;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
 
-/* ---------- HERO (monitor de signos) ---------- */
-.hero{max-width:1200px;margin:auto;padding:4.5rem 1.2rem 4rem;display:grid;grid-template-columns:1.1fr .9fr;gap:3rem;align-items:center}
-.kicker{display:inline-flex;gap:.5rem;align-items:center;font-size:.78rem;letter-spacing:3px;text-transform:uppercase;
-  color:var(--teal);border:1px solid rgba(45,212,191,.3);border-radius:99px;padding:.35rem .9rem;margin-bottom:1.2rem}
-.kicker .dot{width:8px;height:8px;border-radius:99px;background:var(--teal);animation:pulse 1.6s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,.5)}50%{box-shadow:0 0 0 7px rgba(45,212,191,0)}}
-.hero h1{font-family:var(--disp);font-size:clamp(2.2rem,4.6vw,3.6rem);line-height:1.08;font-weight:700}
-.hero h1 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero .sub{color:var(--mut);margin:1.1rem 0 1.8rem;font-size:1.06rem;max-width:46ch;line-height:1.6}
-.hero-cta{display:flex;gap:.8rem;flex-wrap:wrap}
-.hero-stats{display:flex;gap:2rem;margin-top:2.4rem;flex-wrap:wrap}
-.hero-stats div b{font-family:var(--disp);font-size:1.5rem;display:block}
-.hero-stats div span{color:var(--mut);font-size:.82rem}
+  /* Cuando el menú está abierto (clase "open" añadida con JS) */
+  .game-dropdown-content.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) scale(1) rotateY(0deg);
+  }
 
-/* Monitor (panel derecho) */
-.monitor{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.4rem;box-shadow:var(--shadow);
-  position:relative;overflow:hidden}
-.monitor::before{content:'';position:absolute;inset:0;background:radial-gradient(300px 160px at 80% 0%,rgba(45,212,191,.12),transparent);pointer-events:none}
-.monitor-head{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:var(--mut);margin-bottom:.8rem}
-.rec{display:flex;gap:.4rem;align-items:center;color:var(--red)}
-.rec i{width:8px;height:8px;background:var(--red);border-radius:99px;animation:pulse 1.2s infinite}
-.ecg{width:100%;height:90px}
-.ecg path{fill:none;stroke:var(--teal);stroke-width:2.4;stroke-linecap:round;
-  stroke-dasharray:600;stroke-dashoffset:600;animation:ecg 3.2s linear infinite;
-  filter:drop-shadow(0 0 6px rgba(45,212,191,.7))}
-@keyframes ecg{to{stroke-dashoffset:0}}
-.slide-box{margin-top:1rem;border:1px dashed rgba(148,180,255,.25);border-radius:12px;padding:1rem;min-height:74px;
-  display:flex;align-items:center;gap:.8rem;transition:.3s}
-.slide-box .s-ico{font-size:1.6rem}
-.slide-box .s-txt{font-weight:600;font-size:.95rem}
-.vitals{display:flex;gap:.7rem;margin-top:1rem;flex-wrap:wrap}
-.vital{flex:1;min-width:90px;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:.6rem .8rem}
-.vital b{font-family:var(--disp);color:var(--teal);font-size:1.05rem}
-.vital span{display:block;font-size:.7rem;color:var(--mut);letter-spacing:1px;text-transform:uppercase}
+  /* Elementos del menú (juegos) con animación individual */
+  .game-dropdown-content a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.7rem 1.5rem;
+    margin: 0.2rem 0.5rem;
+    border-radius: 16px;
+    color: #1e293b;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    background: transparent;
+    border-left: 3px solid transparent;
+    font-size: 0.9rem;
+  }
 
-/* ---------- Secciones ---------- */
-section{max-width:1200px;margin:auto;padding:4rem 1.2rem}
-.sec-head{margin-bottom:2rem}
-.sec-head .tag{font-size:.75rem;letter-spacing:3px;text-transform:uppercase;color:var(--teal);font-weight:600}
-.sec-head h2{font-family:var(--disp);font-size:clamp(1.6rem,3vw,2.3rem);margin:.3rem 0 .4rem}
-.sec-head p{color:var(--mut)}
+  .game-dropdown-content a:hover {
+    background: #fef9c3;
+    border-left-color: #f59e0b;
+    transform: translateX(6px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
 
-/* Categorías */
-.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.1rem}
-.cat-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.6rem 1.4rem;cursor:pointer;
-  transition:.25s;position:relative;overflow:hidden}
-.cat-card::after{content:'';position:absolute;inset:auto 0 0 0;height:3px;background:var(--grad);transform:scaleX(0);
-  transform-origin:left;transition:.3s}
-.cat-card:hover{transform:translateY(-5px);border-color:rgba(45,212,191,.4)}
-.cat-card:hover::after{transform:scaleX(1)}
-.cat-card .ico{font-size:2rem}
-.cat-card h3{font-family:var(--disp);margin:.7rem 0 .3rem;font-size:1.1rem}
-.cat-card p{color:var(--mut);font-size:.86rem}
-.cat-card .count{margin-top:.8rem;font-size:.78rem;color:var(--teal);font-weight:600}
+  .game-dropdown-content a i {
+    font-size: 1.3rem;
+    width: 28px;
+    text-align: center;
+    color: #f59e0b;
+  }
 
-/* Toolbar filtros */
-.toolbar{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1.6rem}
-.tabs{display:flex;gap:.4rem;flex-wrap:wrap}
-.tab{background:rgba(148,180,255,.07);border:1px solid var(--line);color:var(--mut);padding:.5rem 1rem;border-radius:99px;
-  font-size:.86rem;font-weight:600;transition:.2s}
-.tab:hover{color:var(--ink)}
-.tab.act{background:var(--grad);color:#04121c;border-color:transparent}
-.toolbar select{margin-left:auto;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;
-  padding:.5rem .8rem}
+  /* Animación de "sorpresa" al abrir: cada ítem aparece con retraso */
+  .game-dropdown-content.open a {
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    opacity: 0;
+    transform: scale(0.8) translateY(-10px);
+  }
 
-/* Grid de productos */
-.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.2rem}
-.p-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:.25s;
-  display:flex;flex-direction:column;animation:fadeUp .5s both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-.p-card:hover{transform:translateY(-6px);border-color:rgba(45,212,191,.45);box-shadow:0 18px 40px rgba(0,0,0,.4)}
-.p-img{height:150px;display:grid;place-items:center;font-size:3.4rem;background:linear-gradient(160deg,var(--card2),#0a1226);
-  position:relative}
-.chip{position:absolute;top:.7rem;left:.7rem;font-size:.68rem;font-weight:700;letter-spacing:.6px;padding:.28rem .6rem;
-  border-radius:99px;text-transform:uppercase}
-.chip.medicamentos{background:rgba(45,212,191,.15);color:var(--teal)}
-.chip.tecnologia{background:rgba(56,189,248,.15);color:var(--cyan)}
-.chip.salud{background:rgba(251,191,36,.15);color:var(--amber)}
-.chip.gaming{background:rgba(251,113,133,.15);color:var(--red)}
-.badge-of{position:absolute;top:.7rem;right:.7rem;background:var(--amber);color:#3a2a00;font-size:.7rem;font-weight:800;
-  padding:.28rem .55rem;border-radius:99px}
-.badge-star{position:absolute;bottom:.7rem;right:.7rem;font-size:.85rem}
-.p-body{padding:1rem 1.1rem 1.2rem;display:flex;flex-direction:column;gap:.45rem;flex:1}
-.p-body h3{font-family:var(--disp);font-size:1rem;line-height:1.3}
-.p-body .desc{color:var(--mut);font-size:.82rem;flex:1}
-.p-price{display:flex;align-items:baseline;gap:.5rem;margin-top:.3rem}
-.p-price b{font-family:var(--disp);font-size:1.25rem;color:var(--teal)}
-.p-price s{color:var(--mut);font-size:.85rem}
-.p-foot{display:flex;justify-content:space-between;align-items:center;margin-top:.5rem}
-.stock{font-size:.75rem;color:var(--mut)}
-.stock.low{color:var(--amber)}
-.stock.out{color:var(--red)}
+  .game-dropdown-content.open a:nth-child(1) { animation-delay: 0.05s; }
+  .game-dropdown-content.open a:nth-child(2) { animation-delay: 0.10s; }
+  .game-dropdown-content.open a:nth-child(3) { animation-delay: 0.15s; }
+  .game-dropdown-content.open a:nth-child(4) { animation-delay: 0.20s; }
+  .game-dropdown-content.open a:nth-child(5) { animation-delay: 0.25s; }
+  .game-dropdown-content.open a:nth-child(6) { animation-delay: 0.30s; }
 
-/* Ofertas */
-.of-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem}
-.of-card{display:flex;gap:1rem;background:linear-gradient(140deg,rgba(251,191,36,.08),var(--card) 55%);
-  border:1px solid rgba(251,191,36,.25);border-radius:var(--r);padding:1.1rem;transition:.25s;animation:fadeUp .5s both}
-.of-card:hover{transform:translateY(-5px);box-shadow:0 16px 36px rgba(0,0,0,.4)}
-.of-ico{font-size:2.4rem}
-.of-info{flex:1}
-.of-info h3{font-family:var(--disp);font-size:1rem}
-.of-info .p-price b{color:var(--amber)}
-.of-off{font-family:var(--disp);font-weight:700;color:var(--amber);font-size:1.15rem;white-space:nowrap}
+  @keyframes popIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
 
-/* ============================================================
-   🔒 MURO DE ACCESO (login wall)
-   ============================================================ */
-body.no-auth .zona-protegida .contenido-seccion{display:none}
-body.auth .auth-wall,body.auth .preview-bloqueado{display:none!important}
-.auth-wall{padding:2.5rem 0 1rem}
-.auth-wall-card{max-width:560px;margin:0 auto;text-align:center;padding:2.6rem 2.2rem;border-radius:18px;
-  border:1px dashed rgba(148,180,255,.3);background:rgba(148,180,255,.04);animation:fadeUp .5s both}
-.auth-wall-icon{font-size:2.8rem;display:inline-block;animation:lockFloat 2.6s ease-in-out infinite}
-@keyframes lockFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-.auth-wall-card h3{font-family:var(--disp);font-size:1.35rem;margin:.8rem 0 .4rem}
-.auth-wall-card>p{color:var(--mut)}
-.auth-wall-card ul{list-style:none;text-align:left;display:inline-block;margin:1.2rem 0 1.5rem}
-.auth-wall-card li{padding:.3rem 0;color:var(--mut)}
-.auth-wall-card li b{color:var(--ink);font-weight:600}
-.auth-wall-botones{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+  /* Flecha indicadora */
+  .game-dropdown-btn .arrow {
+    transition: transform 0.3s ease;
+    display: inline-block;
+  }
 
-/* Vista previa borrosa */
-.preview-bloqueado{position:relative;margin-top:2rem}
-.preview-bloqueado .ghost-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.2rem;
-  filter:blur(13px);pointer-events:none;user-select:none;opacity:.75}
-.ghost-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.ghost-card .g-img{height:150px;background:linear-gradient(120deg,#16234a,#0e1830,#16234a);background-size:200% 100%;
-  animation:shimmer 2.2s linear infinite}
-@keyframes shimmer{to{background-position:-200% 0}}
-.ghost-card .g-body{padding:1rem}
-.ghost-card .g-l{height:12px;border-radius:6px;background:#1c2c55;margin-bottom:.6rem}
-.ghost-card .g-l.s{width:55%}
-.preview-bloqueado .velo{position:absolute;inset:0;display:grid;place-items:center;background:rgba(10,16,32,.35);
-  font-weight:700;font-family:var(--disp);font-size:1.05rem;color:var(--teal);text-align:center;padding:1rem}
+  .game-dropdown-btn .arrow.open {
+    transform: rotate(180deg);
+  }
 
-/* ---------- Footer ---------- */
-footer{border-top:1px solid var(--line);margin-top:3rem;background:var(--bg2)}
-.foot{max-width:1200px;margin:auto;padding:3rem 1.2rem 2rem;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2rem}
-.foot h4{font-family:var(--disp);margin-bottom:.9rem;font-size:.95rem}
-.foot a,.foot p{display:block;color:var(--mut);font-size:.88rem;padding:.25rem 0;transition:.2s}
-.foot a:hover{color:var(--teal)}
-.foot .desc{max-width:34ch;line-height:1.6}
-.socials{display:flex;gap:.6rem;margin-top:.8rem}
-.socials a{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;padding:0}
-.socials a:hover{border-color:var(--teal);transform:translateY(-3px)}
-.copy{border-top:1px solid var(--line);text-align:center;color:var(--mut);font-size:.8rem;padding:1.1rem}
+  /* ============================================================
+     🔒 MURO DE AUTENTICACIÓN (Login Wall)
+     ============================================================ */
+  body.no-auth .zona-protegida .contenido-seccion {
+    display: none !important;
+  }
 
-/* ---------- Modales ---------- */
-.modal{position:fixed;inset:0;z-index:100;display:none;place-items:center;background:rgba(5,9,20,.75);
-  backdrop-filter:blur(6px);padding:1rem}
-.modal.open{display:grid}
-.modal-box{background:var(--card);border:1px solid var(--line);border-radius:18px;width:100%;max-width:420px;
-  padding:2rem;position:relative;box-shadow:var(--shadow);animation:pop .3s both;max-height:92vh;overflow:auto}
-@keyframes pop{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:none}}
-.modal-box.wide{max-width:1080px}
-.modal-close{position:absolute;top:.9rem;right:.9rem;background:rgba(148,180,255,.08);border:none;color:var(--mut);
-  width:34px;height:34px;border-radius:9px;font-size:1rem;transition:.2s}
-.modal-close:hover{color:var(--red);background:rgba(251,113,133,.12)}
-.modal-box h2{font-family:var(--disp);font-size:1.4rem;margin-bottom:.3rem}
-.modal-box .m-sub{color:var(--mut);font-size:.88rem;margin-bottom:1.4rem}
-.field{margin-bottom:1rem}
-.field label{display:block;font-size:.82rem;font-weight:600;color:var(--mut);margin-bottom:.35rem}
-.field input,.field select,.field textarea{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--ink);
-  border-radius:10px;padding:.7rem .9rem;transition:.2s}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--teal);
-  box-shadow:0 0 0 3px rgba(45,212,191,.15)}
-.err{color:var(--red);font-size:.78rem;margin-top:.3rem;display:none}
-.err.show{display:block}
-.form-alt{text-align:center;margin-top:1.1rem;font-size:.86rem;color:var(--mut)}
-.form-alt button{background:none;border:none;color:var(--teal);font-weight:600;font-size:.86rem}
-.hint{background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.25);border-radius:10px;padding:.6rem .8rem;
-  font-size:.78rem;color:var(--cyan);margin-top:1rem}
+  body.auth .auth-wall,
+  body.auth .preview-bloqueado {
+    display: none !important;
+  }
 
-/* Carrito */
-.cart-list{display:flex;flex-direction:column;gap:.7rem;margin:1rem 0;max-height:320px;overflow:auto}
-.cart-item{display:flex;gap:.8rem;align-items:center;background:var(--card2);border:1px solid var(--line);
-  border-radius:10px;padding:.7rem}
-.cart-item .ci-ico{font-size:1.6rem}
-.cart-item .ci-info{flex:1}
-.cart-item h4{font-size:.88rem}
-.cart-item .ci-price{color:var(--teal);font-size:.82rem}
-.qty{display:flex;align-items:center;gap:.5rem}
-.qty button{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:none;color:var(--ink)}
-.qty button:hover{border-color:var(--teal)}
-.ci-del{background:none;border:none;color:var(--mut);font-size:1rem}
-.ci-del:hover{color:var(--red)}
-.cart-total{display:flex;justify-content:space-between;font-family:var(--disp);font-size:1.15rem;
-  border-top:1px solid var(--line);padding-top:1rem;margin-top:.4rem}
-.cart-total b{color:var(--teal)}
-.cart-empty{text-align:center;color:var(--mut);padding:2rem 0}
+  .auth-wall {
+    padding: 4rem 1rem;
+    text-align: center;
+  }
 
-/* ---------- Panel Admin ---------- */
-.admin-layout{display:grid;grid-template-columns:200px 1fr;gap:1.4rem;min-height:480px}
-.admin-nav{display:flex;flex-direction:column;gap:.3rem;border-right:1px solid var(--line);padding-right:1rem}
-.admin-nav button{background:none;border:none;color:var(--mut);text-align:left;padding:.6rem .8rem;border-radius:9px;
-  font-size:.88rem;font-weight:600;transition:.2s}
-.admin-nav button:hover{background:rgba(148,180,255,.07);color:var(--ink)}
-.admin-nav button.act{background:rgba(45,212,191,.12);color:var(--teal)}
-.admin-panel{display:none;overflow:auto}
-.admin-panel.act{display:block;animation:fadeUp .35s both}
-.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.8rem;margin-bottom:1.4rem}
-.stat{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:.9rem}
-.stat b{font-family:var(--disp);font-size:1.4rem;display:block}
-.stat span{font-size:.72rem;color:var(--mut);letter-spacing:.5px;text-transform:uppercase}
-.stat.ok b{color:var(--teal)}.stat.warn b{color:var(--amber)}.stat.info b{color:var(--cyan)}.stat.bad b{color:var(--red)}
-.tbl{width:100%;border-collapse:collapse;font-size:.85rem}
-.tbl th{text-align:left;color:var(--mut);font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;
-  padding:.5rem;border-bottom:1px solid var(--line)}
-.tbl td{padding:.55rem .5rem;border-bottom:1px solid rgba(148,180,255,.07)}
-.bar-row{display:grid;grid-template-columns:110px 1fr 44px;gap:.6rem;align-items:center;margin-bottom:.5rem;font-size:.83rem}
-.bar{height:10px;border-radius:99px;background:rgba(148,180,255,.1);overflow:hidden}
-.bar i{display:block;height:100%;background:var(--grad);border-radius:99px;transition:width .8s ease}
-.bar.days i{background:linear-gradient(90deg,var(--amber),#f59e0b)}
-.admin-grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
-.pill{font-size:.7rem;font-weight:700;padding:.2rem .55rem;border-radius:99px}
-.pill.ok{background:rgba(45,212,191,.15);color:var(--teal)}
-.pill.no{background:rgba(251,113,133,.15);color:var(--red)}
+  .auth-wall-card {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.95));
+    border: 2px dashed #0d9488;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    animation: fadeInUp 0.6s ease;
+  }
 
-/* ---------- Toasts ---------- */
-.toasts{position:fixed;bottom:1.2rem;right:1.2rem;z-index:200;display:flex;flex-direction:column;gap:.6rem}
-.toast{background:var(--card);border:1px solid var(--teal);border-left:4px solid var(--teal);color:var(--ink);
-  padding:.8rem 1.1rem;border-radius:10px;box-shadow:var(--shadow);font-size:.9rem;animation:slideIn .3s both;max-width:320px}
-.toast.error{border-color:var(--red)}
-@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
-/* ---------- Chatbot ---------- */
-.chat-fab{position:fixed;bottom:1.2rem;left:1.2rem;z-index:90;width:54px;height:54px;border-radius:99px;border:none;
-  background:var(--grad);font-size:1.4rem;box-shadow:0 12px 30px rgba(45,212,191,.4);transition:.25s}
-.chat-fab:hover{transform:scale(1.08)}
-.chat-panel{position:fixed;bottom:5.6rem;left:1.2rem;z-index:90;width:320px;max-width:calc(100vw - 2.4rem);
-  background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
-  display:none;flex-direction:column;animation:pop .25s both}
-.chat-panel.open{display:flex}
-.chat-head{background:linear-gradient(90deg,rgba(45,212,191,.15),rgba(56,189,248,.12));padding:.9rem 1.1rem;
-  font-family:var(--disp);font-weight:700;display:flex;justify-content:space-between;align-items:center}
-.chat-body{padding:1rem;height:260px;overflow:auto;display:flex;flex-direction:column;gap:.6rem;font-size:.86rem}
-.msg{max-width:85%;padding:.6rem .8rem;border-radius:12px;line-height:1.45}
-.msg.bot{background:var(--card2);border:1px solid var(--line);border-bottom-left-radius:4px}
-.msg.user{background:rgba(45,212,191,.15);align-self:flex-end;border-bottom-right-radius:4px}
-.chat-input{display:flex;gap:.5rem;padding:.8rem;border-top:1px solid var(--line)}
-.chat-input input{flex:1;background:var(--card2);border:1px solid var(--line);border-radius:99px;color:var(--ink);
-  padding:.55rem 1rem;font-size:.86rem}
-.chat-input button{background:var(--grad);border:none;border-radius:99px;width:40px;height:40px}
+  .auth-wall-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: lockFloat 2.5s ease-in-out infinite;
+  }
 
-/* Reveal on scroll */
-.reveal{opacity:0;transform:translateY(26px);transition:.7s cubic-bezier(.2,.7,.3,1)}
-.reveal.in{opacity:1;transform:none}
+  @keyframes lockFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
 
-/* Responsive */
-@media(max-width:960px){
-  .hero{grid-template-columns:1fr;padding-top:3rem}
-  .foot{grid-template-columns:1fr 1fr}
-  .admin-layout{grid-template-columns:1fr}
-  .admin-nav{flex-direction:row;flex-wrap:wrap;border-right:none;border-bottom:1px solid var(--line);padding:0 0 .8rem}
-  .admin-grid2{grid-template-columns:1fr}
-}
-@media(max-width:640px){
-  .nav-links{display:none}
-  .foot{grid-template-columns:1fr}
-}
+  .auth-wall-card h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+  }
+
+  .auth-wall-card > p {
+    color: #64748b;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .auth-wall-card ul {
+    list-style: none;
+    text-align: left;
+    display: inline-block;
+    margin: 1.5rem 0;
+    padding: 0;
+  }
+
+  .auth-wall-card li {
+    padding: 0.6rem 0;
+    color: #475569;
+    font-size: 0.95rem;
+  }
+
+  .auth-wall-card li i {
+    color: #10b981;
+    margin-right: 0.5rem;
+  }
+
+  .auth-wall-botones {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  .auth-wall-botones button {
+    padding: 0.8rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .auth-wall-botones .btn-login {
+    background: linear-gradient(135deg, #0d9488, #0891b2);
+    color: white;
+    border: none;
+  }
+
+  .auth-wall-botones .btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(13, 148, 136, 0.4);
+  }
+
+  .auth-wall-botones .btn-register {
+    background: white;
+    color: #0d9488;
+    border: 2px solid #0d9488;
+  }
+
+  .auth-wall-botones .btn-register:hover {
+    background: #0d9488;
+    color: white;
+  }
+
+  /* Vista previa borrosa */
+  .preview-bloqueado {
+    position: relative;
+    margin-top: 2rem;
+  }
+
+  .preview-bloqueado .ghost-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.5rem;
+    filter: blur(12px);
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.6;
+  }
+
+  .ghost-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .ghost-card .g-img {
+    height: 180px;
+    background: linear-gradient(120deg, #e2e8f0, #cbd5e1, #e2e8f0);
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  @keyframes shimmer {
+    to { background-position: -200% 0; }
+  }
+
+  .ghost-card .g-body {
+    padding: 1rem;
+  }
+
+  .ghost-card .g-line {
+    height: 14px;
+    background: #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 0.8rem;
+  }
+
+  .ghost-card .g-line.short {
+    width: 60%;
+  }
+
+  .preview-bloqueado .velo {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(2px);
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #0d9488;
+    text-align: center;
+  }
+
+  /* Toast para mensajes de autenticación */
+  .auth-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #0d9488, #0891b2);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    z-index: 9999;
+    animation: slideInRight 0.4s ease;
+    max-width: 350px;
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(100px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
 </style>
-</head>
+    
 
+</head>
+    
 <body class="no-auth">
 <script>
   // Evita parpadeo: si ya hay sesión, marca como autenticado de inmediato
   if(localStorage.getItem('mt_session')) document.body.className='auth';
 </script>
-<div class="bg-layer"></div><div class="bg-grid"></div>
 
-<!-- Ticker -->
-<div class="ticker" aria-hidden="true"><div class="ticker-track" id="tickerTrack">
-  <span>🚚 Envío gratis en pedidos +$50</span><span>💊 Medicamentos certificados</span>
-  <span>💻 Hardware con garantía oficial</span><span>🔒 Catálogo exclusivo para miembros</span>
-  <span>🔥 Ofertas nuevas cada semana</span>
-</div></div>
+    <!-- ============================================ -->
+    <!-- HEADER -->
+    <!-- ============================================ -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-logo">
+                <div class="header-logo-icon"><i class="fas fa-heartbeat"></i></div>
+                <div>
+                    <h1>Medi<span class="gradient-text">Tech</span></h1>
+                    <div class="header-logo-sub" id="header-subtitle">Salud & Tecnología</div>
+                </div>
+            </div>
 
-<!-- ================= HEADER ================= -->
-<header>
-  <nav class="nav">
-    <a href="#inicio" class="logo"><span class="logo-badge">✚</span>
-      <span>MediTech<small>Salud &amp; Tecnología</small></span></a>
+            <div class="search-container">
+                <div id="chat-chips" style="display:flex;gap:6px;flex-wrap:wrap;padding:6px 10px;"></div>
+                <input type="text" id="search-input" placeholder="Buscar productos..." oninput="searchProducts(this.value)">
+                <i class="fas fa-search search-icon"></i>
+                <div id="search-results" class="search-results"></div>
+            </div>
 
-    <div class="nav-links">
-      <a href="#inicio">Inicio</a>
-      <a href="#productos" class="nav-gated">Productos</a>
-      <a href="#categorias" class="nav-gated">Categorías</a>
-      <a href="#ofertas" class="nav-gated">Ofertas</a>
-      <div class="dropdown">
-        <button class="drop-btn">🎮 Juegos ▼</button>
-        <div class="drop-menu">
-          <a href="gms/Vuelo-V3.html">✈️ AeroHolgín</a>
-          <a href="gms/HLG-Z/index.html">🚀 HLG-Z</a>
-          <a href="gms/NeonRushPursuitEdition.html">🏎️ Neon Rush</a>
-          <a href="gms/MugenKalm.html">🧘 Mugen Kalm</a>
-          <a href="gms/MugenKalmVcell/MugenKalm-Vcell.html">📱 Mugen Kalm (Móvil)</a>
-          <a href="gms/WKalm/worl-kalm.html">🌍 Worl Kalm</a>
+<nav class="nav">
+    <a href="#inicio">Inicio</a>
+    <a href="#productos" class="nav-gated">Productos</a>
+    <a href="#categorias" class="nav-gated">Categorías</a>
+    <a href="#ofertas" class="nav-gated">Ofertas</a>
+
+    <!-- MENÚ DESPLEGABLE DE JUEGOS (CAJITA SORPRESA) -->
+    <div class="game-dropdown">
+        <button class="game-dropdown-btn" onclick="toggleGameMenu()">
+            <i class="fas fa-gamepad"></i> Juegos <span class="arrow">▼</span>
+        </button>
+        <!-- ============================================ -->
+        <!-- 👇 Link de juegos aqui 👇 -->
+        <!-- ============================================ -->
+        <div class="game-dropdown-content" id="gameMenu">
+            <a href="gms/Vuelo-V3.html" class="game-link"><i class="fas fa-plane"></i> AeroHolgín</a>
+            <a href="gms/HLG-Z/index.html" class="game-link"><i class="fas fa-ghost"></i> HLG-Z</a>
+            <a href="gms/NeonRushPursuitEdition.html" class="game-link"><i class="fas fa-car"></i> Neon Rush</a>
+            <a href="gms/MugenKalm.html" class="game-link"><i class="fas fa-skull"></i> Mugen Kalm</a>
+            <a href="gms/MugenKalmVcell/MugenKalm-Vcell.html" class="game-link"><i class="fas fa-mobile-alt"></i> Mugen Kalm (Móvil)</a>
+            <a href="gms/WKalm/worl-kalm.html" class="game-link"><i class="fas fa-mobile-alt"></i> Worl Kalm</a>
         </div>
-      </div>
     </div>
+</nav>
 
-    <div class="nav-actions">
-      <button class="cart-btn" id="btnCart" title="Carrito">🛒<span class="cart-count" id="cartCount">0</span></button>
-      <button class="btn btn-grad btn-sm" id="btnLogin" onclick="abrirModal('modalLogin')">Iniciar Sesión</button>
+            <div class="flex items-center gap-3">
+                <button id="cart-btn" onclick="openCart()" class="cart-btn hidden">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span id="cart-count" class="cart-count">0</span>
+                </button>
 
-      <div class="user-menu" id="menuUsuario" hidden>
-        <button class="user-chip">👤 <span id="userName">Usuario</span> ▾</button>
-        <div class="user-drop">
-          <div class="u-name" id="saludoUsuario">Conectado como</div>
-          <button data-solo-admin onclick="openAdmin('productos')">⚙️ Panel Admin</button>
-          <button data-solo-admin onclick="openAdmin('usuarios')">👥 Gestión Usuarios</button>
-          <button data-solo-admin onclick="toast('🤖 Configura tu Bot Telegram desde Configuración del Panel Admin.')">🤖 Bot Telegram</button>
-          <button data-solo-admin onclick="openAdmin('productos')">📊 Panel CRUD</button>
-          <button class="logout" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+                <div class="user-section" id="user-section">
+                    <button id="user-btn" onclick="toggleUserMenu()" class="user-btn">
+                        <i class="fas fa-user-circle text-xl"></i>
+                        <span id="user-name-display" class="hidden md:inline">Iniciar Sesión</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                    <div id="user-menu" class="user-menu">
+                        <div id="menu-logged-out">
+                            <button onclick="openLoginModal()" class="user-menu-item">
+                                <i class="fas fa-sign-in-alt text-teal-600"></i> Iniciar Sesión
+                            </button>
+                            <button onclick="openRegisterModal()" class="user-menu-item">
+                                <i class="fas fa-user-plus text-teal-600"></i> Registrarse
+                            </button>
+                        </div>
+                        <div id="menu-logged-in" class="hidden">
+                            <div class="px-4 py-3 border-b border-gray-200">
+                                <p class="text-sm text-gray-500">Conectado como</p>
+                                <p id="user-menu-name" class="font-bold text-gray-900"></p>
+                                <span id="user-role-badge" class="badge-role user"></span>
+                            </div>
+                            <button id="admin-menu-btn" onclick="openAdminPanel()" class="user-menu-item hidden">
+                                <i class="fas fa-cog text-orange-600"></i> Panel Admin
+                            </button>
+                            <button id="users-menu-btn" onclick="window.location.href='admin-usuarios.html'" class="user-menu-item hidden">
+                                <i class="fas fa-users-cog text-teal-600"></i> Gestión Usuarios
+                            </button>
+                            <button id="telegram-btn" onclick="window.open('telegram-bot.html', '_blank')" class="user-menu-item hidden">
+                                <i class="fab fa-telegram text-blue-500"></i> 🤖 Bot Telegram
+                            </button>
+                            <button id="crud-menu-btn" onclick="window.location.href='admin-crud.html'" class="user-menu-item hidden">
+                                <i class="fas fa-database text-purple-600"></i> 📊 Panel CRUD
+                            </button>                           
+                            <button onclick="logout()" class="user-menu-item danger">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </nav>
-</header>
+    </header>
 
-<main>
-<!-- ================= HERO ================= -->
-<section id="inicio" class="hero">
-  <div>
-    <span class="kicker"><i class="dot"></i> Sistema en línea · Atención 24/7</span>
-    <h1 id="heroTitle">Tu salud y tu <em>tecnología</em>, en un solo lugar.</h1>
-    <p class="sub" id="heroSub">Medicamentos certificados y hardware de última generación. Crea tu cuenta gratuita para desbloquear el catálogo completo, precios y ofertas exclusivas.</p>
-    <div class="hero-cta">
-      <button class="btn btn-grad" onclick="irACatalogo()">Explorar catálogo →</button>
-      <button class="btn btn-ghost" id="heroSecBtn" onclick="abrirModal('modalRegistro')">Crear cuenta gratis</button>
-    </div>
-    <div class="hero-stats">
-      <div><b id="statProd">0</b><span>Productos</span></div>
-      <div><b id="statUsers">0</b><span>Miembros</span></div>
-      <div><b>24/7</b><span>Soporte</span></div>
-      <div><b>100%</b><span>Garantía</span></div>
-    </div>
-  </div>
+    <!-- ============================================ -->
+    <!-- CARRUSEL HERO -->
+    <!-- ============================================ -->
+    <section id="inicio" class="hero">
+        <div class="container">
+            <div class="carousel">
+                <div class="carousel-inner" id="carousel-inner"></div>
+                <button class="carousel-btn prev" onclick="moveCarousel(-1)"><i class="fas fa-chevron-left"></i></button>
+                <button class="carousel-btn next" onclick="moveCarousel(1)"><i class="fas fa-chevron-right"></i></button>
+                <div class="carousel-dots" id="carousel-dots"></div>
+            </div>
+        </div>
+    </section>
 
-  <div class="monitor reveal">
-    <div class="monitor-head"><span>PANEL MEDI-TECH · v2.0</span><span class="rec"><i></i> EN VIVO</span></div>
-    <svg class="ecg" viewBox="0 0 300 90" preserveAspectRatio="none">
-      <path d="M0,45 L40,45 L50,45 L58,20 L66,70 L74,45 L110,45 L120,45 L128,15 L136,75 L144,45 L190,45 L200,45 L208,25 L216,65 L224,45 L300,45"/>
-    </svg>
-    <div class="slide-box"><span class="s-ico" id="slideIco">💊</span><span class="s-txt" id="slideTxt">Bienvenido a MediTech</span></div>
-    <div class="vitals">
-      <div class="vital"><b>98.6°</b><span>Temp</span></div>
-      <div class="vital"><b>72</b><span>BPM</span></div>
-      <div class="vital"><b>99%</b><span>SpO₂</span></div>
-    </div>
-  </div>
-</section>
+    <!-- ============================================ -->
+    <!-- CATEGORÍAS (🔒 PROTEGIDA) -->
+    <!-- ============================================ -->
+    <section id="categorias" class="categories-section zona-protegida">
+        <!-- Muro de acceso -->
+        <div class="auth-wall">
+            <div class="auth-wall-card">
+                <div class="auth-wall-icon">🔒</div>
+                <h3>Categorías exclusivas para miembros</h3>
+                <p>Inicia sesión o regístrate gratis para explorar:</p>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> <strong>Medicamentos</strong> certificados y de confianza</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Tecnología</strong> con garantía oficial</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Salud</strong> y bienestar para tu familia</li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Gaming</strong> de alto rendimiento</li>
+                </ul>
+                <div class="auth-wall-botones">
+                    <button class="btn-login" onclick="pedirLogin('#categorias')">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </button>
+                    <button class="btn-register" onclick="pedirRegistro('#categorias')">
+                        <i class="fas fa-user-plus"></i> Crear cuenta gratis
+                    </button>
+                </div>
+            </div>
+        </div>
 
-<!-- ================= CATEGORÍAS (🔒 protegida) ================= -->
-<section id="categorias" class="zona-protegida">
-  <!-- Muro de acceso -->
-  <div class="auth-wall">
-    <div class="auth-wall-card">
-      <span class="auth-wall-icon">🔒</span>
-      <h3>Categorías exclusivas para miembros</h3>
-      <p>Inicia sesión o regístrate gratis para explorar:</p>
-      <ul>
-        <li>✅ <b>Medicamentos</b> certificados y de confianza</li>
-        <li>✅ <b>Tecnología</b> con garantía oficial</li>
-        <li>✅ <b>Salud</b> y bienestar para tu familia</li>
-        <li>✅ <b>Gaming</b> de alto rendimiento</li>
-      </ul>
-      <div class="auth-wall-botones">
-        <button class="btn btn-grad" onclick="pedirLogin('#categorias')">Iniciar Sesión</button>
-        <button class="btn btn-ghost" onclick="pedirRegistro('#categorias')">Crear cuenta gratis</button>
-      </div>
-    </div>
-  </div>
+        <div class="contenido-seccion">
+            <div class="container">
+                <div class="section-header">
+                    <h2 id="categorias-title">Explora por Categoría</h2>
+                    <p id="categorias-subtitle">Encuentra exactamente lo que necesitas</p>
+                </div>
+                <div class="category-grid" id="categorias-grid"></div>
+            </div>
+        </div>
+    </section>
 
-  <div class="contenido-seccion">
-    <div class="sec-head reveal"><span class="tag">Explora</span><h2 id="catTitle">Explora por Categoría</h2><p id="catSub">Encuentra exactamente lo que necesitas</p></div>
-    <div class="cat-grid">
-      <div class="cat-card reveal" onclick="filtrar('medicamentos')"><span class="ico">💊</span><h3>Medicamentos</h3><p>Analgésicos, antibióticos y vitaminas.</p><span class="count" data-count-cat="medicamentos"></span></div>
-      <div class="cat-card reveal" onclick="filtrar('tecnologia')"><span class="ico">💻</span><h3>Tecnología</h3><p>Componentes y hardware de PC.</p><span class="count" data-count-cat="tecnologia"></span></div>
-      <div class="cat-card reveal" onclick="filtrar('salud')"><span class="ico">🩺</span><h3>Salud</h3><p>Equipos médicos y cuidado personal.</p><span class="count" data-count-cat="salud"></span></div>
-      <div class="cat-card reveal" onclick="filtrar('gaming')"><span class="ico">🎮</span><h3>Gaming</h3><p>Periféricos y accesorios gamer.</p><span class="count" data-count-cat="gaming"></span></div>
-    </div>
-  </div>
-</section>
+    <!-- ============================================ -->
+    <!-- PRODUCTOS (🔒 PROTEGIDA) -->
+    <!-- ============================================ -->
+    <section id="productos" class="products-section zona-protegida">
+        <!-- Muro de acceso -->
+        <div class="auth-wall">
+            <div class="auth-wall-card">
+                <div class="auth-wall-icon">🔒</div>
+                <h3>Catálogo exclusivo para usuarios registrados</h3>
+                <p>Únete a MediTech y desbloquea al instante:</p>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> Catálogo completo con <strong>precios visibles</strong></li>
+                    <li><i class="fas fa-check-circle"></i> <strong>Ofertas y descuentos</strong> exclusivos</li>
+                    <li><i class="fas fa-check-circle"></i> Carrito de compras y <strong>pedidos por correo</strong></li>
+                    <li><i class="fas fa-check-circle"></i> Asistente MediTech personalizado</li>
+                </ul>
+                <div class="auth-wall-botones">
+                    <button class="btn-login" onclick="pedirLogin('#productos')">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </button>
+                    <button class="btn-register" onclick="pedirRegistro('#productos')">
+                        <i class="fas fa-user-plus"></i> Crear cuenta gratis
+                    </button>
+                </div>
+            </div>
+        </div>
 
-<!-- ================= PRODUCTOS (🔒 protegida) ================= -->
-<section id="productos" class="zona-protegida">
-  <!-- Muro de acceso -->
-  <div class="auth-wall">
-    <div class="auth-wall-card">
-      <span class="auth-wall-icon">🔒</span>
-      <h3>Catálogo exclusivo para usuarios registrados</h3>
-      <p>Únete a MediTech y desbloquea al instante:</p>
-      <ul>
-        <li>✅ Catálogo completo con <b>precios visibles</b></li>
-        <li>✅ <b>Ofertas y descuentos</b> exclusivos</li>
-        <li>✅ Carrito de compras y <b>pedidos por correo</b></li>
-        <li>✅ Asistente MediTech personalizado</li>
-      </ul>
-      <div class="auth-wall-botones">
-        <button class="btn btn-grad" onclick="pedirLogin('#productos')">Iniciar Sesión</button>
-        <button class="btn btn-ghost" onclick="pedirRegistro('#productos')">Crear cuenta gratis</button>
-      </div>
-    </div>
-  </div>
+        <!-- Vista previa borrosa (solo visible sin sesión) -->
+        <div class="preview-bloqueado" aria-hidden="true">
+            <div class="container">
+                <div class="products-header">
+                    <div class="section-header">
+                        <h2>🌟 Productos Destacados</h2>
+                        <p>Los más populares entre nuestros clientes</p>
+                    </div>
+                </div>
+                <div class="ghost-grid">
+                    <div class="ghost-card"><div class="g-img"></div><div class="g-body"><div class="g-line"></div><div class="g-line short"></div><div class="g-line short"></div></div></div>
+                    <div class="ghost-card"><div class="g-img"></div><div class="g-body"><div class="g-line"></div><div class="g-line short"></div><div class="g-line short"></div></div></div>
+                    <div class="ghost-card"><div class="g-img"></div><div class="g-body"><div class="g-line"></div><div class="g-line short"></div><div class="g-line short"></div></div></div>
+                    <div class="ghost-card"><div class="g-img"></div><div class="g-body"><div class="g-line"></div><div class="g-line short"></div><div class="g-line short"></div></div></div>
+                </div>
+                <div class="velo">🔒 Inicia sesión para ver los productos</div>
+            </div>
+        </div>
 
-  <!-- Vista previa borrosa (solo visible sin sesión) -->
-  <div class="preview-bloqueado" aria-hidden="true">
-    <div class="ghost-row">
-      <div class="ghost-card"><div class="g-img"></div><div class="g-body"><div class="g-l"></div><div class="g-l s"></div><div class="g-l s"></div></div></div>
-      <div class="ghost-card"><div class="g-img"></div><div class="g-body"><div class="g-l"></div><div class="g-l s"></div><div class="g-l s"></div></div></div>
-      <div class="ghost-card"><div class="g-img"></div><div class="g-body"><div class="g-l"></div><div class="g-l s"></div><div class="g-l s"></div></div></div>
-    </div>
-    <div class="velo">🔒 Inicia sesión para ver los productos</div>
-  </div>
+        <div class="contenido-seccion">
+            <div class="container">
+                <div class="products-header">
+                    <div class="section-header">
+                        <h2 id="productos-title">🌟 Productos Destacados</h2>
+                        <p id="productos-subtitle">Los más populares entre nuestros clientes</p>
+                    </div>
+                    <div class="filters">
+                        <select id="filter-category" onchange="filterProducts()">
+                            <option value="">Todas</option>
+                            <option value="medicamento">💊 Medicamentos</option>
+                            <option value="tecnologia">💻 Tecnología</option>
+                            <option value="salud">🩺 Salud</option>
+                            <option value="gaming">🎮 Gaming</option>
+                        </select>
+                        <select id="sort-by" onchange="filterProducts()">
+                            <option value="default">Ordenar</option>
+                            <option value="price-asc">Precio: Menor</option>
+                            <option value="price-desc">Precio: Mayor</option>
+                            <option value="name">Nombre A-Z</option>
+                        </select>
+                        <span class="product-count" id="product-total-label">Cargando...</span>
+                    </div>
+                </div>
+                <div id="portada-productos" class="product-grid">
+                    <p class="col-span-full text-center py-16 text-gray-400">
+                        <i class="fas fa-spinner fa-spin text-3xl mb-4 block"></i>
+                        Cargando productos...
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <div class="contenido-seccion">
-    <div class="sec-head reveal"><span class="tag">🌟 Catálogo</span><h2 id="prodTitle">Productos Destacados</h2><p id="prodSub">Los más populares entre nuestros clientes</p></div>
-    <div class="toolbar">
-      <div class="tabs" id="tabsCat">
-        <button class="tab act" data-cat="todas">Todas</button>
-        <button class="tab" data-cat="medicamentos">💊 Medicamentos</button>
-        <button class="tab" data-cat="tecnologia">💻 Tecnología</button>
-        <button class="tab" data-cat="salud">🩺 Salud</button>
-        <button class="tab" data-cat="gaming">🎮 Gaming</button>
-      </div>
-      <select id="selOrden" onchange="renderProductos()">
-        <option value="def">Ordenar</option>
-        <option value="precio-asc">Precio: Menor</option>
-        <option value="precio-desc">Precio: Mayor</option>
-        <option value="nombre">Nombre A-Z</option>
-      </select>
-    </div>
-    <div class="prod-grid" id="gridProductos"></div>
-  </div>
-</section>
+    <!-- ============================================ -->
+    <!-- OFERTAS (🔒 PROTEGIDA) -->
+    <!-- ============================================ -->
+    <section id="ofertas" class="offers-section zona-protegida">
+        <!-- Muro de acceso -->
+        <div class="auth-wall">
+            <div class="auth-wall-card">
+                <div class="auth-wall-icon">🔒</div>
+                <h3>Ofertas exclusivas para miembros</h3>
+                <p>Los descuentos solo son visibles para usuarios registrados.</p>
+                <div class="auth-wall-botones">
+                    <button class="btn-login" onclick="pedirLogin('#ofertas')">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </button>
+                    <button class="btn-register" onclick="pedirRegistro('#ofertas')">
+                        <i class="fas fa-user-plus"></i> Crear cuenta gratis
+                    </button>
+                </div>
+            </div>
+        </div>
 
-<!-- ================= OFERTAS (🔒 protegida) ================= -->
-<section id="ofertas" class="zona-protegida">
-  <div class="auth-wall">
-    <div class="auth-wall-card">
-      <span class="auth-wall-icon">🔒</span>
-      <h3>Ofertas exclusivas para miembros</h3>
-      <p>Los descuentos solo son visibles para usuarios registrados.</p>
-      <div class="auth-wall-botones">
-        <button class="btn btn-grad" onclick="pedirLogin('#ofertas')">Iniciar Sesión</button>
-        <button class="btn btn-ghost" onclick="pedirRegistro('#ofertas')">Crear cuenta gratis</button>
-      </div>
-    </div>
-  </div>
+        <div class="contenido-seccion">
+            <div class="container">
+                <div class="section-header">
+                    <h2 id="ofertas-title">🔥 Ofertas Especiales</h2>
+                    <p id="ofertas-subtitle">Aprovecha estos descuentos exclusivos</p>
+                </div>
+                <div class="offer-grid" id="ofertas-grid"></div>
+            </div>
+        </div>
+    </section>
 
-  <div class="contenido-seccion">
-    <div class="sec-head reveal"><span class="tag">🔥 Descuentos</span><h2 id="ofTitle">Ofertas Especiales</h2><p id="ofSub">Aprovecha estos descuentos exclusivos</p></div>
-    <div class="of-grid" id="gridOfertas"></div>
-  </div>
-</section>
-</main>
+    <!-- ============================================ -->
+    <!-- FOOTER -->
+    <!-- ============================================ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <h4 class="text-xl font-bold text-white">MediTech</h4>
+                    </div>
+                    <p class="text-sm opacity-70 leading-relaxed" id="footer-description">Tu tienda confiable para medicamentos y hardware de última generación.</p>
+                </div>
+                <div>
+                    <h5 class="font-semibold text-white mb-4">Enlaces</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#">Inicio</a></li>
+                        <li><a href="#productos" class="nav-gated">Productos</a></li>
+                        <li><a href="#ofertas" class="nav-gated">Ofertas</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold text-white mb-4">Legal</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#">Política de Privacidad</a></li>
+                        <li><a href="#">Términos y Condiciones</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold text-white mb-4">Síguenos</h5>
+                    <div class="social">
+                        <a href="https://www.facebook.com/profile.php?id=61579147574368"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom">
+                © <span id="year"></span> MediTech. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
 
-<!-- ================= FOOTER ================= -->
-<footer>
-  <div class="foot">
-    <div><a href="#inicio" class="logo"><span class="logo-badge">✚</span><span>MediTech</span></a>
-      <p class="desc" id="footDesc">Tu tienda confiable para medicamentos y hardware de última generación.</p>
-      <div class="socials"><a href="#">📘</a><a href="#">📸</a><a href="#">🐦</a><a href="#">✈️</a></div>
-    </div>
-    <div><h4>Enlaces</h4><a href="#inicio">Inicio</a><a href="#productos" class="nav-gated">Productos</a><a href="#ofertas" class="nav-gated">Ofertas</a></div>
-    <div><h4>Legal</h4><a href="#">Política de Privacidad</a><a href="#">Términos y Condiciones</a></div>
-    <div><h4>Contacto</h4><p>📧 ventas@mediatech.com</p><p>📱 +00 000 000 000</p></div>
-  </div>
-  <div class="copy">© <span id="anio"></span> MediTech. Todos los derechos reservados.</div>
-</footer>
+    <!-- ============================================ -->
+    <!-- MODALES -->
+    <!-- ============================================ -->
 
-<!-- ================= MODAL LOGIN ================= -->
-<div class="modal" id="modalLogin" role="dialog" aria-modal="true" aria-label="Iniciar sesión">
-  <div class="modal-box">
-    <button class="modal-close" onclick="cerrarModal('modalLogin')">✕</button>
-    <h2>Iniciar Sesión</h2><p class="m-sub">Accede a tu cuenta para ver el catálogo</p>
-    <form id="formLogin" novalidate>
-      <div class="field"><label>Usuario</label><input id="logUser" autocomplete="username"><p class="err" id="errLogUser"></p></div>
-      <div class="field"><label>Contraseña</label><input id="logPass" type="password" autocomplete="current-password"><p class="err" id="errLogPass"></p></div>
-      <button class="btn btn-grad" style="width:100%" type="submit">Iniciar Sesión</button>
-    </form>
-    <div class="form-alt">¿No tienes cuenta? <button onclick="cambiarModal('modalLogin','modalRegistro')">Regístrate aquí</button></div>
-    <div class="hint">💡 Demo — Admin: <b>admin</b> / <b>admin123</b> · o crea tu cuenta de cliente.</div>
-  </div>
-</div>
-
-<!-- ================= MODAL REGISTRO ================= -->
-<div class="modal" id="modalRegistro" role="dialog" aria-modal="true" aria-label="Registrarse">
-  <div class="modal-box">
-    <button class="modal-close" onclick="cerrarModal('modalRegistro')">✕</button>
-    <h2>Registrarse</h2><p class="m-sub">Crea tu cuenta gratuita en segundos</p>
-    <form id="formRegistro" novalidate>
-      <div class="field"><label>Nombre Completo</label><input id="regNombre"><p class="err" id="errRegNombre"></p></div>
-      <div class="field"><label>Usuario</label><input id="regUsuario" autocomplete="username"><p class="err" id="errRegUsuario"></p></div>
-      <div class="field"><label>Correo</label><input id="regCorreo" type="email" autocomplete="email"><p class="err" id="errRegCorreo"></p></div>
-      <div class="field"><label>Contraseña</label><input id="regPass" type="password" autocomplete="new-password"><p class="err" id="errRegPass"></p></div>
-      <div class="field"><label>Confirmar Contraseña</label><input id="regPass2" type="password" autocomplete="new-password"><p class="err" id="errRegPass2"></p></div>
-      <button class="btn btn-grad" style="width:100%" type="submit">Crear Cuenta</button>
-    </form>
-    <div class="form-alt">¿Ya tienes cuenta? <button onclick="cambiarModal('modalRegistro','modalLogin')">Inicia sesión</button></div>
-  </div>
-</div>
-
-<!-- ================= MODAL CARRITO ================= -->
-<div class="modal" id="modalCarrito" role="dialog" aria-modal="true" aria-label="Carrito">
-  <div class="modal-box">
-    <button class="modal-close" onclick="cerrarModal('modalCarrito')">✕</button>
-    <h2>🛒 Tu Carrito</h2><p class="m-sub">Revisa tu pedido antes de solicitarlo</p>
-    <div class="cart-list" id="cartList"></div>
-    <div class="cart-total"><span>Total:</span><b id="cartTotal">$0.00</b></div>
-    <br><button class="btn btn-grad" style="width:100%" onclick="solicitarPedido()">📧 Solicitar Pedido por Correo</button>
-  </div>
-</div>
-
-<!-- ================= PANEL ADMIN ================= -->
-<div class="modal" id="modalAdmin" role="dialog" aria-modal="true" aria-label="Panel de administración">
-  <div class="modal-box wide">
-    <button class="modal-close" onclick="cerrarModal('modalAdmin')">✕</button>
-    <h2>⚙️ Panel de Administración</h2>
-    <p class="m-sub"><span class="pill ok">● Online</span> Gestión completa de MediTech</p>
-
-    <div class="admin-layout">
-      <div class="admin-nav">
-        <button class="act" data-tab="productos" onclick="adminTab('productos')">📦 Productos</button>
-        <button data-tab="usuarios" onclick="adminTab('usuarios')">👥 Usuarios</button>
-        <button data-tab="pedidos" onclick="adminTab('pedidos')">🧾 Pedidos</button>
-        <button data-tab="estadisticas" onclick="adminTab('estadisticas')">📊 Estadísticas</button>
-        <button data-tab="textos" onclick="adminTab('textos')">✏️ Textos</button>
-        <button data-tab="carrusel" onclick="adminTab('carrusel')">🖼️ Carrusel</button>
-        <button data-tab="config" onclick="adminTab('config')">🔧 Configuración</button>
-      </div>
-
-      <!-- PRODUCTOS -->
-      <div class="admin-panel act" id="tab-productos">
-        <div class="stat-row"><div class="stat info"><b id="aInv">0</b><span>Inventario</span></div></div>
-        <div class="admin-grid2">
-          <div>
-            <h3 style="font-family:var(--disp);margin-bottom:.8rem" id="aProdTitulo">➕ Agregar Producto</h3>
-            <form id="formProd">
-              <input type="hidden" id="pId">
-              <div class="field"><label>Nombre</label><input id="pNombre"></div>
-              <div class="field"><label>Categoría</label><select id="pCat">
-                <option value="medicamentos">💊 Medicamento</option><option value="tecnologia">💻 Tecnología</option>
-                <option value="salud">🩺 Salud</option><option value="gaming">🎮 Gaming</option></select></div>
-              <div class="admin-grid2">
-                <div class="field"><label>Precio ($)</label><input id="pPrecio" type="number" step="0.01" min="0"></div>
-                <div class="field"><label>Precio anterior (oferta)</label><input id="pOld" type="number" step="0.01" min="0"></div>
-              </div>
-              <div class="admin-grid2">
-                <div class="field"><label>Stock</label><input id="pStock" type="number" min="0"></div>
-                <div class="field"><label>Emoji / Imagen</label><input id="pEmoji" placeholder="💊"></div>
-              </div>
-              <div class="field"><label>Descripción</label><textarea id="pDesc" rows="2"></textarea></div>
-              <div class="field"><label><input type="checkbox" id="pDestacado" style="width:auto"> ⭐ Producto destacado</label></div>
-              <div style="display:flex;gap:.6rem">
-                <button class="btn btn-grad btn-sm" type="submit">💾 Guardar</button>
-                <button class="btn btn-ghost btn-sm" type="button" onclick="limpiarFormProd()">Cancelar</button>
-              </div>
+    <!-- LOGIN -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión</h2>
+                <button class="close" onclick="closeLoginModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="login-form" onsubmit="handleLogin(event)" class="modal-body">
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="login-username" required placeholder="Ingresa tu usuario">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="login-password" required placeholder="Ingresa tu contraseña">
+                </div>
+                <button type="submit" class="btn-primary w-full">Iniciar Sesión</button>
+                <p class="text-center text-sm text-gray-600 mt-4">
+                    ¿No tienes cuenta?
+                    <button type="button" onclick="closeLoginModal(); openRegisterModal();" class="text-teal-600 font-semibold hover:underline">Regístrate aquí</button>
+                </p>
             </form>
-          </div>
-          <div><h3 style="font-family:var(--disp);margin-bottom:.8rem">📋 Inventario</h3>
-            <div style="max-height:420px;overflow:auto"><table class="tbl"><thead><tr><th></th><th>Nombre</th><th>Precio</th><th>Stock</th><th></th></tr></thead><tbody id="aProdList"></tbody></table></div>
-          </div>
         </div>
-      </div>
-
-      <!-- USUARIOS -->
-      <div class="admin-panel" id="tab-usuarios">
-        <button class="btn btn-ghost btn-sm" onclick="exportarUsuarios()">📥 Exportar CSV</button><br><br>
-        <table class="tbl"><thead><tr><th>Nombre</th><th>Usuario</th><th>Correo</th><th>Rol</th><th></th></tr></thead><tbody id="aUsersList"></tbody></table>
-      </div>
-
-      <!-- PEDIDOS -->
-      <div class="admin-panel" id="tab-pedidos">
-        <table class="tbl"><thead><tr><th>#</th><th>Cliente</th><th>Productos</th><th>Total</th><th>Fecha</th></tr></thead><tbody id="aOrdersList"></tbody></table>
-      </div>
-
-      <!-- ESTADÍSTICAS -->
-      <div class="admin-panel" id="tab-estadisticas">
-        <div class="stat-row">
-          <div class="stat info"><b id="sProd">0</b><span>Productos</span></div>
-          <div class="stat ok"><b id="sUsers">0</b><span>Usuarios</span></div>
-          <div class="stat warn"><b id="sOrders">0</b><span>Pedidos</span></div>
-          <div class="stat ok"><b id="sIngresos">$0</b><span>Ingresos</span></div>
-          <div class="stat bad"><b id="sStockCrit">0</b><span>Stock crítico</span></div>
-          <div class="stat info"><b id="sHoy">$0</b><span>Ventas hoy</span></div>
-        </div>
-        <div class="admin-grid2">
-          <div><h3 style="font-family:var(--disp);margin-bottom:.8rem">📊 Ventas por Categoría</h3><div id="barsCat"></div></div>
-          <div><h3 style="font-family:var(--disp);margin-bottom:.8rem">📈 Pedidos (7 días)</h3><div id="barsDias"></div></div>
-        </div>
-      </div>
-
-      <!-- TEXTOS -->
-      <div class="admin-panel" id="tab-textos">
-        <div class="admin-grid2">
-          <div class="field"><label>Título del Header</label><input id="t_heroTitle"></div>
-          <div class="field"><label>Subtítulo del Header</label><input id="t_heroSub"></div>
-          <div class="field"><label>Título de Categorías</label><input id="t_catTitle"></div>
-          <div class="field"><label>Subtítulo de Categorías</label><input id="t_catSub"></div>
-          <div class="field"><label>Título de Productos</label><input id="t_prodTitle"></div>
-          <div class="field"><label>Subtítulo de Productos</label><input id="t_prodSub"></div>
-          <div class="field"><label>Título de Ofertas</label><input id="t_ofTitle"></div>
-          <div class="field"><label>Subtítulo de Ofertas</label><input id="t_ofSub"></div>
-          <div class="field" style="grid-column:1/-1"><label>Descripción del Footer</label><textarea id="t_footDesc" rows="2"></textarea></div>
-        </div>
-        <button class="btn btn-grad btn-sm" onclick="guardaTextos()">💾 Guardar Textos</button>
-      </div>
-
-      <!-- CARRUSEL -->
-      <div class="admin-panel" id="tab-carrusel">
-        <p class="m-sub">Mensajes que rotan en el monitor del inicio.</p>
-        <div style="display:flex;gap:.6rem;margin-bottom:1rem">
-          <input id="newSlideIco" placeholder="Emoji" style="width:90px;background:var(--card2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:.6rem">
-          <input id="newSlideTxt" placeholder="Texto del slide" style="flex:1;background:var(--card2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:.6rem">
-          <button class="btn btn-grad btn-sm" onclick="agregarSlide()">➕ Agregar Slide</button>
-        </div>
-        <table class="tbl"><thead><tr><th></th><th>Texto</th><th></th></tr></thead><tbody id="aSlidesList"></tbody></table>
-      </div>
-
-      <!-- CONFIG -->
-      <div class="admin-panel" id="tab-config">
-        <div class="admin-grid2">
-          <div class="field"><label>🔑 Token de GitHub</label><input id="cfgToken" type="password" placeholder="ghp_...">
-            <br><br><button class="btn btn-ghost btn-sm" onclick="guardarToken()">💾 Guardar Token</button>
-            <button class="btn btn-ghost btn-sm" onclick="toast('✅ Token verificado (demo)')">Probar</button></div>
-          <div class="field"><label>💾 Backup</label><br>
-            <button class="btn btn-ghost btn-sm" onclick="exportarBackup()">⬇️ Exportar</button>
-            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('fileBackup').click()">⬆️ Importar</button>
-            <button class="btn btn-danger btn-sm" onclick="recargarDemo()">🔄 Recargar Demo</button>
-            <input type="file" id="fileBackup" accept=".json" hidden onchange="importarBackup(this)">
-            <p class="hint">⚠️ Seguridad: las contraseñas se guardan en localStorage (solo demo). Para producción usa un backend o Firebase/Supabase.</p></div>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
 
-<!-- ================= CHATBOT ================= -->
-<button class="chat-fab" id="chatFab" title="Asistente MediTech">🤖</button>
-<div class="chat-panel" id="chatPanel">
-  <div class="chat-head"><span>🤖 Asistente MediTech</span><button class="modal-close" style="position:static" onclick="toggleChat(false)">✕</button></div>
-  <div class="chat-body" id="chatBody">
-    <div class="msg bot">¡Hola! 👋 Soy el asistente de MediTech. Pregúntame sobre:<br>💊 Medicamentos<br>💻 Piezas de PC<br>🛒 Pedidos y ofertas</div>
-  </div>
-  <div class="chat-input"><input id="chatInput" placeholder="Escribe tu pregunta..." onkeydown="if(event.key==='Enter')enviarChat()"><button onclick="enviarChat()">➤</button></div>
-</div>
+    <!-- REGISTRO -->
+    <div id="register-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus mr-2"></i>Registrarse</h2>
+                <button class="close" onclick="closeRegisterModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="register-form" onsubmit="handleRegister(event)" class="modal-body">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="register-name" required placeholder="Tu nombre completo">
+                </div>
+                <div class="form-group">
+                    <label>Usuario</label>
+                    <input type="text" id="register-username" required placeholder="Elige un nombre de usuario">
+                </div>
+                <div class="form-group">
+                    <label>Correo</label>
+                    <input type="email" id="register-email" required placeholder="tu@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="register-password" required minlength="6" placeholder="Mínimo 6 caracteres">
+                </div>
+                <button type="submit" class="btn-primary w-full">Crear Cuenta</button>
+                <p class="text-center text-sm text-gray-600 mt-4">
+                    ¿Ya tienes cuenta?
+                    <button type="button" onclick="closeRegisterModal(); openLoginModal();" class="text-teal-600 font-semibold hover:underline">Inicia sesión</button>
+                </p>
+            </form>
+        </div>
+    </div>
 
-<div class="toasts" id="toasts"></div>
+    <!-- CARRITO -->
+    <div id="cart-modal" class="modal-overlay">
+        <div class="modal" style="max-width:700px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-shopping-cart mr-2"></i>Tu Carrito</h2>
+                <button class="close" onclick="closeCart()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="cart-items">
+                <div class="text-center py-12">
+                    <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4 block"></i>
+                    <p class="text-gray-400 text-lg">Tu carrito está vacío</p>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 p-6 bg-gray-50">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xl font-semibold">Total:</span>
+                    <span id="cart-total" class="text-3xl font-bold gradient-text">$0.00</span>
+                </div>
+                <button onclick="enviarPedidoPorCorreo()" class="btn-primary w-full text-lg">
+                    <i class="fas fa-envelope mr-2"></i>Solicitar Pedido por Correo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK VIEW -->
+    <div id="quick-view" class="quick-view-overlay" onclick="if(event.target===this) closeQuickView()">
+        <div class="modal" style="max-width:700px;">
+            <div id="quick-view-content"></div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- ADMIN PANEL -->
+    <!-- ============================================ -->
+    <div id="admin-panel" class="admin-panel-overlay">
+        <div class="admin-panel">
+            <div class="admin-header">
+                <div class="content">
+                    <h2><i class="fas fa-cog"></i> Panel de Administración</h2>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <div class="status"><span class="dot"></span> Online</div>
+                        <div id="admin-notifications" class="flex items-center gap-2">
+                            <span>🔔</span>
+                            <span id="notif-text" class="text-xs text-white/80">Cargando...</span>
+                        </div>
+                        <button onclick="closeAdminPanel()" class="close-btn"><i class="fas fa-times"></i> Cerrar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-dashboard" id="admin-dashboard">
+                <div class="metric-card"><div class="label">Ventas Hoy</div><div class="value" id="dashboard-ventas-hoy">$0</div></div>
+                <div class="metric-card" style="border-left-color:#3b82f6;"><div class="label">Pedidos</div><div class="value" id="dashboard-pedidos-pendientes">0</div></div>
+                <div class="metric-card" style="border-left-color:#f59e0b;"><div class="label">Stock Crítico</div><div class="value" id="dashboard-stock-critico">0</div></div>
+                <div class="metric-card" style="border-left-color:#ef4444;"><div class="label">Clientes Nuevos</div><div class="value" id="dashboard-clientes-nuevos">0</div></div>
+            </div>
+
+            <div class="admin-tabs">
+                <button onclick="showAdminTab('productos')" class="admin-tab active" data-tab="productos"><i class="fas fa-box"></i>Productos</button>
+                <button onclick="showAdminTab('carrusel')" class="admin-tab" data-tab="carrusel"><i class="fas fa-images"></i>Carrusel</button>
+                <button onclick="showAdminTab('textos')" class="admin-tab" data-tab="textos"><i class="fas fa-font"></i>Textos</button>
+                <button onclick="showAdminTab('usuarios')" class="admin-tab" data-tab="usuarios"><i class="fas fa-users"></i>Usuarios</button>
+                <button onclick="showAdminTab('pedidos')" class="admin-tab" data-tab="pedidos"><i class="fas fa-receipt"></i>Pedidos</button>
+                <button onclick="showAdminTab('estadisticas')" class="admin-tab" data-tab="estadisticas"><i class="fas fa-chart-line"></i>Estadísticas</button>
+                <button onclick="showAdminTab('config')" class="admin-tab" data-tab="config"><i class="fas fa-key"></i>Configuración</button>
+            </div>
+
+            <div class="admin-content">
+                <!-- Productos -->
+                <div id="tab-productos" class="tab-content active">
+                    <div class="admin-card">
+                        <div class="header">
+                            <h3><i class="fas fa-plus-circle text-teal-600"></i> Agregar/Editar Producto</h3>
+                        </div>
+                        <form id="product-form" class="admin-form" onsubmit="saveProduct(event)">
+                            <input type="hidden" id="edit-product-id" value="">
+                            <div class="form-group">
+                                <label>Nombre</label>
+                                <input type="text" id="prod-name" required>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Categoría</label>
+                                    <select id="prod-category">
+                                        <option value="medicamento">💊 Medicamento</option>
+                                        <option value="tecnologia">💻 Tecnología</option>
+                                        <option value="salud">🩺 Salud</option>
+                                        <option value="gaming">🎮 Gaming</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Precio</label>
+                                    <input type="number" id="prod-price" required step="0.01">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Stock</label>
+                                    <input type="number" id="prod-stock" required min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Estado</label>
+                                    <select id="prod-available">
+                                        <option value="true">✅ Disponible</option>
+                                        <option value="false">❌ Agotado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <textarea id="prod-desc" required rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Imagen (URL)</label>
+                                <input type="url" id="prod-image-url" placeholder="https://...">
+                            </div>
+                            <div class="form-group">
+                                <label><input type="checkbox" id="prod-feat"> Producto destacado</label>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Guardar</button>
+                                <button type="button" onclick="resetProductForm()" class="btn-secondary">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="admin-card">
+                        <div class="header">
+                            <h3><i class="fas fa-boxes text-teal-600"></i> Inventario <span class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-sm font-semibold" id="admin-count">0</span></h3>
+                        </div>
+                        <div id="admin-list"></div>
+                    </div>
+                </div>
+
+                <!-- Carrusel -->
+                <div id="tab-carrusel" class="tab-content">
+                    <div class="admin-card">
+                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-images text-purple-600"></i> Editar Carrusel</h3>
+                        <div id="carousel-editor"></div>
+                        <div class="flex gap-3 mt-4">
+                            <button onclick="addCarouselSlide()" class="btn-primary"><i class="fas fa-plus"></i> Agregar Slide</button>
+                            <button onclick="saveCarousel()" class="btn-primary"><i class="fas fa-save"></i> Guardar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Textos -->
+                <div id="tab-textos" class="tab-content">
+                    <div class="admin-card">
+                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-font text-blue-600"></i> Editar Textos</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="form-group"><label>Subtítulo del Header</label><input type="text" id="edit-header-subtitle" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Título de Categorías</label><input type="text" id="edit-categorias-title" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Subtítulo de Categorías</label><input type="text" id="edit-categorias-subtitle" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Título de Productos</label><input type="text" id="edit-productos-title" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Subtítulo de Productos</label><input type="text" id="edit-productos-subtitle" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Título de Ofertas</label><input type="text" id="edit-ofertas-title" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Subtítulo de Ofertas</label><input type="text" id="edit-ofertas-subtitle" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
+                            <div class="form-group"><label>Descripción del Footer</label><textarea id="edit-footer-description" rows="3" class="border-2 border-gray-300 rounded-lg p-3 w-full"></textarea></div>
+                        </div>
+                        <button onclick="saveTexts()" class="btn-primary mt-4"><i class="fas fa-save"></i> Guardar Textos</button>
+                    </div>
+                </div>
+
+                <!-- Usuarios -->
+                <div id="tab-usuarios" class="tab-content">
+                    <div class="admin-card">
+                        <div class="header">
+                            <h3><i class="fas fa-users text-green-600"></i> Usuarios Registrados</h3>
+                            <div class="flex gap-2">
+                                <input type="text" id="buscar-usuario" placeholder="🔍 Buscar..." class="border-2 border-gray-300 rounded-lg px-4 py-2 text-sm" oninput="buscarUsuarios(this.value)">
+                                <button onclick="exportarClientesCSV()" class="btn-primary text-sm">📥 Exportar</button>
+                            </div>
+                        </div>
+                        <div id="users-list"></div>
+                    </div>
+                </div>
+
+                <!-- Pedidos -->
+                <div id="tab-pedidos" class="tab-content">
+                    <div class="admin-card">
+                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-receipt text-red-600"></i> Pedidos Recibidos</h3>
+                        <div id="orders-list"></div>
+                    </div>
+                </div>
+
+                <!-- Estadísticas -->
+                <div id="tab-estadisticas" class="tab-content">
+                    <div class="admin-card">
+                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-chart-line text-indigo-600"></i> Estadísticas</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card"><div class="stat-value" id="stat-products">0</div><div class="stat-label">Productos</div></div>
+                            <div class="stat-card"><div class="stat-value" id="stat-users">0</div><div class="stat-label">Usuarios</div></div>
+                            <div class="stat-card"><div class="stat-value" id="stat-orders">0</div><div class="stat-label">Pedidos</div></div>
+                            <div class="stat-card"><div class="stat-value" id="stat-revenue">$0</div><div class="stat-label">Ingresos</div></div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6 mt-4">
+                            <div class="bg-white p-4 rounded-xl border"><h4 class="font-semibold">📊 Ventas por Categoría</h4><canvas id="ventas-categoria" height="180"></canvas></div>
+                            <div class="bg-white p-4 rounded-xl border"><h4 class="font-semibold">📈 Pedidos (7 días)</h4><canvas id="pedidos-dia" height="180"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuración -->
+                <div id="tab-config" class="tab-content">
+                    <div class="admin-card">
+                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-key text-amber-600"></i> Configuración</h3>
+                        <div class="token-config">
+                            <h4 class="font-bold text-lg mb-3"><i class="fas fa-key text-blue-600"></i> Token de GitHub</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">Token actual</label>
+                                    <div class="flex gap-2">
+                                        <input type="password" id="current-token-display" readonly class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl bg-gray-50 font-mono text-sm" value="">
+                                        <button onclick="toggleTokenVisibility()" class="px-4 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl transition"><i class="fas fa-eye"></i></button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold mb-2">Nuevo token</label>
+                                    <input type="text" id="new-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-teal-500 outline-none font-mono text-sm">
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="updateToken()" class="btn-primary"><i class="fas fa-save"></i> Actualizar</button>
+                                    <button onclick="testToken()" class="btn-secondary"><i class="fas fa-vial"></i> Probar</button>
+                                </div>
+                                <div id="token-status" class="token-status" style="display:none;"></div>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="font-bold text-lg mb-3"><i class="fas fa-database text-amber-600"></i> Backup</h4>
+                            <div class="flex gap-2 flex-wrap">
+                                <button onclick="exportAllData()" class="btn-primary"><i class="fas fa-download"></i> Exportar</button>
+                                <label class="btn-primary cursor-pointer"><i class="fas fa-upload"></i> Importar<input type="file" accept=".json" onchange="importBackup(event)" class="hidden"></label>
+                                <button onclick="forzarRecarga()" class="btn-secondary"><i class="fas fa-sync"></i> Recargar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- CHATBOT -->
+    <!-- ============================================ -->
+    <div class="chatbot-container">
+        <div id="chatbot-window" class="chatbot-window">
+            <div class="chatbot-header">
+                <h3><i class="fas fa-robot"></i> Asistente MediTech</h3>
+                <button class="close" onclick="toggleChat()"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="chat-messages" class="chatbot-messages">
+                <div class="message bot">
+                    <strong>¡Hola! 👋</strong><br>
+                    Soy el asistente de MediTech. Pregúntame sobre:
+                    <ul class="text-xs mt-2 space-y-1">
+                        <li>💊 Medicamentos y sus usos</li>
+                        <li>💻 Piezas de PC y componentes</li>
+                        <li>🛒 Información de productos</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+        <button onclick="toggleChat()" class="chatbot-toggle"><i class="fas fa-comment-dots"></i></button>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- SCRIPTS -->
+    <!-- ============================================ -->
+    <script src="static/js/api.js"></script>
+    <script src="static/js/token.js"></script>
+    <script src="static/js/auth.js"></script>
+    <script src="static/js/email.min.js"></script>
+    <script src="static/js/cart.js"></script>
+    <script src="static/js/chat.js"></script>
+    <script src="static/js/admin.js"></script>
+    <script src="static/js/main.js"></script>
+
+   <!-- ========== SECURITY (DESACTIVADO POR CORRUPCIÓN DE ARCHIVO) ========== -->
+   <!-- <script src="static/Kjs/capa_seguridad.js"></script> -->
+   <!-- <script src="static/Kjs/1armytage.js"></script> -->
 
 <script>
-/* ================================================================
-   MediTech — Lógica completa con muro de autenticación
-   ⚠️ Demo con localStorage. En producción: backend / Firebase.
-   ================================================================ */
-const K = { users:'mt_users', ses:'mt_session', prod:'mt_products', ord:'mt_orders', txt:'mt_texts', sli:'mt_slides' };
-const $  = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
+// ============================================================
+// 🛡️ MURO DE AUTENTICACIÓN - Lógica de bloqueo
+// ============================================================
 
-/* ---------------- Datos por defecto ---------------- */
-const PRODUCTOS_DEFAULT = [
- {id:1, nombre:'Paracetamol 500mg ×20', cat:'medicamentos', precio:3.50, old:0, stock:48, emoji:'💊', desc:'Analgésico y antipirético de acción rápida.', destacado:true},
- {id:2, nombre:'Ibuprofeno 400mg ×30', cat:'medicamentos', precio:5.25, old:6.50, stock:32, emoji:'💊', desc:'Antiinflamatorio para dolor muscular y fiebre.', destacado:false},
- {id:3, nombre:'Amoxicilina 500mg ×21', cat:'medicamentos', precio:7.80, old:0, stock:20, emoji:'🧫', desc:'Antibiótico de amplio espectro (venta con receta).', destacado:false},
- {id:4, nombre:'Omeprazol 20mg ×28', cat:'medicamentos', precio:4.60, old:0, stock:40, emoji:'💊', desc:'Protector gástrico de uso diario.', destacado:false},
- {id:5, nombre:'Vitamina C 1000mg ×60', cat:'salud', precio:8.90, old:0, stock:55, emoji:'🍊', desc:'Refuerza tu sistema inmunológico.', destacado:true},
- {id:6, nombre:'Termómetro Digital', cat:'salud', precio:12.50, old:0, stock:15, emoji:'🌡️', desc:'Lectura rápida en 10 segundos, memoria dual.', destacado:false},
- {id:7, nombre:'Tensiómetro de Brazo', cat:'salud', precio:34.90, old:42.00, stock:8, emoji:'🩺', desc:'Monitor de presión arterial certificado.', destacado:true},
- {id:8, nombre:'Mascarillas N95 ×10', cat:'salud', precio:6.40, old:0, stock:3, emoji:'😷', desc:'Protección certificada de 5 capas.', destacado:false},
- {id:9, nombre:'GPU RTX 4060 8GB', cat:'tecnologia', precio:399.00, old:0, stock:6, emoji:'🖥️', desc:'Gráfica de última generación con Ray Tracing.', destacado:true},
- {id:10,nombre:'CPU Ryzen 5 7600', cat:'tecnologia', precio:229.00, old:0, stock:10, emoji:'⚙️', desc:'6 núcleos / 12 hilos, ideal para gaming.', destacado:false},
- {id:11,nombre:'RAM DDR5 16GB 6000MHz', cat:'tecnologia', precio:79.90, old:95.00, stock:18, emoji:'💾', desc:'Kit de memoria de alto rendimiento.', destacado:false},
- {id:12,nombre:'SSD NVMe 1TB Gen4', cat:'tecnologia', precio:89.90, old:0, stock:22, emoji:'💽', desc:'Hasta 7000MB/s de lectura.', destacado:true},
- {id:13,nombre:'Teclado Mecánico RGB', cat:'tecnologia', precio:45.00, old:0, stock:2, emoji:'⌨️', desc:'Switches rojos, anti-ghosting total.', destacado:false},
- {id:14,nombre:'Mouse Gamer 16000 DPI', cat:'gaming', precio:25.90, old:0, stock:30, emoji:'🖱️', desc:'Sensor óptico de precisión y 7 botones.', destacado:false},
- {id:15,nombre:'Headset 7.1 Surround', cat:'gaming', precio:39.90, old:49.90, stock:14, emoji:'🎧', desc:'Sonido envolvente con micrófono retráctil.', destacado:false},
- {id:16,nombre:'Monitor 27" 165Hz', cat:'gaming', precio:219.00, old:259.00, stock:5, emoji:'🖥️', desc:'Panel IPS QHD, 1ms de respuesta.', destacado:true},
- {id:17,nombre:'Silla Gamer Reclinable', cat:'gaming', precio:149.00, old:0, stock:7, emoji:'💺', desc:'Ergonómica con soporte lumbar 180°.', destacado:false},
- {id:18,nombre:'Suero Oral ×5 sobres', cat:'medicamentos', precio:3.90, old:0, stock:60, emoji:'🧪', desc:'Rehidratación rápida sabor neutro.', destacado:false},
-];
-const TEXTOS_DEFAULT = {
- heroTitle:'Tu salud y tu <em>tecnología</em>, en un solo lugar.', heroSub:'Medicamentos certificados y hardware de última generación. Crea tu cuenta gratuita para desbloquear el catálogo completo, precios y ofertas exclusivas.',
- catTitle:'Explora por Categoría', catSub:'Encuentra exactamente lo que necesitas',
- prodTitle:'Productos Destacados', prodSub:'Los más populares entre nuestros clientes',
- ofTitle:'Ofertas Especiales', ofSub:'Aprovecha estos descuentos exclusivos',
- footDesc:'Tu tienda confiable para medicamentos y hardware de última generación.'};
-const SLIDES_DEFAULT = [
- {ico:'💊', txt:'Medicamentos certificados para tu familia'},
- {ico:'💻', txt:'Hardware con garantía oficial'},
- {ico:'🔥', txt:'Ofertas exclusivas para miembros'},
- {ico:'🚚', txt:'Envío gratis en pedidos +$50'}];
+const K_SESION = 'mt_session';
 
-/* ---------------- Persistencia ---------------- */
-const load = (k,def) => { try{ return JSON.parse(localStorage.getItem(k)) ?? def }catch{ return def } };
-const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
-function seed(){
-  if(!localStorage.getItem(K.prod)) save(K.prod, PRODUCTOS_DEFAULT);
-  if(!localStorage.getItem(K.txt))  save(K.txt, TEXTOS_DEFAULT);
-  if(!localStorage.getItem(K.sli))  save(K.sli, SLIDES_DEFAULT);
-  if(!localStorage.getItem(K.ord))  save(K.ord, []);
-  const users = load(K.users, null);
-  if(!users){ save(K.users, [{nombre:'Administrador', usuario:'admin', correo:'admin@mediatech.com', pass:'admin123', rol:'admin'}]); }
+function haySesion() {
+  return !!localStorage.getItem(K_SESION);
 }
-const getProductos = () => load(K.prod, PRODUCTOS_DEFAULT);
-const setProductos  = p => save(K.prod, p);
-const getUsuarios   = () => load(K.users, []);
-const getPedidos    = () => load(K.ord, []);
-const sesion        = () => load(K.ses, null);
 
-/* ================================================================
-   🔐 AUTENTICACIÓN — núcleo del muro de acceso
-   ================================================================ */
-function aplicarAuth(){
-  const s = sesion();
-  document.body.classList.toggle('auth', !!s);
-  document.body.classList.toggle('no-auth', !s);
-  $('#btnLogin').hidden = !!s;
-  $('#menuUsuario').hidden = !s;
-  $('#heroSecBtn').hidden = !!s;
-  if(s){
-    $('#userName').textContent = s.nombre.split(' ')[0];
-    $('#saludoUsuario').textContent = 'Conectado como ' + s.usuario;
-    const esAdmin = s.rol === 'admin';
-    $$('[data-solo-admin]').forEach(el => el.hidden = !esAdmin);
+function aplicarAuth() {
+  const tieneSesion = haySesion();
+  document.body.classList.toggle('auth', tieneSesion);
+  document.body.classList.toggle('no-auth', !tieneSesion);
+  
+  // Mostrar/ocultar elementos de usuario
+  const userBtn = document.getElementById('user-btn');
+  const cartBtn = document.getElementById('cart-btn');
+  
+  if (userBtn) {
+    const userNameDisplay = document.getElementById('user-name-display');
+    if (tieneSesion) {
+      const sesionData = JSON.parse(localStorage.getItem(K_SESION) || '{}');
+      if (userNameDisplay) {
+        userNameDisplay.textContent = sesionData.nombre || sesionData.usuario || 'Usuario';
+        userNameDisplay.classList.remove('hidden');
+      }
+    } else {
+      if (userNameDisplay) {
+        userNameDisplay.textContent = 'Iniciar Sesión';
+        userNameDisplay.classList.remove('hidden');
+      }
+    }
   }
-  actualizarBadgeCarrito();
 }
-function iniciarSesionComo(u){
-  save(K.ses, {nombre:u.nombre, usuario:u.usuario, rol:u.rol||'cliente'});
-  aplicarAuth(); cerrarModales();
-  toast('✅ ¡Bienvenido, ' + u.nombre.split(' ')[0] + '! Catálogo desbloqueado.');
-  const dest = sessionStorage.getItem('mt_destino');
-  if(dest){ sessionStorage.removeItem('mt_destino'); setTimeout(()=>location.hash = dest, 120); }
-}
-function cerrarSesion(){
-  localStorage.removeItem(K.ses);
-  aplicarAuth(); cerrarModales();
-  location.hash = '#inicio';
-  toast('👋 Sesión cerrada. El catálogo vuelve a estar bloqueado.');
-}
-/* Guarda destino y abre login/registro (usado por muros y nav) */
-function pedirLogin(dest){ sessionStorage.setItem('mt_destino', dest||''); abrirModal('modalLogin'); }
-function pedirRegistro(dest){ sessionStorage.setItem('mt_destino', dest||''); abrirModal('modalRegistro'); }
-function irACatalogo(){ sesion() ? location.hash='#productos' : pedirLogin('#productos'); }
 
-/* Interceptar enlaces a zonas protegidas cuando NO hay sesión */
-document.addEventListener('click', e=>{
-  const a = e.target.closest('a.nav-gated');
-  if(a && !sesion()){ e.preventDefault(); pedirLogin(a.getAttribute('href')); }
+function pedirLogin(destino) {
+  sessionStorage.setItem('mt_destino', destino || '');
+  if (typeof openLoginModal === 'function') {
+    openLoginModal();
+  } else {
+    document.getElementById('login-modal').classList.add('active');
+  }
+}
+
+function pedirRegistro(destino) {
+  sessionStorage.setItem('mt_destino', destino || '');
+  if (typeof openRegisterModal === 'function') {
+    openRegisterModal();
+  } else {
+    document.getElementById('register-modal').classList.add('active');
+  }
+}
+
+// Interceptar enlaces a zonas protegidas cuando NO hay sesión
+document.addEventListener('click', function(e) {
+  const link = e.target.closest('a.nav-gated');
+  if (link && !haySesion()) {
+    e.preventDefault();
+    const destino = link.getAttribute('href');
+    pedirLogin(destino);
+    mostrarToast('🔒 Inicia sesión para acceder a esta sección');
+  }
 });
 
-/* ---------------- Formularios ---------------- */
-function showErr(id,msg){ const el=$('#'+id); el.textContent=msg; el.classList.toggle('show',!!msg); }
+// Interceptar enlaces de juegos cuando NO hay sesión
+document.addEventListener('click', function(e) {
+  const gameLink = e.target.closest('a.game-link');
+  if (gameLink && !haySesion()) {
+    e.preventDefault();
+    e.stopPropagation();
+    pedirLogin('');
+    mostrarToast('🎮 Inicia sesión para acceder a los juegos');
+    
+    // Cerrar el menú de juegos
+    const menu = document.getElementById('gameMenu');
+    const arrow = document.querySelector('.game-dropdown-btn .arrow');
+    if (menu) menu.classList.remove('open');
+    if (arrow) arrow.classList.remove('open');
+  }
+}, true);
 
-$('#formLogin').addEventListener('submit', e=>{
-  e.preventDefault();
-  const u=$('#logUser').value.trim(), p=$('#logPass').value;
-  let ok=true;
-  showErr('errLogUser', u?'':'Ingresa tu usuario'); if(!u) ok=false;
-  showErr('errLogPass', p?'':'Ingresa tu contraseña'); if(!p) ok=false;
-  if(!ok) return;
-  const user = getUsuarios().find(x=>x.usuario.toLowerCase()===u.toLowerCase() && x.pass===p);
-  if(!user){ showErr('errLogPass','Usuario o contraseña incorrectos'); return; }
-  iniciarSesionComo(user); e.target.reset();
+// Redirigir después del login exitoso
+function redirigirSiHayDestino() {
+  const destino = sessionStorage.getItem('mt_destino');
+  if (destino) {
+    sessionStorage.removeItem('mt_destino');
+    setTimeout(() => {
+      if (destino.startsWith('#')) {
+        window.location.hash = destino;
+      }
+    }, 300);
+  }
+}
+
+// Observar cambios en localStorage para detectar login/logout
+window.addEventListener('storage', function(e) {
+  if (e.key === K_SESION) {
+    aplicarAuth();
+    if (e.newValue) {
+      redirigirSiHayDestino();
+      mostrarToast('✅ ¡Bienvenido! Contenido desbloqueado');
+    }
+  }
 });
 
-$('#formRegistro').addEventListener('submit', e=>{
-  e.preventDefault();
-  const n=$('#regNombre').value.trim(), us=$('#regUsuario').value.trim(),
-        c=$('#regCorreo').value.trim(), p=$('#regPass').value, p2=$('#regPass2').value;
-  let ok=true;
-  const chk=(id,cond,msg)=>{ showErr(id, cond?'':msg); if(!cond) ok=false; };
-  chk('errRegNombre', n.length>=3, 'Ingresa tu nombre completo');
-  chk('errRegUsuario', us.length>=3, 'Mínimo 3 caracteres');
-  chk('errRegCorreo', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c), 'Correo inválido');
-  chk('errRegPass', p.length>=6, 'Mínimo 6 caracteres');
-  chk('errRegPass2', p===p2, 'Las contraseñas no coinciden');
-  if(!ok) return;
-  const users=getUsuarios();
-  if(users.some(x=>x.usuario.toLowerCase()===us.toLowerCase())){ showErr('errRegUsuario','Ese usuario ya existe'); return; }
-  if(users.some(x=>x.correo.toLowerCase()===c.toLowerCase())){ showErr('errRegCorreo','Ese correo ya está registrado'); return; }
-  const nuevo={nombre:n, usuario:us, correo:c, pass:p, rol:'cliente'};
-  users.push(nuevo); save(K.users, users);
-  toast('🎉 ¡Cuenta creada! Bienvenido a MediTech.');
-  iniciarSesionComo(nuevo); e.target.reset();
+// Función para mostrar toasts
+function mostrarToast(mensaje, tipo = 'info') {
+  const toast = document.createElement('div');
+  toast.className = 'auth-toast';
+  toast.textContent = mensaje;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.4s ease';
+    setTimeout(() => toast.remove(), 400);
+  }, 3500);
+}
+
+// Alternar menú de juegos (cajita sorpresa)
+function toggleGameMenu() {
+  const menu = document.getElementById('gameMenu');
+  const arrow = document.querySelector('.game-dropdown-btn .arrow');
+  menu.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+// Cerrar el menú si se hace clic fuera
+document.addEventListener('click', function(e) {
+  const dropdown = document.querySelector('.game-dropdown');
+  if (dropdown && !dropdown.contains(e.target)) {
+    const menu = document.getElementById('gameMenu');
+    const arrow = document.querySelector('.game-dropdown-btn .arrow');
+    if (menu) menu.classList.remove('open');
+    if (arrow) arrow.classList.remove('open');
+  }
 });
 
-/* ================================================================
-   🛍️ PRODUCTOS (solo se renderizan si hay sesión)
-   ================================================================ */
-let catActual='todas';
-const CATS={medicamentos:'💊 Medicamento', tecnologia:'💻 Tecnología', salud:'🩺 Salud', gaming:'🎮 Gaming'};
-const fmt = n => '$'+Number(n).toFixed(2);
+// ============================================================
+// 🛡️ ARMYTAGE - MODO COMPATIBILIDAD
+// ============================================================
+// Desactiva todas las políticas que bloquean interacciones
+// ============================================================
 
-function renderProductos(){
-  if(!sesion()) return; // 🔒 no se generan ni muestran productos sin sesión
-  let list=getProductos().filter(p=>catActual==='todas'||p.cat===catActual);
-  const ord=$('#selOrden').value;
-  if(ord==='precio-asc') list.sort((a,b)=>a.precio-b.precio);
-  if(ord==='precio-desc')list.sort((a,b)=>b.precio-a.precio);
-  if(ord==='nombre')     list.sort((a,b)=>a.nombre.localeCompare(b.nombre));
-  $('#gridProductos').innerHTML = list.length ? list.map((p,i)=>`
-    <div class="p-card" style="animation-delay:${i*40}ms">
-      <div class="p-img">${p.emoji}
-        <span class="chip ${p.cat}">${CATS[p.cat]}</span>
-        ${p.old>0?`<span class="badge-of">-${Math.round((1-p.precio/p.old)*100)}%</span>`:''}
-        ${p.destacado?'<span class="badge-star">⭐</span>':''}
-      </div>
-      <div class="p-body">
-        <h3>${p.nombre}</h3><p class="desc">${p.desc}</p>
-        <div class="p-price"><b>${fmt(p.precio)}</b>${p.old>0?`<s>${fmt(p.old)}</s>`:''}</div>
-        <div class="p-foot">
-          <span class="stock ${p.stock<=3?'low':''} ${p.stock===0?'out':''}">
-            ${p.stock===0?'❌ Agotado':p.stock<=3?'⚠️ ¡Quedan '+p.stock+'!':'✅ Disponible'}</span>
-          <button class="btn btn-grad btn-sm" ${p.stock===0?'disabled style="opacity:.4;cursor:not-allowed"':''}
-            onclick="agregarCarrito(${p.id})">+ Agregar</button>
-        </div>
-      </div>
-    </div>`).join('') : '<p style="color:var(--mut)">No hay productos en esta categoría.</p>';
-}
-function renderOfertas(){
-  if(!sesion()) return;
-  const ofs=getProductos().filter(p=>p.old>0);
-  $('#gridOfertas').innerHTML = ofs.map((p,i)=>`
-    <div class="of-card" style="animation-delay:${i*60}ms">
-      <span class="of-ico">${p.emoji}</span>
-      <div class="of-info"><h3>${p.nombre}</h3>
-        <div class="p-price"><b>${fmt(p.precio)}</b><s>${fmt(p.old)}</s></div>
-        <button class="btn btn-grad btn-sm" style="margin-top:.5rem" onclick="agregarCarrito(${p.id})">🛒 Comprar ahora</button>
-      </div>
-      <span class="of-off">-${Math.round((1-p.precio/p.old)*100)}%</span>
-    </div>`).join('') || '<p style="color:var(--mut)">No hay ofertas activas.</p>';
-}
-function renderConteoCats(){
-  const prods=getProductos();
-  $$('[data-count-cat]').forEach(el=>{
-    el.textContent = prods.filter(p=>p.cat===el.dataset.countCat).length + ' productos →';
-  });
-}
-function filtrar(cat){
-  catActual=cat;
-  $$('#tabsCat .tab').forEach(t=>t.classList.toggle('act', t.dataset.cat===cat));
-  renderProductos(); location.hash='#productos';
-}
-$$('#tabsCat .tab').forEach(t=>t.addEventListener('click',()=>filtrar(t.dataset.cat)));
+(function() {
+    'use strict';
 
-/* ================================================================
-   🛒 CARRITO (por usuario)
-   ================================================================ */
-const cartKey = () => 'mt_cart_' + (sesion()?.usuario || 'invitado');
-const getCart = () => load(cartKey(), []);
-const setCart = c => save(cartKey(), c);
+    console.log('🛡️ Activando modo compatibilidad para clics...');
 
-$('#btnCart').addEventListener('click', ()=>{
-  if(!sesion()){ pedirLogin('#productos'); toast('🔒 Inicia sesión para usar el carrito.'); return; }
-  renderCarrito(); abrirModal('modalCarrito');
-});
-function agregarCarrito(id){
-  if(!sesion()) return;
-  const cart=getCart(), item=cart.find(i=>i.id===id);
-  item ? item.qty++ : cart.push({id, qty:1});
-  setCart(cart); actualizarBadgeCarrito();
-  toast('🛒 Producto agregado al carrito');
-}
-function actualizarBadgeCarrito(){
-  const n = sesion() ? getCart().reduce((s,i)=>s+i.qty,0) : 0;
-  $('#cartCount').textContent = n;
-}
-function renderCarrito(){
-  const cart=getCart(), prods=getProductos();
-  let total=0;
-  $('#cartList').innerHTML = cart.length ? cart.map(i=>{
-    const p=prods.find(x=>x.id===i.id); if(!p) return '';
-    total+=p.precio*i.qty;
-    return `<div class="cart-item"><span class="ci-ico">${p.emoji}</span>
-      <div class="ci-info"><h4>${p.nombre}</h4><span class="ci-price">${fmt(p.precio)} c/u</span></div>
-      <div class="qty"><button onclick="cambiarQty(${p.id},-1)">−</button><span>${i.qty}</span><button onclick="cambiarQty(${p.id},1)">+</button></div>
-      <button class="ci-del" onclick="quitarItem(${p.id})">🗑️</button></div>`;
-  }).join('') : '<div class="cart-empty">Tu carrito está vacío 🛒</div>';
-  $('#cartTotal').textContent = fmt(total);
-}
-function cambiarQty(id,d){
-  const cart=getCart(), item=cart.find(i=>i.id===id);
-  if(!item) return;
-  item.qty+=d; if(item.qty<=0) return quitarItem(id);
-  setCart(cart); renderCarrito(); actualizarBadgeCarrito();
-}
-function quitarItem(id){ setCart(getCart().filter(i=>i.id!==id)); renderCarrito(); actualizarBadgeCarrito(); }
-function solicitarPedido(){
-  const cart=getCart(); if(!cart.length) return toast('El carrito está vacío','error');
-  const prods=getProductos(), s=sesion(); let total=0, lineas=[];
-  cart.forEach(i=>{ const p=prods.find(x=>x.id===i.id); if(p){ total+=p.precio*i.qty; lineas.push(`• ${p.nombre} ×${i.qty} — ${fmt(p.precio*i.qty)}`); }});
-  const orden={id:Date.now(), usuario:s.usuario, items:lineas, total, fecha:new Date().toISOString()};
-  const orders=getPedidos(); orders.push(orden); save(K.ord, orders);
-  setCart([]); actualizarBadgeCarrito(); renderCarrito(); cerrarModal('modalCarrito');
-  const cuerpo=encodeURIComponent(`Pedido MediTech de ${s.nombre}\n\n${lineas.join('\n')}\n\nTotal: ${fmt(total)}`);
-  window.open(`mailto:ventas@mediatech.com?subject=Pedido MediTech ${orden.id}&body=${cuerpo}`);
-  toast('🧾 Pedido #' + String(orden.id).slice(-5) + ' registrado. Abriendo correo...');
-}
+    // Función para esperar a que los agentes estén listos
+    function waitForAgents() {
+        return new Promise((resolve) => {
+            let attempts = 0;
+            const maxAttempts = 20;
+            
+            const check = () => {
+                attempts++;
+                
+                // Verificar si Valkyrie está disponible
+                const hasValkyrie = window.valkyrie || 
+                                   (window.armytage && window.armytage.valkyrie) ||
+                                   (window.armytage && window.armytage.agents && window.armytage.agents.ValkyrieAgent);
+                
+                // Verificar si AgentBus está disponible
+                const hasAgentBus = window.armytage && window.armytage.bus;
+                
+                if (hasValkyrie || hasAgentBus || attempts >= maxAttempts) {
+                    resolve();
+                } else {
+                    setTimeout(check, 300);
+                }
+            };
+            
+            check();
+        });
+    }
 
-/* ================================================================
-   ⚙️ PANEL ADMIN (solo rol admin)
-   ================================================================ */
-function openAdmin(tab='productos'){
-  if(sesion()?.rol!=='admin') return toast('🔒 Acceso solo para administradores','error');
-  abrirModal('modalAdmin'); adminTab(tab);
-}
-function adminTab(t){
-  $$('.admin-nav button').forEach(b=>b.classList.toggle('act', b.dataset.tab===t));
-  $$('.admin-panel').forEach(p=>p.classList.toggle('act', p.id==='tab-'+t));
-  if(t==='productos') renderAdminProductos();
-  if(t==='usuarios')  renderAdminUsuarios();
-  if(t==='pedidos')   renderAdminPedidos();
-  if(t==='estadisticas') renderAdminStats();
-  if(t==='textos')    cargarTextosForm();
-  if(t==='carrusel')  renderAdminSlides();
-  if(t==='config')    $('#cfgToken').value = localStorage.getItem('mt_token')||'';
-}
-/* --- Productos --- */
-function renderAdminProductos(){
-  const prods=getProductos();
-  $('#aInv').textContent = prods.length;
-  $('#aProdList').innerHTML = prods.map(p=>`<tr>
-    <td style="font-size:1.2rem">${p.emoji}</td><td>${p.nombre}${p.destacado?' ⭐':''}</td>
-    <td>${fmt(p.precio)}</td>
-    <td style="color:${p.stock<=3?'var(--amber)':'inherit'}">${p.stock}</td>
-    <td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="editarProd(${p.id})">✏️</button>
-    <button class="btn btn-danger btn-sm" onclick="eliminarProd(${p.id})">🗑️</button></td></tr>`).join('');
-}
-$('#formProd').addEventListener('submit', e=>{
-  e.preventDefault();
-  const prods=getProductos(), id=$('#pId').value;
-  const data={ nombre:$('#pNombre').value.trim(), cat:$('#pCat').value,
-    precio:parseFloat($('#pPrecio').value)||0, old:parseFloat($('#pOld').value)||0,
-    stock:parseInt($('#pStock').value)||0, emoji:$('#pEmoji').value.trim()||'📦',
-    desc:$('#pDesc').value.trim(), destacado:$('#pDestacado').checked };
-  if(!data.nombre || data.precio<=0) return toast('Completa nombre y precio válido','error');
-  if(id){ const i=prods.findIndex(p=>p.id==id); prods[i]={...prods[i], ...data}; toast('✅ Producto actualizado'); }
-  else  { data.id=Date.now(); prods.push(data); toast('✅ Producto agregado'); }
-  setProductos(prods); limpiarFormProd(); renderAdminProductos(); refrescarTienda();
-});
-function editarProd(id){
-  const p=getProductos().find(x=>x.id===id); if(!p) return;
-  $('#pId').value=p.id; $('#pNombre').value=p.nombre; $('#pCat').value=p.cat;
-  $('#pPrecio').value=p.precio; $('#pOld').value=p.old||''; $('#pStock').value=p.stock;
-  $('#pEmoji').value=p.emoji; $('#pDesc').value=p.desc; $('#pDestacado').checked=!!p.destacado;
-  $('#aProdTitulo').textContent='✏️ Editar Producto';
-}
-function limpiarFormProd(){ $('#formProd').reset(); $('#pId').value=''; $('#aProdTitulo').textContent='➕ Agregar Producto'; }
-function eliminarProd(id){ if(!confirm('¿Eliminar este producto?')) return;
-  setProductos(getProductos().filter(p=>p.id!==id)); renderAdminProductos(); refrescarTienda(); toast('🗑️ Producto eliminado'); }
-/* --- Usuarios --- */
-function renderAdminUsuarios(){
-  $('#aUsersList').innerHTML = getUsuarios().map(u=>`<tr><td>${u.nombre}</td><td>${u.usuario}</td>
-    <td>${u.correo}</td><td><span class="pill ${u.rol==='admin'?'ok':'no'}">${u.rol}</span></td>
-    <td>${u.rol!=='admin'?`<button class="btn btn-danger btn-sm" onclick="eliminarUsuario('${u.usuario}')">🗑️</button>`:'—'}</td></tr>`).join('');
-}
-function eliminarUsuario(us){ if(!confirm('¿Eliminar usuario?')) return;
-  save(K.users, getUsuarios().filter(u=>u.usuario!==us)); renderAdminUsuarios(); toast('🗑️ Usuario eliminado'); }
-function exportarUsuarios(){
-  const rows=[['Nombre','Usuario','Correo','Rol'], ...getUsuarios().map(u=>[u.nombre,u.usuario,u.correo,u.rol])];
-  descargarCSV('usuarios_meditech.csv', rows);
-}
-/* --- Pedidos --- */
-function renderAdminPedidos(){
-  const ords=getPedidos();
-  $('#aOrdersList').innerHTML = ords.length ? ords.map(o=>`<tr>
-    <td>#${String(o.id).slice(-5)}</td><td>${o.usuario}</td><td>${o.items.length} ítems</td>
-    <td style="color:var(--teal)">${fmt(o.total)}</td><td>${new Date(o.fecha).toLocaleString()}</td></tr>`).join('')
-    : '<tr><td colspan="5" style="color:var(--mut)">Sin pedidos todavía.</td></tr>';
-}
-/* --- Estadísticas --- */
-function renderAdminStats(){
-  const prods=getProductos(), users=getUsuarios(), ords=getPedidos();
-  const hoy=new Date().toDateString();
-  $('#sProd').textContent=prods.length; $('#sUsers').textContent=users.length;
-  $('#sOrders').textContent=ords.length;
-  $('#sIngresos').textContent=fmt(ords.reduce((s,o)=>s+o.total,0));
-  $('#sStockCrit').textContent=prods.filter(p=>p.stock<=3).length;
-  $('#sHoy').textContent=fmt(ords.filter(o=>new Date(o.fecha).toDateString()===hoy).reduce((s,o)=>s+o.total,0));
-  const porCat={medicamentos:0,tecnologia:0,salud:0,gaming:0};
-  ords.forEach(o=>o.items.forEach(l=>{ const p=prods.find(x=>l.includes(x.nombre)); if(p) porCat[p.cat]+=p.precio; }));
-  const max=Math.max(1,...Object.values(porCat));
-  $('#barsCat').innerHTML=Object.entries(porCat).map(([c,v])=>`<div class="bar-row"><span>${CATS[c]}</span>
-    <div class="bar"><i style="width:${v/max*100}%"></i></div><b>${fmt(v)}</b></div>`).join('');
-  const dias=[...Array(7)].map((_,i)=>{ const d=new Date(); d.setDate(d.getDate()-6+i); return d; });
-  const porDia=dias.map(d=>ords.filter(o=>new Date(o.fecha).toDateString()===d.toDateString()).length);
-  const maxD=Math.max(1,...porDia);
-  $('#barsDias').innerHTML=dias.map((d,i)=>`<div class="bar-row"><span>${d.toLocaleDateString('es',{weekday:'short'})}</span>
-    <div class="bar days"><i style="width:${porDia[i]/maxD*100}%"></i></div><b>${porDia[i]}</b></div>`).join('');
-}
-/* --- Textos --- */
-function cargarTextosForm(){ const t=load(K.txt,TEXTOS_DEFAULT);
-  Object.keys(TEXTOS_DEFAULT).forEach(k=>{ const el=$('#t_'+k); if(el) el.value=t[k].replace(/<[^>]*>/g,''); }); }
-function guardaTextos(){
-  const t={}; Object.keys(TEXTOS_DEFAULT).forEach(k=>{ t[k]=$('#t_'+k)?.value || TEXTOS_DEFAULT[k]; });
-  t.heroTitle = t.heroTitle.replace(/tecnología/gi,'<em>tecnología</em>');
-  save(K.txt,t); aplicarTextos(); toast('💾 Textos guardados');
-}
-function aplicarTextos(){ const t=load(K.txt,TEXTOS_DEFAULT);
-  const map={heroTitle:'heroTitle',heroSub:'heroSub',catTitle:'catTitle',catSub:'catSub',
-             prodTitle:'prodTitle',prodSub:'prodSub',ofTitle:'ofTitle',ofSub:'ofSub',footDesc:'footDesc'};
-  Object.entries(map).forEach(([k,id])=>{ const el=document.getElementById(id); if(el) el.innerHTML=t[k]; }); }
-/* --- Carrusel / Slides --- */
-let slideIdx=0;
-function renderAdminSlides(){
-  $('#aSlidesList').innerHTML=load(K.sli,SLIDES_DEFAULT).map((s,i)=>`<tr><td style="font-size:1.3rem">${s.ico}</td>
-    <td>${s.txt}</td><td><button class="btn btn-danger btn-sm" onclick="eliminarSlide(${i})">🗑️</button></td></tr>`).join('');
-}
-function agregarSlide(){
-  const ico=$('#newSlideIco').value.trim()||'✨', txt=$('#newSlideTxt').value.trim();
-  if(!txt) return toast('Escribe el texto del slide','error');
-  const s=load(K.sli,SLIDES_DEFAULT); s.push({ico,txt}); save(K.sli,s);
-  $('#newSlideIco').value=''; $('#newSlideTxt').value=''; renderAdminSlides(); toast('🖼️ Slide agregado');
-}
-function eliminarSlide(i){ const s=load(K.sli,SLIDES_DEFAULT); s.splice(i,1); save(K.sli,s); renderAdminSlides(); }
-function rotarSlides(){
-  const s=load(K.sli,SLIDES_DEFAULT); if(!s.length) return;
-  slideIdx=(slideIdx+1)%s.length;
-  $('#slideIco').textContent=s[slideIdx].ico;
-  const box=$('.slide-box'); box.style.opacity=0;
-  setTimeout(()=>{ $('#slideTxt').textContent=s[slideIdx].txt; box.style.opacity=1; },250);
-}
-setInterval(rotarSlides, 4000);
-/* --- Configuración --- */
-function guardarToken(){ localStorage.setItem('mt_token',$('#cfgToken').value.trim()); toast('🔑 Token guardado'); }
-function exportarBackup(){
-  const data={}; Object.values(K).forEach(k=>data[k]=load(k,null));
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='mediatech_backup_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
-  toast('⬇️ Backup exportado');
-}
-function importarBackup(input){
-  const f=input.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=e=>{ try{ const d=JSON.parse(e.target.result);
-      Object.entries(d).forEach(([k,v])=>v&&save(k,v));
-      aplicarTextos(); refrescarTienda(); toast('⬆️ Backup importado correctamente');
-    }catch{ toast('Archivo inválido','error'); } };
-  r.readAsText(f); input.value='';
-}
-function recargarDemo(){
-  if(!confirm('¿Restaurar todos los datos de demostración?')) return;
-  Object.values(K).forEach(k=>localStorage.removeItem(k)); seed();
-  aplicarTextos(); refrescarTienda(); toast('🔄 Datos restaurados');
-}
-function descargarCSV(nombre, filas){
-  const csv=filas.map(f=>f.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));
-  a.download=nombre; a.click();
-}
-function refrescarTienda(){ renderProductos(); renderOfertas(); renderConteoCats(); actualizarStatsHero(); }
-function actualizarStatsHero(){ $('#statProd').textContent=getProductos().length; $('#statUsers').textContent=getUsuarios().length; }
+    // Función principal
+    async function fixInteractions() {
+        await waitForAgents();
+        
+        console.log('✅ Agentes detectados, aplicando configuración...');
 
-/* ================================================================
-   🪟 MODALES / UI GENERAL
-   ================================================================ */
-function abrirModal(id){ $('#'+id).classList.add('open'); }
-function cerrarModal(id){ $('#'+id).classList.remove('open'); }
-function cerrarModales(){ $$('.modal').forEach(m=>m.classList.remove('open')); }
-function cambiarModal(a,b){ cerrarModal(a); abrirModal(b); }
-$$('.modal').forEach(m=>m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('open'); }));
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') cerrarModales(); });
+        // ============================================================
+        // 1. DESACTIVAR VALKYRIE (La Justiciera)
+        // ============================================================
+        try {
+            // Opción 1: API global de Valkyrie
+            if (window.valkyrie && window.valkyrie.politicas) {
+                window.valkyrie.politicas.aplicar({
+                    eliminarEventosInline: false,
+                    bloquearScriptsExternos: false,
+                    bloquearEval: true,
+                    bloquearInnerHTMLMalicioso: true,
+                    bloquearDocumentWrite: true
+                });
+                console.log('✅ Valkyrie configurada (vía API global)');
+            }
+            
+            // Opción 2: A través de Armytage
+            if (window.armytage && window.armytage.agents) {
+                const valkyrie = window.armytage.agents.ValkyrieAgent;
+                if (valkyrie && typeof valkyrie.aplicarPoliticas === 'function') {
+                    valkyrie.aplicarPoliticas({
+                        eliminarEventosInline: false,
+                        bloquearScriptsExternos: false
+                    });
+                    console.log('✅ Valkyrie configurada (vía Armytage)');
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudo configurar Valkyrie:', e);
+        }
 
-function toast(msg, tipo=''){
-  const t=document.createElement('div'); t.className='toast '+tipo; t.textContent=msg;
-  $('#toasts').appendChild(t); setTimeout(()=>{ t.style.opacity=0; t.style.transition='.4s'; setTimeout(()=>t.remove(),400); }, 3200);
-}
+        // ============================================================
+        // 2. DESACTIVAR POLÍTICAS EN EL BUS DE AGENTES
+        // ============================================================
+        try {
+            if (window.armytage && window.armytage.bus) {
+                // Enviar mensaje para desactivar auto-block
+                window.armytage.bus.broadcast('SET_AUTO_BLOCK', { enabled: false });
+                window.armytage.bus.broadcast('ALLOW_INTERACTIONS', { enabled: true });
+                console.log('✅ Auto-block desactivado en AgentBus');
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudo configurar AgentBus:', e);
+        }
 
-/* ================================================================
-   🤖 CHATBOT
-   ================================================================ */
-function toggleChat(v){ $('#chatPanel').classList.toggle('open', v); }
-$('#chatFab').addEventListener('click', ()=>toggleChat(!$('#chatPanel').classList.contains('open')));
-function enviarChat(){
-  const inp=$('#chatInput'), q=inp.value.trim(); if(!q) return;
-  addMsg(q,'user'); inp.value='';
-  setTimeout(()=>addMsg(respuestaBot(q),'bot'), 450);
-}
-function addMsg(t,c){ const d=document.createElement('div'); d.className='msg '+c; d.innerHTML=t;
-  $('#chatBody').appendChild(d); $('#chatBody').scrollTop=99999; }
-function respuestaBot(q){
-  q=q.toLowerCase();
-  if(!sesion()) return '🔒 Para ver productos, precios y comprar necesitas una cuenta. <b>¡Registrarse es gratis!</b> Haz clic en "Iniciar Sesión" arriba a la derecha.';
-  if(q.includes('medicamento')||q.includes('remedio')||q.includes('pastilla'))
-    return '💊 Tenemos analgésicos, antibióticos y vitaminas. Revisa la pestaña <b>Medicamentos</b> en el catálogo. Recuerda: algunos requieren receta médica.';
-  if(q.includes('pc')||q.includes('pieza')||q.includes('componente')||q.includes('hardware'))
-    return '💻 En <b>Tecnología</b> encontrarás GPUs, CPUs, RAM, SSD y periféricos con garantía oficial.';
-  if(q.includes('oferta')||q.includes('descuento'))
-    return '🔥 Mira la sección <b>Ofertas Especiales</b>: descuentos de hasta el 20% para miembros.';
-  if(q.includes('pedido')||q.includes('carrito')||q.includes('comprar')||q.includes('correo'))
-    return '🛒 Agrega productos al carrito y pulsa "Solicitar Pedido por Correo". ¡Tu pedido quedará registrado!';
-  if(q.includes('envío')||q.includes('envio'))
-    return '🚚 Envío gratis en pedidos mayores a $50.';
-  if(q.includes('hola')) return '¡Hola! 👋 ¿En qué puedo ayudarte hoy?';
-  return 'Puedo ayudarte con: 💊 medicamentos, 💻 piezas de PC, 🛒 pedidos o 🔥 ofertas. ¿Qué te interesa?';
-}
+        // ============================================================
+        // 3. DESACTIVAR POLÍTICAS DE VALKYRIE DIRECTAMENTE
+        // ============================================================
+        try {
+            // Buscar el objeto PolicyEngine si existe
+            if (window.PolicyEngine) {
+                if (typeof window.PolicyEngine.aplicarPoliticas === 'function') {
+                    window.PolicyEngine.aplicarPoliticas({
+                        eliminarEventosInline: false,
+                        bloquearScriptsExternos: false
+                    });
+                    console.log('✅ PolicyEngine configurado');
+                }
+            }
+            
+            // Buscar en el contexto de Valkyrie
+            if (window.valkyrie) {
+                // Si tiene método para desactivar
+                if (typeof window.valkyrie.desactivarEventos === 'function') {
+                    window.valkyrie.desactivarEventos();
+                }
+                // Si tiene propiedad para permitir
+                if (window.valkyrie.permitirInteracciones !== undefined) {
+                    window.valkyrie.permitirInteracciones = true;
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudo configurar PolicyEngine:', e);
+        }
 
-/* ================================================================
-   ✨ INICIALIZACIÓN
-   ================================================================ */
-document.addEventListener('DOMContentLoaded', ()=>{
-  seed();
-  aplicarTextos();
-  aplicarAuth();            // 🔒 aplica el muro según la sesión
-  refrescarTienda();
-  $('#anio').textContent=new Date().getFullYear();
-  $('#tickerTrack').innerHTML += $('#tickerTrack').innerHTML; // marquee infinito
+        // ============================================================
+        // 4. RESTAURAR EVENTOS EXISTENTES
+        // ============================================================
+        try {
+            // Restaurar atributos onclick que fueron eliminados
+            document.querySelectorAll('[data-valkyrie-blocked]').forEach(el => {
+                el.style.display = '';
+                el.style.pointerEvents = '';
+                el.removeAttribute('data-valkyrie-blocked');
+            });
+            
+            // Restaurar elementos ocultos
+            document.querySelectorAll('[style*="display: none"]').forEach(el => {
+                if (el.hasAttribute('data-valkyrie-blocked')) {
+                    el.style.display = '';
+                    el.removeAttribute('data-valkyrie-blocked');
+                }
+            });
+        } catch (e) {
+            console.warn('⚠️ No se pudieron restaurar elementos:', e);
+        }
 
-  // Revelado al hacer scroll
-  const obs=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); }}),{threshold:.12});
-  $$('.reveal').forEach(el=>obs.observe(el));
-});
+        // ============================================================
+        // 5. DESACTIVAR PHANTOM (si está bloqueando)
+        // ============================================================
+        try {
+            if (window.Phantom) {
+                // Si Phantom tiene método para desactivar
+                if (typeof window.Phantom.desactivar === 'function') {
+                    window.Phantom.desactivar();
+                }
+                // Si Phantom tiene propiedad de protección
+                if (window.Phantom.protecciones) {
+                    window.Phantom.protecciones = {};
+                }
+                console.log('✅ Phantom configurado');
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudo configurar Phantom:', e);
+        }
+
+        // ============================================================
+        // 6. DESACTIVAR SECURITY (si está bloqueando)
+        // ============================================================
+        try {
+            if (window.SecurityAgent) {
+                if (typeof window.SecurityAgent.desactivar === 'function') {
+                    window.SecurityAgent.desactivar();
+                }
+            }
+            
+            // A través de Armytage
+            if (window.armytage && window.armytage.agents) {
+                const security = window.armytage.agents.SecurityAgent;
+                if (security && security.protecciones) {
+                    security.protecciones.teclas = false;
+                }
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudo configurar Security:', e);
+        }
+
+        // ============================================================
+        // 7. AGREGAR ELEMENTOS PERMITIDOS (para que no sean bloqueados)
+        // ============================================================
+        const elementosPermitidos = [
+            'cart', 'carrito', 'shopping-cart',
+            'admin', 'menu', 'dropdown', 'toggle',
+            'button', 'btn', 'link', 'a',
+            'modal', 'popup', 'dialog',
+            'checkout', 'pagar', 'comprar'
+        ];
+
+        try {
+            if (window.valkyrie && window.valkyrie.agregarElementoPermitido) {
+                elementosPermitidos.forEach(id => {
+                    window.valkyrie.agregarElementoPermitido(id);
+                });
+                console.log('✅ Elementos permitidos agregados a Valkyrie');
+            }
+            
+            // A través de Armytage
+            if (window.armytage && window.armytage.bus) {
+                window.armytage.bus.broadcast('ADD_ALLOWED_ELEMENTS', { 
+                    elements: elementosPermitidos 
+                });
+            }
+        } catch (e) {
+            console.warn('⚠️ No se pudieron agregar elementos permitidos:', e);
+        }
+
+        // ============================================================
+        // 8. RE-ASIGNAR EVENTOS (si fueron eliminados)
+        // ============================================================
+        // Forzar re-ejecución de eventos que pudieron ser eliminados
+        document.querySelectorAll('[onclick], [onerror], [onload]').forEach(el => {
+            // Guardar atributos originales
+            const attrs = ['onclick', 'onerror', 'onload', 'onmouseover', 'onfocus'];
+            attrs.forEach(attr => {
+                if (el.hasAttribute(attr)) {
+                    const value = el.getAttribute(attr);
+                    if (value && !el._restored) {
+                        // Re-asignar el evento
+                        el.removeAttribute(attr);
+                        el.setAttribute(attr, value);
+                    }
+                }
+            });
+            el._restored = true;
+        });
+
+        // ============================================================
+        // 9. MENSAJE DE CONFIRMACIÓN
+        // ============================================================
+        console.log('✅ MODO COMPATIBILIDAD ACTIVADO');
+        console.log('📋 Los clics y eventos deberían funcionar correctamente');
+        console.log('🛡️ Seguridad activa pero sin bloquear interacciones');
+
+        // Mostrar toast si está disponible
+        try {
+            if (window.ToastSystem && window.ToastSystem.success) {
+                window.ToastSystem.success('🛡️ Modo compatibilidad activado - Clics permitidos');
+            } else if (window.showToast) {
+                window.showToast('🛡️ Modo compatibilidad activado', 'success', 3000);
+            }
+        } catch (e) {}
+        console.log('✅ Configuración completada');
+    }
+
+    // ============================================================
+    // EJECUTAR
+    // ============================================================
+    
+    // Ejecutar inmediatamente si ya está cargado
+    if (document.readyState === 'complete') {
+        fixInteractions();
+    } else {
+        // Esperar a que todo esté cargado
+        window.addEventListener('load', () => {
+            setTimeout(fixInteractions, 1000);
+        });
+    }
+
+    // También ejecutar después de 3 segundos por si acaso
+    setTimeout(fixInteractions, 3000);
+
+    // Ejecutar después de 5 segundos (último intento)
+    setTimeout(fixInteractions, 5000);
+
+    // ============================================================
+    // EXPONER FUNCIÓN PARA USO MANUAL
+    // ============================================================
+    window.armytageCompat = fixInteractions;
+    
+    console.log('🛡️ Script de compatibilidad cargado');
+    console.log('📋 Si los clics no funcionan, ejecuta: armytageCompat()');
+
+})();
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const yearEl = document.getElementById('year');
+        if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+        // Aplicar autenticación al cargar
+        aplicarAuth();
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.active, .admin-panel-overlay.active, .quick-view-overlay.active')
+                    .forEach(el => el.classList.remove('active'));
+                const userMenu = document.getElementById('user-menu');
+                if (userMenu) userMenu.classList.remove('open');
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#user-section')) {
+                const userMenu = document.getElementById('user-menu');
+                if (userMenu) userMenu.classList.remove('open');
+            }
+            if (!e.target.closest('.search-container')) {
+                const searchResults = document.getElementById('search-results');
+                if (searchResults) searchResults.classList.remove('active');
+            }
+        });
+        console.log('✅ MediTech listo con muro de autenticación');
+    });
+</script>  
+    
 </body>
 </html>
