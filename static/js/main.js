@@ -1,5 +1,5 @@
 // ============================================
-// MAIN.JS - LÓGICA PRINCIPAL (CORREGIDA)
+// MAIN.JS - LÓGICA PRINCIPAL (CORREGIDA + MURO)
 // ============================================
 
 // ============================================
@@ -35,10 +35,84 @@ const S = {
         ofertas: [
             { titulo: "--%", descripcion: "Medicamentos", detalle: "En toda la línea de analgésicos" },
             { titulo: "--%", descripcion: "Hardware PC", detalle: "Componentes seleccionados" },
-            { titulo: "ENVÍO", descripcion: "Con domicilio por costo adicional.", detalle: "Segun zona de residencia." }
+            { titulo: "ENVÍO", descripcion: "Con domicilio por costo adicional.", detalle: "Según zona de residencia." }
         ]
     }
 };
+
+// ============================================
+// 🔒 MURO DE AUTENTICACIÓN - Núcleo
+// ============================================
+function haySesion() {
+    // main.js usa la clave 'session'
+    const session = localStorage.getItem('session');
+    if (session && session !== 'null' && session !== '') return true;
+    
+    // Claves alternativas por compatibilidad
+    const clavesAlt = ['mt_session', 'currentUser', 'auth_user'];
+    for (const key of clavesAlt) {
+        const val = localStorage.getItem(key);
+        if (val && val !== 'null' && val !== '') return true;
+    }
+    return false;
+}
+
+function aplicarEstadoAuth() {
+    const tieneSesion = haySesion();
+    document.body.classList.toggle('auth', tieneSesion);
+    document.body.classList.toggle('no-auth', !tieneSesion);
+    
+    // 🔒 Si NO hay sesión, VACIAR los contenedores de productos
+    if (!tieneSesion) {
+        const portada = safeElement('portada-productos');
+        if (portada) portada.innerHTML = '';
+        
+        const ofertasGrid = safeElement('ofertas-grid');
+        if (ofertasGrid) ofertasGrid.innerHTML = '';
+        
+        const categoriasGrid = safeElement('categorias-grid');
+        if (categoriasGrid) categoriasGrid.innerHTML = '';
+        
+        // Ocultar botón de búsqueda de productos
+        const searchInput = safeElement('search-input');
+        if (searchInput) searchInput.placeholder = '🔒 Inicia sesión para buscar...';
+    }
+    
+    // Actualizar UI del menú de usuario
+    updateAuthUI();
+}
+
+function updateAuthUI() {
+    const tieneSesion = haySesion();
+    const menuLoggedOut = safeElement('menu-logged-out');
+    const menuLoggedIn = safeElement('menu-logged-in');
+    const userNameDisplay = safeElement('user-name-display');
+    
+    if (menuLoggedOut && menuLoggedIn) {
+        menuLoggedOut.classList.toggle('hidden', tieneSesion);
+        menuLoggedIn.classList.toggle('hidden', !tieneSesion);
+    }
+    
+    if (userNameDisplay && S.currentUser) {
+        userNameDisplay.textContent = S.currentUser.name || S.currentUser.username || 'Usuario';
+    }
+    
+    // Mostrar/ocultar botones admin
+    const esAdmin = S.currentUser && S.currentUser.role === 'admin';
+    const adminBtn = safeElement('admin-menu-btn');
+    const usersBtn = safeElement('users-menu-btn');
+    const telegramBtn = safeElement('telegram-btn');
+    const crudBtn = safeElement('crud-menu-btn');
+    
+    if (adminBtn) adminBtn.classList.toggle('hidden', !esAdmin);
+    if (usersBtn) usersBtn.classList.toggle('hidden', !esAdmin);
+    if (telegramBtn) telegramBtn.classList.toggle('hidden', !esAdmin);
+    if (crudBtn) crudBtn.classList.toggle('hidden', !esAdmin);
+    
+    // Mostrar/ocultar carrito
+    const cartBtn = safeElement('cart-btn');
+    if (cartBtn) cartBtn.classList.toggle('hidden', !tieneSesion);
+}
 
 // ============================================
 // FUNCIONES SEGURAS PARA ELEMENTOS
@@ -53,22 +127,25 @@ function safeElement(id) {
 }
 
 // ============================================
-// CARGAR PRODUCTOS
+// CARGAR PRODUCTOS (🔒 solo si hay sesión)
 // ============================================
 async function cargarProductos() {
+    // 🔒 BLOQUEO CRÍTICO: No cargar productos si no hay sesión
+    if (!haySesion()) {
+        console.log('🔒 [MediTech] Productos bloqueados: no hay sesión activa');
+        return;
+    }
+    
     console.log('📦 Cargando productos desde backend...');
     try {
         const productos = await apiRequest('/productos');
         console.log('📦 Respuesta del backend:', productos);
-        
         if (productos && productos.length > 0) {
             S.pr = productos;
             console.log(`✅ ${S.pr.length} productos cargados`);
-            // Guardar en localStorage como backup
             localStorage.setItem('productos_backup', JSON.stringify(S.pr));
         } else {
             console.warn('⚠️ No hay productos en el backend');
-            // Intentar cargar desde backup
             const backup = localStorage.getItem('productos_backup');
             if (backup) {
                 try {
@@ -87,7 +164,6 @@ async function cargarProductos() {
         }
     } catch (error) {
         console.error('❌ Error cargando productos:', error);
-        // Fallback: usar backup o productos por defecto
         const backup = localStorage.getItem('productos_backup');
         if (backup) {
             try {
@@ -107,39 +183,41 @@ async function cargarProductos() {
     }
 }
 
-
+// ============================================
+// 🔒 RENDER PRODUCTS - Verifica sesión antes de renderizar
+// ============================================
 function renderProducts() {
+    // 🔒 BLOQUEO: No renderizar si no hay sesión
+    if (!haySesion()) {
+        const grid = safeElement('portada-productos');
+        if (grid) grid.innerHTML = '';
+        return;
+    }
+    
     const grid = safeElement('portada-productos');
     if (!grid) return;
-    
     const category = safeElement('filter-category');
     const sort = safeElement('sort-by');
     const label = safeElement('product-total-label');
-    
     const catValue = category ? category.value : '';
     const sortValue = sort ? sort.value : 'default';
-    
     let filtered = [...S.pr];
     if (catValue) filtered = filtered.filter(p => p.category === catValue);
     if (sortValue === 'price-asc') filtered.sort((a, b) => a.price - b.price);
     else if (sortValue === 'price-desc') filtered.sort((a, b) => b.price - a.price);
     else if (sortValue === 'name') filtered.sort((a, b) => a.name.localeCompare(b.name));
-    
     if (filtered.length === 0) {
         grid.innerHTML = `<p class="col-span-full text-center py-16 text-gray-400"><i class="fas fa-box-open text-5xl mb-4 block opacity-50"></i>No hay productos disponibles.</p>`;
         if (label) label.textContent = '0 productos';
         return;
     }
-    
     const fallbackImage = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200"><rect width="300" height="200" fill="#f3f4f6"/><text x="150" y="105" font-family="Arial" font-size="16" fill="#9ca3af" text-anchor="middle">Sin imagen</text></svg>');
-    
     grid.innerHTML = filtered.map(p => {
         const isSoldOut = !p.available || p.stock <= 0;
         const isLowStock = p.stock > 0 && p.stock <= 5;
         const stockClass = isSoldOut ? 'soldout' : (isLowStock ? 'low-stock' : 'in-stock');
         const stockText = isSoldOut ? '❌ Agotado' : `📦 ${p.stock} unidades`;
         const imgSrc = p.image && p.image.startsWith('http') ? p.image : fallbackImage;
-        
         return `
             <div class="product-card" style="background:white;border-radius:16px;overflow:hidden;border:1px solid #f1f5f9;box-shadow:0 4px 20px rgba(0,0,0,0.06);transition:all 0.3s cubic-bezier(0.4,0,0.2,1);">
                 <div class="image-wrap" style="position:relative;height:200px;overflow:hidden;background:#f8fafc;cursor:pointer;" onclick="openQuickView('${p.id}')">
@@ -177,9 +255,18 @@ function filterProducts() {
 }
 
 function searchProducts(query) {
+    // 🔒 Bloquear búsqueda si no hay sesión
+    if (!haySesion()) {
+        const results = safeElement('search-results');
+        if (results) {
+            results.innerHTML = '<p class="p-4 text-center text-gray-400">🔒 Inicia sesión para buscar productos</p>';
+            results.classList.add('active');
+        }
+        return;
+    }
+    
     const results = safeElement('search-results');
     if (!results) return;
-    
     if (!query.trim()) {
         results.classList.remove('active');
         return;
@@ -209,11 +296,9 @@ function searchProducts(query) {
 // ============================================
 let currentSlide = 0;
 let carouselInterval = null;
-
 function renderCarousel() {
     const inner = safeElement('carousel-inner');
     if (!inner) return;
-    
     if (!S.config.carousel || S.config.carousel.length === 0) {
         S.config.carousel = [
             { image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&h=400&fit=crop", title: "Medicamentos de Calidad", subtitle: "Los mejores precios" },
@@ -221,7 +306,6 @@ function renderCarousel() {
             { image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=400&fit=crop", title: "Ofertas Especiales", subtitle: "Descuentos exclusivos" }
         ];
     }
-    
     inner.innerHTML = S.config.carousel.map((slide) => `
         <div class="carousel-item">
             <img src="${slide.image || 'https://via.placeholder.com/1200x400?text=Sin+Imagen'}" alt="${slide.title}" onerror="this.src='https://via.placeholder.com/1200x400?text=Error'">
@@ -231,7 +315,6 @@ function renderCarousel() {
             </div>
         </div>
     `).join('');
-    
     const dotsContainer = safeElement('carousel-dots');
     if (dotsContainer) {
         dotsContainer.innerHTML = '';
@@ -245,13 +328,11 @@ function renderCarousel() {
     currentSlide = 0;
     updateCarousel();
 }
-
 function moveCarousel(direction) {
     if (!S.config.carousel || S.config.carousel.length === 0) return;
     currentSlide = (currentSlide + direction + S.config.carousel.length) % S.config.carousel.length;
     updateCarousel();
 }
-
 function updateCarousel() {
     const inner = safeElement('carousel-inner');
     if (!inner) return;
@@ -260,41 +341,37 @@ function updateCarousel() {
         dot.classList.toggle('active', i === currentSlide);
     });
 }
-
 function initCarousel() {
     if (carouselInterval) clearInterval(carouselInterval);
     carouselInterval = setInterval(() => moveCarousel(1), 5000);
 }
 
 // ============================================
-// CATEGORÍAS Y OFERTAS
+// CATEGORÍAS Y OFERTAS (🔒 solo con sesión)
 // ============================================
 function renderCategorias() {
+    // 🔒 Bloquear si no hay sesión
+    if (!haySesion()) return;
+    
     const grid = safeElement('categorias-grid');
     if (!grid) return;
-    grid.innerHTML = S.config.categorias.map(cat => `
-        <div class="category-card bg-gradient-to-br ${cat.color}" onclick="filtrarPorCategoria('${cat.nombre}')">
-            <div class="icon"><i class="fas ${cat.icono}"></i></div>
-            <div class="name">${cat.nombre}</div>
-            <div class="count">${cat.count}</div>
-        </div>
-    `).join('');
+    grid.innerHTML = S.config.categorias.map(cat => `<div class="category-card bg-gradient-to-br ${cat.color}" onclick="filtrarPorCategoria('${cat.nombre}')"> <div class="icon"><i class="fas ${cat.icono}"></i></div> <div class="name">${cat.nombre}</div> <div class="count">${cat.count}</div> </div>`).join('');
 }
-
 function renderOfertas() {
+    // 🔒 Bloquear si no hay sesión
+    if (!haySesion()) return;
+    
     const grid = safeElement('ofertas-grid');
     if (!grid) return;
-    grid.innerHTML = S.config.ofertas.map(oferta => `
-        <div class="offer-card">
-            <div class="title">${oferta.titulo}</div>
-            <div class="desc">${oferta.descripcion}</div>
-            <div class="detail">${oferta.detalle}</div>
-            <button class="btn" onclick="document.getElementById('productos').scrollIntoView({ behavior: 'smooth' })">Ver productos</button>
-        </div>
-    `).join('');
+    grid.innerHTML = S.config.ofertas.map(oferta => `<div class="offer-card"> <div class="title">${oferta.titulo}</div> <div class="desc">${oferta.descripcion}</div> <div class="detail">${oferta.detalle}</div> <button class="btn" onclick="document.getElementById('productos').scrollIntoView({ behavior: 'smooth' })">Ver productos</button> </div>`).join('');
 }
-
 function filtrarPorCategoria(categoria) {
+    // 🔒 Verificar sesión antes de filtrar
+    if (!haySesion()) {
+        if (typeof openLoginModal === 'function') openLoginModal();
+        return;
+    }
+    
     const select = safeElement('filter-category');
     if (!select) return;
     const opciones = {
@@ -352,16 +429,19 @@ function showNotif(msg, type = 'info') {
 // QUICK VIEW
 // ============================================
 function openQuickView(id) {
+    // 🔒 Verificar sesión antes de mostrar quick view
+    if (!haySesion()) {
+        if (typeof openLoginModal === 'function') openLoginModal();
+        return;
+    }
+    
     const p = S.pr.find(x => x.id === id);
     if (!p) return;
     const isAvailable = p.available && p.stock > 0;
     const content = safeElement('quick-view-content');
     if (!content) return;
-    
-    // 🔧 SVG de respaldo para imágenes rotas
     const fallbackImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect width="400" height="400" fill="%23f3f4f6"/%3E%3Ctext x="200" y="205" font-family="Arial" font-size="20" fill="%239ca3af" text-anchor="middle"%3ESin imagen%3C/text%3E%3C/svg%3E';
     const imgSrc = p.image && p.image.startsWith('http') ? p.image : fallbackImage;
-    
     content.innerHTML = `
         <div class="grid md:grid-cols-2 gap-6 p-6">
             <div><img src="${imgSrc}" class="w-full h-96 object-cover rounded-2xl" onerror="this.src='${fallbackImage}'"></div>
@@ -381,7 +461,6 @@ function openQuickView(id) {
     const overlay = safeElement('quick-view');
     if (overlay) overlay.classList.add('active');
 }
-
 function closeQuickView() {
     const overlay = safeElement('quick-view');
     if (overlay) overlay.classList.remove('active');
@@ -401,27 +480,12 @@ function renderAdminList() {
     }
     list.innerHTML = S.pr.map(p => {
         const isAvailable = p.available !== false;
-        return `
-            <div class="admin-list-item">
-                <img src="${p.image || 'https://via.placeholder.com/60'}" alt="${p.name}">
-                <div class="info">
-                    <div class="name">${p.name}</div>
-                    <div class="meta">$${p.price} | Stock: ${p.stock} | <span style="color:${isAvailable ? '#10b981' : '#ef4444'};font-weight:600;">${isAvailable ? '✅ Disponible' : '❌ Agotado'}</span></div>
-                </div>
-                <div class="actions">
-                    <button class="${isAvailable ? 'toggle-on' : 'toggle-off'}" onclick="toggleProductAvailability('${p.id}')" title="${isAvailable ? 'Marcar como agotado' : 'Marcar como disponible'}">
-                        <i class="fas ${isAvailable ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
-                    </button>
-                    <button class="edit" onclick="editProduct('${p.id}')"><i class="fas fa-edit"></i></button>
-                    <button class="delete" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button>
-                </div>
-            </div>
-        `;
+        return `<div class="admin-list-item"> <img src="${p.image || 'https://via.placeholder.com/60'}" alt="${p.name}"> <div class="info"> <div class="name">${p.name}</div> <div class="meta">$${p.price} | Stock: ${p.stock} | <span style="color:${isAvailable ? '#10b981' : '#ef4444'};font-weight:600;">${isAvailable ? '✅ Disponible' : '❌ Agotado'}</span></div> </div> <div class="actions"> <button class="${isAvailable ? 'toggle-on' : 'toggle-off'}" onclick="toggleProductAvailability('${p.id}')" title="${isAvailable ? 'Marcar como agotado' : 'Marcar como disponible'}"> <i class="fas ${isAvailable ? 'fa-toggle-on' : 'fa-toggle-off'}"></i> </button> <button class="edit" onclick="editProduct('${p.id}')"><i class="fas fa-edit"></i></button> <button class="delete" onclick="deleteProduct('${p.id}')"><i class="fas fa-trash"></i></button> </div> </div>`;
     }).join('');
 }
 
 // ============================================
-// ESTADÍSTICAS - CORREGIDA (eliminadas referencias a stat-views y stat-today)
+// ESTADÍSTICAS
 // ============================================
 function renderEstadisticas() {
     const elements = {
@@ -430,7 +494,6 @@ function renderEstadisticas() {
         orders: safeElement('stat-orders'),
         revenue: safeElement('stat-revenue')
     };
-    
     if (elements.products) elements.products.textContent = S.pr ? S.pr.length : 0;
     if (elements.users) elements.users.textContent = S.users ? S.users.length : 0;
     if (elements.orders) elements.orders.textContent = S.orders ? S.orders.length : 0;
@@ -440,18 +503,15 @@ function renderEstadisticas() {
     }
     console.log(`📊 Estadísticas: ${S.pr ? S.pr.length : 0} productos, ${S.users ? S.users.length : 0} usuarios, ${S.orders ? S.orders.length : 0} pedidos`);
 }
-
 function generarGraficos() {
     try {
         if (window.chartVentas) window.chartVentas.destroy();
         if (window.chartPedidos) window.chartPedidos.destroy();
-
         const ctx1 = safeElement('ventas-categoria');
         if (ctx1 && typeof Chart !== 'undefined') {
             const categorias = ['medicamento', 'tecnologia', 'salud', 'gaming'];
             const nombres = ['💊 Medicamentos', '💻 Tecnología', '🩺 Salud', '🎮 Gaming'];
             const colores = ['#0d9488', '#3b82f6', '#10b981', '#8b5cf6'];
-            
             const ventas = categorias.map(cat => {
                 if (!S.orders) return 0;
                 return S.orders.reduce((sum, o) => {
@@ -462,14 +522,12 @@ function generarGraficos() {
                     return sum + items.reduce((s, i) => s + (i.subtotal || 0), 0);
                 }, 0);
             });
-            
             window.chartVentas = new Chart(ctx1, {
                 type: 'doughnut',
                 data: { labels: nombres, datasets: [{ data: ventas, backgroundColor: colores, borderWidth: 2, borderColor: '#fff' }] },
                 options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
             });
         }
-
         const ctx2 = safeElement('pedidos-dia');
         if (ctx2 && typeof Chart !== 'undefined') {
             const dias = [], counts = [], hoy = new Date();
@@ -481,7 +539,6 @@ function generarGraficos() {
                 const count = S.orders ? S.orders.filter(o => o.fecha && o.fecha.startsWith(fechaStr)).length : 0;
                 counts.push(count);
             }
-            
             window.chartPedidos = new Chart(ctx2, {
                 type: 'bar',
                 data: { labels: dias, datasets: [{ label: 'Pedidos', data: counts, backgroundColor: '#0d9488', borderRadius: 6 }] },
@@ -492,28 +549,22 @@ function generarGraficos() {
         console.warn('Error generando gráficos:', e.message);
     }
 }
-
 function actualizarDashboard() {
     const hoy = new Date().toISOString().split('T')[0];
     const ventasHoy = S.orders ? S.orders.filter(o => o.fecha && o.fecha.startsWith(hoy)).reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0) : 0;
-    
     const elVentas = safeElement('dashboard-ventas-hoy');
     if (elVentas) elVentas.textContent = `$${ventasHoy.toFixed(2)}`;
-    
     const elPedidos = safeElement('dashboard-pedidos-pendientes');
     if (elPedidos) elPedidos.textContent = S.orders ? S.orders.length : 0;
-    
     const critico = S.pr ? S.pr.filter(p => p.stock <= 5 && p.stock > 0).length : 0;
     const elStock = safeElement('dashboard-stock-critico');
     if (elStock) elStock.textContent = critico;
-    
     const semana = new Date();
     semana.setDate(semana.getDate() - 7);
     const nuevos = S.users ? S.users.filter(u => u.fecha && new Date(u.fecha) > semana).length : 0;
     const elClientes = safeElement('dashboard-clientes-nuevos');
     if (elClientes) elClientes.textContent = nuevos;
 }
-
 function verificarNotificaciones() {
     const critico = S.pr ? S.pr.filter(p => p.stock <= 5 && p.stock > 0).length : 0;
     const textEl = safeElement('notif-text');
@@ -529,23 +580,39 @@ function verificarNotificaciones() {
 }
 
 // ============================================
-// INICIALIZACIÓN
-// ============================================
-// ============================================
-// INICIALIZACIÓN
+// 🔒 INICIALIZACIÓN CON MURO
 // ============================================
 async function init() {
     console.log('🚀 Iniciando MediTech...');
+    
+    // 🔒 Aplicar estado de autenticación PRIMERO
+    aplicarEstadoAuth();
+    
     try {
         await loadToken();
-        
         const session = localStorage.getItem('session');
         if (session) {
             S.currentUser = JSON.parse(session);
             updateUIForLoggedUser();
         }
         
-        await cargarProductos();
+        // 🔒 Solo cargar productos SI hay sesión
+        if (haySesion()) {
+            await cargarProductos();
+        } else {
+            console.log('🔒 [MediTech] Sesión no detectada. Productos bloqueados.');
+            // Mostrar mensaje en el área de productos
+            const portada = safeElement('portada-productos');
+            if (portada) {
+                portada.innerHTML = `
+                    <div class="col-span-full text-center py-16">
+                        <i class="fas fa-lock text-5xl text-gray-300 mb-4 block"></i>
+                        <p class="text-gray-500 text-lg font-medium mb-2">Contenido exclusivo para miembros</p>
+                        <p class="text-gray-400 text-sm">Inicia sesión para ver el catálogo completo</p>
+                    </div>
+                `;
+            }
+        }
         
         if (S.currentUser && S.currentUser.role === 'admin') {
             if (safeElement('users-list')) {
@@ -564,11 +631,15 @@ async function init() {
         }
         
         renderCarousel();
-        renderCategorias();
-        renderOfertas();
+        
+        // 🔒 Solo renderizar categorías y ofertas si hay sesión
+        if (haySesion()) {
+            renderCategorias();
+            renderOfertas();
+        }
+        
         applyTexts();
         initCarousel();
-        
         console.log('🎉 MediTech iniciado correctamente');
     } catch (error) {
         console.error('❌ Error en init:', error);
@@ -584,13 +655,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (year) year.textContent = new Date().getFullYear();
     init();
 });
-
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     const year = safeElement('year');
     if (year) year.textContent = new Date().getFullYear();
     init();
 }
-
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         const login = safeElement('login-modal');
@@ -607,7 +676,6 @@ document.addEventListener('keydown', (e) => {
         if (userMenu) userMenu.classList.remove('open');
     }
 });
-
 document.addEventListener('click', (e) => {
     const userSection = safeElement('user-section');
     if (!userSection || !e.target.closest('#user-section')) {
@@ -622,9 +690,8 @@ document.addEventListener('click', (e) => {
 });
 
 // ============================================
-// EXPONER FUNCIONES GLOBALES (SOLO LAS QUE EXISTEN)
+// EXPONER FUNCIONES GLOBALES
 // ============================================
-// Auth
 window.openLoginModal = openLoginModal;
 window.closeLoginModal = closeLoginModal;
 window.openRegisterModal = openRegisterModal;
@@ -633,19 +700,16 @@ window.toggleUserMenu = toggleUserMenu;
 window.logout = logout;
 window.handleLogin = handleLogin;
 window.handleRegister = handleRegister;
-// Cart
 window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
 window.openCart = openCart;
 window.closeCart = closeCart;
 window.updateCartQuantity = updateCartQuantity;
-// UI
 window.openQuickView = openQuickView;
 window.closeQuickView = closeQuickView;
 window.moveCarousel = moveCarousel;
 window.filterProducts = filterProducts;
 window.searchProducts = searchProducts;
-// Admin
 window.openAdminPanel = openAdminPanel;
 window.closeAdminPanel = closeAdminPanel;
 window.showAdminTab = showAdminTab;
@@ -673,7 +737,8 @@ window.renderEstadisticas = renderEstadisticas;
 window.generarGraficos = generarGraficos;
 window.actualizarDashboard = actualizarDashboard;
 window.verificarNotificaciones = verificarNotificaciones;
-// Admin extra (solo si existen)
+window.haySesion = haySesion;
+window.aplicarEstadoAuth = aplicarEstadoAuth;
 if (typeof cargarUsuarios !== 'undefined') window.cargarUsuarios = cargarUsuarios;
 if (typeof cargarPedidosAdmin !== 'undefined') window.cargarPedidosAdmin = cargarPedidosAdmin;
 if (typeof renderPedidos !== 'undefined') window.renderPedidos = renderPedidos;
