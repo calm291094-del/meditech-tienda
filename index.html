@@ -1029,5 +1029,210 @@ aplicarAuth();
 
 <!-- main.js va al FINAL para que nuestro script pueda sobreescribir sus funciones -->
 <script src="static/js/main.js"></script>
+
+<!-- ============================================ -->
+<!-- 🔒 GUARDIÁN DE ACCESO (pegar al final del body) -->
+<!-- ============================================ -->
+<style>
+  .mt-wall {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 60px 20px; min-height: 400px;
+  }
+  .mt-wall-card {
+    max-width: 560px; width: 100%; padding: 48px 32px;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 2px dashed #0d9488; border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+    animation: mtFadeUp .5s ease;
+  }
+  @keyframes mtFadeUp { from { opacity:0; transform:translateY(24px);} to { opacity:1; transform:none;} }
+  .mt-wall-icon { font-size: 3.5rem; margin-bottom: 16px; animation: mtFloat 2.4s ease-in-out infinite; }
+  @keyframes mtFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-9px);} }
+  .mt-wall-card h3 { font-size: 1.6rem; font-weight: 700; color: #0f172a; margin: 0 0 8px; }
+  .mt-wall-card > p { color: #64748b; margin: 0 0 20px; }
+  .mt-wall-card ul { list-style: none; padding: 0; margin: 0 0 24px; text-align: left; display: inline-block; }
+  .mt-wall-card li { padding: 6px 0; color: #475569; font-size: .95rem; }
+  .mt-wall-card li i { color: #10b981; margin-right: 8px; }
+  .mt-wall-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .mt-wall-btns button {
+    padding: 12px 28px; border-radius: 12px; font-weight: 600; font-size: 1rem;
+    cursor: pointer; transition: all .25s ease; border: none;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .mt-btn-login { background: linear-gradient(135deg, #0d9488, #0891b2); color: #fff; }
+  .mt-btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(13,148,136,.4); }
+  .mt-btn-reg { background: #fff; color: #0d9488; border: 2px solid #0d9488 !important; }
+  .mt-btn-reg:hover { background: #0d9488; color: #fff; }
+</style>
+
+<script>
+(function() {
+  'use strict';
+
+  // 🔑 Claves posibles donde tu auth.js guarda la sesión (la principal es 'session')
+  var CLAVES = ['session', 'mt_session', 'currentUser', 'auth_user', 'mediatech_user', 'user'];
+
+  function haySesion() {
+    for (var i = 0; i < CLAVES.length; i++) {
+      try {
+        var v = localStorage.getItem(CLAVES[i]);
+        if (!v || v === 'null' || v === '' || v === '{}' || v === 'undefined') continue;
+        try {
+          var o = JSON.parse(v);
+          if (o && Object.keys(o).length > 0) return true;
+        } catch (e) { return true; } // no es JSON pero tiene contenido
+      } catch (e) {}
+    }
+    return false;
+  }
+
+  // Zonas a proteger: id de la sección + texto del muro
+  var ZONAS = [
+    { id: 'categorias', titulo: 'Categorías exclusivas para miembros', desc: 'Inicia sesión para explorar todo lo que ofrecemos.' },
+    { id: 'productos',  titulo: 'Catálogo exclusivo para usuarios registrados', desc: 'Únete a MediTech y desbloquea precios y productos.' },
+    { id: 'ofertas',    titulo: 'Ofertas exclusivas para miembros', desc: 'Los descuentos solo son visibles si tienes cuenta.' }
+  ];
+
+  function muroHTML(z) {
+    return '<div class="mt-wall">' +
+      '<div class="mt-wall-card">' +
+        '<div class="mt-wall-icon">🔒</div>' +
+        '<h3>' + z.titulo + '</h3>' +
+        '<p>' + z.desc + '</p>' +
+        '<ul>' +
+          '<li><i class="fas fa-check-circle"></i> <strong>Catálogo completo</strong> con precios visibles</li>' +
+          '<li><i class="fas fa-check-circle"></i> <strong>Ofertas</strong> y descuentos exclusivos</li>' +
+          '<li><i class="fas fa-check-circle"></i> <strong>Carrito</strong> y pedidos por correo</li>' +
+        '</ul>' +
+        '<div class="mt-wall-btns">' +
+          '<button class="mt-btn-login" onclick="mtAbrirLogin()"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>' +
+          '<button class="mt-btn-reg" onclick="mtAbrirRegistro()"><i class="fas fa-user-plus"></i> Crear cuenta gratis</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // Funciones globales para los botones del muro
+  window.mtAbrirLogin = function() {
+    if (typeof openLoginModal === 'function') openLoginModal();
+    else { var m = document.getElementById('login-modal'); if (m) m.classList.add('active'); }
+  };
+  window.mtAbrirRegistro = function() {
+    if (typeof openRegisterModal === 'function') openRegisterModal();
+    else { var m = document.getElementById('register-modal'); if (m) m.classList.add('active'); }
+  };
+
+  function ocultarHijos(sec) {
+    Array.prototype.forEach.call(sec.children, function(h) {
+      if (!h.classList.contains('mt-wall')) h.style.display = 'none';
+    });
+  }
+  function mostrarHijos(sec) {
+    Array.prototype.forEach.call(sec.children, function(h) {
+      if (!h.classList.contains('mt-wall')) h.style.display = '';
+    });
+  }
+
+  var estabanVacios = false; // para saber si hay que re-renderizar al desloguear
+
+  function bloquear() {
+    document.body.classList.add('mt-no-auth');
+    document.body.classList.remove('mt-auth');
+
+    ZONAS.forEach(function(z) {
+      var sec = document.getElementById(z.id);
+      if (!sec) return;
+      ocultarHijos(sec);
+      if (!sec.querySelector('.mt-wall')) {
+        sec.insertAdjacentHTML('afterbegin', muroHTML(z));
+      }
+    });
+
+    // Vaciar el grid de productos para que no queden en memoria visual
+    var grid = document.getElementById('portada-productos');
+    if (grid && grid.children.length > 0) {
+      grid.innerHTML = '';
+      estabanVacios = true;
+    }
+
+    // Ocultar juegos, carrito y búsqueda
+    var juegos = document.querySelector('.game-dropdown'); if (juegos) juegos.style.display = 'none';
+    var cart = document.getElementById('cart-btn'); if (cart) cart.style.display = 'none';
+    var search = document.getElementById('search-input');
+    if (search) { search.placeholder = '🔒 Inicia sesión para buscar...'; search.disabled = true; }
+  }
+
+  function desbloquear() {
+    document.body.classList.add('mt-auth');
+    document.body.classList.remove('mt-no-auth');
+
+    ZONAS.forEach(function(z) {
+      var sec = document.getElementById(z.id);
+      if (!sec) return;
+      mostrarHijos(sec);
+      var wall = sec.querySelector('.mt-wall');
+      if (wall) wall.remove();
+    });
+
+    // Mostrar juegos, carrito y búsqueda
+    var juegos = document.querySelector('.game-dropdown'); if (juegos) juegos.style.display = '';
+    var cart = document.getElementById('cart-btn'); if (cart) cart.style.display = '';
+    var search = document.getElementById('search-input');
+    if (search) { search.placeholder = 'Buscar productos...'; search.disabled = false; }
+
+    // Re-renderizar productos si fueron vaciados por el guardián
+    if (estabanVacios) {
+      estabanVacios = false;
+      setTimeout(function() {
+        if (typeof cargarProductos === 'function') cargarProductos();
+        else if (typeof renderProducts === 'function') renderProducts();
+      }, 100);
+    }
+  }
+
+  function aplicar() {
+    if (haySesion()) desbloquear();
+    else bloquear();
+  }
+
+  // 👁️ MutationObserver: si main.js intenta dibujar productos SIN sesión, los borra al instante
+  var observer = new MutationObserver(function() {
+    if (!haySesion()) {
+      var grid = document.getElementById('portada-productos');
+      if (grid && grid.children.length > 0) grid.innerHTML = '';
+    }
+  });
+
+  function init() {
+    aplicar();
+
+    var grid = document.getElementById('portada-productos');
+    if (grid) observer.observe(grid, { childList: true, subtree: true });
+
+    // Detectar login/logout en la misma pestaña (localStorage no dispara 'storage' aquí)
+    var estadoPrevio = haySesion();
+    setInterval(function() {
+      var ahora = haySesion();
+      if (ahora !== estadoPrevio) {
+        estadoPrevio = ahora;
+        aplicar();
+      }
+    }, 400);
+
+    // Por si cambia desde otra pestaña
+    window.addEventListener('storage', aplicar);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // Exposición manual (por si quieres forzar el estado)
+  window.mtAplicar = aplicar;
+  window.mtHaySesion = haySesion;
+})();
+</script>
 </body>
 </html>
