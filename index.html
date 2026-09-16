@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MediTech — Salud & Tecnología</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Font Awesome 6.5.1 (versión estable, sin warnings de Glyph bbox) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 :root{
   --teal:#0d9488; --teal2:#0f766e; --cyan:#06b6d4; --amber:#f59e0b; --red:#ef4444;
@@ -22,7 +23,6 @@ a{text-decoration:none;color:inherit}
 button{font-family:var(--body);cursor:pointer}
 img{max-width:100%}
 
-/* ============ HEADER ============ */
 .header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .header-inner{max-width:1200px;margin:auto;display:flex;align-items:center;gap:1.2rem;padding:.7rem 1.2rem;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:.6rem}
@@ -46,7 +46,6 @@ img{max-width:100%}
 .cart-btn:hover{border-color:var(--teal);color:var(--teal)}
 .cart-count{position:absolute;top:-6px;right:-6px;background:var(--grad);color:#fff;font-size:.65rem;font-weight:700;min-width:19px;height:19px;border-radius:99px;display:grid;place-items:center;padding:0 4px}
 
-/* dropdown juegos */
 .games-drop{position:relative}
 .games-btn{background:linear-gradient(145deg,#f59e0b,#fbbf24);color:#1e293b;font-weight:700;border:none;border-radius:99px;padding:.5rem 1.1rem;font-size:.88rem;display:flex;align-items:center;gap:.45rem;box-shadow:0 4px 14px rgba(245,158,11,.35);transition:.2s}
 .games-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(245,158,11,.5)}
@@ -56,7 +55,6 @@ img{max-width:100%}
 .games-menu a:hover{background:#fef9c3;transform:translateX(4px)}
 .games-menu a i{color:#f59e0b;width:22px;text-align:center}
 
-/* usuario */
 .user-wrap{position:relative}
 .user-btn{display:flex;align-items:center;gap:.5rem;border-radius:99px;padding:.45rem 1rem;font-weight:600;font-size:.86rem;transition:.2s;border:1.5px solid transparent}
 .user-btn.guest{background:var(--grad);color:#fff;box-shadow:0 4px 14px rgba(13,148,136,.3)}
@@ -72,7 +70,6 @@ img{max-width:100%}
 .user-menu button:hover,.user-menu a:hover{background:var(--soft)}
 .user-menu .danger{color:var(--red)}
 
-/* ============ HERO ============ */
 .hero{background:radial-gradient(800px 420px at 85% -10%,rgba(13,148,136,.14),transparent 60%),radial-gradient(600px 380px at -5% 40%,rgba(6,182,212,.10),transparent 60%),var(--dark);color:#e9f1ff;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(148,180,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(148,180,255,.05) 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(ellipse at 50% 0%,#000 30%,transparent 75%);pointer-events:none}
 .hero-inner{max-width:1200px;margin:auto;padding:4.2rem 1.2rem;display:grid;grid-template-columns:1.1fr .9fr;gap:3rem;align-items:center;position:relative}
@@ -91,7 +88,6 @@ img{max-width:100%}
 .hero-stats{display:flex;gap:2.2rem;margin-top:2.3rem;flex-wrap:wrap}
 .hero-stats b{font-family:var(--disp);font-size:1.5rem;display:block;color:#fff}
 .hero-stats span{font-size:.78rem;color:#94a6c8}
-/* monitor */
 .monitor{background:var(--dark-card);border:1px solid var(--dark-line);border-radius:18px;padding:1.35rem;box-shadow:0 30px 60px rgba(0,0,0,.45);position:relative;overflow:hidden}
 .monitor-head{display:flex;justify-content:space-between;font-size:.76rem;color:#94a6c8;margin-bottom:.7rem;letter-spacing:1px}
 .rec{color:#fb7185;display:flex;align-items:center;gap:.4rem}
@@ -107,14 +103,12 @@ img{max-width:100%}
 .vital b{font-family:var(--disp);color:#2dd4bf;font-size:1.05rem}
 .vital span{display:block;font-size:.64rem;letter-spacing:1.5px;text-transform:uppercase;color:#94a6c8}
 
-/* ============ SECCIONES ============ */
 section.block{max-width:1200px;margin:auto;padding:3.8rem 1.2rem}
 .sec-head{margin-bottom:1.8rem}
 .sec-head .tag{font-size:.72rem;letter-spacing:3px;text-transform:uppercase;color:var(--teal);font-weight:700}
 .sec-head h3{font-family:var(--disp);font-size:clamp(1.5rem,2.6vw,2.1rem);margin:.25rem 0 .2rem}
 .sec-head p{color:var(--mut);font-size:.93rem}
 
-/* muro */
 .wall{border:2px dashed rgba(13,148,136,.45);border-radius:22px;background:linear-gradient(135deg,rgba(13,148,136,.05),rgba(6,182,212,.04));padding:3rem 1.6rem;text-align:center;animation:fadeUp .5s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
 .wall .lock{width:74px;height:74px;margin:0 auto 1.1rem;border-radius:22px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:1.9rem;box-shadow:0 12px 30px rgba(13,148,136,.35);animation:float 2.6s ease-in-out infinite}
@@ -130,7 +124,6 @@ section.block{max-width:1200px;margin:auto;padding:3.8rem 1.2rem}
 .btn-ghost{background:#fff;color:var(--teal2);border:2px solid var(--teal)}
 .btn-ghost:hover{background:var(--teal);color:#fff}
 
-/* categorías */
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.1rem}
 .cat-card{border-radius:var(--r);padding:1.5rem 1.3rem;color:#fff;cursor:pointer;transition:.25s;position:relative;overflow:hidden}
 .cat-card:hover{transform:translateY(-6px);box-shadow:0 16px 34px rgba(2,6,23,.2)}
@@ -138,7 +131,6 @@ section.block{max-width:1200px;margin:auto;padding:3.8rem 1.2rem}
 .cat-card h5{font-family:var(--disp);font-size:1.08rem}
 .cat-card span{font-size:.8rem;opacity:.85}
 
-/* toolbar */
 .toolbar{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin-bottom:1.4rem}
 .chipset{display:flex;gap:.4rem;flex-wrap:wrap}
 .chip{border:1.5px solid var(--line);background:#fff;color:var(--mut);padding:.45rem .95rem;border-radius:99px;font-size:.82rem;font-weight:600;transition:.2s}
@@ -147,7 +139,6 @@ section.block{max-width:1200px;margin:auto;padding:3.8rem 1.2rem}
 .toolbar select{margin-left:auto;border:1.5px solid var(--line);border-radius:10px;padding:.5rem .8rem;font-size:.84rem;background:#fff;color:var(--ink)}
 .count-label{font-size:.8rem;color:var(--mut);font-weight:600}
 
-/* productos */
 .prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:1.2rem}
 .p-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:.25s;display:flex;flex-direction:column;animation:fadeUp .45s both}
 .p-card:hover{transform:translateY(-6px);box-shadow:0 18px 38px rgba(2,6,23,.13);border-color:rgba(13,148,136,.4)}
@@ -169,7 +160,6 @@ section.block{max-width:1200px;margin:auto;padding:3.8rem 1.2rem}
 .add-btn:hover{transform:scale(1.12)}
 .add-btn:disabled{background:#cbd5e1;box-shadow:none;cursor:not-allowed}
 
-/* ofertas */
 .offer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:1.2rem}
 .o-card{border-radius:var(--r);padding:1.4rem;border:1px solid rgba(245,158,11,.35);background:linear-gradient(140deg,rgba(245,158,11,.09),#fff 60%);transition:.25s;animation:fadeUp .45s both}
 .o-card:hover{transform:translateY(-5px);box-shadow:0 14px 30px rgba(2,6,23,.12)}
@@ -178,7 +168,6 @@ section.block{max-width:1200px;margin:auto;padding:3.8rem 1.2rem}
 .o-card .desc{font-size:.8rem;color:var(--mut);margin-bottom:.9rem}
 .o-card .price{font-family:var(--disp);font-weight:700;color:#b45309;font-size:1.15rem;margin-bottom:.8rem}
 
-/* footer */
 .footer{background:#0f172a;color:#94a3b8;margin-top:2rem}
 .foot-inner{max-width:1200px;margin:auto;padding:3rem 1.2rem 1.5rem;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2rem}
 .footer h6{color:#fff;font-size:.92rem;margin-bottom:.9rem}
@@ -190,7 +179,6 @@ section.block{max-width:1200px;margin:auto;padding:3.8rem 1.2rem}
 .socials a:hover{border-color:#2dd4bf;transform:translateY(-3px)}
 .copy{border-top:1px solid rgba(148,163,184,.15);text-align:center;padding:1.1rem;font-size:.78rem}
 
-/* ============ MODALES ============ */
 .overlay{position:fixed;inset:0;background:rgba(2,6,23,.6);backdrop-filter:blur(5px);z-index:100;display:none;place-items:center;padding:1rem}
 .overlay.open{display:grid}
 .modal{background:#fff;border-radius:20px;max-width:420px;width:100%;padding:2rem;position:relative;animation:pop .3s ease;max-height:92vh;overflow:auto}
@@ -210,7 +198,6 @@ section.block{max-width:1200px;margin:auto;padding:3.8rem 1.2rem}
 .m-alt button{background:none;border:none;color:var(--teal2);font-weight:700;font-size:.84rem}
 .hint{background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.25);border-radius:10px;padding:.55rem .8rem;font-size:.75rem;color:#0369a1;margin-top:1rem}
 
-/* carrito */
 .c-item{display:flex;gap:.8rem;align-items:center;background:var(--soft);border-radius:12px;padding:.7rem;margin-bottom:.6rem}
 .c-item .thumb{width:44px;height:44px;border-radius:10px;background:#fff;display:grid;place-items:center;font-size:1.3rem;flex-shrink:0}
 .c-item .info{flex:1}.c-item h6{font-size:.86rem}.c-item small{color:var(--teal2);font-weight:600;font-size:.78rem}
@@ -222,13 +209,11 @@ section.block{max-width:1200px;margin:auto;padding:3.8rem 1.2rem}
 .c-total b{color:var(--teal2);font-size:1.4rem}
 .c-empty{text-align:center;color:var(--mut);padding:2.2rem 0}
 
-/* toasts */
 .toasts{position:fixed;top:1.2rem;right:1.2rem;z-index:200;display:flex;flex-direction:column;gap:.55rem}
 .toast{background:#0f172a;color:#fff;padding:.8rem 1.1rem;border-radius:12px;font-size:.87rem;box-shadow:0 12px 30px rgba(0,0,0,.25);animation:slideIn .3s ease;max-width:320px;border-left:4px solid #2dd4bf}
 .toast.err{border-left-color:#fb7185}
 @keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
 
-/* ============ CHATBOT (derecha) ============ */
 .chat-fab{position:fixed;bottom:1.3rem;right:1.3rem;z-index:90;width:58px;height:58px;border-radius:99px;border:none;background:var(--grad);color:#fff;font-size:1.45rem;box-shadow:0 12px 30px rgba(13,148,136,.45);transition:.25s}
 .chat-fab:hover{transform:scale(1.1) rotate(8deg)}
 .chat-panel{position:fixed;bottom:5.8rem;right:1.3rem;z-index:90;width:340px;max-width:calc(100vw - 2.6rem);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 60px rgba(2,6,23,.25);display:none;flex-direction:column;overflow:hidden;animation:pop .25s ease}
@@ -251,17 +236,12 @@ section.block{max-width:1200px;margin:auto;padding:3.8rem 1.2rem}
 .chat-input input:focus{outline:none;border-color:var(--teal)}
 .chat-input button{width:40px;height:40px;border-radius:99px;border:none;background:var(--grad);color:#fff}
 
-@media(max-width:960px){
-  .hero-inner{grid-template-columns:1fr;padding-top:3rem}
-  .foot-inner{grid-template-columns:1fr 1fr}
-  .search-box input{width:140px}
-}
+@media(max-width:960px){.hero-inner{grid-template-columns:1fr;padding-top:3rem}.foot-inner{grid-template-columns:1fr 1fr}.search-box input{width:140px}}
 @media(max-width:640px){.nav{order:3;width:100%;justify-content:flex-start}.foot-inner{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<!-- Detección temprana de sesión (evita parpadeos) -->
 <script>
 try{
   var _s = localStorage.getItem('mt_session') || localStorage.getItem('session');
@@ -269,7 +249,6 @@ try{
 }catch(e){}
 </script>
 
-<!-- ================= HEADER ================= -->
 <header class="header">
   <div class="header-inner">
     <a class="logo" href="#inicio">
@@ -283,7 +262,6 @@ try{
       <a href="#categorias" class="nav-gated">Categorías</a>
       <a href="#ofertas" class="nav-gated">Ofertas</a>
 
-      <!-- 🎮 Juegos: SOLO visible con sesión -->
       <div class="games-drop" id="gamesDrop" style="display:none">
         <button class="games-btn" onclick="toggleGames(event)"><i class="fas fa-gamepad"></i> Juegos <span style="font-size:.7rem">▼</span></button>
         <div class="games-menu">
@@ -316,7 +294,6 @@ try{
   </div>
 </header>
 
-<!-- ================= HERO ================= -->
 <section class="hero" id="inicio">
   <div class="hero-inner">
     <div>
@@ -349,25 +326,18 @@ try{
   </div>
 </section>
 
-<!-- ============================================================
-     🔒 ZONAS PROTEGIDAS
-     IMPORTANTE: estos contenedores están VACÍOS en el HTML.
-     El contenido SOLO se inyecta con JS si hay sesión activa.
-     Sin sesión → se pinta el muro. No hay forma de ver productos.
-     ============================================================ -->
 <section class="block" id="categorias">
-  <div id="zonaCategorias"><!-- JS decide: muro o categorías --></div>
+  <div id="zonaCategorias"></div>
 </section>
 
 <section class="block" id="productos" style="background:var(--soft)">
-  <div id="zonaProductos"><!-- JS decide: muro o productos --></div>
+  <div id="zonaProductos"></div>
 </section>
 
 <section class="block" id="ofertas">
-  <div id="zonaOfertas"><!-- JS decide: muro u ofertas --></div>
+  <div id="zonaOfertas"></div>
 </section>
 
-<!-- ================= FOOTER ================= -->
 <footer class="footer">
   <div class="foot-inner">
     <div>
@@ -389,7 +359,7 @@ try{
   <div class="copy">© <span id="year"></span> MediTech. Todos los derechos reservados.</div>
 </footer>
 
-<!-- ================= MODAL LOGIN ================= -->
+<!-- MODAL LOGIN -->
 <div class="overlay" id="modalLogin">
   <div class="modal">
     <button class="x" onclick="closeModal('modalLogin')">✕</button>
@@ -401,11 +371,9 @@ try{
       <button class="btn btn-solid" style="width:100%" type="submit"><i class="fas fa-unlock"></i> Iniciar Sesión</button>
     </form>
     <div class="m-alt">¿No tienes cuenta? <button onclick="switchModal('modalLogin','modalRegister')">Regístrate aquí</button></div>
-    <div class="hint">💡 Demo: usuario <b>admin</b> / contraseña <b>admin123</b></div>
   </div>
 </div>
 
-<!-- ================= MODAL REGISTRO ================= -->
 <div class="overlay" id="modalRegister">
   <div class="modal">
     <button class="x" onclick="closeModal('modalRegister')">✕</button>
@@ -423,7 +391,6 @@ try{
   </div>
 </div>
 
-<!-- ================= MODAL CARRITO ================= -->
 <div class="overlay" id="modalCart">
   <div class="modal wide">
     <button class="x" onclick="closeModal('modalCart')">✕</button>
@@ -436,7 +403,6 @@ try{
   </div>
 </div>
 
-<!-- ================= CHATBOT ================= -->
 <button class="chat-fab" id="chatFab" onclick="toggleChat()"><i class="fas fa-comment-dots"></i></button>
 <div class="chat-panel" id="chatPanel">
   <div class="chat-head">
@@ -456,23 +422,16 @@ try{
 <div class="toasts" id="toasts"></div>
 
 <script>
-/* ================================================================
-   MediTech — App completa
-   🔒 REGLA DE ORO: los productos SOLO se inyectan al DOM si hay
-   sesión. El HTML base está vacío → nada puede "filtrarse".
-   ================================================================ */
 'use strict';
 
-/* ---------- CONFIG ---------- */
 const API_URL = 'https://meditech-bot.onrender.com/api';
-const K_SES  = 'mt_session';     // sesión actual
-const K_USERS= 'mt_users';       // usuarios registrados
-const K_CART = 'mt_cart_';       // carrito por usuario
+const K_SES   = 'mt_session';
+const K_USERS = 'mt_users';
+const K_CART  = 'mt_cart_';
 
 const $  = s => document.querySelector(s);
 const $$ = s => document.querySelectorAll(s);
 
-/* ---------- UTILIDADES ---------- */
 function toast(msg, err){
   const t = document.createElement('div');
   t.className = 'toast' + (err ? ' err' : '');
@@ -480,7 +439,6 @@ function toast(msg, err){
   $('#toasts').appendChild(t);
   setTimeout(()=>{ t.style.opacity='0'; t.style.transition='.4s'; setTimeout(()=>t.remove(),400); }, 3200);
 }
-/* Repara textos con doble codificación (ÃƒÆ’...) del backend */
 function fixEncoding(s){
   if(!s) return s || '';
   let out = String(s);
@@ -499,14 +457,38 @@ const CAT_META = {
 };
 
 /* ================================================================
-   🔐 SESIÓN
+   🔐 SESIÓN — COMPATIBLE con 'username' y con 'usuario' (legacy)
    ================================================================ */
+const CATALOGO_DEMO = [
+ {id:'1', name:'Enalapril 10mg', desc:'Medicamento para tratar la hipertensión arterial y el fallo cardíaco.', price:280, stock:10, category:'medicamento', feat:true},
+ {id:'2', name:'Loratadina 10mg', desc:'Antihistamínico que alivia los síntomas de las alergias.', price:230, stock:10, category:'medicamento', feat:true},
+ {id:'3', name:'Cable de corriente PC', desc:'Cable de poder para conectar PC y monitor a la corriente eléctrica.', price:1000, stock:1, category:'tecnologia', feat:true},
+ {id:'4', name:'Alprazolam 0.5mg', desc:'Tratamiento de trastornos de ansiedad y pánico. Benzodiacepina.', price:550, stock:10, category:'medicamento'},
+ {id:'5', name:'Benadrilina', desc:'Antihistamínico sedante para alergias y fiebre del heno.', price:250, stock:20, category:'medicamento', feat:true},
+ {id:'6', name:'Captopril 25mg', desc:'Tratamiento de hipertensión y disfunción ventricular.', price:250, stock:20, category:'medicamento'},
+ {id:'7', name:'Paracetamol + Diclofenaco 550mg', desc:'Analgésico para dolor muscular, de cabeza y menstrual.', price:260, stock:20, category:'medicamento'},
+ {id:'8', name:'Ibuprofeno 800mg', desc:'Alivio del dolor e inflamación por artritis.', price:280, stock:20, category:'medicamento'},
+ {id:'9', name:'Amoxicilina 500mg', desc:'Antibiótico para infecciones bacterianas.', price:350, stock:20, category:'medicamento'},
+ {id:'10',name:'Omeprazol 20mg', desc:'Control de acidez estomacal frecuente.', price:250, stock:20, category:'medicamento'},
+ {id:'11',name:'Domazol', desc:'Problemas digestivos, reflujo y acidez.', price:300, stock:10, category:'medicamento'},
+ {id:'12',name:'Hidroclorotiazida 50mg', desc:'Diurético para tratar edema e hipertensión.', price:230, stock:10, category:'medicamento'},
+ {id:'13',name:'Metronidazol 500mg', desc:'Antibiótico para infecciones gastrointestinales y dentales.', price:280, stock:20, category:'medicamento'},
+ {id:'14',name:'Nifedipino 20mg', desc:'Tratamiento de hipertensión y arritmia cardíaca.', price:250, stock:10, category:'medicamento'},
+ {id:'15',name:'Amlodipino 10mg', desc:'Control de presión arterial alta y angina.', price:250, stock:10, category:'medicamento'},
+ {id:'16',name:'Sulfaprim', desc:'Antibacteriano para vías respiratorias y renales.', price:280, stock:10, category:'medicamento'},
+ {id:'17',name:'Furosemida 40mg', desc:'Diurético para hipertensión e insuficiencia cardíaca.', price:230, stock:10, category:'medicamento'}
+];
+
+/* 🔧 Helpers seguros: aceptan 'username' o 'usuario' */
+function getId(u){ return (u?.username || u?.usuario || u?.user || u?.email || '').toString(); }
+function getName(u){ return u?.name || u?.nombre || getId(u) || 'Usuario'; }
+
 function getUser(){
   try{
     const raw = localStorage.getItem(K_SES) || localStorage.getItem('session');
     if(!raw) return null;
     const u = JSON.parse(raw);
-    return (u && (u.username || u.name)) ? u : null;
+    return (u && getId(u)) ? u : null;
   }catch(e){ return null; }
 }
 const haySesion = () => !!getUser();
@@ -514,7 +496,7 @@ const haySesion = () => !!getUser();
 function saveSession(u){
   const data = JSON.stringify(u);
   localStorage.setItem(K_SES, data);
-  localStorage.setItem('session', data); // compatibilidad con tus páginas admin
+  localStorage.setItem('session', data);
 }
 function clearSession(){
   localStorage.removeItem(K_SES);
@@ -525,17 +507,21 @@ function getUsers(){
 }
 function saveUsers(list){ localStorage.setItem(K_USERS, JSON.stringify(list)); }
 
-/* Usuario admin por defecto */
+/* Seed admin (compatible con ambos campos) */
 (function seed(){
   const users = getUsers();
-  if(!users.some(u => u.username === 'admin')){
-    users.push({name:'Administrador', username:'admin', email:'admin@mediatech.com', pass:'admin123', role:'admin'});
+  const hasAdmin = users.some(u => {
+    const id = getId(u).toLowerCase();
+    return id === 'admin';
+  });
+  if(!hasAdmin){
+    users.push({name:'Administrador', username:'admin', usuario:'admin', email:'admin@mediatech.com', pass:'admin123', role:'admin'});
     saveUsers(users);
   }
 })();
 
 /* ================================================================
-   🛡️ RENDERIZADO DE ZONAS (el corazón del bloqueo)
+   🛡️ MUROS
    ================================================================ */
 const MURO = (titulo, frase, dest) => `
   <div class="wall">
@@ -554,26 +540,23 @@ const MURO = (titulo, frase, dest) => `
     </div>
   </div>`;
 
-let PRODUCTOS = [];   // memoria interna, NUNCA se expone sin sesión
+let PRODUCTOS = [];
 let catFiltro = 'todas';
 
 function renderZonas(){
   const u = getUser();
   headerAuth(u);
   if(u){
-    renderCategorias();
-    renderProductosZona();
-    renderOfertas();
     $('#gamesDrop').style.display = '';
     $('#searchBox').style.display = '';
     $('#cartBtn').style.display = '';
     if(PRODUCTOS.length === 0) cargarProductos();
+    else { renderCategorias(); renderProductosZona(); renderOfertas(); }
   }else{
-    // 🔒 SIN SESIÓN: solo muros. El contenido no existe en el DOM.
     $('#zonaCategorias').innerHTML = MURO('Categorías exclusivas para miembros','Explora medicamentos, tecnología, salud y gaming.','#categorias');
     $('#zonaProductos').innerHTML  = MURO('Catálogo exclusivo para usuarios registrados','Únete a MediTech y desbloquea precios y productos al instante.','#productos');
     $('#zonaOfertas').innerHTML    = MURO('Ofertas exclusivas para miembros','Los descuentos solo son visibles si tienes una cuenta.','#ofertas');
-    PRODUCTOS = []; // 🔒 limpia la memoria
+    PRODUCTOS = [];
     $('#gamesDrop').style.display = 'none';
     $('#searchBox').style.display = 'none';
     $('#cartBtn').style.display = 'none';
@@ -586,11 +569,11 @@ function headerAuth(u){
   const btn = $('#userBtn'), menu = $('#userMenu');
   if(u){
     btn.className = 'user-btn logged';
-    $('#userLabel').textContent = (u.name || u.username || 'Usuario').split(' ')[0];
+    $('#userLabel').textContent = getName(u).split(' ')[0];
     $('#heroRegBtn').style.display = 'none';
     const admin = u.role === 'admin';
     menu.innerHTML = `
-      <div class="head"><small>Conectado como</small><b>${u.name || u.username}</b><br>
+      <div class="head"><small>Conectado como</small><b>${getName(u)}</b><br>
         <span class="role">${admin ? '👑 Admin' : '🛍️ Cliente'}</span></div>
       ${admin ? `
         <button onclick="window.location.href='admin-crud.html'"><i class="fas fa-database" style="color:#7c3aed"></i> Panel CRUD</button>
@@ -607,9 +590,8 @@ function headerAuth(u){
   }
 }
 
-/* ---------- Cargar productos (SOLO con sesión) ---------- */
 async function cargarProductos(){
-  if(!haySesion()) return;                 // 🔒 doble seguro
+  if(!haySesion()) return;
   let lista = null;
   try{
     const ctrl = new AbortController();
@@ -631,15 +613,19 @@ async function cargarProductos(){
   }
   PRODUCTOS = (lista || CATALOGO_DEMO).map(p => ({
     ...p,
-    name: fixEncoding(p.name),
-    desc: fixEncoding(p.desc || p.description || '')
+    id: String(p.id || p._id || p.nombre),
+    name: fixEncoding(p.name || p.nombre || ''),
+    desc: fixEncoding(p.desc || p.description || ''),
+    category: p.category || p.categoria || 'medicamento',
+    price: Number(p.price || p.precio || 0),
+    stock: Number(p.stock ?? 10),
+    feat: !!p.feat
   }));
   localStorage.setItem('productos_backup', JSON.stringify(PRODUCTOS));
   $('#statProd').textContent = PRODUCTOS.length;
   renderCategorias(); renderProductosZona(); renderOfertas();
 }
 
-/* ---------- Categorías ---------- */
 function renderCategorias(){
   if(!haySesion()) return;
   const cats = ['medicamento','tecnologia','salud','gaming'];
@@ -658,9 +644,8 @@ function renderCategorias(){
     </div>`;
 }
 
-/* ---------- Productos ---------- */
 function renderProductosZona(){
-  if(!haySesion()) return;                 // 🔒
+  if(!haySesion()) return;
   $('#zonaProductos').innerHTML = `
     <div class="sec-head"><span class="tag">🌟 Catálogo</span><h3>Productos Destacados</h3><p>Los más populares entre nuestros clientes</p></div>
     <div class="toolbar">
@@ -720,7 +705,6 @@ function renderGrid(){
   }).join('') : '<p style="color:var(--mut);grid-column:1/-1;text-align:center;padding:2rem">No hay productos en esta categoría.</p>';
 }
 
-/* ---------- Ofertas ---------- */
 function renderOfertas(){
   if(!haySesion()) return;
   const bajos = PRODUCTOS.filter(p => p.stock>0 && p.stock<=10).slice(0,8);
@@ -743,7 +727,6 @@ function renderOfertas(){
     </div>`;
 }
 
-/* ---------- Búsqueda (solo con sesión) ---------- */
 $('#searchInput').addEventListener('input', function(){
   const q = this.value.trim().toLowerCase();
   const box = $('#searchResults');
@@ -763,10 +746,7 @@ document.addEventListener('click', e=>{
   if(!e.target.closest('#gamesDrop'))  $('#gamesDrop').classList.remove('open');
 });
 
-/* ================================================================
-   🛒 CARRITO
-   ================================================================ */
-const cartKey = () => K_CART + (getUser()?.username || 'guest');
+const cartKey = () => K_CART + (getId(getUser()) || 'guest');
 const getCart = () => { try{ return JSON.parse(localStorage.getItem(cartKey())) || []; }catch(e){ return []; } };
 const setCart = c => localStorage.setItem(cartKey(), JSON.stringify(c));
 
@@ -821,13 +801,13 @@ function checkout(){
     const p = PRODUCTOS.find(x => String(x.id) === String(i.id));
     if(p){ total += p.price*i.qty; lines.push(`• ${p.name} ×${i.qty} — ${fmt(p.price*i.qty)}`); }
   });
-  const body = encodeURIComponent(`Pedido MediTech de ${u.name || u.username}\n\n${lines.join('\n')}\n\nTotal: ${fmt(total)}`);
+  const body = encodeURIComponent(`Pedido MediTech de ${getName(u)}\n\n${lines.join('\n')}\n\nTotal: ${fmt(total)}`);
   window.open(`mailto:ventas@mediatech.com?subject=Pedido MediTech&body=${body}`);
   toast('📧 Abriendo tu correo para enviar el pedido…');
 }
 
 /* ================================================================
-   🔐 LOGIN / REGISTRO / LOGOUT
+   🔐 LOGIN / REGISTRO / LOGOUT  (CORREGIDO)
    ================================================================ */
 let destinoTrasLogin = '';
 function pedirLogin(dest){ destinoTrasLogin = dest || ''; openModal('modalLogin'); }
@@ -843,11 +823,29 @@ $('#formLogin').addEventListener('submit', e=>{
   setErr('eLogUser', u?'':'Ingresa tu usuario'); if(!u) ok=false;
   setErr('eLogPass', p?'':'Ingresa tu contraseña'); if(!p) ok=false;
   if(!ok) return;
-  const user = getUsers().find(x => x.username.toLowerCase() === u.toLowerCase() && x.pass === p);
-  if(!user){ setErr('eLogPass','Usuario o contraseña incorrectos'); return; }
-  saveSession({name:user.name, username:user.username, email:user.email, role:user.role||'cliente'});
+
+  const users = getUsers();
+  const target = u.toLowerCase();
+
+  // 🔧 Búsqueda TOLERANTE con username/usuario/email
+  const user = users.find(x => {
+    if(!x) return false;
+    const candidates = [x.username, x.usuario, x.user, x.email].filter(Boolean);
+    return candidates.some(c => String(c).toLowerCase() === target);
+  });
+
+  if(!user || user.pass !== p){
+    setErr('eLogPass','Usuario o contraseña incorrectos');
+    return;
+  }
+  saveSession({
+    name: user.name || user.nombre || getId(user),
+    username: getId(user),
+    email: user.email || '',
+    role: user.role || 'cliente'
+  });
   closeModal('modalLogin'); e.target.reset();
-  toast('✅ ¡Bienvenido, ' + user.name.split(' ')[0] + '! Catálogo desbloqueado.');
+  toast('✅ ¡Bienvenido, ' + getName(user).split(' ')[0] + '! Catálogo desbloqueado.');
   renderZonas();
   if(destinoTrasLogin){ const d = destinoTrasLogin; destinoTrasLogin=''; setTimeout(()=>location.hash=d, 150); }
 });
@@ -865,9 +863,12 @@ $('#formRegister').addEventListener('submit', e=>{
   chk('eRegPass2', p===p2, 'Las contraseñas no coinciden');
   if(!ok) return;
   const users = getUsers();
-  if(users.some(x=>x.username.toLowerCase()===u.toLowerCase())) return setErr('eRegUser','Ese usuario ya existe');
-  if(users.some(x=>(x.email||'').toLowerCase()===m.toLowerCase())) return setErr('eRegMail','Ese correo ya está registrado');
-  const nuevo = {name:n, username:u, email:m, pass:p, role:'cliente'};
+  // 🔧 Búsqueda segura con fallback a string vacío
+  if(users.some(x => getId(x).toLowerCase() === u.toLowerCase()))
+    return setErr('eRegUser','Ese usuario ya existe');
+  if(users.some(x => String(x.email||'').toLowerCase() === m.toLowerCase()))
+    return setErr('eRegMail','Ese correo ya está registrado');
+  const nuevo = {name:n, username:u, usuario:u, email:m, pass:p, role:'cliente'};
   users.push(nuevo); saveUsers(users);
   saveSession({name:n, username:u, email:m, role:'cliente'});
   $('#statUsers').textContent = users.length;
@@ -884,7 +885,6 @@ function logout(){
   toast('👋 Sesión cerrada. El catálogo vuelve a estar bloqueado.');
 }
 
-/* Interceptar enlaces a zonas protegidas */
 document.addEventListener('click', e=>{
   const a = e.target.closest('a.nav-gated');
   if(a && !haySesion()){ e.preventDefault(); pedirLogin(a.getAttribute('href')); }
@@ -898,9 +898,6 @@ function toggleGames(e){
 }
 function toggleUserMenu(e){ e.stopPropagation(); $('#userWrap').classList.toggle('open'); }
 
-/* ================================================================
-   🪟 MODALES
-   ================================================================ */
 function openModal(id){ $('#'+id).classList.add('open'); }
 function closeModal(id){ $('#'+id).classList.remove('open'); }
 function switchModal(a,b){ closeModal(a); openModal(b); }
@@ -908,10 +905,9 @@ $$('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target === o
 document.addEventListener('keydown', e => { if(e.key === 'Escape') $$('.overlay').forEach(o=>o.classList.remove('open')); });
 
 /* ================================================================
-   🤖 CHATBOT — IA gratis (Pollinations, sin keys) + respaldo local
+   🤖 CHATBOT — IA gratis + base de conocimientos
    ================================================================ */
 const CHAT = { hist: [], busy: false, catalogo: null, ts: 0 };
-
 function toggleChat(){
   const p = $('#chatPanel');
   p.classList.toggle('open');
@@ -945,7 +941,6 @@ async function getCatalogoChat(){
   return CHAT.catalogo || [];
 }
 
-/* IA gratis, sin keys */
 async function llamarIA(texto){
   const cat = await getCatalogoChat();
   const nombre = getUser()?.name?.split(' ')[0];
@@ -954,7 +949,6 @@ async function llamarIA(texto){
 ${nombre ? 'El usuario se llama '+nombre+'. ' : ''}Responde en español, amable, máximo 3 líneas, sin markdown.
 Catálogo real (NUNCA inventes productos ni precios): ${contexto}.
 Si preguntan algo ajeno a la tienda, redirige con simpatía hacia MediTech.`;
-  // Intento 1: POST
   try{
     const r = await fetch('https://text.pollinations.ai/', {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -962,7 +956,6 @@ Si preguntan algo ajeno a la tienda, redirige con simpatía hacia MediTech.`;
     });
     if(r.ok){ const t = await r.text(); if(t.trim().length>=10) return t; }
   }catch(e){}
-  // Intento 2: GET
   try{
     const prompt = encodeURIComponent(system + '\nUsuario: ' + texto + '\nAnia:');
     const r = await fetch('https://text.pollinations.ai/' + prompt.slice(0,5500));
@@ -971,7 +964,6 @@ Si preguntan algo ajeno a la tienda, redirige con simpatía hacia MediTech.`;
   return null;
 }
 
-/* 📚 Base de conocimientos de respaldo (funciona siempre) */
 async function respaldoLocal(texto){
   const t = texto.toLowerCase();
   const cat = await getCatalogoChat();
@@ -1007,22 +999,18 @@ async function sendChat(){
 
   let resp = null;
   try{
-    resp = await llamarIA(txt);                       // 1) IA gratis
+    resp = await llamarIA(txt);
     if(resp){
       CHAT.hist.push({role:'user',content:txt},{role:'assistant',content:resp});
       if(CHAT.hist.length > 12) CHAT.hist = CHAT.hist.slice(-12);
     }
   }catch(e){}
-  if(!resp) resp = await respaldoLocal(txt);          // 2) respaldo local (nunca falla)
-
+  if(!resp) resp = await respaldoLocal(txt);
   tp.remove();
   addMsg(resp.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>'), 'bot');
   CHAT.busy = false;
 }
 
-/* ================================================================
-   ✨ EXTRAS UI
-   ================================================================ */
 const SLIDES = [
   {ico:'💊', txt:'Medicamentos certificados para tu familia'},
   {ico:'💻', txt:'Hardware con garantía oficial'},
@@ -1041,13 +1029,1048 @@ setInterval(()=>{
   }, 250);
 }, 4000);
 
-/* ================================================================
-   🚀 INIT
-   ================================================================ */
 document.addEventListener('DOMContentLoaded', ()=>{
   $('#year').textContent = new Date().getFullYear();
   $('#statUsers').textContent = getUsers().length;
-  renderZonas(); // 🔒 decide muro vs contenido según la sesión
+  renderZonas();
+});
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediTech — Salud & Tecnología</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<!-- Font Awesome 6.5.1 (versión estable, sin warnings de Glyph bbox) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+  --teal:#0d9488; --teal2:#0f766e; --cyan:#06b6d4; --amber:#f59e0b; --red:#ef4444;
+  --ink:#0f172a; --mut:#64748b; --soft:#f1f5f9; --line:#e2e8f0;
+  --grad:linear-gradient(135deg,#0d9488,#06b6d4);
+  --dark:#0a1020; --dark-card:#101b36; --dark-line:rgba(148,180,255,.14);
+  --r:16px; --shadow:0 10px 30px rgba(2,6,23,.10);
+  --body:'Poppins',sans-serif; --disp:'Space Grotesk',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);background:#fff;color:var(--ink)}
+a{text-decoration:none;color:inherit}
+button{font-family:var(--body);cursor:pointer}
+img{max-width:100%}
+
+.header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.header-inner{max-width:1200px;margin:auto;display:flex;align-items:center;gap:1.2rem;padding:.7rem 1.2rem;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:.6rem}
+.logo-icon{width:42px;height:42px;border-radius:12px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:1.15rem;box-shadow:0 6px 16px rgba(13,148,136,.35)}
+.logo h1{font-family:var(--disp);font-size:1.35rem;line-height:1}
+.logo h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo small{display:block;font-size:.62rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);font-weight:600}
+.nav{display:flex;align-items:center;gap:.15rem;margin-left:auto;flex-wrap:wrap}
+.nav>a{padding:.5rem .85rem;border-radius:10px;font-size:.9rem;font-weight:500;color:var(--mut);transition:.2s}
+.nav>a:hover{background:var(--soft);color:var(--ink)}
+.search-box{position:relative}
+.search-box input{border:1.5px solid var(--line);border-radius:99px;padding:.5rem 1rem .5rem 2.3rem;font-size:.85rem;width:200px;transition:.25s;background:#fff}
+.search-box input:focus{outline:none;border-color:var(--teal);width:250px;box-shadow:0 0 0 3px rgba(13,148,136,.12)}
+.search-box i{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--mut);font-size:.85rem}
+.search-results{position:absolute;top:110%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;display:none;z-index:60}
+.search-results.open{display:block}
+.search-item{display:flex;gap:.7rem;align-items:center;padding:.6rem .8rem;cursor:pointer;font-size:.85rem}
+.search-item:hover{background:var(--soft)}
+.search-item .thumb{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;background:var(--soft);font-size:1.1rem;flex-shrink:0}
+.cart-btn{position:relative;width:42px;height:42px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-size:1.05rem;color:var(--ink);transition:.2s}
+.cart-btn:hover{border-color:var(--teal);color:var(--teal)}
+.cart-count{position:absolute;top:-6px;right:-6px;background:var(--grad);color:#fff;font-size:.65rem;font-weight:700;min-width:19px;height:19px;border-radius:99px;display:grid;place-items:center;padding:0 4px}
+
+.games-drop{position:relative}
+.games-btn{background:linear-gradient(145deg,#f59e0b,#fbbf24);color:#1e293b;font-weight:700;border:none;border-radius:99px;padding:.5rem 1.1rem;font-size:.88rem;display:flex;align-items:center;gap:.45rem;box-shadow:0 4px 14px rgba(245,158,11,.35);transition:.2s}
+.games-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(245,158,11,.5)}
+.games-menu{position:absolute;top:calc(100% + 10px);right:0;background:#fff;border:2px solid #fbbf24;border-radius:18px;min-width:230px;padding:.5rem;box-shadow:0 20px 50px rgba(0,0,0,.18);opacity:0;visibility:hidden;transform:translateY(10px) scale(.95);transition:.25s cubic-bezier(.34,1.56,.64,1);z-index:70}
+.games-drop.open .games-menu{opacity:1;visibility:visible;transform:none}
+.games-menu a{display:flex;align-items:center;gap:.7rem;padding:.6rem .9rem;border-radius:12px;font-size:.88rem;font-weight:500;color:#1e293b}
+.games-menu a:hover{background:#fef9c3;transform:translateX(4px)}
+.games-menu a i{color:#f59e0b;width:22px;text-align:center}
+
+.user-wrap{position:relative}
+.user-btn{display:flex;align-items:center;gap:.5rem;border-radius:99px;padding:.45rem 1rem;font-weight:600;font-size:.86rem;transition:.2s;border:1.5px solid transparent}
+.user-btn.guest{background:var(--grad);color:#fff;box-shadow:0 4px 14px rgba(13,148,136,.3)}
+.user-btn.guest:hover{transform:translateY(-2px)}
+.user-btn.logged{background:rgba(13,148,136,.08);border-color:rgba(13,148,136,.3);color:var(--teal2)}
+.user-menu{position:absolute;top:calc(100% + 10px);right:0;background:#fff;border:1px solid var(--line);border-radius:16px;min-width:230px;box-shadow:var(--shadow);padding:.5rem;opacity:0;visibility:hidden;transform:translateY(8px);transition:.22s;z-index:70}
+.user-wrap.open .user-menu{opacity:1;visibility:visible;transform:none}
+.user-menu .head{padding:.7rem .9rem;border-bottom:1px solid var(--line);margin-bottom:.4rem}
+.user-menu .head small{color:var(--mut);font-size:.72rem;display:block}
+.user-menu .head b{font-size:.92rem}
+.user-menu .role{display:inline-block;margin-top:.3rem;font-size:.66rem;font-weight:700;padding:.15rem .55rem;border-radius:99px;background:rgba(13,148,136,.12);color:var(--teal2)}
+.user-menu button,.user-menu a{display:flex;align-items:center;gap:.6rem;width:100%;text-align:left;background:none;border:none;padding:.6rem .9rem;border-radius:10px;font-size:.87rem;color:#334155}
+.user-menu button:hover,.user-menu a:hover{background:var(--soft)}
+.user-menu .danger{color:var(--red)}
+
+.hero{background:radial-gradient(800px 420px at 85% -10%,rgba(13,148,136,.14),transparent 60%),radial-gradient(600px 380px at -5% 40%,rgba(6,182,212,.10),transparent 60%),var(--dark);color:#e9f1ff;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(148,180,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(148,180,255,.05) 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(ellipse at 50% 0%,#000 30%,transparent 75%);pointer-events:none}
+.hero-inner{max-width:1200px;margin:auto;padding:4.2rem 1.2rem;display:grid;grid-template-columns:1.1fr .9fr;gap:3rem;align-items:center;position:relative}
+.kicker{display:inline-flex;align-items:center;gap:.5rem;font-size:.74rem;letter-spacing:2.5px;text-transform:uppercase;color:#2dd4bf;border:1px solid rgba(45,212,191,.35);border-radius:99px;padding:.38rem .95rem;background:rgba(45,212,191,.06)}
+.kicker .dot{width:8px;height:8px;border-radius:99px;background:#2dd4bf;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,.5)}50%{box-shadow:0 0 0 7px rgba(45,212,191,0)}}
+.hero h2{font-family:var(--disp);font-size:clamp(2.1rem,4.4vw,3.4rem);line-height:1.1;margin:1.1rem 0;font-weight:700}
+.hero h2 em{font-style:normal;background:linear-gradient(90deg,#2dd4bf,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .sub{color:#94a6c8;font-size:1rem;line-height:1.65;max-width:46ch}
+.hero-cta{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1.7rem}
+.btn{border:none;border-radius:12px;padding:.75rem 1.4rem;font-weight:600;font-size:.92rem;display:inline-flex;align-items:center;gap:.5rem;transition:.22s}
+.btn-grad{background:var(--grad);color:#fff;box-shadow:0 6px 18px rgba(13,148,136,.35)}
+.btn-grad:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(13,148,136,.5)}
+.btn-line{background:transparent;color:#e9f1ff;border:1.5px solid rgba(148,180,255,.35)}
+.btn-line:hover{border-color:#2dd4bf;color:#2dd4bf}
+.hero-stats{display:flex;gap:2.2rem;margin-top:2.3rem;flex-wrap:wrap}
+.hero-stats b{font-family:var(--disp);font-size:1.5rem;display:block;color:#fff}
+.hero-stats span{font-size:.78rem;color:#94a6c8}
+.monitor{background:var(--dark-card);border:1px solid var(--dark-line);border-radius:18px;padding:1.35rem;box-shadow:0 30px 60px rgba(0,0,0,.45);position:relative;overflow:hidden}
+.monitor-head{display:flex;justify-content:space-between;font-size:.76rem;color:#94a6c8;margin-bottom:.7rem;letter-spacing:1px}
+.rec{color:#fb7185;display:flex;align-items:center;gap:.4rem}
+.rec i{width:8px;height:8px;border-radius:99px;background:#fb7185;animation:pulse 1.2s infinite}
+.ecg{width:100%;height:88px}
+.ecg path{fill:none;stroke:#2dd4bf;stroke-width:2.4;stroke-linecap:round;stroke-dasharray:600;stroke-dashoffset:600;animation:ecg 3.2s linear infinite;filter:drop-shadow(0 0 6px rgba(45,212,191,.7))}
+@keyframes ecg{to{stroke-dashoffset:0}}
+.slide-box{margin-top:.9rem;border:1px dashed rgba(148,180,255,.28);border-radius:12px;padding:.95rem 1rem;display:flex;align-items:center;gap:.8rem;background:rgba(148,180,255,.04);transition:opacity .25s}
+.slide-box .ico{font-size:1.5rem}
+.slide-box .txt{font-weight:600;font-size:.92rem}
+.vitals{display:flex;gap:.7rem;margin-top:.9rem}
+.vital{flex:1;background:#0e1830;border:1px solid var(--dark-line);border-radius:11px;padding:.6rem .8rem}
+.vital b{font-family:var(--disp);color:#2dd4bf;font-size:1.05rem}
+.vital span{display:block;font-size:.64rem;letter-spacing:1.5px;text-transform:uppercase;color:#94a6c8}
+
+section.block{max-width:1200px;margin:auto;padding:3.8rem 1.2rem}
+.sec-head{margin-bottom:1.8rem}
+.sec-head .tag{font-size:.72rem;letter-spacing:3px;text-transform:uppercase;color:var(--teal);font-weight:700}
+.sec-head h3{font-family:var(--disp);font-size:clamp(1.5rem,2.6vw,2.1rem);margin:.25rem 0 .2rem}
+.sec-head p{color:var(--mut);font-size:.93rem}
+
+.wall{border:2px dashed rgba(13,148,136,.45);border-radius:22px;background:linear-gradient(135deg,rgba(13,148,136,.05),rgba(6,182,212,.04));padding:3rem 1.6rem;text-align:center;animation:fadeUp .5s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+.wall .lock{width:74px;height:74px;margin:0 auto 1.1rem;border-radius:22px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:1.9rem;box-shadow:0 12px 30px rgba(13,148,136,.35);animation:float 2.6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+.wall h4{font-family:var(--disp);font-size:1.4rem;margin-bottom:.4rem}
+.wall>p{color:var(--mut);max-width:44ch;margin:0 auto}
+.wall ul{list-style:none;display:inline-block;text-align:left;margin:1.3rem 0 1.6rem}
+.wall li{padding:.32rem 0;color:#334155;font-size:.92rem}
+.wall li i{color:#10b981;margin-right:.55rem}
+.wall-btns{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+.btn-solid{background:var(--grad);color:#fff}
+.btn-solid:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(13,148,136,.4)}
+.btn-ghost{background:#fff;color:var(--teal2);border:2px solid var(--teal)}
+.btn-ghost:hover{background:var(--teal);color:#fff}
+
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.1rem}
+.cat-card{border-radius:var(--r);padding:1.5rem 1.3rem;color:#fff;cursor:pointer;transition:.25s;position:relative;overflow:hidden}
+.cat-card:hover{transform:translateY(-6px);box-shadow:0 16px 34px rgba(2,6,23,.2)}
+.cat-card .ic{font-size:1.9rem;margin-bottom:.8rem}
+.cat-card h5{font-family:var(--disp);font-size:1.08rem}
+.cat-card span{font-size:.8rem;opacity:.85}
+
+.toolbar{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;margin-bottom:1.4rem}
+.chipset{display:flex;gap:.4rem;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:#fff;color:var(--mut);padding:.45rem .95rem;border-radius:99px;font-size:.82rem;font-weight:600;transition:.2s}
+.chip:hover{border-color:var(--teal);color:var(--teal2)}
+.chip.act{background:var(--grad);color:#fff;border-color:transparent}
+.toolbar select{margin-left:auto;border:1.5px solid var(--line);border-radius:10px;padding:.5rem .8rem;font-size:.84rem;background:#fff;color:var(--ink)}
+.count-label{font-size:.8rem;color:var(--mut);font-weight:600}
+
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:1.2rem}
+.p-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;transition:.25s;display:flex;flex-direction:column;animation:fadeUp .45s both}
+.p-card:hover{transform:translateY(-6px);box-shadow:0 18px 38px rgba(2,6,23,.13);border-color:rgba(13,148,136,.4)}
+.p-img{height:150px;display:grid;place-items:center;font-size:3.2rem;background:linear-gradient(160deg,#f0fdfa,#e0f2fe);position:relative}
+.p-img img{width:100%;height:100%;object-fit:cover}
+.p-badge{position:absolute;top:.7rem;left:.7rem;font-size:.64rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:.28rem .6rem;border-radius:99px;background:rgba(255,255,255,.9)}
+.p-badge.med{color:var(--teal2)} .p-badge.tec{color:#0369a1} .p-badge.sal{color:#b45309} .p-badge.gam{color:#be123c}
+.p-star{position:absolute;top:.7rem;right:.7rem;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:.6rem;font-weight:700;padding:.28rem .55rem;border-radius:99px;text-transform:uppercase}
+.p-body{padding:1rem 1.1rem 1.15rem;display:flex;flex-direction:column;gap:.4rem;flex:1}
+.p-body h5{font-size:.97rem;line-height:1.3}
+.p-body .desc{font-size:.78rem;color:var(--mut);flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:34px}
+.p-price{display:flex;align-items:baseline;gap:.4rem}
+.p-price b{font-family:var(--disp);font-size:1.25rem;color:var(--teal2)}
+.p-price small{color:var(--mut);font-size:.72rem}
+.p-foot{display:flex;justify-content:space-between;align-items:center;margin-top:.45rem}
+.stock-tag{font-size:.72rem;font-weight:600}
+.stock-ok{color:#059669}.stock-low{color:var(--amber)}.stock-out{color:var(--red)}
+.add-btn{width:38px;height:38px;border-radius:50%;border:none;background:var(--grad);color:#fff;font-size:.95rem;box-shadow:0 4px 12px rgba(13,148,136,.3);transition:.2s}
+.add-btn:hover{transform:scale(1.12)}
+.add-btn:disabled{background:#cbd5e1;box-shadow:none;cursor:not-allowed}
+
+.offer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:1.2rem}
+.o-card{border-radius:var(--r);padding:1.4rem;border:1px solid rgba(245,158,11,.35);background:linear-gradient(140deg,rgba(245,158,11,.09),#fff 60%);transition:.25s;animation:fadeUp .45s both}
+.o-card:hover{transform:translateY(-5px);box-shadow:0 14px 30px rgba(2,6,23,.12)}
+.o-card .badge{font-size:.68rem;font-weight:800;color:#b45309;letter-spacing:1px;text-transform:uppercase}
+.o-card h5{font-family:var(--disp);font-size:1.05rem;margin:.4rem 0 .2rem}
+.o-card .desc{font-size:.8rem;color:var(--mut);margin-bottom:.9rem}
+.o-card .price{font-family:var(--disp);font-weight:700;color:#b45309;font-size:1.15rem;margin-bottom:.8rem}
+
+.footer{background:#0f172a;color:#94a3b8;margin-top:2rem}
+.foot-inner{max-width:1200px;margin:auto;padding:3rem 1.2rem 1.5rem;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2rem}
+.footer h6{color:#fff;font-size:.92rem;margin-bottom:.9rem}
+.footer a{display:block;padding:.22rem 0;font-size:.85rem;transition:.2s}
+.footer a:hover{color:#2dd4bf}
+.foot-desc{font-size:.85rem;line-height:1.6;max-width:34ch}
+.socials{display:flex;gap:.6rem;margin-top:.9rem}
+.socials a{width:36px;height:36px;border:1px solid rgba(148,163,184,.3);border-radius:10px;display:grid;place-items:center;padding:0}
+.socials a:hover{border-color:#2dd4bf;transform:translateY(-3px)}
+.copy{border-top:1px solid rgba(148,163,184,.15);text-align:center;padding:1.1rem;font-size:.78rem}
+
+.overlay{position:fixed;inset:0;background:rgba(2,6,23,.6);backdrop-filter:blur(5px);z-index:100;display:none;place-items:center;padding:1rem}
+.overlay.open{display:grid}
+.modal{background:#fff;border-radius:20px;max-width:420px;width:100%;padding:2rem;position:relative;animation:pop .3s ease;max-height:92vh;overflow:auto}
+.modal.wide{max-width:640px}
+@keyframes pop{from{opacity:0;transform:scale(.94) translateY(14px)}to{opacity:1;transform:none}}
+.modal .x{position:absolute;top:.9rem;right:.9rem;width:34px;height:34px;border-radius:10px;border:none;background:var(--soft);color:var(--mut);transition:.2s}
+.modal .x:hover{background:#fee2e2;color:var(--red)}
+.modal h3{font-family:var(--disp);font-size:1.35rem;display:flex;align-items:center;gap:.5rem}
+.modal .msub{color:var(--mut);font-size:.85rem;margin:.3rem 0 1.3rem}
+.fg{margin-bottom:.95rem}
+.fg label{display:block;font-size:.8rem;font-weight:600;color:#334155;margin-bottom:.35rem}
+.fg input{width:100%;border:1.5px solid var(--line);border-radius:11px;padding:.7rem .95rem;font-size:.92rem;transition:.2s}
+.fg input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.13)}
+.ferr{color:var(--red);font-size:.75rem;margin-top:.3rem;display:none}
+.ferr.show{display:block}
+.m-alt{text-align:center;font-size:.84rem;color:var(--mut);margin-top:1.1rem}
+.m-alt button{background:none;border:none;color:var(--teal2);font-weight:700;font-size:.84rem}
+.hint{background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.25);border-radius:10px;padding:.55rem .8rem;font-size:.75rem;color:#0369a1;margin-top:1rem}
+
+.c-item{display:flex;gap:.8rem;align-items:center;background:var(--soft);border-radius:12px;padding:.7rem;margin-bottom:.6rem}
+.c-item .thumb{width:44px;height:44px;border-radius:10px;background:#fff;display:grid;place-items:center;font-size:1.3rem;flex-shrink:0}
+.c-item .info{flex:1}.c-item h6{font-size:.86rem}.c-item small{color:var(--teal2);font-weight:600;font-size:.78rem}
+.qty{display:flex;align-items:center;gap:.45rem}
+.qty button{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--line);background:#fff;transition:.2s}
+.qty button:hover{border-color:var(--teal)}
+.c-del{background:none;border:none;color:var(--mut)}.c-del:hover{color:var(--red)}
+.c-total{display:flex;justify-content:space-between;align-items:center;border-top:1.5px solid var(--line);padding-top:1rem;margin-top:.6rem;font-family:var(--disp);font-size:1.15rem}
+.c-total b{color:var(--teal2);font-size:1.4rem}
+.c-empty{text-align:center;color:var(--mut);padding:2.2rem 0}
+
+.toasts{position:fixed;top:1.2rem;right:1.2rem;z-index:200;display:flex;flex-direction:column;gap:.55rem}
+.toast{background:#0f172a;color:#fff;padding:.8rem 1.1rem;border-radius:12px;font-size:.87rem;box-shadow:0 12px 30px rgba(0,0,0,.25);animation:slideIn .3s ease;max-width:320px;border-left:4px solid #2dd4bf}
+.toast.err{border-left-color:#fb7185}
+@keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+
+.chat-fab{position:fixed;bottom:1.3rem;right:1.3rem;z-index:90;width:58px;height:58px;border-radius:99px;border:none;background:var(--grad);color:#fff;font-size:1.45rem;box-shadow:0 12px 30px rgba(13,148,136,.45);transition:.25s}
+.chat-fab:hover{transform:scale(1.1) rotate(8deg)}
+.chat-panel{position:fixed;bottom:5.8rem;right:1.3rem;z-index:90;width:340px;max-width:calc(100vw - 2.6rem);background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 60px rgba(2,6,23,.25);display:none;flex-direction:column;overflow:hidden;animation:pop .25s ease}
+.chat-panel.open{display:flex}
+.chat-head{background:var(--grad);color:#fff;padding:.85rem 1.1rem;display:flex;justify-content:space-between;align-items:center}
+.chat-head b{font-size:.95rem;display:flex;align-items:center;gap:.5rem}
+.chat-head button{background:rgba(255,255,255,.2);border:none;color:#fff;width:28px;height:28px;border-radius:8px}
+.chat-chips{display:flex;gap:.4rem;flex-wrap:wrap;padding:.6rem .8rem;border-bottom:1px solid var(--line)}
+.chat-chips button{font-size:.72rem;border:1px solid var(--line);background:#fff;border-radius:99px;padding:.3rem .7rem;color:#334155;transition:.2s}
+.chat-chips button:hover{border-color:var(--teal);color:var(--teal2)}
+.chat-msgs{height:280px;overflow-y:auto;padding:.9rem;display:flex;flex-direction:column;gap:.55rem;background:#f8fafc}
+.msg{max-width:86%;padding:.6rem .85rem;border-radius:14px;font-size:.84rem;line-height:1.5}
+.msg.bot{background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px}
+.msg.user{background:var(--grad);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.typing span{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--teal);margin-right:4px;animation:tp 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+@keyframes tp{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-5px);opacity:1}}
+.chat-input{display:flex;gap:.5rem;padding:.7rem;border-top:1px solid var(--line)}
+.chat-input input{flex:1;border:1.5px solid var(--line);border-radius:99px;padding:.55rem 1rem;font-size:.85rem}
+.chat-input input:focus{outline:none;border-color:var(--teal)}
+.chat-input button{width:40px;height:40px;border-radius:99px;border:none;background:var(--grad);color:#fff}
+
+@media(max-width:960px){.hero-inner{grid-template-columns:1fr;padding-top:3rem}.foot-inner{grid-template-columns:1fr 1fr}.search-box input{width:140px}}
+@media(max-width:640px){.nav{order:3;width:100%;justify-content:flex-start}.foot-inner{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<script>
+try{
+  var _s = localStorage.getItem('mt_session') || localStorage.getItem('session');
+  if(!_s) document.body.setAttribute('data-guest','1');
+}catch(e){}
+</script>
+
+<header class="header">
+  <div class="header-inner">
+    <a class="logo" href="#inicio">
+      <div class="logo-icon"><i class="fas fa-heartbeat"></i></div>
+      <div><h1>Medi<span>Tech</span></h1><small>Salud & Tecnología</small></div>
+    </a>
+
+    <nav class="nav">
+      <a href="#inicio">Inicio</a>
+      <a href="#productos" class="nav-gated">Productos</a>
+      <a href="#categorias" class="nav-gated">Categorías</a>
+      <a href="#ofertas" class="nav-gated">Ofertas</a>
+
+      <div class="games-drop" id="gamesDrop" style="display:none">
+        <button class="games-btn" onclick="toggleGames(event)"><i class="fas fa-gamepad"></i> Juegos <span style="font-size:.7rem">▼</span></button>
+        <div class="games-menu">
+          <a href="gms/Vuelo-V3.html"><i class="fas fa-plane"></i> AeroHolgín</a>
+          <a href="gms/HLG-Z/index.html"><i class="fas fa-ghost"></i> HLG-Z</a>
+          <a href="gms/NeonRushPursuitEdition.html"><i class="fas fa-car"></i> Neon Rush</a>
+          <a href="gms/MugenKalm.html"><i class="fas fa-skull"></i> Mugen Kalm</a>
+          <a href="gms/MugenKalmVcell/MugenKalm-Vcell.html"><i class="fas fa-mobile-alt"></i> Mugen Kalm (Móvil)</a>
+          <a href="gms/WKalm/worl-kalm.html"><i class="fas fa-mobile-alt"></i> Worl Kalm</a>
+        </div>
+      </div>
+
+      <div class="search-box" id="searchBox" style="display:none">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Buscar productos..." autocomplete="off">
+        <div class="search-results" id="searchResults"></div>
+      </div>
+
+      <button class="cart-btn" id="cartBtn" style="display:none" onclick="openCart()">
+        <i class="fas fa-shopping-cart"></i><span class="cart-count" id="cartCount">0</span>
+      </button>
+
+      <div class="user-wrap" id="userWrap">
+        <button class="user-btn guest" id="userBtn" onclick="toggleUserMenu(event)">
+          <i class="fas fa-user-circle"></i> <span id="userLabel">Iniciar Sesión</span> <i class="fas fa-chevron-down" style="font-size:.6rem"></i>
+        </button>
+        <div class="user-menu" id="userMenu"></div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="inicio">
+  <div class="hero-inner">
+    <div>
+      <span class="kicker"><i class="dot"></i> Sistema en línea · Atención 24/7</span>
+      <h2>Tu salud y tu <em>tecnología</em>, en un solo lugar.</h2>
+      <p class="sub">Medicamentos certificados y hardware de última generación. Crea tu cuenta gratuita para desbloquear el catálogo completo, precios y ofertas exclusivas.</p>
+      <div class="hero-cta">
+        <button class="btn btn-grad" onclick="goCatalog()"><i class="fas fa-box-open"></i> Explorar catálogo</button>
+        <button class="btn btn-line" id="heroRegBtn" onclick="openModal('modalRegister')"><i class="fas fa-user-plus"></i> Crear cuenta gratis</button>
+      </div>
+      <div class="hero-stats">
+        <div><b id="statProd">—</b><span>Productos</span></div>
+        <div><b id="statUsers">1</b><span>Miembros</span></div>
+        <div><b>24/7</b><span>Soporte</span></div>
+        <div><b>100%</b><span>Garantía</span></div>
+      </div>
+    </div>
+    <div class="monitor">
+      <div class="monitor-head"><span>PANEL MEDI-TECH · v2.0</span><span class="rec"><i></i> EN VIVO</span></div>
+      <svg class="ecg" viewBox="0 0 300 90" preserveAspectRatio="none">
+        <path d="M0,45 L40,45 L50,45 L58,20 L66,70 L74,45 L110,45 L120,45 L128,15 L136,75 L144,45 L190,45 L200,45 L208,25 L216,65 L224,45 L300,45"/>
+      </svg>
+      <div class="slide-box" id="slideBox"><span class="ico" id="slideIco">💊</span><span class="txt" id="slideTxt">Medicamentos certificados para tu familia</span></div>
+      <div class="vitals">
+        <div class="vital"><b>98.6°</b><span>Temp</span></div>
+        <div class="vital"><b>72</b><span>BPM</span></div>
+        <div class="vital"><b>99%</b><span>SpO₂</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="categorias">
+  <div id="zonaCategorias"></div>
+</section>
+
+<section class="block" id="productos" style="background:var(--soft)">
+  <div id="zonaProductos"></div>
+</section>
+
+<section class="block" id="ofertas">
+  <div id="zonaOfertas"></div>
+</section>
+
+<footer class="footer">
+  <div class="foot-inner">
+    <div>
+      <a class="logo" href="#inicio" style="margin-bottom:.9rem">
+        <div class="logo-icon"><i class="fas fa-heartbeat"></i></div>
+        <div><h1 style="color:#fff">Medi<span>Tech</span></h1></div>
+      </a>
+      <p class="foot-desc">Tu tienda confiable para medicamentos y hardware de última generación.</p>
+      <div class="socials">
+        <a href="https://www.facebook.com/profile.php?id=61579147574368"><i class="fab fa-facebook-f"></i></a>
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+      </div>
+    </div>
+    <div><h6>Enlaces</h6><a href="#inicio">Inicio</a><a href="#productos" class="nav-gated">Productos</a><a href="#ofertas" class="nav-gated">Ofertas</a></div>
+    <div><h6>Legal</h6><a href="#">Política de Privacidad</a><a href="#">Términos y Condiciones</a></div>
+    <div><h6>Contacto</h6><a href="#">📧 ventas@mediatech.com</a><a href="#">🤖 Telegram: @AniaAsistenteBot</a></div>
+  </div>
+  <div class="copy">© <span id="year"></span> MediTech. Todos los derechos reservados.</div>
+</footer>
+
+<!-- MODAL LOGIN -->
+<div class="overlay" id="modalLogin">
+  <div class="modal">
+    <button class="x" onclick="closeModal('modalLogin')">✕</button>
+    <h3><i class="fas fa-sign-in-alt" style="color:var(--teal)"></i> Iniciar Sesión</h3>
+    <p class="msub">Accede a tu cuenta para desbloquear el catálogo</p>
+    <form id="formLogin" novalidate>
+      <div class="fg"><label>Usuario</label><input id="logUser" autocomplete="username"><div class="ferr" id="eLogUser"></div></div>
+      <div class="fg"><label>Contraseña</label><input id="logPass" type="password" autocomplete="current-password"><div class="ferr" id="eLogPass"></div></div>
+      <button class="btn btn-solid" style="width:100%" type="submit"><i class="fas fa-unlock"></i> Iniciar Sesión</button>
+    </form>
+    <div class="m-alt">¿No tienes cuenta? <button onclick="switchModal('modalLogin','modalRegister')">Regístrate aquí</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="modalRegister">
+  <div class="modal">
+    <button class="x" onclick="closeModal('modalRegister')">✕</button>
+    <h3><i class="fas fa-user-plus" style="color:var(--teal)"></i> Crear cuenta</h3>
+    <p class="msub">Gratis, en menos de un minuto</p>
+    <form id="formRegister" novalidate>
+      <div class="fg"><label>Nombre completo</label><input id="regName"><div class="ferr" id="eRegName"></div></div>
+      <div class="fg"><label>Usuario</label><input id="regUser" autocomplete="username"><div class="ferr" id="eRegUser"></div></div>
+      <div class="fg"><label>Correo</label><input id="regMail" type="email"><div class="ferr" id="eRegMail"></div></div>
+      <div class="fg"><label>Contraseña</label><input id="regPass" type="password"><div class="ferr" id="eRegPass"></div></div>
+      <div class="fg"><label>Confirmar contraseña</label><input id="regPass2" type="password"><div class="ferr" id="eRegPass2"></div></div>
+      <button class="btn btn-solid" style="width:100%" type="submit"><i class="fas fa-rocket"></i> Crear Cuenta</button>
+    </form>
+    <div class="m-alt">¿Ya tienes cuenta? <button onclick="switchModal('modalRegister','modalLogin')">Inicia sesión</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="modalCart">
+  <div class="modal wide">
+    <button class="x" onclick="closeModal('modalCart')">✕</button>
+    <h3><i class="fas fa-shopping-cart" style="color:var(--teal)"></i> Tu Carrito</h3>
+    <p class="msub">Revisa tu pedido antes de solicitarlo</p>
+    <div id="cartItems"></div>
+    <div class="c-total"><span>Total:</span><b id="cartTotal">$0.00</b></div>
+    <br>
+    <button class="btn btn-solid" style="width:100%" onclick="checkout()"><i class="fas fa-envelope"></i> Solicitar Pedido por Correo</button>
+  </div>
+</div>
+
+<button class="chat-fab" id="chatFab" onclick="toggleChat()"><i class="fas fa-comment-dots"></i></button>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-head">
+    <b><i class="fas fa-robot"></i> Ania · Asistente MediTech</b>
+    <button onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-chips" id="chatChips"></div>
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="msg bot">¡Hola! 👋 Soy <b>Ania</b>, asistente de MediTech. Pregúntame por medicamentos, tecnología, precios u ofertas 😊</div>
+  </div>
+  <div class="chat-input">
+    <input id="chatInput" placeholder="Escribe tu pregunta..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()"><i class="fas fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+'use strict';
+
+const API_URL = 'https://meditech-bot.onrender.com/api';
+const K_SES   = 'mt_session';
+const K_USERS = 'mt_users';
+const K_CART  = 'mt_cart_';
+
+const $  = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+function toast(msg, err){
+  const t = document.createElement('div');
+  t.className = 'toast' + (err ? ' err' : '');
+  t.textContent = msg;
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='.4s'; setTimeout(()=>t.remove(),400); }, 3200);
+}
+function fixEncoding(s){
+  if(!s) return s || '';
+  let out = String(s);
+  for(let i=0;i<3;i++){
+    if(!/[ÃÂ]/.test(out)) break;
+    try{ out = decodeURIComponent(escape(out)); }catch(e){ break; }
+  }
+  return out;
+}
+const fmt = n => '$' + Number(n||0).toFixed(2);
+const CAT_META = {
+  medicamento:{ico:'💊', label:'Medicamento', cls:'med', grad:'linear-gradient(135deg,#0d9488,#06b6d4)'},
+  tecnologia :{ico:'💻', label:'Tecnología',  cls:'tec', grad:'linear-gradient(135deg,#3b82f6,#6366f1)'},
+  salud      :{ico:'🩺', label:'Salud',       cls:'sal', grad:'linear-gradient(135deg,#10b981,#059669)'},
+  gaming     :{ico:'🎮', label:'Gaming',      cls:'gam', grad:'linear-gradient(135deg,#8b5cf6,#ec4899)'}
+};
+
+/* ================================================================
+   🔐 SESIÓN — COMPATIBLE con 'username' y con 'usuario' (legacy)
+   ================================================================ */
+const CATALOGO_DEMO = [
+ {id:'1', name:'Enalapril 10mg', desc:'Medicamento para tratar la hipertensión arterial y el fallo cardíaco.', price:280, stock:10, category:'medicamento', feat:true},
+ {id:'2', name:'Loratadina 10mg', desc:'Antihistamínico que alivia los síntomas de las alergias.', price:230, stock:10, category:'medicamento', feat:true},
+ {id:'3', name:'Cable de corriente PC', desc:'Cable de poder para conectar PC y monitor a la corriente eléctrica.', price:1000, stock:1, category:'tecnologia', feat:true},
+ {id:'4', name:'Alprazolam 0.5mg', desc:'Tratamiento de trastornos de ansiedad y pánico. Benzodiacepina.', price:550, stock:10, category:'medicamento'},
+ {id:'5', name:'Benadrilina', desc:'Antihistamínico sedante para alergias y fiebre del heno.', price:250, stock:20, category:'medicamento', feat:true},
+ {id:'6', name:'Captopril 25mg', desc:'Tratamiento de hipertensión y disfunción ventricular.', price:250, stock:20, category:'medicamento'},
+ {id:'7', name:'Paracetamol + Diclofenaco 550mg', desc:'Analgésico para dolor muscular, de cabeza y menstrual.', price:260, stock:20, category:'medicamento'},
+ {id:'8', name:'Ibuprofeno 800mg', desc:'Alivio del dolor e inflamación por artritis.', price:280, stock:20, category:'medicamento'},
+ {id:'9', name:'Amoxicilina 500mg', desc:'Antibiótico para infecciones bacterianas.', price:350, stock:20, category:'medicamento'},
+ {id:'10',name:'Omeprazol 20mg', desc:'Control de acidez estomacal frecuente.', price:250, stock:20, category:'medicamento'},
+ {id:'11',name:'Domazol', desc:'Problemas digestivos, reflujo y acidez.', price:300, stock:10, category:'medicamento'},
+ {id:'12',name:'Hidroclorotiazida 50mg', desc:'Diurético para tratar edema e hipertensión.', price:230, stock:10, category:'medicamento'},
+ {id:'13',name:'Metronidazol 500mg', desc:'Antibiótico para infecciones gastrointestinales y dentales.', price:280, stock:20, category:'medicamento'},
+ {id:'14',name:'Nifedipino 20mg', desc:'Tratamiento de hipertensión y arritmia cardíaca.', price:250, stock:10, category:'medicamento'},
+ {id:'15',name:'Amlodipino 10mg', desc:'Control de presión arterial alta y angina.', price:250, stock:10, category:'medicamento'},
+ {id:'16',name:'Sulfaprim', desc:'Antibacteriano para vías respiratorias y renales.', price:280, stock:10, category:'medicamento'},
+ {id:'17',name:'Furosemida 40mg', desc:'Diurético para hipertensión e insuficiencia cardíaca.', price:230, stock:10, category:'medicamento'}
+];
+
+/* 🔧 Helpers seguros: aceptan 'username' o 'usuario' */
+function getId(u){ return (u?.username || u?.usuario || u?.user || u?.email || '').toString(); }
+function getName(u){ return u?.name || u?.nombre || getId(u) || 'Usuario'; }
+
+function getUser(){
+  try{
+    const raw = localStorage.getItem(K_SES) || localStorage.getItem('session');
+    if(!raw) return null;
+    const u = JSON.parse(raw);
+    return (u && getId(u)) ? u : null;
+  }catch(e){ return null; }
+}
+const haySesion = () => !!getUser();
+
+function saveSession(u){
+  const data = JSON.stringify(u);
+  localStorage.setItem(K_SES, data);
+  localStorage.setItem('session', data);
+}
+function clearSession(){
+  localStorage.removeItem(K_SES);
+  localStorage.removeItem('session');
+}
+function getUsers(){
+  try{ return JSON.parse(localStorage.getItem(K_USERS)) || []; }catch(e){ return []; }
+}
+function saveUsers(list){ localStorage.setItem(K_USERS, JSON.stringify(list)); }
+
+/* Seed admin (compatible con ambos campos) */
+(function seed(){
+  const users = getUsers();
+  const hasAdmin = users.some(u => {
+    const id = getId(u).toLowerCase();
+    return id === 'admin';
+  });
+  if(!hasAdmin){
+    users.push({name:'Administrador', username:'admin', usuario:'admin', email:'admin@mediatech.com', pass:'admin123', role:'admin'});
+    saveUsers(users);
+  }
+})();
+
+/* ================================================================
+   🛡️ MUROS
+   ================================================================ */
+const MURO = (titulo, frase, dest) => `
+  <div class="wall">
+    <div class="lock"><i class="fas fa-lock"></i></div>
+    <h4>${titulo}</h4>
+    <p>${frase}</p>
+    <ul>
+      <li><i class="fas fa-check-circle"></i> <b>Catálogo completo</b> con precios visibles</li>
+      <li><i class="fas fa-check-circle"></i> <b>Ofertas y descuentos</b> exclusivos</li>
+      <li><i class="fas fa-check-circle"></i> <b>Carrito de compras</b> y pedidos por correo</li>
+      <li><i class="fas fa-check-circle"></i> <b>Acceso a los juegos</b> de MediTech 🎮</li>
+    </ul>
+    <div class="wall-btns">
+      <button class="btn btn-solid" onclick="pedirLogin('${dest}')"><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</button>
+      <button class="btn btn-ghost" onclick="pedirRegistro('${dest}')"><i class="fas fa-user-plus"></i> Crear cuenta gratis</button>
+    </div>
+  </div>`;
+
+let PRODUCTOS = [];
+let catFiltro = 'todas';
+
+function renderZonas(){
+  const u = getUser();
+  headerAuth(u);
+  if(u){
+    $('#gamesDrop').style.display = '';
+    $('#searchBox').style.display = '';
+    $('#cartBtn').style.display = '';
+    if(PRODUCTOS.length === 0) cargarProductos();
+    else { renderCategorias(); renderProductosZona(); renderOfertas(); }
+  }else{
+    $('#zonaCategorias').innerHTML = MURO('Categorías exclusivas para miembros','Explora medicamentos, tecnología, salud y gaming.','#categorias');
+    $('#zonaProductos').innerHTML  = MURO('Catálogo exclusivo para usuarios registrados','Únete a MediTech y desbloquea precios y productos al instante.','#productos');
+    $('#zonaOfertas').innerHTML    = MURO('Ofertas exclusivas para miembros','Los descuentos solo son visibles si tienes una cuenta.','#ofertas');
+    PRODUCTOS = [];
+    $('#gamesDrop').style.display = 'none';
+    $('#searchBox').style.display = 'none';
+    $('#cartBtn').style.display = 'none';
+    updateCartBadge();
+  }
+  renderChatChips();
+}
+
+function headerAuth(u){
+  const btn = $('#userBtn'), menu = $('#userMenu');
+  if(u){
+    btn.className = 'user-btn logged';
+    $('#userLabel').textContent = getName(u).split(' ')[0];
+    $('#heroRegBtn').style.display = 'none';
+    const admin = u.role === 'admin';
+    menu.innerHTML = `
+      <div class="head"><small>Conectado como</small><b>${getName(u)}</b><br>
+        <span class="role">${admin ? '👑 Admin' : '🛍️ Cliente'}</span></div>
+      ${admin ? `
+        <button onclick="window.location.href='admin-crud.html'"><i class="fas fa-database" style="color:#7c3aed"></i> Panel CRUD</button>
+        <button onclick="window.location.href='admin-usuarios.html'"><i class="fas fa-users-cog" style="color:#0d9488"></i> Gestión Usuarios</button>
+        <button onclick="window.open('telegram-bot.html','_blank')"><i class="fab fa-telegram" style="color:#0ea5e9"></i> Bot Telegram</button>` : ''}
+      <button class="danger" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>`;
+  }else{
+    btn.className = 'user-btn guest';
+    $('#userLabel').textContent = 'Iniciar Sesión';
+    $('#heroRegBtn').style.display = '';
+    menu.innerHTML = `
+      <button onclick="openModal('modalLogin')"><i class="fas fa-sign-in-alt" style="color:#0d9488"></i> Iniciar Sesión</button>
+      <button onclick="openModal('modalRegister')"><i class="fas fa-user-plus" style="color:#0d9488"></i> Registrarse</button>`;
+  }
+}
+
+async function cargarProductos(){
+  if(!haySesion()) return;
+  let lista = null;
+  try{
+    const ctrl = new AbortController();
+    const to = setTimeout(()=>ctrl.abort(), 8000);
+    const r = await fetch(API_URL + '/productos', {signal: ctrl.signal});
+    clearTimeout(to);
+    if(r.ok){
+      const d = await r.json();
+      if(Array.isArray(d) && d.length) lista = d;
+      else if(d && Array.isArray(d.productos) && d.productos.length) lista = d.productos;
+    }
+  }catch(e){ console.warn('Backend sin respuesta, usando catálogo local:', e.message); }
+
+  if(!lista){
+    try{
+      const bk = JSON.parse(localStorage.getItem('productos_backup') || 'null');
+      if(Array.isArray(bk) && bk.length) lista = bk;
+    }catch(e){}
+  }
+  PRODUCTOS = (lista || CATALOGO_DEMO).map(p => ({
+    ...p,
+    id: String(p.id || p._id || p.nombre),
+    name: fixEncoding(p.name || p.nombre || ''),
+    desc: fixEncoding(p.desc || p.description || ''),
+    category: p.category || p.categoria || 'medicamento',
+    price: Number(p.price || p.precio || 0),
+    stock: Number(p.stock ?? 10),
+    feat: !!p.feat
+  }));
+  localStorage.setItem('productos_backup', JSON.stringify(PRODUCTOS));
+  $('#statProd').textContent = PRODUCTOS.length;
+  renderCategorias(); renderProductosZona(); renderOfertas();
+}
+
+function renderCategorias(){
+  if(!haySesion()) return;
+  const cats = ['medicamento','tecnologia','salud','gaming'];
+  const nombres = {medicamento:'Medicamentos', tecnologia:'Tecnología', salud:'Salud', gaming:'Gaming'};
+  const iconos  = {medicamento:'fa-pills', tecnologia:'fa-laptop', salud:'fa-heart-pulse', gaming:'fa-gamepad'};
+  $('#zonaCategorias').innerHTML = `
+    <div class="sec-head"><span class="tag">Explora</span><h3>Explora por Categoría</h3><p>Encuentra exactamente lo que necesitas</p></div>
+    <div class="cat-grid">
+      ${cats.map(c=>{
+        const n = PRODUCTOS.filter(p=>p.category===c).length;
+        return `<div class="cat-card" style="background:${CAT_META[c].grad}" onclick="filtrarCat('${c}')">
+          <div class="ic"><i class="fas ${iconos[c]}"></i></div>
+          <h5>${nombres[c]}</h5><span>${n} producto${n!==1?'s':''} disponibles</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderProductosZona(){
+  if(!haySesion()) return;
+  $('#zonaProductos').innerHTML = `
+    <div class="sec-head"><span class="tag">🌟 Catálogo</span><h3>Productos Destacados</h3><p>Los más populares entre nuestros clientes</p></div>
+    <div class="toolbar">
+      <div class="chipset" id="chipsCat">
+        <button class="chip ${catFiltro==='todas'?'act':''}" onclick="filtrarCat('todas')">Todas</button>
+        <button class="chip ${catFiltro==='medicamento'?'act':''}" onclick="filtrarCat('medicamento')">💊 Medicamentos</button>
+        <button class="chip ${catFiltro==='tecnologia'?'act':''}" onclick="filtrarCat('tecnologia')">💻 Tecnología</button>
+        <button class="chip ${catFiltro==='salud'?'act':''}" onclick="filtrarCat('salud')">🩺 Salud</button>
+        <button class="chip ${catFiltro==='gaming'?'act':''}" onclick="filtrarCat('gaming')">🎮 Gaming</button>
+      </div>
+      <select id="selSort" onchange="renderGrid()">
+        <option value="def">Ordenar</option>
+        <option value="asc">Precio: menor</option>
+        <option value="desc">Precio: mayor</option>
+        <option value="az">Nombre A-Z</option>
+      </select>
+      <span class="count-label" id="countLabel"></span>
+    </div>
+    <div class="prod-grid" id="prodGrid"></div>`;
+  renderGrid();
+}
+function filtrarCat(c){
+  catFiltro = c;
+  if(!haySesion()){ pedirLogin('#productos'); return; }
+  renderProductosZona();
+  location.hash = '#productos';
+}
+function renderGrid(){
+  if(!haySesion()) return;
+  let list = PRODUCTOS.filter(p => catFiltro==='todas' || p.category===catFiltro);
+  const sort = $('#selSort') ? $('#selSort').value : 'def';
+  if(sort==='asc') list.sort((a,b)=>a.price-b.price);
+  if(sort==='desc')list.sort((a,b)=>b.price-a.price);
+  if(sort==='az')  list.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  $('#countLabel').textContent = list.length + ' producto' + (list.length!==1?'s':'');
+  $('#prodGrid').innerHTML = list.length ? list.map((p,i)=>{
+    const out = p.available===false || p.stock<=0;
+    const low = !out && p.stock<=5;
+    const meta = CAT_META[p.category] || CAT_META.salud;
+    const imgOk = p.image && /^https?:/.test(p.image);
+    return `<div class="p-card" style="animation-delay:${i*35}ms">
+      <div class="p-img">${imgOk?`<img src="${p.image}" alt="${p.name}" onerror="this.remove()">`:meta.ico}
+        <span class="p-badge ${meta.cls}">${meta.ico} ${meta.label}</span>
+        ${p.feat?'<span class="p-star">⭐ Destacado</span>':''}
+      </div>
+      <div class="p-body">
+        <h5>${p.name}</h5>
+        <p class="desc">${p.desc}</p>
+        <div class="p-price"><b>${fmt(p.price)}</b><small>MN</small></div>
+        <div class="p-foot">
+          <span class="stock-tag ${out?'stock-out':low?'stock-low':'stock-ok'}">
+            ${out?'❌ Agotado':low?'⚠️ ¡Quedan '+p.stock+'!':'✅ '+p.stock+' disponibles'}</span>
+          <button class="add-btn" ${out?'disabled':''} onclick="addCart('${p.id}')" title="Agregar al carrito"><i class="fas fa-plus"></i></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('') : '<p style="color:var(--mut);grid-column:1/-1;text-align:center;padding:2rem">No hay productos en esta categoría.</p>';
+}
+
+function renderOfertas(){
+  if(!haySesion()) return;
+  const bajos = PRODUCTOS.filter(p => p.stock>0 && p.stock<=10).slice(0,8);
+  $('#zonaOfertas').innerHTML = `
+    <div class="sec-head"><span class="tag">🔥 No te lo pierdas</span><h3>Ofertas Especiales</h3><p>Últimas unidades y condiciones exclusivas para miembros</p></div>
+    <div class="offer-grid">
+      ${bajos.map((p,i)=>`<div class="o-card" style="animation-delay:${i*50}ms">
+        <span class="badge">🔥 ¡Últimas ${p.stock} unidades!</span>
+        <h5>${p.name}</h5>
+        <p class="desc">${p.desc.slice(0,90)}${p.desc.length>90?'…':''}</p>
+        <div class="price">${fmt(p.price)} MN</div>
+        <button class="btn btn-solid" style="width:100%" onclick="addCart('${p.id}')"><i class="fas fa-cart-plus"></i> Lo quiero</button>
+      </div>`).join('')}
+      <div class="o-card">
+        <span class="badge">🚚 Envíos</span>
+        <h5>Entrega con domicilio</h5>
+        <p class="desc">Con costo adicional según tu zona de residencia. Coordina al confirmar tu pedido.</p>
+        <button class="btn btn-ghost" style="width:100%" onclick="location.hash='#productos'">Ver productos</button>
+      </div>
+    </div>`;
+}
+
+$('#searchInput').addEventListener('input', function(){
+  const q = this.value.trim().toLowerCase();
+  const box = $('#searchResults');
+  if(!haySesion() || !q){ box.classList.remove('open'); return; }
+  const hits = PRODUCTOS.filter(p => (p.name+' '+(p.desc||'')).toLowerCase().includes(q)).slice(0,5);
+  box.innerHTML = hits.length ? hits.map(p=>`
+    <div class="search-item" onclick="location.hash='#productos';$('#searchResults').classList.remove('open');">
+      <div class="thumb">${(CAT_META[p.category]||CAT_META.salud).ico}</div>
+      <div><b>${p.name}</b><br><small style="color:var(--teal2)">${fmt(p.price)}</small></div>
+    </div>`).join('')
+    : '<div class="search-item" style="color:var(--mut)">Sin resultados 😕</div>';
+  box.classList.add('open');
+});
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.search-box')) $('#searchResults').classList.remove('open');
+  if(!e.target.closest('#userWrap'))  $('#userWrap').classList.remove('open');
+  if(!e.target.closest('#gamesDrop'))  $('#gamesDrop').classList.remove('open');
+});
+
+const cartKey = () => K_CART + (getId(getUser()) || 'guest');
+const getCart = () => { try{ return JSON.parse(localStorage.getItem(cartKey())) || []; }catch(e){ return []; } };
+const setCart = c => localStorage.setItem(cartKey(), JSON.stringify(c));
+
+function addCart(id){
+  if(!haySesion()){ pedirLogin('#productos'); return; }
+  const p = PRODUCTOS.find(x => String(x.id) === String(id));
+  if(!p || p.stock<=0) return;
+  const cart = getCart();
+  const item = cart.find(i => String(i.id) === String(id));
+  item ? item.qty++ : cart.push({id, qty:1});
+  setCart(cart); updateCartBadge();
+  toast('🛒 ' + p.name + ' agregado al carrito');
+}
+function updateCartBadge(){
+  const n = haySesion() ? getCart().reduce((s,i)=>s+i.qty,0) : 0;
+  $('#cartCount').textContent = n;
+}
+function changeQty(id, d){
+  let cart = getCart();
+  const item = cart.find(i => String(i.id) === String(id));
+  if(!item) return;
+  item.qty += d;
+  if(item.qty <= 0) cart = cart.filter(i => i !== item);
+  setCart(cart); renderCart(); updateCartBadge();
+}
+function delItem(id){ setCart(getCart().filter(i => String(i.id) !== String(id))); renderCart(); updateCartBadge(); }
+function openCart(){
+  if(!haySesion()){ pedirLogin('#productos'); return; }
+  renderCart(); openModal('modalCart');
+}
+function renderCart(){
+  const cart = getCart();
+  let total = 0;
+  $('#cartItems').innerHTML = cart.length ? cart.map(i=>{
+    const p = PRODUCTOS.find(x => String(x.id) === String(i.id));
+    if(!p) return '';
+    total += p.price * i.qty;
+    return `<div class="c-item">
+      <div class="thumb">${(CAT_META[p.category]||CAT_META.salud).ico}</div>
+      <div class="info"><h6>${p.name}</h6><small>${fmt(p.price)} c/u</small></div>
+      <div class="qty"><button onclick="changeQty('${p.id}',-1)">−</button><span>${i.qty}</span><button onclick="changeQty('${p.id}',1)">+</button></div>
+      <button class="c-del" onclick="delItem('${p.id}')"><i class="fas fa-trash"></i></button>
+    </div>`;
+  }).join('') : '<div class="c-empty"><i class="fas fa-shopping-cart" style="font-size:2.5rem;opacity:.3;display:block;margin-bottom:.6rem"></i>Tu carrito está vacío</div>';
+  $('#cartTotal').textContent = fmt(total);
+}
+function checkout(){
+  const cart = getCart();
+  if(!cart.length) return toast('El carrito está vacío', true);
+  const u = getUser(); let total = 0; const lines = [];
+  cart.forEach(i=>{
+    const p = PRODUCTOS.find(x => String(x.id) === String(i.id));
+    if(p){ total += p.price*i.qty; lines.push(`• ${p.name} ×${i.qty} — ${fmt(p.price*i.qty)}`); }
+  });
+  const body = encodeURIComponent(`Pedido MediTech de ${getName(u)}\n\n${lines.join('\n')}\n\nTotal: ${fmt(total)}`);
+  window.open(`mailto:ventas@mediatech.com?subject=Pedido MediTech&body=${body}`);
+  toast('📧 Abriendo tu correo para enviar el pedido…');
+}
+
+/* ================================================================
+   🔐 LOGIN / REGISTRO / LOGOUT  (CORREGIDO)
+   ================================================================ */
+let destinoTrasLogin = '';
+function pedirLogin(dest){ destinoTrasLogin = dest || ''; openModal('modalLogin'); }
+function pedirRegistro(dest){ destinoTrasLogin = dest || ''; openModal('modalRegister'); }
+function goCatalog(){ haySesion() ? location.hash='#productos' : pedirLogin('#productos'); }
+
+function setErr(id, msg){ const el = $('#'+id); el.textContent = msg; el.classList.toggle('show', !!msg); }
+
+$('#formLogin').addEventListener('submit', e=>{
+  e.preventDefault();
+  const u = $('#logUser').value.trim(), p = $('#logPass').value;
+  let ok = true;
+  setErr('eLogUser', u?'':'Ingresa tu usuario'); if(!u) ok=false;
+  setErr('eLogPass', p?'':'Ingresa tu contraseña'); if(!p) ok=false;
+  if(!ok) return;
+
+  const users = getUsers();
+  const target = u.toLowerCase();
+
+  // 🔧 Búsqueda TOLERANTE con username/usuario/email
+  const user = users.find(x => {
+    if(!x) return false;
+    const candidates = [x.username, x.usuario, x.user, x.email].filter(Boolean);
+    return candidates.some(c => String(c).toLowerCase() === target);
+  });
+
+  if(!user || user.pass !== p){
+    setErr('eLogPass','Usuario o contraseña incorrectos');
+    return;
+  }
+  saveSession({
+    name: user.name || user.nombre || getId(user),
+    username: getId(user),
+    email: user.email || '',
+    role: user.role || 'cliente'
+  });
+  closeModal('modalLogin'); e.target.reset();
+  toast('✅ ¡Bienvenido, ' + getName(user).split(' ')[0] + '! Catálogo desbloqueado.');
+  renderZonas();
+  if(destinoTrasLogin){ const d = destinoTrasLogin; destinoTrasLogin=''; setTimeout(()=>location.hash=d, 150); }
+});
+
+$('#formRegister').addEventListener('submit', e=>{
+  e.preventDefault();
+  const n=$('#regName').value.trim(), u=$('#regUser').value.trim(), m=$('#regMail').value.trim(),
+        p=$('#regPass').value, p2=$('#regPass2').value;
+  let ok=true;
+  const chk=(id,cond,msg)=>{ setErr(id, cond?'':msg); if(!cond) ok=false; };
+  chk('eRegName', n.length>=3, 'Ingresa tu nombre completo');
+  chk('eRegUser', u.length>=3, 'Mínimo 3 caracteres');
+  chk('eRegMail', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(m), 'Correo inválido');
+  chk('eRegPass', p.length>=6, 'Mínimo 6 caracteres');
+  chk('eRegPass2', p===p2, 'Las contraseñas no coinciden');
+  if(!ok) return;
+  const users = getUsers();
+  // 🔧 Búsqueda segura con fallback a string vacío
+  if(users.some(x => getId(x).toLowerCase() === u.toLowerCase()))
+    return setErr('eRegUser','Ese usuario ya existe');
+  if(users.some(x => String(x.email||'').toLowerCase() === m.toLowerCase()))
+    return setErr('eRegMail','Ese correo ya está registrado');
+  const nuevo = {name:n, username:u, usuario:u, email:m, pass:p, role:'cliente'};
+  users.push(nuevo); saveUsers(users);
+  saveSession({name:n, username:u, email:m, role:'cliente'});
+  $('#statUsers').textContent = users.length;
+  closeModal('modalRegister'); e.target.reset();
+  toast('🎉 ¡Cuenta creada! Bienvenido a MediTech.');
+  renderZonas();
+  if(destinoTrasLogin){ const d = destinoTrasLogin; destinoTrasLogin=''; setTimeout(()=>location.hash=d, 150); }
+});
+
+function logout(){
+  clearSession();
+  renderZonas();
+  location.hash = '#inicio';
+  toast('👋 Sesión cerrada. El catálogo vuelve a estar bloqueado.');
+}
+
+document.addEventListener('click', e=>{
+  const a = e.target.closest('a.nav-gated');
+  if(a && !haySesion()){ e.preventDefault(); pedirLogin(a.getAttribute('href')); }
+  const g = e.target.closest('.games-menu a');
+  if(g && !haySesion()){ e.preventDefault(); pedirLogin(''); toast('🎮 Inicia sesión para jugar', true); }
+});
+function toggleGames(e){
+  e.stopPropagation();
+  if(!haySesion()){ pedirLogin(''); return; }
+  $('#gamesDrop').classList.toggle('open');
+}
+function toggleUserMenu(e){ e.stopPropagation(); $('#userWrap').classList.toggle('open'); }
+
+function openModal(id){ $('#'+id).classList.add('open'); }
+function closeModal(id){ $('#'+id).classList.remove('open'); }
+function switchModal(a,b){ closeModal(a); openModal(b); }
+$$('.overlay').forEach(o => o.addEventListener('click', e => { if(e.target === o) o.classList.remove('open'); }));
+document.addEventListener('keydown', e => { if(e.key === 'Escape') $$('.overlay').forEach(o=>o.classList.remove('open')); });
+
+/* ================================================================
+   🤖 CHATBOT — IA gratis + base de conocimientos
+   ================================================================ */
+const CHAT = { hist: [], busy: false, catalogo: null, ts: 0 };
+function toggleChat(){
+  const p = $('#chatPanel');
+  p.classList.toggle('open');
+  $('#chatFab').innerHTML = p.classList.contains('open') ? '<i class="fas fa-times"></i>' : '<i class="fas fa-comment-dots"></i>';
+  if(p.classList.contains('open')) renderChatChips();
+}
+function renderChatChips(){
+  const chips = haySesion()
+    ? ['🛍️ Ver productos','💊 Medicamentos','💻 Tecnología','🔥 Ofertas','📦 ¿Cómo compro?']
+    : ['🔐 ¿Cómo me registro?','🛍️ ¿Qué venden?','🕐 Horarios'];
+  $('#chatChips').innerHTML = chips.map(c=>`<button onclick="quickChat('${c}')">${c}</button>`).join('');
+}
+function quickChat(t){ $('#chatInput').value = t; sendChat(); }
+function addMsg(html, who){
+  const d = document.createElement('div');
+  d.className = 'msg ' + who;
+  d.innerHTML = html;
+  $('#chatMsgs').appendChild(d);
+  $('#chatMsgs').scrollTop = 9e9;
+}
+const escHTML = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+async function getCatalogoChat(){
+  if(CHAT.catalogo && Date.now() - CHAT.ts < 5*60*1000) return CHAT.catalogo;
+  if(PRODUCTOS.length){ CHAT.catalogo = PRODUCTOS; CHAT.ts = Date.now(); return PRODUCTOS; }
+  try{
+    const r = await fetch(API_URL + '/productos-resumen');
+    const d = await r.json();
+    if(d.ok && d.productos){ CHAT.catalogo = d.productos; CHAT.ts = Date.now(); }
+  }catch(e){}
+  return CHAT.catalogo || [];
+}
+
+async function llamarIA(texto){
+  const cat = await getCatalogoChat();
+  const nombre = getUser()?.name?.split(' ')[0];
+  const contexto = cat.slice(0,20).map(p=>`${p.name}: $${p.price} (stock ${p.stock})`).join('; ') || 'sin datos';
+  const system = `Eres Ania, asistente de MediTech (medicamentos y tecnología en Holguín, Cuba).
+${nombre ? 'El usuario se llama '+nombre+'. ' : ''}Responde en español, amable, máximo 3 líneas, sin markdown.
+Catálogo real (NUNCA inventes productos ni precios): ${contexto}.
+Si preguntan algo ajeno a la tienda, redirige con simpatía hacia MediTech.`;
+  try{
+    const r = await fetch('https://text.pollinations.ai/', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({messages:[{role:'system',content:system},...CHAT.hist.slice(-6),{role:'user',content:texto}], model:'openai'})
+    });
+    if(r.ok){ const t = await r.text(); if(t.trim().length>=10) return t; }
+  }catch(e){}
+  try{
+    const prompt = encodeURIComponent(system + '\nUsuario: ' + texto + '\nAnia:');
+    const r = await fetch('https://text.pollinations.ai/' + prompt.slice(0,5500));
+    if(r.ok){ const t = await r.text(); if(t.trim().length>=10) return t; }
+  }catch(e){}
+  return null;
+}
+
+async function respaldoLocal(texto){
+  const t = texto.toLowerCase();
+  const cat = await getCatalogoChat();
+  const hits = cat.filter(p => t.split(/\s+/).some(w => w.length>2 && (p.name||'').toLowerCase().includes(w))).slice(0,5);
+  if(hits.length)
+    return 'Encontré en el catálogo:<br><br>' + hits.map(p=>`• <b>${escHTML(p.name)}</b> — ${fmt(p.price)} ${p.stock<=10?'⚠️ (quedan '+p.stock+')':'✅'}`).join('<br>') + '<br><br>¿Te interesa alguno? 🛒';
+  if(/\b(hola|buenas|saludos)\b/.test(t)) return '¡Hola! 👋 ¿Buscas medicamentos o tecnología? Pregúntame por un producto y te doy su precio 😊';
+  if(/\b(gracias)\b/.test(t)) return '¡De nada! ☕️ ¿Algo más? ✨';
+  if(/\b(registro|registrar|cuenta|login|sesion|sesión)\b/.test(t)) return '🔐 Crear tu cuenta es gratis: haz clic en <b>Iniciar Sesión</b> (arriba a la derecha) y luego en <b>Regístrate aquí</b>. ¡En menos de 1 minuto estarás dentro! 🚀';
+  if(/\b(horario|hora|abierto)\b/.test(t)) return '🕐 Atendemos de Lunes a Sábado, de 9:00 AM a 6:00 PM.';
+  if(/\b(envio|envío|delivery|domicilio)\b/.test(t)) return '🚚 El envío a domicilio tiene costo adicional según tu zona. Se coordina al confirmar el pedido.';
+  if(/\b(pago|pagar|efectivo|transferencia)\b/.test(t)) return '💳 Aceptamos efectivo y transferencia. Te indicamos los detalles al confirmar tu pedido.';
+  if(/\b(comprar|pedido|carrito)\b/.test(t)) return '📦 Muy fácil: agrega productos al carrito 🛒 y pulsa <b>Solicitar Pedido por Correo</b>. Nosotros te contactamos para coordinar.';
+  if(/\b(producto|catalogo|catálogo|vende|medicamento|tecnologia|tecnología|oferta)\b/.test(t)){
+    const top = cat.slice(0,6).map(p=>`• ${escHTML(p.name)} — ${fmt(p.price)}`).join('<br>');
+    return top ? 'Esto es lo más buscado:<br><br>' + top + '<br><br>Pregúntame por cualquiera 😊' : 'El catálogo está en la sección <b>Productos</b> (necesitas iniciar sesión 🔒).';
+  }
+  return 'Puedo ayudarte con productos, precios, horarios, envíos o cómo comprar. ¿Qué necesitas? 😊';
+}
+
+async function sendChat(){
+  if(CHAT.busy) return;
+  const txt = $('#chatInput').value.trim();
+  if(!txt) return;
+  CHAT.busy = true;
+  $('#chatInput').value = '';
+  addMsg(escHTML(txt), 'user');
+  const tid = 'tp' + Date.now();
+  const tp = document.createElement('div');
+  tp.className = 'msg bot'; tp.id = tid;
+  tp.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  $('#chatMsgs').appendChild(tp); $('#chatMsgs').scrollTop = 9e9;
+
+  let resp = null;
+  try{
+    resp = await llamarIA(txt);
+    if(resp){
+      CHAT.hist.push({role:'user',content:txt},{role:'assistant',content:resp});
+      if(CHAT.hist.length > 12) CHAT.hist = CHAT.hist.slice(-12);
+    }
+  }catch(e){}
+  if(!resp) resp = await respaldoLocal(txt);
+  tp.remove();
+  addMsg(resp.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>'), 'bot');
+  CHAT.busy = false;
+}
+
+const SLIDES = [
+  {ico:'💊', txt:'Medicamentos certificados para tu familia'},
+  {ico:'💻', txt:'Hardware con garantía oficial'},
+  {ico:'🔥', txt:'Ofertas exclusivas para miembros'},
+  {ico:'🚚', txt:'Entrega a domicilio según tu zona'}
+];
+let slideIdx = 0;
+setInterval(()=>{
+  slideIdx = (slideIdx+1) % SLIDES.length;
+  const box = $('#slideBox');
+  box.style.opacity = 0;
+  setTimeout(()=>{
+    $('#slideIco').textContent = SLIDES[slideIdx].ico;
+    $('#slideTxt').textContent = SLIDES[slideIdx].txt;
+    box.style.opacity = 1;
+  }, 250);
+}, 4000);
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  $('#year').textContent = new Date().getFullYear();
+  $('#statUsers').textContent = getUsers().length;
+  renderZonas();
 });
 </script>
 </body>
