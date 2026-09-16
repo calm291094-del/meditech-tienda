@@ -1,1066 +1,1723 @@
 <!DOCTYPE html>
 <html lang="es">
-    
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediTech</title>
+    <title>MediTech - Salud & Tecnología</title>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #00d4aa;
+            --primary-dark: #00b894;
+            --secondary: #6c5ce7;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --dark: #0a0a1a;
+            --dark-2: #12122a;
+            --dark-3: #1a1a3e;
+            --dark-4: #252552;
+            --text: #e0e0ff;
+            --text-muted: #8888aa;
+            --glass: rgba(255,255,255,0.05);
+            --glass-border: rgba(255,255,255,0.1);
+            --radius: 12px;
+            --radius-lg: 20px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        a { color: var(--primary); text-decoration: none; transition: var(--transition); }
+        a:hover { color: var(--primary-dark); }
+        img { max-width: 100%; border-radius: var(--radius); }
+        button { cursor: pointer; font-family: inherit; }
+        ul { list-style: none; }
 
-    <!-- ========== EXTERNAL LIBRARIES (CDNs CONFIABLES) ========== -->
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-   <!-- ========== EXTERNAL LIBRARIES ========== -->
-<script src="static/js/tailwind-cdn.js"></script>
-<script src="static/js/chart.min.js"></script>
-<script src="static/js/jspdf.umd.min.js"></script>
-<script src="static/js/jspdf.plugin.autotable.min.js"></script>
-   
-   <!-- Google Fonts -->
-   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-   <link rel="stylesheet" href="static/fontawesome/css/all.min.css">
-   <link rel="stylesheet" href="static/css/style.css">
-   <link rel="stylesheet" href="static/css/admin.css">
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--dark-2); }
+        ::-webkit-scrollbar-thumb { background: var(--dark-4); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
-    <!-- ========== FAVICON ========== -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232c3e50'/%3E%3Ctext x='50' y='70' font-family='Arial' font-size='70' font-weight='bold' fill='white' text-anchor='middle'%3EK%3C/text%3E%3C/svg%3E">
+        /* ===== HEADER ===== */
+        header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            background: rgba(10,10,26,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0.8rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            transition: var(--transition);
+        }
+        .logo {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 1.5rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .logo-sub { font-size: 0.7rem; color: var(--text-muted); display: block; }
+        nav { display: flex; align-items: center; gap: 1.5rem; }
+        nav a {
+            color: var(--text); font-weight: 500; padding: 0.5rem 0.8rem;
+            border-radius: 8px; transition: var(--transition); position: relative;
+        }
+        nav a:hover { color: var(--primary); background: var(--glass); }
+        nav a.active { color: var(--primary); }
+        nav a.active::after {
+            content: ''; position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+            width: 20px; height: 3px; background: var(--primary); border-radius: 3px;
+        }
 
+        /* Dropdown Juegos */
+        .dropdown { position: relative; }
+        .dropdown-toggle { background: none; border: none; color: var(--text); font-size: 1rem; font-weight: 500; padding: 0.5rem 0.8rem; border-radius: 8px; transition: var(--transition); }
+        .dropdown-toggle:hover { color: var(--primary); background: var(--glass); }
+        .dropdown-menu {
+            position: absolute; top: 100%; left: 0; min-width: 220px;
+            background: var(--dark-2); border: 1px solid var(--glass-border);
+            border-radius: var(--radius); padding: 0.5rem;
+            opacity: 0; visibility: hidden; transform: translateY(10px);
+            transition: var(--transition); box-shadow: var(--shadow);
+        }
+        .dropdown:hover .dropdown-menu,
+        .dropdown.open .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown-menu a {
+            display: block; padding: 0.6rem 1rem; border-radius: 8px;
+            color: var(--text); font-size: 0.9rem;
+        }
+        .dropdown-menu a:hover { background: var(--glass); color: var(--primary); }
 
-<!-- En el <head> o en el bloque <style> de tu página -->
-<style>
-  /* Estilos para el menú desplegable tipo "cajita sorpresa" */
-  .game-dropdown {
-    position: relative;
-    display: inline-block;
-  }
+        /* Header Actions */
+        .header-actions { display: flex; align-items: center; gap: 0.8rem; }
+        .btn {
+            padding: 0.6rem 1.2rem; border-radius: 8px; border: none;
+            font-weight: 600; font-size: 0.9rem; transition: var(--transition);
+            display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn.primario { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #000; }
+        .btn.primario:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,212,170,0.3); }
+        .btn.secundario { background: var(--glass); color: var(--text); border: 1px solid var(--glass-border); }
+        .btn.secundario:hover { border-color: var(--primary); color: var(--primary); }
+        .btn.danger { background: var(--danger); color: #fff; }
+        .btn.small { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+        .btn-icon {
+            width: 40px; height: 40px; border-radius: 50%; border: none;
+            background: var(--glass); color: var(--text); font-size: 1.2rem;
+            display: grid; place-items: center; transition: var(--transition); position: relative;
+        }
+        .btn-icon:hover { background: var(--primary); color: #000; }
+        .badge {
+            position: absolute; top: -4px; right: -4px;
+            background: var(--danger); color: #fff; font-size: 0.65rem;
+            width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center;
+            font-weight: 700;
+        }
 
-  .game-dropdown-btn {
-    background: linear-gradient(145deg, #f59e0b, #fbbf24);
-    color: #1e293b;
-    font-weight: 700;
-    padding: 0.5rem 1.2rem;
-    border: none;
-    border-radius: 50px;
-    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.95rem;
-    letter-spacing: 0.5px;
-  }
+        /* Menú Usuario */
+        .menu-usuario { position: relative; }
+        .menu-usuario-toggle {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: var(--glass); border: 1px solid var(--glass-border);
+            padding: 0.4rem 0.8rem 0.4rem 0.4rem; border-radius: 50px;
+            color: var(--text); font-size: 0.85rem; cursor: pointer; transition: var(--transition);
+        }
+        .menu-usuario-toggle:hover { border-color: var(--primary); }
+        .avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: grid; place-items: center; font-weight: 700; font-size: 0.8rem; color: #000;
+        }
+        .menu-usuario-dropdown {
+            position: absolute; top: calc(100% + 8px); right: 0; min-width: 240px;
+            background: var(--dark-2); border: 1px solid var(--glass-border);
+            border-radius: var(--radius); padding: 0.5rem;
+            opacity: 0; visibility: hidden; transform: translateY(10px);
+            transition: var(--transition); box-shadow: var(--shadow); z-index: 100;
+        }
+        .menu-usuario.open .menu-usuario-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+        .menu-usuario-dropdown .user-info { padding: 0.8rem; border-bottom: 1px solid var(--glass-border); margin-bottom: 0.5rem; }
+        .menu-usuario-dropdown .user-info strong { display: block; }
+        .menu-usuario-dropdown .user-info small { color: var(--text-muted); }
+        .menu-usuario-dropdown a, .menu-usuario-dropdown button {
+            display: flex; align-items: center; gap: 0.5rem; width: 100%;
+            padding: 0.6rem 0.8rem; border-radius: 8px; background: none; border: none;
+            color: var(--text); font-size: 0.9rem; text-align: left; cursor: pointer;
+            transition: var(--transition);
+        }
+        .menu-usuario-dropdown a:hover, .menu-usuario-dropdown button:hover { background: var(--glass); color: var(--primary); }
+        .menu-usuario-dropdown .separator { height: 1px; background: var(--glass-border); margin: 0.5rem 0; }
+        .menu-usuario-dropdown .logout-btn { color: var(--danger); }
+        .menu-usuario-dropdown .logout-btn:hover { background: rgba(231,76,60,0.1); }
 
-  .game-dropdown-btn:hover {
-    transform: scale(1.05) translateY(-2px);
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.6);
-  }
+        /* ===== HERO ===== */
+        .hero {
+            padding: 8rem 2rem 4rem; text-align: center;
+            background: radial-gradient(ellipse at top, rgba(0,212,170,0.1), transparent 60%),
+                        radial-gradient(ellipse at bottom right, rgba(108,92,231,0.1), transparent 60%);
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900;
+            background: linear-gradient(135deg, #fff, var(--primary), var(--secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; margin-bottom: 1rem; position: relative;
+        }
+        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 2rem; position: relative; }
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; position: relative; }
 
-  .game-dropdown-btn i {
-    font-size: 1.2rem;
-    transition: transform 0.4s ease;
-  }
+        /* ===== SECCIONES ===== */
+        section { padding: 4rem 2rem; position: relative; }
+        .section-header { text-align: center; margin-bottom: 3rem; }
+        .section-header h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .section-header p { color: var(--text-muted); font-size: 1.1rem; }
+        .container { max-width: 1200px; margin: 0 auto; }
 
-  .game-dropdown-btn:hover i {
-    transform: rotate(20deg) scale(1.1);
-  }
+        /* ===== CATEGORÍAS ===== */
+        .categorias-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .categoria-card {
+            background: var(--glass); border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg); padding: 2rem; text-align: center;
+            transition: var(--transition); cursor: pointer;
+        }
+        .categoria-card:hover {
+            transform: translateY(-5px); border-color: var(--primary);
+            box-shadow: 0 10px 40px rgba(0,212,170,0.15);
+        }
+        .categoria-card .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .categoria-card h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .categoria-card p { color: var(--text-muted); font-size: 0.9rem; }
 
-  /* La cajita sorpresa (contenedor del menú) */
-  .game-dropdown-content {
-    position: absolute;
-    top: calc(100% + 12px);
-    left: 50%;
-    transform: translateX(-50%) scale(0.8) rotateY(90deg);
-    transform-origin: top center;
-    background: white;
-    min-width: 220px;
-    border-radius: 24px;
-    padding: 0.8rem 0.3rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 0 0 2px #fcd34d inset;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 1000;
-    backdrop-filter: blur(8px);
-    background: rgba(255, 255, 255, 0.95);
-    border: 2px solid #fbbf24;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  }
+        /* ===== PRODUCTOS ===== */
+        .filtros {
+            display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .filtro-btn {
+            padding: 0.5rem 1.2rem; border-radius: 50px; border: 1px solid var(--glass-border);
+            background: var(--glass); color: var(--text); font-size: 0.85rem;
+            transition: var(--transition); cursor: pointer;
+        }
+        .filtro-btn:hover, .filtro-btn.active { background: var(--primary); color: #000; border-color: var(--primary); }
+        .productos-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .producto-card {
+            background: var(--glass); border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg); overflow: hidden; transition: var(--transition);
+        }
+        .producto-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); border-color: var(--primary); }
+        .producto-card .img-container {
+            height: 200px; background: var(--dark-3); display: grid; place-items: center;
+            overflow: hidden; position: relative;
+        }
+        .producto-card .img-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 0; }
+        .producto-card .badge-oferta {
+            position: absolute; top: 10px; right: 10px;
+            background: var(--danger); color: #fff; padding: 0.3rem 0.6rem;
+            border-radius: 6px; font-size: 0.75rem; font-weight: 700;
+        }
+        .producto-card .info { padding: 1.2rem; }
+        .producto-card .categoria-tag { font-size: 0.75rem; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .producto-card h3 { font-size: 1rem; margin: 0.4rem 0; }
+        .producto-card .precio { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+        .producto-card .precio-old { text-decoration: line-through; color: var(--text-muted); font-size: 0.9rem; margin-left: 0.5rem; }
+        .producto-card .acciones { display: flex; gap: 0.5rem; margin-top: 0.8rem; }
+        .producto-card .acciones .btn { flex: 1; justify-content: center; font-size: 0.8rem; padding: 0.5rem; }
 
-  /* Cuando el menú está abierto (clase "open" añadida con JS) */
-  .game-dropdown-content.open {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) scale(1) rotateY(0deg);
-  }
+        /* ===== OFERTAS ===== */
+        .ofertas-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .oferta-card {
+            background: linear-gradient(135deg, rgba(231,76,60,0.1), rgba(243,156,18,0.1));
+            border: 1px solid rgba(231,76,60,0.3); border-radius: var(--radius-lg);
+            padding: 1.5rem; display: flex; gap: 1rem; align-items: center;
+            transition: var(--transition);
+        }
+        .oferta-card:hover { transform: scale(1.02); border-color: var(--warning); }
+        .oferta-card .descuento {
+            background: var(--danger); color: #fff; padding: 0.5rem 0.8rem;
+            border-radius: 8px; font-weight: 800; font-size: 1.2rem; white-space: nowrap;
+        }
+        .oferta-card .info h3 { font-size: 1rem; }
+        .oferta-card .info p { color: var(--text-muted); font-size: 0.85rem; }
 
-  /* Elementos del menú (juegos) con animación individual */
-  .game-dropdown-content a {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0.7rem 1.5rem;
-    margin: 0.2rem 0.5rem;
-    border-radius: 16px;
-    color: #1e293b;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    background: transparent;
-    border-left: 3px solid transparent;
-    font-size: 0.9rem;
-  }
+        /* ===== AUTH WALL (MURO DE ACCESO) ===== */
+        .auth-wall {
+            display: grid; place-items: center; padding: 3rem 1rem;
+            min-height: 300px;
+        }
+        .auth-wall-card {
+            max-width: 540px; width: 100%; padding: 3rem 2.5rem;
+            text-align: center; border-radius: var(--radius-lg);
+            border: 1px dashed rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.03);
+            animation: fadeInUp 0.5s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .auth-wall-icon { font-size: 3.5rem; display: block; margin-bottom: 1rem; }
+        .auth-wall-card h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+        .auth-wall-card > p { color: var(--text-muted); margin-bottom: 1.5rem; }
+        .auth-wall-card ul {
+            text-align: left; margin: 1.5rem auto; display: inline-block;
+        }
+        .auth-wall-card ul li { padding: 0.4rem 0; font-size: 0.95rem; }
+        .auth-wall-botones { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+        .auth-wall-botones .btn { padding: 0.8rem 1.5rem; font-size: 1rem; }
 
-  .game-dropdown-content a:hover {
-    background: #fef9c3;
-    border-left-color: #f59e0b;
-    transform: translateX(6px) scale(1.02);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  }
+        /* Preview bloqueado */
+        .preview-bloqueado { position: relative; margin-top: 2rem; }
+        .preview-bloqueado .ghost-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem; filter: blur(12px); pointer-events: none; user-select: none;
+            opacity: 0.4;
+        }
+        .ghost-card {
+            background: var(--glass); border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg); height: 320px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.6; } }
+        .preview-bloqueado .velo {
+            position: absolute; inset: 0; display: grid; place-items: center;
+            font-weight: 600; font-size: 1.1rem;
+            background: rgba(10,10,26,0.5); backdrop-filter: blur(3px);
+            border-radius: var(--radius-lg);
+        }
 
-  .game-dropdown-content a i {
-    font-size: 1.3rem;
-    width: 28px;
-    text-align: center;
-    color: #f59e0b;
-  }
+        /* Estados de body */
+        body.auth .auth-wall { display: none !important; }
+        body.auth .preview-bloqueado { display: none !important; }
+        body.no-auth .zona-protegida > .contenido-protegido { display: none !important; }
 
-  /* Animación de "sorpresa" al abrir: cada ítem aparece con retraso */
-  .game-dropdown-content.open a {
-    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    opacity: 0;
-    transform: scale(0.8) translateY(-10px);
-  }
+        /* ===== MODALES ===== */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 2000;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            display: none; place-items: center; padding: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.active { display: grid; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal {
+            background: var(--dark-2); border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 440px;
+            max-height: 90vh; overflow-y: auto; position: relative;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-close {
+            position: absolute; top: 1rem; right: 1rem;
+            background: var(--glass); border: none; color: var(--text);
+            width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem;
+            display: grid; place-items: center; cursor: pointer; transition: var(--transition);
+        }
+        .modal-close:hover { background: var(--danger); color: #fff; }
+        .modal h2 { font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.4rem; font-size: 0.9rem; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 0.75rem 1rem; border-radius: 8px;
+            border: 1px solid var(--glass-border); background: var(--dark-3);
+            color: var(--text); font-size: 0.95rem; transition: var(--transition);
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,212,170,0.1);
+        }
+        .form-group .error-msg { color: var(--danger); font-size: 0.8rem; margin-top: 0.3rem; display: none; }
+        .form-group.error input { border-color: var(--danger); }
+        .form-group.error .error-msg { display: block; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-footer { text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted); }
+        .form-footer a { cursor: pointer; }
 
-  .game-dropdown-content.open a:nth-child(1) { animation-delay: 0.05s; }
-  .game-dropdown-content.open a:nth-child(2) { animation-delay: 0.10s; }
-  .game-dropdown-content.open a:nth-child(3) { animation-delay: 0.15s; }
-  .game-dropdown-content.open a:nth-child(4) { animation-delay: 0.20s; }
-  .game-dropdown-content.open a:nth-child(5) { animation-delay: 0.25s; }
-  .game-dropdown-content.open a:nth-child(6) { animation-delay: 0.30s; }
+        /* ===== CARRITO ===== */
+        .carrito-panel {
+            position: fixed; top: 0; right: -420px; width: 400px; max-width: 90vw;
+            height: 100vh; background: var(--dark-2); border-left: 1px solid var(--glass-border);
+            z-index: 1500; display: flex; flex-direction: column;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+        }
+        .carrito-panel.open { right: 0; }
+        .carrito-header {
+            padding: 1.5rem; border-bottom: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .carrito-header h3 { font-size: 1.2rem; }
+        .carrito-items { flex: 1; overflow-y: auto; padding: 1rem; }
+        .carrito-item {
+            display: flex; gap: 1rem; padding: 1rem; border-radius: var(--radius);
+            background: var(--glass); margin-bottom: 0.8rem; align-items: center;
+        }
+        .carrito-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; }
+        .carrito-item .info { flex: 1; }
+        .carrito-item .info h4 { font-size: 0.9rem; }
+        .carrito-item .info .precio { color: var(--primary); font-weight: 700; }
+        .carrito-item .remove-btn { background: none; border: none; color: var(--danger); font-size: 1.2rem; cursor: pointer; }
+        .carrito-footer { padding: 1.5rem; border-top: 1px solid var(--glass-border); }
+        .carrito-total { display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 1.2rem; font-weight: 700; }
+        .carrito-vacio { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+        .carrito-vacio .icon { font-size: 3rem; margin-bottom: 1rem; }
 
-  @keyframes popIn {
-    0% {
-      opacity: 0;
-      transform: scale(0.8) translateY(-10px);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
+        /* ===== PANEL ADMIN ===== */
+        .admin-overlay {
+            position: fixed; inset: 0; z-index: 3000;
+            background: var(--dark); display: none; overflow: hidden;
+        }
+        .admin-overlay.active { display: flex; }
+        .admin-sidebar {
+            width: 260px; background: var(--dark-2); border-right: 1px solid var(--glass-border);
+            padding: 1.5rem; overflow-y: auto; flex-shrink: 0;
+        }
+        .admin-sidebar .logo { margin-bottom: 2rem; font-size: 1.2rem; }
+        .admin-sidebar .status { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 2rem; font-size: 0.85rem; color: var(--text-muted); }
+        .admin-sidebar .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); animation: pulse 2s infinite; }
+        .admin-nav a {
+            display: flex; align-items: center; gap: 0.8rem;
+            padding: 0.7rem 1rem; border-radius: 8px; color: var(--text-muted);
+            font-size: 0.9rem; margin-bottom: 0.3rem; transition: var(--transition);
+        }
+        .admin-nav a:hover, .admin-nav a.active { background: var(--glass); color: var(--primary); }
+        .admin-main { flex: 1; overflow-y: auto; padding: 2rem; }
+        .admin-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .admin-topbar h1 { font-size: 1.5rem; }
+        .admin-stats {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem; margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--glass); border: 1px solid var(--glass-border);
+            border-radius: var(--radius); padding: 1.5rem;
+        }
+        .stat-card .label { font-size: 0.85rem; color: var(--text-muted); }
+        .stat-card .value { font-size: 1.8rem; font-weight: 800; margin-top: 0.3rem; }
+        .admin-section { display: none; }
+        .admin-section.active { display: block; }
+        .admin-table {
+            width: 100%; border-collapse: collapse; background: var(--glass);
+            border-radius: var(--radius); overflow: hidden;
+        }
+        .admin-table th, .admin-table td {
+            padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid var(--glass-border);
+            font-size: 0.9rem;
+        }
+        .admin-table th { background: var(--dark-3); font-weight: 600; color: var(--text-muted); }
+        .admin-table tr:hover { background: rgba(255,255,255,0.02); }
 
-  /* Flecha indicadora */
-  .game-dropdown-btn .arrow {
-    transition: transform 0.3s ease;
-    display: inline-block;
-  }
+        /* ===== ASISTENTE ===== */
+        .asistente-btn {
+            position: fixed; bottom: 2rem; right: 2rem; z-index: 1200;
+            width: 60px; height: 60px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none; color: #000; font-size: 1.5rem;
+            display: grid; place-items: center; cursor: pointer;
+            box-shadow: 0 5px 25px rgba(0,212,170,0.4);
+            transition: var(--transition);
+        }
+        .asistente-btn:hover { transform: scale(1.1); }
+        .asistente-panel {
+            position: fixed; bottom: 6rem; right: 2rem; z-index: 1200;
+            width: 360px; max-width: calc(100vw - 2rem); height: 500px; max-height: 70vh;
+            background: var(--dark-2); border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg); display: none; flex-direction: column;
+            overflow: hidden; box-shadow: var(--shadow);
+        }
+        .asistente-panel.open { display: flex; }
+        .asistente-header {
+            padding: 1rem 1.2rem; border-bottom: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--dark-3);
+        }
+        .asistente-header h4 { font-size: 1rem; }
+        .asistente-messages { flex: 1; overflow-y: auto; padding: 1rem; }
+        .asistente-msg {
+            max-width: 85%; padding: 0.8rem 1rem; border-radius: 12px;
+            margin-bottom: 0.8rem; font-size: 0.9rem; line-height: 1.5;
+        }
+        .asistente-msg.bot { background: var(--dark-3); border: 1px solid var(--glass-border); }
+        .asistente-msg.user { background: var(--primary); color: #000; margin-left: auto; }
+        .asistente-input {
+            padding: 1rem; border-top: 1px solid var(--glass-border);
+            display: flex; gap: 0.5rem;
+        }
+        .asistente-input input {
+            flex: 1; padding: 0.7rem 1rem; border-radius: 50px;
+            border: 1px solid var(--glass-border); background: var(--dark-3);
+            color: var(--text); font-size: 0.9rem;
+        }
+        .asistente-input input:focus { outline: none; border-color: var(--primary); }
+        .asistente-input button {
+            width: 40px; height: 40px; border-radius: 50%; border: none;
+            background: var(--primary); color: #000; font-size: 1.1rem; cursor: pointer;
+        }
 
-  .game-dropdown-btn .arrow.open {
-    transform: rotate(180deg);
-  }
-</style>
-    
+        /* ===== FOOTER ===== */
+        footer {
+            background: var(--dark-2); border-top: 1px solid var(--glass-border);
+            padding: 3rem 2rem 1.5rem;
+        }
+        .footer-grid {
+            max-width: 1200px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem; margin-bottom: 2rem;
+        }
+        .footer-col h4 { margin-bottom: 1rem; font-size: 1rem; }
+        .footer-col p, .footer-col a { color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 0.5rem; }
+        .footer-col a:hover { color: var(--primary); }
+        .footer-bottom { text-align: center; padding-top: 1.5rem; border-top: 1px solid var(--glass-border); color: var(--text-muted); font-size: 0.85rem; }
+        .social-links { display: flex; gap: 0.8rem; margin-top: 0.5rem; }
+        .social-links a {
+            width: 36px; height: 36px; border-radius: 50%; background: var(--glass);
+            display: grid; place-items: center; font-size: 1rem; transition: var(--transition);
+        }
+        .social-links a:hover { background: var(--primary); color: #000; }
 
+        /* ===== TOAST ===== */
+        .toast-container { position: fixed; top: 5rem; right: 1rem; z-index: 5000; display: flex; flex-direction: column; gap: 0.5rem; }
+        .toast {
+            padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 0.9rem;
+            background: var(--dark-3); border: 1px solid var(--glass-border);
+            animation: slideInRight 0.3s ease; min-width: 280px;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .toast.success { border-color: var(--primary); }
+        .toast.error { border-color: var(--danger); }
+        .toast.info { border-color: var(--secondary); }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* ===== RESPONSIVE ===== */
+        .mobile-menu-btn { display: none; background: none; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; }
+        @media (max-width: 768px) {
+            header { padding: 0.8rem 1rem; }
+            nav { display: none; position: fixed; top: 60px; left: 0; right: 0; bottom: 0; background: var(--dark); flex-direction: column; padding: 2rem; gap: 0.5rem; z-index: 999; }
+            nav.open { display: flex; }
+            nav a { padding: 1rem; font-size: 1.1rem; }
+            .mobile-menu-btn { display: block; }
+            .hero h1 { font-size: 2rem; }
+            .admin-sidebar { width: 60px; padding: 1rem 0.5rem; }
+            .admin-sidebar .logo span, .admin-nav a span, .admin-sidebar .status span { display: none; }
+            .carrito-panel { width: 100%; right: -100%; }
+            .asistente-panel { right: 0.5rem; bottom: 5rem; width: calc(100vw - 1rem); }
+            .asistente-btn { bottom: 1rem; right: 1rem; }
+            .dropdown-menu { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none; border: none; background: var(--dark-3); }
+        }
+
+        /* ===== UTILIDADES ===== */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .mt-1 { margin-top: 0.5rem; } .mt-2 { margin-top: 1rem; } .mt-3 { margin-top: 1.5rem; }
+        .mb-1 { margin-bottom: 0.5rem; } .mb-2 { margin-bottom: 1rem; }
+        .flex { display: flex; } .gap-1 { gap: 0.5rem; } .gap-2 { gap: 1rem; }
+        .items-center { align-items: center; } .justify-between { justify-content: space-between; }
+    </style>
 </head>
-    
-<body>
+<body class="no-auth">
 
-    <!-- ============================================ -->
-    <!-- HEADER -->
-    <!-- ============================================ -->
-    <header class="header">
-        <div class="header-inner">
-            <div class="header-logo">
-                <div class="header-logo-icon"><i class="fas fa-heartbeat"></i></div>
-                <div>
-                    <h1>Medi<span class="gradient-text">Tech</span></h1>
-                    <div class="header-logo-sub" id="header-subtitle">Salud & Tecnología</div>
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ===== HEADER ===== -->
+    <header>
+        <a href="#inicio" class="logo">
+            🏥 MediTech
+            <span class="logo-sub">Salud & Tecnología</span>
+        </a>
+
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Menú">☰</button>
+
+        <nav id="mainNav">
+            <a href="#inicio" class="active" onclick="navegar('inicio')">Inicio</a>
+            <a href="#productos" onclick="navegarProtegido(event, 'productos')">Productos</a>
+            <a href="#categorias" onclick="navegarProtegido(event, 'categorias')">Categorías</a>
+            <a href="#ofertas" onclick="navegarProtegido(event, 'ofertas')">Ofertas</a>
+            <div class="dropdown">
+                <button class="dropdown-toggle">🎮 Juegos ▼</button>
+                <div class="dropdown-menu">
+                    <a href="gms/Vuelo-V3.html">✈️ AeroHolgín</a>
+                    <a href="gms/HLG-Z/index.html">🎯 HLG-Z</a>
+                    <a href="gms/NeonRushPursuitEdition.html">🏎️ Neon Rush</a>
+                    <a href="gms/MugenKalm.html">🌀 Mugen Kalm</a>
+                    <a href="gms/MugenKalmVcell/MugenKalm-Vcell.html">📱 Mugen Kalm (Móvil)</a>
+                    <a href="gms/WKalm/worl-kalm.html">🌍 Worl Kalm</a>
                 </div>
             </div>
+        </nav>
 
-            <div class="search-container">
-                <div id="chat-chips" style="display:flex;gap:6px;flex-wrap:wrap;padding:6px 10px;"></div>
-                <input type="text" id="search-input" placeholder="Buscar productos..." oninput="searchProducts(this.value)">
-                <i class="fas fa-search search-icon"></i>
-                <div id="search-results" class="search-results"></div>
-            </div>
+        <div class="header-actions">
+            <button class="btn-icon" onclick="toggleCarrito()" aria-label="Carrito">
+                🛒 <span class="badge" id="carritoBadge">0</span>
+            </button>
 
-<nav class="nav">
-    <a href="#inicio">Inicio</a>
-    <a href="#productos">Productos</a>
-    <a href="#categorias">Categorías</a>
-    <a href="#ofertas">Ofertas</a>
+            <!-- Botón Login (visible cuando NO hay sesión) -->
+            <button class="btn primario" id="btnLogin" onclick="abrirModal('modalLogin')">
+                🔐 Iniciar Sesión
+            </button>
 
-    <!-- MENÚ DESPLEGABLE DE JUEGOS (CAJITA SORPRESA) -->
-    <div class="game-dropdown">
-        <button class="game-dropdown-btn" onclick="toggleGameMenu()">
-            <i class="fas fa-gamepad"></i> Juegos <span class="arrow">▼</span>
-        </button>
-        <!-- ============================================ -->
-        <!-- 👇 Link de juegos aqui 👇 -->
-        <!-- ============================================ -->
-        <div class="game-dropdown-content" id="gameMenu">
-            <a href="gms/Vuelo-V3.html"><i class="fas fa-plane"></i> AeroHolgín</a>
-            <a href="gms/HLG-Z/index.html"><i class="fas fa-ghost"></i> HLG-Z</a>
-            <a href="gms/NeonRushPursuitEdition.html"><i class="fas fa-car"></i> Neon Rush</a>
-            <a href="gms/MugenKalm.html"><i class="fas fa-skull"></i> Mugen Kalm</a>
-            <a href="gms/MugenKalmVcell/MugenKalm-Vcell.html"><i class="fas fa-mobile-alt"></i> Mugen Kalm (Móvil)</a>
-            <a href="gms/WKalm/worl-kalm.html"><i class="fas fa-mobile-alt"></i> Worl Kalm</a>
-        </div>
-    </div>
-</nav>
-
-            <div class="flex items-center gap-3">
-                <button id="cart-btn" onclick="openCart()" class="cart-btn hidden">
-                    <i class="fas fa-shopping-cart text-xl"></i>
-                    <span id="cart-count" class="cart-count">0</span>
+            <!-- Menú Usuario (visible cuando HAY sesión) -->
+            <div class="menu-usuario hidden" id="menuUsuario">
+                <button class="menu-usuario-toggle" onclick="toggleMenuUsuario()">
+                    <span class="avatar" id="avatarUsuario">U</span>
+                    <span id="nombreHeader">Usuario</span>
+                    <span>▾</span>
                 </button>
-
-                <div class="user-section" id="user-section">
-                    <button id="user-btn" onclick="toggleUserMenu()" class="user-btn">
-                        <i class="fas fa-user-circle text-xl"></i>
-                        <span id="user-name-display" class="hidden md:inline">Iniciar Sesión</span>
-                        <i class="fas fa-chevron-down text-xs"></i>
-                    </button>
-                    <div id="user-menu" class="user-menu">
-                        <div id="menu-logged-out">
-                            <button onclick="openLoginModal()" class="user-menu-item">
-                                <i class="fas fa-sign-in-alt text-teal-600"></i> Iniciar Sesión
-                            </button>
-                            <button onclick="openRegisterModal()" class="user-menu-item">
-                                <i class="fas fa-user-plus text-teal-600"></i> Registrarse
-                            </button>
-                        </div>
-                        <div id="menu-logged-in" class="hidden">
-                            <div class="px-4 py-3 border-b border-gray-200">
-                                <p class="text-sm text-gray-500">Conectado como</p>
-                                <p id="user-menu-name" class="font-bold text-gray-900"></p>
-                                <span id="user-role-badge" class="badge-role user"></span>
-                            </div>
-                            <button id="admin-menu-btn" onclick="openAdminPanel()" class="user-menu-item hidden">
-                                <i class="fas fa-cog text-orange-600"></i> Panel Admin
-                            </button>
-                            <button id="users-menu-btn" onclick="window.location.href='admin-usuarios.html'" class="user-menu-item hidden">
-                                <i class="fas fa-users-cog text-teal-600"></i> Gestión Usuarios
-                            </button>
-                            <button id="telegram-btn" onclick="window.open('telegram-bot.html', '_blank')" class="user-menu-item hidden">
-                                <i class="fab fa-telegram text-blue-500"></i> 🤖 Bot Telegram
-                            </button>
-                            <button id="crud-menu-btn" onclick="window.location.href='admin-crud.html'" class="user-menu-item hidden">
-                                <i class="fas fa-database text-purple-600"></i> 📊 Panel CRUD
-                            </button>                           
-                            <button onclick="logout()" class="user-menu-item danger">
-                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                            </button>
-                        </div>
+                <div class="menu-usuario-dropdown">
+                    <div class="user-info">
+                        <strong id="saludoUsuario">Conectado como</strong>
+                        <small id="emailHeader">usuario@email.com</small>
                     </div>
+                    <a href="#" data-solo-admin onclick="abrirAdmin()">⚙️ Panel Admin</a>
+                    <a href="#" data-solo-admin onclick="abrirAdmin('usuarios')">👥 Gestión Usuarios</a>
+                    <a href="#" data-solo-admin>🤖 Bot Telegram</a>
+                    <a href="#" data-solo-admin onclick="abrirAdmin('crud')">📊 Panel CRUD</a>
+                    <div class="separator" data-solo-admin></div>
+                    <button class="logout-btn" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- ============================================ -->
-    <!-- CARRUSEL HERO -->
-    <!-- ============================================ -->
-    <section id="inicio" class="hero">
-        <div class="container">
-            <div class="carousel">
-                <div class="carousel-inner" id="carousel-inner"></div>
-                <button class="carousel-btn prev" onclick="moveCarousel(-1)"><i class="fas fa-chevron-left"></i></button>
-                <button class="carousel-btn next" onclick="moveCarousel(1)"><i class="fas fa-chevron-right"></i></button>
-                <div class="carousel-dots" id="carousel-dots"></div>
-            </div>
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="inicio">
+        <h1>Salud & Tecnología<br>al alcance de tu mano</h1>
+        <p>Medicamentos, hardware y gadgets de última generación. Todo en un solo lugar con envío seguro.</p>
+        <div class="hero-buttons">
+            <button class="btn primario" onclick="navegarProtegido(event, 'productos')">🛍️ Ver Productos</button>
+            <button class="btn secundario" onclick="navegarProtegido(event, 'ofertas')">🔥 Ver Ofertas</button>
         </div>
     </section>
 
-    <!-- ============================================ -->
-    <!-- CATEGORÍAS -->
-    <!-- ============================================ -->
-    <section id="categorias" class="categories-section">
+    <!-- ===== CATEGORÍAS ===== -->
+    <section id="categorias" class="zona-protegida">
         <div class="container">
             <div class="section-header">
-                <h2 id="categorias-title">Explora por Categoría</h2>
-                <p id="categorias-subtitle">Encuentra exactamente lo que necesitas</p>
+                <h2>Explora por Categoría</h2>
+                <p>Encuentra exactamente lo que necesitas</p>
             </div>
-            <div class="category-grid" id="categorias-grid"></div>
+
+            <!-- AUTH WALL -->
+            <div class="auth-wall">
+                <div class="auth-wall-card">
+                    <span class="auth-wall-icon">🔒</span>
+                    <h3>Contenido exclusivo para usuarios registrados</h3>
+                    <p>Inicia sesión o crea tu cuenta gratis para explorar nuestras categorías y productos.</p>
+                    <ul>
+                        <li>✅ Catálogo completo de medicamentos y tecnología</li>
+                        <li>✅ Ofertas y descuentos exclusivos</li>
+                        <li>✅ Pedidos por correo y seguimiento</li>
+                        <li>✅ Asistente MediTech personalizado</li>
+                    </ul>
+                    <div class="auth-wall-botones">
+                        <button class="btn primario" onclick="abrirModal('modalLogin')">Iniciar Sesión</button>
+                        <button class="btn secundario" onclick="abrirModal('modalRegistro')">Crear cuenta gratis</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Borroso -->
+            <div class="preview-bloqueado" aria-hidden="true" inert>
+                <div class="ghost-grid">
+                    <div class="ghost-card"></div>
+                    <div class="ghost-card"></div>
+                    <div class="ghost-card"></div>
+                    <div class="ghost-card"></div>
+                </div>
+                <div class="velo">🔒 Inicia sesión para explorar categorías</div>
+            </div>
+
+            <!-- Contenido Protegido -->
+            <div class="contenido-protegido">
+                <div class="categorias-grid">
+                    <div class="categoria-card" onclick="filtrarPorCategoria('medicamento')">
+                        <div class="icon">💊</div>
+                        <h3>Medicamentos</h3>
+                        <p>Farmacéuticos certificados y productos de salud</p>
+                    </div>
+                    <div class="categoria-card" onclick="filtrarPorCategoria('tecnologia')">
+                        <div class="icon">💻</div>
+                        <h3>Tecnología</h3>
+                        <p>Hardware, componentes y periféricos de última generación</p>
+                    </div>
+                    <div class="categoria-card" onclick="filtrarPorCategoria('salud')">
+                        <div class="icon">🩺</div>
+                        <h3>Salud</h3>
+                        <p>Equipos médicos y dispositivos de bienestar</p>
+                    </div>
+                    <div class="categoria-card" onclick="filtrarPorCategoria('gaming')">
+                        <div class="icon">🎮</div>
+                        <h3>Gaming</h3>
+                        <p>Accesorios y periféricos para gamers</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- ============================================ -->
-    <!-- PRODUCTOS -->
-    <!-- ============================================ -->
-    <section id="productos" class="products-section">
-        <div class="container">
-            <div class="products-header">
-                <div class="section-header">
-                    <h2 id="productos-title">🌟 Productos Destacados</h2>
-                    <p id="productos-subtitle">Los más populares entre nuestros clientes</p>
-                </div>
-                <div class="filters">
-                    <select id="filter-category" onchange="filterProducts()">
-                        <option value="">Todas</option>
-                        <option value="medicamento">💊 Medicamentos</option>
-                        <option value="tecnologia">💻 Tecnología</option>
-                        <option value="salud">🩺 Salud</option>
-                        <option value="gaming">🎮 Gaming</option>
-                    </select>
-                    <select id="sort-by" onchange="filterProducts()">
-                        <option value="default">Ordenar</option>
-                        <option value="price-asc">Precio: Menor</option>
-                        <option value="price-desc">Precio: Mayor</option>
-                        <option value="name">Nombre A-Z</option>
-                    </select>
-                    <span class="product-count" id="product-total-label">Cargando...</span>
-                </div>
-            </div>
-            <div id="portada-productos" class="product-grid">
-                <p class="col-span-full text-center py-16 text-gray-400">
-                    <i class="fas fa-spinner fa-spin text-3xl mb-4 block"></i>
-                    Cargando productos...
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ============================================ -->
-    <!-- OFERTAS -->
-    <!-- ============================================ -->
-    <section id="ofertas" class="offers-section">
+    <!-- ===== PRODUCTOS ===== -->
+    <section id="productos" class="zona-protegida" style="background: var(--dark-2);">
         <div class="container">
             <div class="section-header">
-                <h2 id="ofertas-title">🔥 Ofertas Especiales</h2>
-                <p id="ofertas-subtitle">Aprovecha estos descuentos exclusivos</p>
+                <h2>🌟 Productos Destacados</h2>
+                <p>Los más populares entre nuestros clientes</p>
             </div>
-            <div class="offer-grid" id="ofertas-grid"></div>
+
+            <!-- AUTH WALL -->
+            <div class="auth-wall">
+                <div class="auth-wall-card">
+                    <span class="auth-wall-icon">🛍️</span>
+                    <h3>Descubre nuestro catálogo completo</h3>
+                    <p>Regístrate para ver cientos de productos con precios exclusivos y disponibilidad en tiempo real.</p>
+                    <ul>
+                        <li>✅ Filtrar por categoría, precio y disponibilidad</li>
+                        <li>✅ Agregar al carrito y solicitar pedidos</li>
+                        <li>✅ Historial de compras y seguimiento</li>
+                        <li>✅ Notificaciones de ofertas personalizadas</li>
+                    </ul>
+                    <div class="auth-wall-botones">
+                        <button class="btn primario" onclick="abrirModal('modalLogin')">Iniciar Sesión</button>
+                        <button class="btn secundario" onclick="abrirModal('modalRegistro')">Crear cuenta gratis</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Borroso -->
+            <div class="preview-bloqueado" aria-hidden="true" inert>
+                <div class="ghost-grid">
+                    <div class="ghost-card"></div>
+                    <div class="ghost-card"></div>
+                    <div class="ghost-card"></div>
+                    <div class="ghost-card"></div>
+                    <div class="ghost-card"></div>
+                    <div class="ghost-card"></div>
+                </div>
+                <div class="velo">🔒 Inicia sesión para ver los productos</div>
+            </div>
+
+            <!-- Contenido Protegido -->
+            <div class="contenido-protegido">
+                <div class="filtros">
+                    <button class="filtro-btn active" onclick="filtrarProductos('todos', this)">Todas</button>
+                    <button class="filtro-btn" onclick="filtrarProductos('medicamento', this)">💊 Medicamentos</button>
+                    <button class="filtro-btn" onclick="filtrarProductos('tecnologia', this)">💻 Tecnología</button>
+                    <button class="filtro-btn" onclick="filtrarProductos('salud', this)">🩺 Salud</button>
+                    <button class="filtro-btn" onclick="filtrarProductos('gaming', this)">🎮 Gaming</button>
+                    <select class="filtro-btn" onchange="ordenarProductos(this.value)" style="cursor:pointer;">
+                        <option value="">Ordenar</option>
+                        <option value="precio-asc">Precio: Menor</option>
+                        <option value="precio-desc">Precio: Mayor</option>
+                        <option value="nombre">Nombre A-Z</option>
+                    </select>
+                </div>
+                <div class="productos-grid" id="productosGrid">
+                    <p class="text-center" style="grid-column: 1/-1; padding: 2rem; color: var(--text-muted);">
+                        ⏳ Cargando productos...
+                    </p>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- ============================================ -->
-    <!-- FOOTER -->
-    <!-- ============================================ -->
-    <footer class="footer">
+    <!-- ===== OFERTAS ===== -->
+    <section id="ofertas" class="zona-protegida">
         <div class="container">
-            <div class="footer-grid">
-                <div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center text-white">
-                            <i class="fas fa-heartbeat"></i>
+            <div class="section-header">
+                <h2>🔥 Ofertas Especiales</h2>
+                <p>Aprovecha estos descuentos exclusivos</p>
+            </div>
+
+            <!-- AUTH WALL -->
+            <div class="auth-wall">
+                <div class="auth-wall-card">
+                    <span class="auth-wall-icon">🏷️</span>
+                    <h3>Ofertas exclusivas para miembros</h3>
+                    <p>Los usuarios registrados acceden a descuentos de hasta el 50% en productos seleccionados.</p>
+                    <ul>
+                        <li>✅ Descuentos exclusivos cada semana</li>
+                        <li>✅ Alertas de bajada de precio</li>
+                        <li>✅ Cupones de bienvenida para nuevos usuarios</li>
+                    </ul>
+                    <div class="auth-wall-botones">
+                        <button class="btn primario" onclick="abrirModal('modalLogin')">Iniciar Sesión</button>
+                        <button class="btn secundario" onclick="abrirModal('modalRegistro')">Crear cuenta gratis</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Borroso -->
+            <div class="preview-bloqueado" aria-hidden="true" inert>
+                <div class="ghost-grid">
+                    <div class="ghost-card" style="height:120px;"></div>
+                    <div class="ghost-card" style="height:120px;"></div>
+                    <div class="ghost-card" style="height:120px;"></div>
+                </div>
+                <div class="velo">🔒 Inicia sesión para ver ofertas</div>
+            </div>
+
+            <!-- Contenido Protegido -->
+            <div class="contenido-protegido">
+                <div class="ofertas-grid" id="ofertasGrid">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== MODAL LOGIN ===== -->
+    <div class="modal-overlay" id="modalLogin" role="dialog" aria-modal="true" aria-label="Iniciar Sesión">
+        <div class="modal">
+            <button class="modal-close" onclick="cerrarModales()" aria-label="Cerrar">✕</button>
+            <h2>🔐 Iniciar Sesión</h2>
+            <form id="formLogin" onsubmit="return procesarLogin(event)">
+                <div class="form-group" id="loginUsuarioGroup">
+                    <label for="loginUsuario">Usuario</label>
+                    <input type="text" id="loginUsuario" placeholder="Tu nombre de usuario" required autocomplete="username">
+                    <span class="error-msg">El usuario es obligatorio</span>
+                </div>
+                <div class="form-group" id="loginPasswordGroup">
+                    <label for="loginPassword">Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="Tu contraseña" required autocomplete="current-password" minlength="4">
+                    <span class="error-msg">La contraseña es obligatoria</span>
+                </div>
+                <button type="submit" class="btn primario" style="width:100%; justify-content:center; padding: 0.8rem;">
+                    Iniciar Sesión
+                </button>
+                <div class="form-footer mt-2">
+                    ¿No tienes cuenta? <a onclick="cerrarModales(); abrirModal('modalRegistro')">Regístrate aquí</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL REGISTRO ===== -->
+    <div class="modal-overlay" id="modalRegistro" role="dialog" aria-modal="true" aria-label="Registrarse">
+        <div class="modal">
+            <button class="modal-close" onclick="cerrarModales()" aria-label="Cerrar">✕</button>
+            <h2>📝 Crear Cuenta</h2>
+            <form id="formRegistro" onsubmit="return procesarRegistro(event)">
+                <div class="form-group" id="regNombreGroup">
+                    <label for="regNombre">Nombre Completo</label>
+                    <input type="text" id="regNombre" placeholder="Tu nombre completo" required>
+                    <span class="error-msg">El nombre es obligatorio (mínimo 2 caracteres)</span>
+                </div>
+                <div class="form-group" id="regUsuarioGroup">
+                    <label for="regUsuario">Usuario</label>
+                    <input type="text" id="regUsuario" placeholder="Elige un nombre de usuario" required minlength="3">
+                    <span class="error-msg">El usuario debe tener al menos 3 caracteres</span>
+                </div>
+                <div class="form-group" id="regCorreoGroup">
+                    <label for="regCorreo">Correo Electrónico</label>
+                    <input type="email" id="regCorreo" placeholder="correo@ejemplo.com" required>
+                    <span class="error-msg">Introduce un correo válido</span>
+                </div>
+                <div class="form-group" id="regPasswordGroup">
+                    <label for="regPassword">Contraseña</label>
+                    <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" required minlength="6">
+                    <span class="error-msg">La contraseña debe tener al menos 6 caracteres</span>
+                </div>
+                <div class="form-group" id="regPassword2Group">
+                    <label for="regPassword2">Confirmar Contraseña</label>
+                    <input type="password" id="regPassword2" placeholder="Repite la contraseña" required>
+                    <span class="error-msg">Las contraseñas no coinciden</span>
+                </div>
+                <button type="submit" class="btn primario" style="width:100%; justify-content:center; padding: 0.8rem;">
+                    Crear Cuenta
+                </button>
+                <div class="form-footer mt-2">
+                    ¿Ya tienes cuenta? <a onclick="cerrarModales(); abrirModal('modalLogin')">Inicia sesión</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== CARRITO PANEL ===== -->
+    <div class="carrito-panel" id="carritoPanel">
+        <div class="carrito-header">
+            <h3>🛒 Tu Carrito</h3>
+            <button class="modal-close" onclick="toggleCarrito()" aria-label="Cerrar carrito">✕</button>
+        </div>
+        <div class="carrito-items" id="carritoItems">
+            <div class="carrito-vacio">
+                <div class="icon">🛒</div>
+                <p>Tu carrito está vacío</p>
+            </div>
+        </div>
+        <div class="carrito-footer">
+            <div class="carrito-total">
+                <span>Total:</span>
+                <span id="carritoTotal">$0.00</span>
+            </div>
+            <button class="btn primario" style="width:100%; justify-content:center;" id="btnPedidoCorreo" onclick="solicitarPedido()">
+                📧 Solicitar Pedido por Correo
+            </button>
+            <p class="text-center mt-1" style="font-size:0.8rem; color: var(--text-muted);" id="carritoLoginMsg" class="hidden">
+                <a onclick="cerrarCarritoYSesion(); abrirModal('modalLogin')" style="cursor:pointer;">Inicia sesión</a> para realizar pedidos
+            </p>
+        </div>
+    </div>
+
+    <!-- ===== PANEL ADMIN ===== -->
+    <div class="admin-overlay" id="adminOverlay">
+        <div class="admin-sidebar">
+            <div class="logo">⚙️ <span>Admin</span></div>
+            <div class="status">
+                <span class="dot"></span>
+                <span>Online</span>
+            </div>
+            <nav class="admin-nav">
+                <a href="#" class="active" onclick="cambiarTabAdmin('ventas', this)"><span>📊</span> <span>Ventas</span></a>
+                <a href="#" onclick="cambiarTabAdmin('productos', this)"><span>📦</span> <span>Productos</span></a>
+                <a href="#" onclick="cambiarTabAdmin('carrusel', this)"><span>🎠</span> <span>Carrusel</span></a>
+                <a href="#" onclick="cambiarTabAdmin('textos', this)"><span>✏️</span> <span>Textos</span></a>
+                <a href="#" onclick="cambiarTabAdmin('usuarios', this)"><span>👥</span> <span>Usuarios</span></a>
+                <a href="#" onclick="cambiarTabAdmin('pedidos', this)"><span>📋</span> <span>Pedidos</span></a>
+                <a href="#" onclick="cambiarTabAdmin('estadisticas', this)"><span>📈</span> <span>Estadísticas</span></a>
+                <a href="#" onclick="cambiarTabAdmin('configuracion', this)"><span>⚙️</span> <span>Configuración</span></a>
+            </nav>
+            <button class="btn secundario mt-3" style="width:100%; justify-content:center;" onclick="cerrarAdmin()">
+                ← <span>Volver</span>
+            </button>
+        </div>
+        <div class="admin-main">
+            <div class="admin-topbar">
+                <h1 id="adminTitulo">📊 Ventas Hoy</h1>
+                <button class="btn small secundario" onclick="cerrarAdmin()">✕ Cerrar</button>
+            </div>
+
+            <!-- Tab: Ventas -->
+            <div class="admin-section active" id="tab-ventas">
+                <div class="admin-stats">
+                    <div class="stat-card"><div class="label">Ventas Hoy</div><div class="value" style="color:var(--primary);">$0</div></div>
+                    <div class="stat-card"><div class="label">Pedidos</div><div class="value">0</div></div>
+                    <div class="stat-card"><div class="label">Stock Crítico</div><div class="value" style="color:var(--danger);">0</div></div>
+                    <div class="stat-card"><div class="label">Clientes Nuevos</div><div class="value" style="color:var(--secondary);">0</div></div>
+                </div>
+            </div>
+
+            <!-- Tab: Productos -->
+            <div class="admin-section" id="tab-productos">
+                <div class="flex justify-between items-center mb-2">
+                    <h3>📦 Productos</h3>
+                    <button class="btn primario small" onclick="mostrarFormProducto()">+ Agregar Producto</button>
+                </div>
+                <div id="formProductoContainer" class="hidden" style="background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;">
+                    <h4 class="mb-2">Agregar/Editar Producto</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                        <div class="form-group"><label>Nombre</label><input type="text" id="prodNombre"></div>
+                        <div class="form-group">
+                            <label>Categoría</label>
+                            <select id="prodCategoria">
+                                <option value="medicamento">💊 Medicamento</option>
+                                <option value="tecnologia">💻 Tecnología</option>
+                                <option value="salud">🩺 Salud</option>
+                                <option value="gaming">🎮 Gaming</option>
+                            </select>
                         </div>
-                        <h4 class="text-xl font-bold text-white">MediTech</h4>
+                        <div class="form-group"><label>Precio</label><input type="number" id="prodPrecio" step="0.01"></div>
+                        <div class="form-group"><label>Stock</label><input type="number" id="prodStock"></div>
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <select id="prodEstado">
+                                <option value="disponible">✅ Disponible</option>
+                                <option value="agotado">❌ Agotado</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Imagen (URL)</label><input type="url" id="prodImagen"></div>
                     </div>
-                    <p class="text-sm opacity-70 leading-relaxed" id="footer-description">Tu tienda confiable para medicamentos y hardware de última generación.</p>
+                    <div class="form-group"><label>Descripción</label><textarea id="prodDescripcion"></textarea></div>
+                    <div class="form-group"><label><input type="checkbox" id="prodDestacado"> Producto destacado</label></div>
+                    <div class="flex gap-1">
+                        <button class="btn primario small" onclick="guardarProducto()">💾 Guardar</button>
+                        <button class="btn secundario small" onclick="ocultarFormProducto()">Cancelar</button>
+                    </div>
                 </div>
-                <div>
-                    <h5 class="font-semibold text-white mb-4">Enlaces</h5>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#">Inicio</a></li>
-                        <li><a href="#productos">Productos</a></li>
-                        <li><a href="#ofertas">Ofertas</a></li>
-                    </ul>
+                <div id="tablaProductos" style="overflow-x:auto;">
+                    <p style="color:var(--text-muted);">Cargando inventario...</p>
                 </div>
-                <div>
-                    <h5 class="font-semibold text-white mb-4">Legal</h5>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#">Política de Privacidad</a></li>
-                        <li><a href="#">Términos y Condiciones</a></li>
-                    </ul>
+            </div>
+
+            <!-- Tab: Carrusel -->
+            <div class="admin-section" id="tab-carrusel">
+                <h3 class="mb-2">🎠 Editar Carrusel</h3>
+                <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:1.5rem;">
+                    <p style="color:var(--text-muted);">Gestión de slides del carrusel principal.</p>
+                    <button class="btn primario small mt-2">+ Agregar Slide</button>
+                    <button class="btn secundario small mt-2">💾 Guardar</button>
                 </div>
-                <div>
-                    <h5 class="font-semibold text-white mb-4">Síguenos</h5>
-                    <div class="social">
-                        <a href="https://www.facebook.com/profile.php?id=61579147574368"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
+            </div>
+
+            <!-- Tab: Textos -->
+            <div class="admin-section" id="tab-textos">
+                <h3 class="mb-2">✏️ Editar Textos</h3>
+                <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:1.5rem;">
+                    <div class="form-group"><label>Subtítulo del Header</label><input type="text" value="Salud & Tecnología"></div>
+                    <div class="form-group"><label>Título de Categorías</label><input type="text" value="Explora por Categoría"></div>
+                    <div class="form-group"><label>Subtítulo de Categorías</label><input type="text" value="Encuentra exactamente lo que necesitas"></div>
+                    <div class="form-group"><label>Título de Productos</label><input type="text" value="🌟 Productos Destacados"></div>
+                    <div class="form-group"><label>Subtítulo de Productos</label><input type="text" value="Los más populares entre nuestros clientes"></div>
+                    <div class="form-group"><label>Título de Ofertas</label><input type="text" value="🔥 Ofertas Especiales"></div>
+                    <div class="form-group"><label>Subtítulo de Ofertas</label><input type="text" value="Aprovecha estos descuentos exclusivos"></div>
+                    <div class="form-group"><label>Descripción del Footer</label><textarea>Tu tienda confiable para medicamentos y hardware de última generación.</textarea></div>
+                    <button class="btn primario small">💾 Guardar Textos</button>
+                </div>
+            </div>
+
+            <!-- Tab: Usuarios -->
+            <div class="admin-section" id="tab-usuarios">
+                <div class="flex justify-between items-center mb-2">
+                    <h3>👥 Usuarios Registrados</h3>
+                    <button class="btn secundario small">📥 Exportar</button>
+                </div>
+                <div id="tablaUsuarios" style="overflow-x:auto;">
+                    <p style="color:var(--text-muted);">Cargando usuarios...</p>
+                </div>
+            </div>
+
+            <!-- Tab: Pedidos -->
+            <div class="admin-section" id="tab-pedidos">
+                <h3 class="mb-2">📋 Pedidos Recibidos</h3>
+                <div id="tablaPedidos" style="overflow-x:auto;">
+                    <p style="color:var(--text-muted);">No hay pedidos registrados.</p>
+                </div>
+            </div>
+
+            <!-- Tab: Estadísticas -->
+            <div class="admin-section" id="tab-estadisticas">
+                <h3 class="mb-2">📈 Estadísticas</h3>
+                <div class="admin-stats">
+                    <div class="stat-card"><div class="label">Productos</div><div class="value">0</div></div>
+                    <div class="stat-card"><div class="label">Usuarios</div><div class="value">0</div></div>
+                    <div class="stat-card"><div class="label">Pedidos</div><div class="value">0</div></div>
+                    <div class="stat-card"><div class="label">Ingresos</div><div class="value" style="color:var(--primary);">$0</div></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.5rem;">
+                    <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:1.5rem;">
+                        <h4>📊 Ventas por Categoría</h4>
+                        <p style="color:var(--text-muted);margin-top:1rem;">Sin datos disponibles</p>
+                    </div>
+                    <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:1.5rem;">
+                        <h4>📈 Pedidos (7 días)</h4>
+                        <p style="color:var(--text-muted);margin-top:1rem;">Sin datos disponibles</p>
                     </div>
                 </div>
             </div>
-            <div class="bottom">
-                © <span id="year"></span> MediTech. Todos los derechos reservados.
+
+            <!-- Tab: Configuración -->
+            <div class="admin-section" id="tab-configuracion">
+                <h3 class="mb-2">⚙️ Configuración</h3>
+                <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem;">
+                    <h4 class="mb-1">🔑 Token de GitHub</h4>
+                    <div class="form-group"><label>Token actual</label><input type="password" value="ghp_****" disabled></div>
+                    <div class="form-group"><label>Nuevo token</label><input type="password" id="nuevoToken" placeholder="ghp_..."></div>
+                    <div class="flex gap-1">
+                        <button class="btn primario small">Actualizar</button>
+                        <button class="btn secundario small">Probar</button>
+                    </div>
+                </div>
+                <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:1.5rem;">
+                    <h4 class="mb-1">💾 Backup</h4>
+                    <div class="flex gap-1">
+                        <button class="btn primario small">📤 Exportar</button>
+                        <button class="btn secundario small">📥 Importar</button>
+                        <button class="btn danger small">🔄 Recargar</button>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ===== ASISTENTE ===== -->
+    <button class="asistente-btn" id="asistenteBtn" onclick="toggleAsistente()" aria-label="Asistente MediTech">🤖</button>
+    <div class="asistente-panel" id="asistentePanel">
+        <div class="asistente-header">
+            <h4>🤖 Asistente MediTech</h4>
+            <button class="modal-close" onclick="toggleAsistente()" aria-label="Cerrar asistente" style="position:static;width:28px;height:28px;font-size:1rem;">✕</button>
+        </div>
+        <div class="asistente-messages" id="asistenteMessages">
+            <div class="asistente-msg bot">
+                ¡Hola! 👋 Soy el asistente de MediTech. Pregúntame sobre:<br><br>
+                💊 Medicamentos y sus usos<br>
+                💻 Piezas de PC y componentes<br>
+                🛒 Información de productos
+            </div>
+        </div>
+        <div class="asistente-input">
+            <input type="text" id="asistenteInput" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter')enviarMensajeAsistente()">
+            <button onclick="enviarMensajeAsistente()">➤</button>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>🏥 MediTech</h4>
+                <p>Tu tienda confiable para medicamentos y hardware de última generación.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="Facebook">📘</a>
+                    <a href="#" aria-label="Twitter">🐦</a>
+                    <a href="#" aria-label="Instagram">📷</a>
+                    <a href="#" aria-label="YouTube">🎬</a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h4>Enlaces</h4>
+                <a href="#inicio">Inicio</a>
+                <a href="#productos" onclick="navegarProtegido(event, 'productos')">Productos</a>
+                <a href="#ofertas" onclick="navegarProtegido(event, 'ofertas')">Ofertas</a>
+            </div>
+            <div class="footer-col">
+                <h4>Legal</h4>
+                <a href="#">Política de Privacidad</a>
+                <a href="#">Términos y Condiciones</a>
+            </div>
+            <div class="footer-col">
+                <h4>Síguenos</h4>
+                <p>📧 contacto@mediatech.com</p>
+                <p>📱 +1 (555) 123-4567</p>
+                <p>📍 Holguín, Cuba</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            © 2025 MediTech. Todos los derechos reservados.
         </div>
     </footer>
 
-    <!-- ============================================ -->
-    <!-- MODALES -->
-    <!-- ============================================ -->
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+    // ==========================================
+    // CONFIGURACIÓN Y ESTADO
+    // ==========================================
+    const SESION_KEY = 'mediatech_sesion';
+    const USUARIOS_KEY = 'mediatech_usuarios';
+    const PRODUCTOS_KEY = 'mediatech_productos';
+    const CARRITO_KEY = 'mediatech_carrito';
 
-    <!-- LOGIN -->
-    <div id="login-modal" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h2><i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión</h2>
-                <button class="close" onclick="closeLoginModal()"><i class="fas fa-times"></i></button>
-            </div>
-            <form id="login-form" onsubmit="handleLogin(event)" class="modal-body">
-                <div class="form-group">
-                    <label>Usuario</label>
-                    <input type="text" id="login-username" required placeholder="Ingresa tu usuario">
-                </div>
-                <div class="form-group">
-                    <label>Contraseña</label>
-                    <input type="password" id="login-password" required placeholder="Ingresa tu contraseña">
-                </div>
-                <button type="submit" class="btn-primary w-full">Iniciar Sesión</button>
-                <p class="text-center text-sm text-gray-600 mt-4">
-                    ¿No tienes cuenta?
-                    <button type="button" onclick="closeLoginModal(); openRegisterModal();" class="text-teal-600 font-semibold hover:underline">Regístrate aquí</button>
-                </p>
-            </form>
-        </div>
-    </div>
+    let productos = [];
+    let carrito = [];
+    let filtroActual = 'todos';
+    let ordenActual = '';
 
-    <!-- REGISTRO -->
-    <div id="register-modal" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-header">
-                <h2><i class="fas fa-user-plus mr-2"></i>Registrarse</h2>
-                <button class="close" onclick="closeRegisterModal()"><i class="fas fa-times"></i></button>
-            </div>
-            <form id="register-form" onsubmit="handleRegister(event)" class="modal-body">
-                <div class="form-group">
-                    <label>Nombre Completo</label>
-                    <input type="text" id="register-name" required placeholder="Tu nombre completo">
-                </div>
-                <div class="form-group">
-                    <label>Usuario</label>
-                    <input type="text" id="register-username" required placeholder="Elige un nombre de usuario">
-                </div>
-                <div class="form-group">
-                    <label>Correo</label>
-                    <input type="email" id="register-email" required placeholder="tu@email.com">
-                </div>
-                <div class="form-group">
-                    <label>Contraseña</label>
-                    <input type="password" id="register-password" required minlength="6" placeholder="Mínimo 6 caracteres">
-                </div>
-                <button type="submit" class="btn-primary w-full">Crear Cuenta</button>
-                <p class="text-center text-sm text-gray-600 mt-4">
-                    ¿Ya tienes cuenta?
-                    <button type="button" onclick="closeRegisterModal(); openLoginModal();" class="text-teal-600 font-semibold hover:underline">Inicia sesión</button>
-                </p>
-            </form>
-        </div>
-    </div>
+    // Productos de ejemplo
+    const PRODUCTOS_DEFAULT = [
+        { id: 1, nombre: 'Paracetamol 500mg', categoria: 'medicamento', precio: 5.99, stock: 150, estado: 'disponible', destacado: true, imagen: '', descripcion: 'Analgésico y antipirético' },
+        { id: 2, nombre: 'Ibuprofeno 400mg', categoria: 'medicamento', precio: 7.50, stock: 80, estado: 'disponible', destacado: false, imagen: '', descripcion: 'Antiinflamatorio no esteroideo' },
+        { id: 3, nombre: 'RTX 4070 Super', categoria: 'tecnologia', precio: 599.99, stock: 12, estado: 'disponible', destacado: true, imagen: '', descripcion: 'GPU NVIDIA última generación' },
+        { id: 4, nombre: 'AMD Ryzen 7 7800X3D', categoria: 'tecnologia', precio: 449.00, stock: 8, estado: 'disponible', destacado: true, imagen: '', descripcion: 'Procesador gaming con 3D V-Cache' },
+        { id: 5, nombre: 'Tensiómetro Digital', categoria: 'salud', precio: 35.00, stock: 25, estado: 'disponible', destacado: false, imagen: '', descripcion: 'Monitor de presión arterial automático' },
+        { id: 6, nombre: 'Teclado Mecánico RGB', categoria: 'gaming', precio: 89.99, stock: 30, estado: 'disponible', destacado: true, imagen: '', descripcion: 'Switches Cherry MX, retroiluminación RGB' },
+        { id: 7, nombre: 'Oxímetro de Pulso', categoria: 'salud', precio: 22.50, stock: 40, estado: 'disponible', destacado: false, imagen: '', descripcion: 'Medición SpO2 y frecuencia cardíaca' },
+        { id: 8, nombre: 'SSD NVMe 2TB', categoria: 'tecnologia', precio: 159.99, stock: 15, estado: 'disponible', destacado: false, imagen: '', descripcion: 'Almacenamiento ultrarrápido PCIe 4.0' },
+        { id: 9, nombre: 'Amoxicilina 500mg', categoria: 'medicamento', precio: 12.00, stock: 0, estado: 'agotado', destacado: false, imagen: '', descripcion: 'Antibiótico de amplio espectro' },
+        { id: 10, nombre: 'Mouse Gaming 16000 DPI', categoria: 'gaming', precio: 49.99, stock: 22, estado: 'disponible', destacado: false, imagen: '', descripcion: 'Sensor óptico de alta precisión' },
+        { id: 11, nombre: 'Vitamina C 1000mg', categoria: 'medicamento', precio: 8.99, stock: 60, estado: 'disponible', destacado: true, imagen: '', descripcion: 'Suplemento antioxidante' },
+        { id: 12, nombre: 'Monitor 27" 165Hz', categoria: 'gaming', precio: 329.00, stock: 5, estado: 'disponible', destacado: true, imagen: '', descripcion: 'IPS QHD, 1ms, FreeSync Premium' },
+    ];
 
-    <!-- CARRITO -->
-    <div id="cart-modal" class="modal-overlay">
-        <div class="modal" style="max-width:700px;">
-            <div class="modal-header">
-                <h2><i class="fas fa-shopping-cart mr-2"></i>Tu Carrito</h2>
-                <button class="close" onclick="closeCart()"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body" id="cart-items">
-                <div class="text-center py-12">
-                    <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4 block"></i>
-                    <p class="text-gray-400 text-lg">Tu carrito está vacío</p>
-                </div>
-            </div>
-            <div class="border-t border-gray-200 p-6 bg-gray-50">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-xl font-semibold">Total:</span>
-                    <span id="cart-total" class="text-3xl font-bold gradient-text">$0.00</span>
-                </div>
-                <button onclick="enviarPedidoPorCorreo()" class="btn-primary w-full text-lg">
-                    <i class="fas fa-envelope mr-2"></i>Solicitar Pedido por Correo
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- QUICK VIEW -->
-    <div id="quick-view" class="quick-view-overlay" onclick="if(event.target===this) closeQuickView()">
-        <div class="modal" style="max-width:700px;">
-            <div id="quick-view-content"></div>
-        </div>
-    </div>
-
-    <!-- ============================================ -->
-    <!-- ADMIN PANEL -->
-    <!-- ============================================ -->
-    <div id="admin-panel" class="admin-panel-overlay">
-        <div class="admin-panel">
-            <div class="admin-header">
-                <div class="content">
-                    <h2><i class="fas fa-cog"></i> Panel de Administración</h2>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <div class="status"><span class="dot"></span> Online</div>
-                        <div id="admin-notifications" class="flex items-center gap-2">
-                            <span>🔔</span>
-                            <span id="notif-text" class="text-xs text-white/80">Cargando...</span>
-                        </div>
-                        <button onclick="closeAdminPanel()" class="close-btn"><i class="fas fa-times"></i> Cerrar</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="admin-dashboard" id="admin-dashboard">
-                <div class="metric-card"><div class="label">Ventas Hoy</div><div class="value" id="dashboard-ventas-hoy">$0</div></div>
-                <div class="metric-card" style="border-left-color:#3b82f6;"><div class="label">Pedidos</div><div class="value" id="dashboard-pedidos-pendientes">0</div></div>
-                <div class="metric-card" style="border-left-color:#f59e0b;"><div class="label">Stock Crítico</div><div class="value" id="dashboard-stock-critico">0</div></div>
-                <div class="metric-card" style="border-left-color:#ef4444;"><div class="label">Clientes Nuevos</div><div class="value" id="dashboard-clientes-nuevos">0</div></div>
-            </div>
-
-            <div class="admin-tabs">
-                <button onclick="showAdminTab('productos')" class="admin-tab active" data-tab="productos"><i class="fas fa-box"></i>Productos</button>
-                <button onclick="showAdminTab('carrusel')" class="admin-tab" data-tab="carrusel"><i class="fas fa-images"></i>Carrusel</button>
-                <button onclick="showAdminTab('textos')" class="admin-tab" data-tab="textos"><i class="fas fa-font"></i>Textos</button>
-                <button onclick="showAdminTab('usuarios')" class="admin-tab" data-tab="usuarios"><i class="fas fa-users"></i>Usuarios</button>
-                <button onclick="showAdminTab('pedidos')" class="admin-tab" data-tab="pedidos"><i class="fas fa-receipt"></i>Pedidos</button>
-                <button onclick="showAdminTab('estadisticas')" class="admin-tab" data-tab="estadisticas"><i class="fas fa-chart-line"></i>Estadísticas</button>
-                <button onclick="showAdminTab('config')" class="admin-tab" data-tab="config"><i class="fas fa-key"></i>Configuración</button>
-            </div>
-
-            <div class="admin-content">
-                <!-- Productos -->
-                <div id="tab-productos" class="tab-content active">
-                    <div class="admin-card">
-                        <div class="header">
-                            <h3><i class="fas fa-plus-circle text-teal-600"></i> Agregar/Editar Producto</h3>
-                        </div>
-                        <form id="product-form" class="admin-form" onsubmit="saveProduct(event)">
-                            <input type="hidden" id="edit-product-id" value="">
-                            <div class="form-group">
-                                <label>Nombre</label>
-                                <input type="text" id="prod-name" required>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Categoría</label>
-                                    <select id="prod-category">
-                                        <option value="medicamento">💊 Medicamento</option>
-                                        <option value="tecnologia">💻 Tecnología</option>
-                                        <option value="salud">🩺 Salud</option>
-                                        <option value="gaming">🎮 Gaming</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Precio</label>
-                                    <input type="number" id="prod-price" required step="0.01">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Stock</label>
-                                    <input type="number" id="prod-stock" required min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label>Estado</label>
-                                    <select id="prod-available">
-                                        <option value="true">✅ Disponible</option>
-                                        <option value="false">❌ Agotado</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Descripción</label>
-                                <textarea id="prod-desc" required rows="3"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>Imagen (URL)</label>
-                                <input type="url" id="prod-image-url" placeholder="https://...">
-                            </div>
-                            <div class="form-group">
-                                <label><input type="checkbox" id="prod-feat"> Producto destacado</label>
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Guardar</button>
-                                <button type="button" onclick="resetProductForm()" class="btn-secondary">Cancelar</button>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="admin-card">
-                        <div class="header">
-                            <h3><i class="fas fa-boxes text-teal-600"></i> Inventario <span class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-sm font-semibold" id="admin-count">0</span></h3>
-                        </div>
-                        <div id="admin-list"></div>
-                    </div>
-                </div>
-
-                <!-- Carrusel -->
-                <div id="tab-carrusel" class="tab-content">
-                    <div class="admin-card">
-                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-images text-purple-600"></i> Editar Carrusel</h3>
-                        <div id="carousel-editor"></div>
-                        <div class="flex gap-3 mt-4">
-                            <button onclick="addCarouselSlide()" class="btn-primary"><i class="fas fa-plus"></i> Agregar Slide</button>
-                            <button onclick="saveCarousel()" class="btn-primary"><i class="fas fa-save"></i> Guardar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Textos -->
-                <div id="tab-textos" class="tab-content">
-                    <div class="admin-card">
-                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-font text-blue-600"></i> Editar Textos</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="form-group"><label>Subtítulo del Header</label><input type="text" id="edit-header-subtitle" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
-                            <div class="form-group"><label>Título de Categorías</label><input type="text" id="edit-categorias-title" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
-                            <div class="form-group"><label>Subtítulo de Categorías</label><input type="text" id="edit-categorias-subtitle" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
-                            <div class="form-group"><label>Título de Productos</label><input type="text" id="edit-productos-title" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
-                            <div class="form-group"><label>Subtítulo de Productos</label><input type="text" id="edit-productos-subtitle" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
-                            <div class="form-group"><label>Título de Ofertas</label><input type="text" id="edit-ofertas-title" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
-                            <div class="form-group"><label>Subtítulo de Ofertas</label><input type="text" id="edit-ofertas-subtitle" class="border-2 border-gray-300 rounded-lg p-3 w-full"></div>
-                            <div class="form-group"><label>Descripción del Footer</label><textarea id="edit-footer-description" rows="3" class="border-2 border-gray-300 rounded-lg p-3 w-full"></textarea></div>
-                        </div>
-                        <button onclick="saveTexts()" class="btn-primary mt-4"><i class="fas fa-save"></i> Guardar Textos</button>
-                    </div>
-                </div>
-
-                <!-- Usuarios -->
-                <div id="tab-usuarios" class="tab-content">
-                    <div class="admin-card">
-                        <div class="header">
-                            <h3><i class="fas fa-users text-green-600"></i> Usuarios Registrados</h3>
-                            <div class="flex gap-2">
-                                <input type="text" id="buscar-usuario" placeholder="🔍 Buscar..." class="border-2 border-gray-300 rounded-lg px-4 py-2 text-sm" oninput="buscarUsuarios(this.value)">
-                                <button onclick="exportarClientesCSV()" class="btn-primary text-sm">📥 Exportar</button>
-                            </div>
-                        </div>
-                        <div id="users-list"></div>
-                    </div>
-                </div>
-
-                <!-- Pedidos -->
-                <div id="tab-pedidos" class="tab-content">
-                    <div class="admin-card">
-                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-receipt text-red-600"></i> Pedidos Recibidos</h3>
-                        <div id="orders-list"></div>
-                    </div>
-                </div>
-
-                <!-- Estadísticas -->
-                <div id="tab-estadisticas" class="tab-content">
-                    <div class="admin-card">
-                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-chart-line text-indigo-600"></i> Estadísticas</h3>
-                        <div class="stats-grid">
-                            <div class="stat-card"><div class="stat-value" id="stat-products">0</div><div class="stat-label">Productos</div></div>
-                            <div class="stat-card"><div class="stat-value" id="stat-users">0</div><div class="stat-label">Usuarios</div></div>
-                            <div class="stat-card"><div class="stat-value" id="stat-orders">0</div><div class="stat-label">Pedidos</div></div>
-                            <div class="stat-card"><div class="stat-value" id="stat-revenue">$0</div><div class="stat-label">Ingresos</div></div>
-                        </div>
-                        <div class="grid md:grid-cols-2 gap-6 mt-4">
-                            <div class="bg-white p-4 rounded-xl border"><h4 class="font-semibold">📊 Ventas por Categoría</h4><canvas id="ventas-categoria" height="180"></canvas></div>
-                            <div class="bg-white p-4 rounded-xl border"><h4 class="font-semibold">📈 Pedidos (7 días)</h4><canvas id="pedidos-dia" height="180"></canvas></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Configuración -->
-                <div id="tab-config" class="tab-content">
-                    <div class="admin-card">
-                        <h3 class="text-lg font-bold mb-4"><i class="fas fa-key text-amber-600"></i> Configuración</h3>
-                        <div class="token-config">
-                            <h4 class="font-bold text-lg mb-3"><i class="fas fa-key text-blue-600"></i> Token de GitHub</h4>
-                            <div class="space-y-3">
-                                <div>
-                                    <label class="block text-sm font-semibold mb-2">Token actual</label>
-                                    <div class="flex gap-2">
-                                        <input type="password" id="current-token-display" readonly class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl bg-gray-50 font-mono text-sm" value="">
-                                        <button onclick="toggleTokenVisibility()" class="px-4 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl transition"><i class="fas fa-eye"></i></button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold mb-2">Nuevo token</label>
-                                    <input type="text" id="new-token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-teal-500 outline-none font-mono text-sm">
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="updateToken()" class="btn-primary"><i class="fas fa-save"></i> Actualizar</button>
-                                    <button onclick="testToken()" class="btn-secondary"><i class="fas fa-vial"></i> Probar</button>
-                                </div>
-                                <div id="token-status" class="token-status" style="display:none;"></div>
-                            </div>
-                        </div>
-                        <div class="mt-6">
-                            <h4 class="font-bold text-lg mb-3"><i class="fas fa-database text-amber-600"></i> Backup</h4>
-                            <div class="flex gap-2 flex-wrap">
-                                <button onclick="exportAllData()" class="btn-primary"><i class="fas fa-download"></i> Exportar</button>
-                                <label class="btn-primary cursor-pointer"><i class="fas fa-upload"></i> Importar<input type="file" accept=".json" onchange="importBackup(event)" class="hidden"></label>
-                                <button onclick="forzarRecarga()" class="btn-secondary"><i class="fas fa-sync"></i> Recargar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================================ -->
-    <!-- CHATBOT -->
-    <!-- ============================================ -->
-    <div class="chatbot-container">
-        <div id="chatbot-window" class="chatbot-window">
-            <div class="chatbot-header">
-                <h3><i class="fas fa-robot"></i> Asistente MediTech</h3>
-                <button class="close" onclick="toggleChat()"><i class="fas fa-times"></i></button>
-            </div>
-            <div id="chat-messages" class="chatbot-messages">
-                <div class="message bot">
-                    <strong>¡Hola! 👋</strong><br>
-                    Soy el asistente de MediTech. Pregúntame sobre:
-                    <ul class="text-xs mt-2 space-y-1">
-                        <li>💊 Medicamentos y sus usos</li>
-                        <li>💻 Piezas de PC y componentes</li>
-                        <li>🛒 Información de productos</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="chatbot-input">
-                <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." onkeypress="if(event.key==='Enter') sendMessage()">
-                <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
-            </div>
-        </div>
-        <button onclick="toggleChat()" class="chatbot-toggle"><i class="fas fa-comment-dots"></i></button>
-    </div>
-
-    <!-- ============================================ -->
-    <!-- SCRIPTS -->
-    <!-- ============================================ -->
-    <script src="static/js/api.js"></script>
-    <script src="static/js/token.js"></script>
-    <script src="static/js/auth.js"></script>
-    <script src="static/js/email.min.js"></script>
-    <script src="static/js/cart.js"></script>
-    <script src="static/js/chat.js"></script>
-    <script src="static/js/admin.js"></script>
-    <script src="static/js/main.js"></script>
-
-   <!-- ========== SECURITY (DESACTIVADO POR CORRUPCIÓN DE ARCHIVO) ========== -->
-   <!-- <script src="static/Kjs/capa_seguridad.js"></script> -->
-   <!-- <script src="static/Kjs/1armytage.js"></script> -->
-
-<script>
-// ============================================================
-// 🛡️ ARMYTAGE - MODO COMPATIBILIDAD
-// ============================================================
-// Desactiva todas las políticas que bloquean interacciones
-// ============================================================
-
-(function() {
-    'use strict';
-
-    console.log('🛡️ Activando modo compatibilidad para clics...');
-
-    // Función para esperar a que los agentes estén listos
-    function waitForAgents() {
-        return new Promise((resolve) => {
-            let attempts = 0;
-            const maxAttempts = 20;
-            
-            const check = () => {
-                attempts++;
-                
-                // Verificar si Valkyrie está disponible
-                const hasValkyrie = window.valkyrie || 
-                                   (window.armytage && window.armytage.valkyrie) ||
-                                   (window.armytage && window.armytage.agents && window.armytage.agents.ValkyrieAgent);
-                
-                // Verificar si AgentBus está disponible
-                const hasAgentBus = window.armytage && window.armytage.bus;
-                
-                if (hasValkyrie || hasAgentBus || attempts >= maxAttempts) {
-                    resolve();
-                } else {
-                    setTimeout(check, 300);
-                }
-            };
-            
-            check();
-        });
+    // ==========================================
+    // AUTENTICACIÓN
+    // ==========================================
+    function sesionActiva() {
+        return !!localStorage.getItem(SESION_KEY);
     }
 
-    // Función principal
-    async function fixInteractions() {
-        await waitForAgents();
-        
-        console.log('✅ Agentes detectados, aplicando configuración...');
-
-        // ============================================================
-        // 1. DESACTIVAR VALKYRIE (La Justiciera)
-        // ============================================================
-        try {
-            // Opción 1: API global de Valkyrie
-            if (window.valkyrie && window.valkyrie.politicas) {
-                window.valkyrie.politicas.aplicar({
-                    eliminarEventosInline: false,
-                    bloquearScriptsExternos: false,
-                    bloquearEval: true,
-                    bloquearInnerHTMLMalicioso: true,
-                    bloquearDocumentWrite: true
-                });
-                console.log('✅ Valkyrie configurada (vía API global)');
-            }
-            
-            // Opción 2: A través de Armytage
-            if (window.armytage && window.armytage.agents) {
-                const valkyrie = window.armytage.agents.ValkyrieAgent;
-                if (valkyrie && typeof valkyrie.aplicarPoliticas === 'function') {
-                    valkyrie.aplicarPoliticas({
-                        eliminarEventosInline: false,
-                        bloquearScriptsExternos: false
-                    });
-                    console.log('✅ Valkyrie configurada (vía Armytage)');
-                }
-            }
-        } catch (e) {
-            console.warn('⚠️ No se pudo configurar Valkyrie:', e);
-        }
-
-        // ============================================================
-        // 2. DESACTIVAR POLÍTICAS EN EL BUS DE AGENTES
-        // ============================================================
-        try {
-            if (window.armytage && window.armytage.bus) {
-                // Enviar mensaje para desactivar auto-block
-                window.armytage.bus.broadcast('SET_AUTO_BLOCK', { enabled: false });
-                window.armytage.bus.broadcast('ALLOW_INTERACTIONS', { enabled: true });
-                console.log('✅ Auto-block desactivado en AgentBus');
-            }
-        } catch (e) {
-            console.warn('⚠️ No se pudo configurar AgentBus:', e);
-        }
-
-        // ============================================================
-        // 3. DESACTIVAR POLÍTICAS DE VALKYRIE DIRECTAMENTE
-        // ============================================================
-        try {
-            // Buscar el objeto PolicyEngine si existe
-            if (window.PolicyEngine) {
-                if (typeof window.PolicyEngine.aplicarPoliticas === 'function') {
-                    window.PolicyEngine.aplicarPoliticas({
-                        eliminarEventosInline: false,
-                        bloquearScriptsExternos: false
-                    });
-                    console.log('✅ PolicyEngine configurado');
-                }
-            }
-            
-            // Buscar en el contexto de Valkyrie
-            if (window.valkyrie) {
-                // Si tiene método para desactivar
-                if (typeof window.valkyrie.desactivarEventos === 'function') {
-                    window.valkyrie.desactivarEventos();
-                }
-                // Si tiene propiedad para permitir
-                if (window.valkyrie.permitirInteracciones !== undefined) {
-                    window.valkyrie.permitirInteracciones = true;
-                }
-            }
-        } catch (e) {
-            console.warn('⚠️ No se pudo configurar PolicyEngine:', e);
-        }
-
-        // ============================================================
-        // 4. RESTAURAR EVENTOS EXISTENTES
-        // ============================================================
-        try {
-            // Restaurar atributos onclick que fueron eliminados
-            document.querySelectorAll('[data-valkyrie-blocked]').forEach(el => {
-                el.style.display = '';
-                el.style.pointerEvents = '';
-                el.removeAttribute('data-valkyrie-blocked');
-            });
-            
-            // Restaurar elementos ocultos
-            document.querySelectorAll('[style*="display: none"]').forEach(el => {
-                if (el.hasAttribute('data-valkyrie-blocked')) {
-                    el.style.display = '';
-                    el.removeAttribute('data-valkyrie-blocked');
-                }
-            });
-        } catch (e) {
-            console.warn('⚠️ No se pudieron restaurar elementos:', e);
-        }
-
-        // ============================================================
-        // 5. DESACTIVAR PHANTOM (si está bloqueando)
-        // ============================================================
-        try {
-            if (window.Phantom) {
-                // Si Phantom tiene método para desactivar
-                if (typeof window.Phantom.desactivar === 'function') {
-                    window.Phantom.desactivar();
-                }
-                // Si Phantom tiene propiedad de protección
-                if (window.Phantom.protecciones) {
-                    window.Phantom.protecciones = {};
-                }
-                console.log('✅ Phantom configurado');
-            }
-        } catch (e) {
-            console.warn('⚠️ No se pudo configurar Phantom:', e);
-        }
-
-        // ============================================================
-        // 6. DESACTIVAR SECURITY (si está bloqueando)
-        // ============================================================
-        try {
-            if (window.SecurityAgent) {
-                if (typeof window.SecurityAgent.desactivar === 'function') {
-                    window.SecurityAgent.desactivar();
-                }
-            }
-            
-            // A través de Armytage
-            if (window.armytage && window.armytage.agents) {
-                const security = window.armytage.agents.SecurityAgent;
-                if (security && security.protecciones) {
-                    security.protecciones.teclas = false;
-                }
-            }
-        } catch (e) {
-            console.warn('⚠️ No se pudo configurar Security:', e);
-        }
-
-        // ============================================================
-        // 7. AGREGAR ELEMENTOS PERMITIDOS (para que no sean bloqueados)
-        // ============================================================
-        const elementosPermitidos = [
-            'cart', 'carrito', 'shopping-cart',
-            'admin', 'menu', 'dropdown', 'toggle',
-            'button', 'btn', 'link', 'a',
-            'modal', 'popup', 'dialog',
-            'checkout', 'pagar', 'comprar'
-        ];
-
-        try {
-            if (window.valkyrie && window.valkyrie.agregarElementoPermitido) {
-                elementosPermitidos.forEach(id => {
-                    window.valkyrie.agregarElementoPermitido(id);
-                });
-                console.log('✅ Elementos permitidos agregados a Valkyrie');
-            }
-            
-            // A través de Armytage
-            if (window.armytage && window.armytage.bus) {
-                window.armytage.bus.broadcast('ADD_ALLOWED_ELEMENTS', { 
-                    elements: elementosPermitidos 
-                });
-            }
-        } catch (e) {
-            console.warn('⚠️ No se pudieron agregar elementos permitidos:', e);
-        }
-
-        // ============================================================
-        // 8. RE-ASIGNAR EVENTOS (si fueron eliminados)
-        // ============================================================
-        // Forzar re-ejecución de eventos que pudieron ser eliminados
-        document.querySelectorAll('[onclick], [onerror], [onload]').forEach(el => {
-            // Guardar atributos originales
-            const attrs = ['onclick', 'onerror', 'onload', 'onmouseover', 'onfocus'];
-            attrs.forEach(attr => {
-                if (el.hasAttribute(attr)) {
-                    const value = el.getAttribute(attr);
-                    if (value && !el._restored) {
-                        // Re-asignar el evento
-                        el.removeAttribute(attr);
-                        el.setAttribute(attr, value);
-                    }
-                }
-            });
-            el._restored = true;
-        });
-
-        // ============================================================
-        // 9. MENSAJE DE CONFIRMACIÓN
-        // ============================================================
-        console.log('✅ MODO COMPATIBILIDAD ACTIVADO');
-        console.log('📋 Los clics y eventos deberían funcionar correctamente');
-        console.log('🛡️ Seguridad activa pero sin bloquear interacciones');
-
-        // Mostrar toast si está disponible
-        try {
-            if (window.ToastSystem && window.ToastSystem.success) {
-                window.ToastSystem.success('🛡️ Modo compatibilidad activado - Clics permitidos');
-            } else if (window.showToast) {
-                window.showToast('🛡️ Modo compatibilidad activado', 'success', 3000);
-            }
-        } catch (e) {}
-        console.log('✅ Configuración completada');
+    function getSesion() {
+        try { return JSON.parse(localStorage.getItem(SESION_KEY) || 'null'); }
+        catch { return null; }
     }
 
-    // ============================================================
-    // EJECUTAR
-    // ============================================================
-    
-    // Ejecutar inmediatamente si ya está cargado
-    if (document.readyState === 'complete') {
-        fixInteractions();
-    } else {
-        // Esperar a que todo esté cargado
-        window.addEventListener('load', () => {
-            setTimeout(fixInteractions, 1000);
-        });
+    function getUsuarios() {
+        try { return JSON.parse(localStorage.getItem(USUARIOS_KEY) || '[]'); }
+        catch { return []; }
     }
 
-    // También ejecutar después de 3 segundos por si acaso
-    setTimeout(fixInteractions, 3000);
+    function guardarUsuarios(usuarios) {
+        localStorage.setItem(USUARIOS_KEY, JSON.stringify(usuarios));
+    }
 
-    // Ejecutar después de 5 segundos (último intento)
-    setTimeout(fixInteractions, 5000);
+    function aplicarAuth() {
+        const activo = sesionActiva();
+        const sesion = getSesion();
 
-    // ============================================================
-    // EXPONER FUNCIÓN PARA USO MANUAL
-    // ============================================================
-    window.armytageCompat = fixInteractions;
-    
-    console.log('🛡️ Script de compatibilidad cargado');
-    console.log('📋 Si los clics no funcionan, ejecuta: armytageCompat()');
+        document.body.classList.toggle('auth', activo);
+        document.body.classList.toggle('no-auth', !activo);
 
-})();
-</script>
+        // Botones header
+        const btnLogin = document.getElementById('btnLogin');
+        const menuUsuario = document.getElementById('menuUsuario');
+        if (btnLogin) btnLogin.classList.toggle('hidden', activo);
+        if (menuUsuario) menuUsuario.classList.toggle('hidden', !activo);
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const yearEl = document.getElementById('year');
-        if (yearEl) yearEl.textContent = new Date().getFullYear();
+        // Info usuario
+        if (sesion) {
+            const avatar = document.getElementById('avatarUsuario');
+            const nombreH = document.getElementById('nombreHeader');
+            const saludo = document.getElementById('saludoUsuario');
+            const emailH = document.getElementById('emailHeader');
+            if (avatar) avatar.textContent = (sesion.nombre || 'U')[0].toUpperCase();
+            if (nombreH) nombreH.textContent = sesion.nombre || 'Usuario';
+            if (saludo) saludo.textContent = 'Conectado como ' + (sesion.nombre || '');
+            if (emailH) emailH.textContent = sesion.correo || sesion.usuario || '';
+        }
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-overlay.active, .admin-panel-overlay.active, .quick-view-overlay.active')
-                    .forEach(el => el.classList.remove('active'));
-                const userMenu = document.getElementById('user-menu');
-                if (userMenu) userMenu.classList.remove('open');
-            }
+        // Admin solo para admins
+        const esAdmin = sesion && sesion.rol === 'admin';
+        document.querySelectorAll('[data-solo-admin]').forEach(el => {
+            el.classList.toggle('hidden', !esAdmin);
         });
 
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#user-section')) {
-                const userMenu = document.getElementById('user-menu');
-                if (userMenu) userMenu.classList.remove('open');
+        // Carrito
+        actualizarCarritoUI();
+
+        // Cargar productos si hay sesión
+        if (activo) {
+            cargarProductos();
+        }
+    }
+
+    function procesarLogin(e) {
+        e.preventDefault();
+        let valido = true;
+
+        const usuario = document.getElementById('loginUsuario').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        // Reset errors
+        document.getElementById('loginUsuarioGroup').classList.remove('error');
+        document.getElementById('loginPasswordGroup').classList.remove('error');
+
+        if (!usuario) {
+            document.getElementById('loginUsuarioGroup').classList.add('error');
+            valido = false;
+        }
+        if (!password) {
+            document.getElementById('loginPasswordGroup').classList.add('error');
+            valido = false;
+        }
+        if (!valido) return false;
+
+        // Buscar usuario
+        const usuarios = getUsuarios();
+        const encontrado = usuarios.find(u => u.usuario === usuario && u.password === password);
+
+        if (!encontrado) {
+            // Permitir login con admin/admin por defecto
+            if (usuario === 'admin' && password === 'admin') {
+                iniciarSesion({ nombre: 'Administrador', usuario: 'admin', correo: 'admin@mediatech.com', rol: 'admin' });
+            } else {
+                mostrarToast('❌ Usuario o contraseña incorrectos', 'error');
             }
-            if (!e.target.closest('.search-container')) {
-                const searchResults = document.getElementById('search-results');
-                if (searchResults) searchResults.classList.remove('active');
-            }
+            return false;
+        }
+
+        iniciarSesion(encontrado);
+        return false;
+    }
+
+    function procesarRegistro(e) {
+        e.preventDefault();
+        let valido = true;
+
+        const nombre = document.getElementById('regNombre').value.trim();
+        const usuario = document.getElementById('regUsuario').value.trim();
+        const correo = document.getElementById('regCorreo').value.trim();
+        const password = document.getElementById('regPassword').value;
+        const password2 = document.getElementById('regPassword2').value;
+
+        // Reset errors
+        ['regNombreGroup','regUsuarioGroup','regCorreoGroup','regPasswordGroup','regPassword2Group'].forEach(id => {
+            document.getElementById(id).classList.remove('error');
         });
-        console.log('✅ MediTech listo');
+
+        if (nombre.length < 2) { document.getElementById('regNombreGroup').classList.add('error'); valido = false; }
+        if (usuario.length < 3) { document.getElementById('regUsuarioGroup').classList.add('error'); valido = false; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) { document.getElementById('regCorreoGroup').classList.add('error'); valido = false; }
+        if (password.length < 6) { document.getElementById('regPasswordGroup').classList.add('error'); valido = false; }
+        if (password !== password2) { document.getElementById('regPassword2Group').classList.add('error'); valido = false; }
+
+        if (!valido) return false;
+
+        // Verificar si ya existe
+        const usuarios = getUsuarios();
+        if (usuarios.find(u => u.usuario === usuario)) {
+            mostrarToast('⚠️ Ese nombre de usuario ya existe', 'error');
+            return false;
+        }
+        if (usuarios.find(u => u.correo === correo)) {
+            mostrarToast('⚠️ Ese correo ya está registrado', 'error');
+            return false;
+        }
+
+        const nuevoUsuario = {
+            id: Date.now(),
+            nombre, usuario, correo, password,
+            rol: 'cliente',
+            creado: new Date().toISOString()
+        };
+
+        usuarios.push(nuevoUsuario);
+        guardarUsuarios(usuarios);
+
+        mostrarToast('✅ ¡Cuenta creada! Iniciando sesión...', 'success');
+        setTimeout(() => iniciarSesion(nuevoUsuario), 500);
+        return false;
+    }
+
+    function iniciarSesion(usuario) {
+        localStorage.setItem(SESION_KEY, JSON.stringify({
+            nombre: usuario.nombre,
+            usuario: usuario.usuario,
+            correo: usuario.correo,
+            rol: usuario.rol || 'cliente'
+        }));
+        aplicarAuth();
+        cerrarModales();
+        mostrarToast('👋 ¡Bienvenido, ' + usuario.nombre + '!', 'success');
+
+        // Redirigir a destino bloqueado si existe
+        const destino = sessionStorage.getItem('destinoBloqueado');
+        if (destino) {
+            sessionStorage.removeItem('destinoBloqueado');
+            setTimeout(() => { location.hash = destino; }, 300);
+        }
+    }
+
+    function cerrarSesion() {
+        localStorage.removeItem(SESION_KEY);
+        aplicarAuth();
+        cerrarMenuUsuario();
+        location.hash = '#inicio';
+        mostrarToast('👋 Sesión cerrada', 'info');
+    }
+
+    // ==========================================
+    // NAVEGACIÓN PROTEGIDA
+    // ==========================================
+    function navegarProtegido(e, seccion) {
+        if (!sesionActiva()) {
+            e.preventDefault();
+            sessionStorage.setItem('destinoBloqueado', '#' + seccion);
+            abrirModal('modalLogin');
+            mostrarToast('🔒 Inicia sesión para acceder a esta sección', 'info');
+        }
+    }
+
+    function navegar(seccion) {
+        location.hash = '#' + seccion;
+    }
+
+    // ==========================================
+    // PRODUCTOS
+    // ==========================================
+    function cargarProductos() {
+        const guardados = localStorage.getItem(PRODUCTOS_KEY);
+        productos = guardados ? JSON.parse(guardados) : [...PRODUCTOS_DEFAULT];
+        renderizarProductos();
+        renderizarOfertas();
+    }
+
+    function renderizarProductos() {
+        const grid = document.getElementById('productosGrid');
+        if (!grid) return;
+
+        let filtrados = filtroActual === 'todos'
+            ? [...productos]
+            : productos.filter(p => p.categoria === filtroActual);
+
+        // Ordenar
+        if (ordenActual === 'precio-asc') filtrados.sort((a,b) => a.precio - b.precio);
+        else if (ordenActual === 'precio-desc') filtrados.sort((a,b) => b.precio - a.precio);
+        else if (ordenActual === 'nombre') filtrados.sort((a,b) => a.nombre.localeCompare(b.nombre));
+
+        if (filtrados.length === 0) {
+            grid.innerHTML = '<p class="text-center" style="grid-column:1/-1;padding:2rem;color:var(--text-muted);">No se encontraron productos</p>';
+            return;
+        }
+
+        const iconosCat = { medicamento: '💊', tecnologia: '💻', salud: '🩺', gaming: '🎮' };
+
+        grid.innerHTML = filtrados.map(p => `
+            <div class="producto-card">
+                <div class="img-container">
+                    ${p.imagen ? `<img src="${p.imagen}" alt="${p.nombre}">` : `<span style="font-size:4rem;">${iconosCat[p.categoria] || '📦'}</span>`}
+                    ${p.estado === 'agotado' ? '<span class="badge-oferta" style="background:var(--dark-4);">Agotado</span>' : ''}
+                </div>
+                <div class="info">
+                    <span class="categoria-tag">${iconosCat[p.categoria] || ''} ${p.categoria}</span>
+                    <h3>${p.nombre}</h3>
+                    <p style="font-size:0.85rem;color:var(--text-muted);margin:0.3rem 0;">${p.descripcion || ''}</p>
+                    <div class="precio">$${p.precio.toFixed(2)}</div>
+                    <div class="acciones">
+                        <button class="btn primario small" onclick="agregarAlCarrito(${p.id})" ${p.estado === 'agotado' ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+                            🛒 ${p.estado === 'agotado' ? 'Agotado' : 'Agregar'}
+                        </button>
+                        <button class="btn secundario small" onclick="verDetalle(${p.id})">👁️ Ver</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderizarOfertas() {
+        const grid = document.getElementById('ofertasGrid');
+        if (!grid) return;
+
+        const ofertas = productos.filter(p => p.destacado && p.estado === 'disponible').slice(0, 6);
+        const descuentos = [15, 20, 25, 30, 10, 35];
+
+        grid.innerHTML = ofertas.map((p, i) => `
+            <div class="oferta-card">
+                <span class="descuento">-${descuentos[i] || 15}%</span>
+                <div class="info">
+                    <h3>${p.nombre}</h3>
+                    <p>${p.descripcion || p.categoria}</p>
+                    <strong style="color:var(--primary);">$${(p.precio * (1 - (descuentos[i]||15)/100)).toFixed(2)}</strong>
+                    <span style="text-decoration:line-through;color:var(--text-muted);margin-left:0.5rem;font-size:0.85rem;">$${p.precio.toFixed(2)}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filtrarProductos(categoria, btn) {
+        filtroActual = categoria;
+        document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        renderizarProductos();
+    }
+
+    function filtrarPorCategoria(categoria) {
+        filtroActual = categoria;
+        document.querySelectorAll('.filtro-btn').forEach(b => {
+            b.classList.toggle('active', b.textContent.toLowerCase().includes(categoria) || (categoria === 'todos' && b.textContent === 'Todas'));
+        });
+        renderizarProductos();
+        document.getElementById('productos').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function ordenarProductos(valor) {
+        ordenActual = valor;
+        renderizarProductos();
+    }
+
+    function verDetalle(id) {
+        const p = productos.find(x => x.id === id);
+        if (p) mostrarToast(`📦 ${p.nombre} — $${p.precio.toFixed(2)} — Stock: ${p.stock}`, 'info');
+    }
+
+    // ==========================================
+    // CARRITO
+    // ==========================================
+    function cargarCarrito() {
+        try { carrito = JSON.parse(localStorage.getItem(CARRITO_KEY) || '[]'); }
+        catch { carrito = []; }
+    }
+
+    function guardarCarrito() {
+        localStorage.setItem(CARRITO_KEY, JSON.stringify(carrito));
+    }
+
+    function agregarAlCarrito(id) {
+        if (!sesionActiva()) {
+            abrirModal('modalLogin');
+            mostrarToast('🔒 Inicia sesión para agregar al carrito', 'info');
+            return;
+        }
+        const producto = productos.find(p => p.id === id);
+        if (!producto || producto.estado === 'agotado') return;
+
+        const existente = carrito.find(c => c.id === id);
+        if (existente) {
+            existente.cantidad++;
+        } else {
+            carrito.push({ ...producto, cantidad: 1 });
+        }
+        guardarCarrito();
+        actualizarCarritoUI();
+        mostrarToast(`✅ ${producto.nombre} agregado al carrito`, 'success');
+    }
+
+    function removeFromCarrito(id) {
+        carrito = carrito.filter(c => c.id !== id);
+        guardarCarrito();
+        actualizarCarritoUI();
+    }
+
+    function actualizarCarritoUI() {
+        const badge = document.getElementById('carritoBadge');
+        const items = document.getElementById('carritoItems');
+        const total = document.getElementById('carritoTotal');
+        const btnPedido = document.getElementById('btnPedidoCorreo');
+        const loginMsg = document.getElementById('carritoLoginMsg');
+
+        const count = carrito.reduce((sum, c) => sum + c.cantidad, 0);
+        if (badge) badge.textContent = count;
+
+        if (!items) return;
+
+        if (carrito.length === 0) {
+            items.innerHTML = '<div class="carrito-vacio"><div class="icon">🛒</div><p>Tu carrito está vacío</p></div>';
+        } else {
+            items.innerHTML = carrito.map(c => `
+                <div class="carrito-item">
+                    <div class="info">
+                        <h4>${c.nombre}</h4>
+                        <span class="precio">$${c.precio.toFixed(2)} x ${c.cantidad}</span>
+                    </div>
+                    <button class="remove-btn" onclick="removeFromCarrito(${c.id})" aria-label="Eliminar">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        const totalAmount = carrito.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
+        if (total) total.textContent = '$' + totalAmount.toFixed(2);
+
+        // Mostrar/ocultar botón de pedido según sesión
+        if (btnPedido) btnPedido.classList.toggle('hidden', !sesionActiva() || carrito.length === 0);
+        if (loginMsg) loginMsg.classList.toggle('hidden', sesionActiva());
+    }
+
+    function toggleCarrito() {
+        document.getElementById('carritoPanel').classList.toggle('open');
+    }
+
+    function cerrarCarritoYSesion() {
+        document.getElementById('carritoPanel').classList.remove('open');
+    }
+
+    function solicitarPedido() {
+        if (!sesionActiva()) {
+            abrirModal('modalLogin');
+            return;
+        }
+        if (carrito.length === 0) return;
+
+        const sesion = getSesion();
+        const total = carrito.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
+        const lista = carrito.map(c => `• ${c.nombre} x${c.cantidad} — $${(c.precio * c.cantidad).toFixed(2)}`).join('%0D%0A');
+        const asunto = encodeURIComponent('Pedido MediTech - ' + (sesion.nombre || sesion.usuario));
+        const cuerpo = encodeURIComponent(`Hola, quiero realizar el siguiente pedido:\n\n${carrito.map(c => `• ${c.nombre} x${c.cantidad} — $${(c.precio * c.cantidad).toFixed(2)}`).join('\n')}\n\nTotal: $${total.toFixed(2)}\n\nUsuario: ${sesion.usuario}\nCorreo: ${sesion.correo || 'N/A'}`);
+
+        window.open(`mailto:pedidos@mediatech.com?subject=${asunto}&body=${cuerpo}`, '_blank');
+        mostrarToast('📧 Pedido enviado por correo', 'success');
+    }
+
+    // ==========================================
+    // MODALES
+    // ==========================================
+    function abrirModal(id) {
+        cerrarModales();
+        const modal = document.getElementById(id);
+        if (modal) modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarModales() {
+        document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+        document.body.style.overflow = '';
+    }
+
+    // Cerrar modal con click fuera
+    document.addEventListener('click', e => {
+        if (e.target.classList.contains('modal-overlay')) cerrarModales();
     });
-</script>  
 
-<script>
-// Alternar menú de juegos (cajita sorpresa)
-function toggleGameMenu() {
-    const menu = document.getElementById('gameMenu');
-    const arrow = document.querySelector('.game-dropdown-btn .arrow');
-    menu.classList.toggle('open');
-    arrow.classList.toggle('open');
-}
+    // Cerrar modal con Escape
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            cerrarModales();
+            document.getElementById('carritoPanel')?.classList.remove('open');
+            document.getElementById('asistentePanel')?.classList.remove('open');
+            cerrarMenuUsuario();
+        }
+    });
 
-// Cerrar el menú si se hace clic fuera
-document.addEventListener('click', function(e) {
-    const dropdown = document.querySelector('.game-dropdown');
-    if (dropdown && !dropdown.contains(e.target)) {
-        const menu = document.getElementById('gameMenu');
-        const arrow = document.querySelector('.game-dropdown-btn .arrow');
-        if (menu) menu.classList.remove('open');
-        if (arrow) arrow.classList.remove('open');
+    // ==========================================
+    // MENÚ USUARIO
+    // ==========================================
+    function toggleMenuUsuario() {
+        document.getElementById('menuUsuario').classList.toggle('open');
     }
-});
-</script>
-    
+
+    function cerrarMenuUsuario() {
+        document.getElementById('menuUsuario')?.classList.remove('open');
+    }
+
+    // Cerrar menú al click fuera
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.menu-usuario')) cerrarMenuUsuario();
+    });
+
+    // ==========================================
+    // MOBILE MENU
+    // ==========================================
+    function toggleMobileMenu() {
+        document.getElementById('mainNav').classList.toggle('open');
+    }
+
+    // ==========================================
+    // PANEL ADMIN
+    // ==========================================
+    function abrirAdmin(tab) {
+        const sesion = getSesion();
+        if (!sesion || sesion.rol !== 'admin') {
+            mostrarToast('🔒 Acceso solo para administradores', 'error');
+            return;
+        }
+        document.getElementById('adminOverlay').classList.add('active');
+        document.body.style.overflow = 'hidden';
+        if (tab) cambiarTabAdmin(tab, null);
+    }
+
+    function cerrarAdmin() {
+        document.getElementById('adminOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function cambiarTabAdmin(tab, link) {
+        document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
+        const section = document.getElementById('tab-' + tab);
+        if (section) section.classList.add('active');
+        if (link) link.classList.add('active');
+
+        const titulos = {
+            ventas: '📊 Ventas Hoy', productos: '📦 Productos', carrusel: '🎠 Carrusel',
+            textos: '✏️ Textos', usuarios: '👥 Usuarios', pedidos: '📋 Pedidos',
+            estadisticas: '📈 Estadísticas', configuracion: '⚙️ Configuración'
+        };
+        document.getElementById('adminTitulo').textContent = titulos[tab] || tab;
+    }
+
+    function mostrarFormProducto() {
+        document.getElementById('formProductoContainer').classList.remove('hidden');
+    }
+
+    function ocultarFormProducto() {
+        document.getElementById('formProductoContainer').classList.add('hidden');
+    }
+
+    function guardarProducto() {
+        const nombre = document.getElementById('prodNombre').value.trim();
+        if (!nombre) { mostrarToast('⚠️ El nombre es obligatorio', 'error'); return; }
+
+        const nuevo = {
+            id: Date.now(),
+            nombre,
+            categoria: document.getElementById('prodCategoria').value,
+            precio: parseFloat(document.getElementById('prodPrecio').value) || 0,
+            stock: parseInt(document.getElementById('prodStock').value) || 0,
+            estado: document.getElementById('prodEstado').value,
+            imagen: document.getElementById('prodImagen').value.trim(),
+            descripcion: document.getElementById('prodDescripcion').value.trim(),
+            destacado: document.getElementById('prodDestacado').checked
+        };
+
+        productos.push(nuevo);
+        localStorage.setItem(PRODUCTOS_KEY, JSON.stringify(productos));
+        renderizarProductos();
+        renderizarOfertas();
+        ocultarFormProducto();
+        mostrarToast('✅ Producto agregado', 'success');
+    }
+
+    // ==========================================
+    // ASISTENTE
+    // ==========================================
+    function toggleAsistente() {
+        document.getElementById('asistentePanel').classList.toggle('open');
+    }
+
+    function enviarMensajeAsistente() {
+        const input = document.getElementById('asistenteInput');
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        const messages = document.getElementById('asistenteMessages');
+
+        // Mensaje del usuario
+        messages.innerHTML += `<div class="asistente-msg user">${msg}</div>`;
+        input.value = '';
+        messages.scrollTop = messages.scrollHeight;
+
+        // Respuesta simulada del bot
+        setTimeout(() => {
+            let respuesta = '';
+            const lower = msg.toLowerCase();
+
+            if (lower.includes('medicamento') || lower.includes('pastilla') || lower.includes('dolor')) {
+                respuesta = '💊 Tenemos varios medicamentos disponibles como Paracetamol, Ibuprofeno y Amoxicilina. ¿Necesitas información sobre alguno en particular?';
+            } else if (lower.includes('pc') || lower.includes('computadora') || lower.includes('gpu') || lower.includes('procesador')) {
+                respuesta = '💻 Contamos con componentes de PC como la RTX 4070 Super y el Ryzen 7 7800X3D. ¡Excelentes para gaming y productividad!';
+            } else if (lower.includes('precio') || lower.includes('costo') || lower.includes('cuanto')) {
+                respuesta = '🏷️ Los precios varían según el producto. Puedes ver nuestro catálogo completo en la sección de Productos. ¿Buscas algo específico?';
+            } else if (lower.includes('envío') || lower.includes('pedido') || lower.includes('comprar')) {
+                respuesta = '📧 Los pedidos se realizan por correo electrónico. Agrega productos al carrito y usa el botón "Solicitar Pedido por Correo".';
+            } else if (lower.includes('hola') || lower.includes('hi') || lower.includes('buenas')) {
+                respuesta = '¡Hola! 😊 ¿En qué puedo ayudarte hoy? Puedo informarte sobre medicamentos, tecnología o el proceso de compra.';
+            } else {
+                respuesta = '🤔 Interesante pregunta. Puedo ayudarte con información sobre medicamentos, componentes de PC, o el proceso de compra. ¿Qué te gustaría saber?';
+            }
+
+            messages.innerHTML += `<div class="asistente-msg bot">${respuesta}</div>`;
+            messages.scrollTop = messages.scrollHeight;
+        }, 800);
+    }
+
+    // ==========================================
+    // TOASTS
+    // ==========================================
+    function mostrarToast(mensaje, tipo = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + tipo;
+        toast.textContent = mensaje;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            toast.style.transition = 'all 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    }
+
+    // ==========================================
+    // INICIALIZACIÓN
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+        // Crear usuario admin por defecto si no existe
+        const usuarios = getUsuarios();
+        if (!usuarios.find(u => u.usuario === 'admin')) {
+            usuarios.push({
+                id: 1, nombre: 'Administrador', usuario: 'admin',
+                correo: 'admin@mediatech.com', password: 'admin',
+                rol: 'admin', creado: new Date().toISOString()
+            });
+            guardarUsuarios(usuarios);
+        }
+
+        cargarCarrito();
+        aplicarAuth();
+    });
+    </script>
 </body>
 </html>
