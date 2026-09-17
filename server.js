@@ -542,6 +542,41 @@ app.get('/api/config/github-token', authenticateToken, esAdmin, (req, res) => {
   res.json({ token: process.env.GITHUB_TOKEN || '' });
 });
 
+// Guardar/actualizar token de GitHub (solo admin)
+// Nota: esto solo actualiza la variable en memoria del proceso actual.
+// Para persistirlo entre reinicios, se debe setear en Render ENV.
+app.post('/api/config/github-token', authenticateToken, esAdmin, (req, res) => {
+  const { token } = req.body || {};
+  if (!token || typeof token !== 'string') {
+    return res.status(400).json({ error: 'Token inválido' });
+  }
+  process.env.GITHUB_TOKEN = token;
+  res.json({ ok: true, message: 'Token actualizado en memoria del proceso' });
+});
+
+// Test rápido del token
+app.post('/api/config/test-github-token', authenticateToken, esAdmin, async (req, res) => {
+  const { token } = req.body || {};
+  const t = token || process.env.GITHUB_TOKEN;
+  if (!t) return res.json({ valid: false, message: 'No hay token' });
+  try {
+    const r = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `token ${t}`,
+        'Accept': 'application/vnd.github+json',
+        'User-Agent': 'MediTech-Backend'
+      }
+    });
+    if (r.ok) {
+      const u = await r.json();
+      return res.json({ valid: true, message: `Conectado como ${u.login}` });
+    }
+    return res.json({ valid: false, message: `GitHub respondió ${r.status}` });
+  } catch (e) {
+    res.json({ valid: false, message: e.message });
+  }
+});
+
 // ---- TELEGRAM PROXY (solo para TU bot, ya no es relay abierto) ----
 app.post('/api/telegram-proxy', async (req, res) => {
   try {
