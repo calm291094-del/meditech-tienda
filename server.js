@@ -516,6 +516,43 @@ app.put('/api/pedidos/:id', authenticateToken, esAdmin, (req, res) => {
   res.json(pedidos[index]);
 });
 
+async function notificarTelegram(pedido) {
+  const TOKEN = process.env.TELEGRAM_TOKEN;
+  const CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
+  if (!TOKEN || !CHAT_ID) return;
+
+  const itemsTexto = pedido.items
+    .map(i => `• ${i.nombre} x${i.cantidad} — $${i.subtotal}`)
+    .join('\n');
+
+  const esc = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  const mensaje =
+    `🛒 <b>NUEVO PEDIDO</b>\n\n` +
+    `🆔 <code>${esc(pedido.id)}</code>\n` +
+    `👤 ${esc(pedido.cliente)}\n` +
+    `📧 ${esc(pedido.email)}\n` +
+    (pedido.telefono ? `📞 ${esc(pedido.telefono)}\n` : '') +
+    (pedido.direccion ? `📍 ${esc(pedido.direccion)}\n` : '') +
+    `\n<b>Productos:</b>\n${esc(itemsTexto)}\n\n` +
+    `💰 <b>Total: $${pedido.total}</b>\n` +
+    (pedido.notas ? `\n📝 ${esc(pedido.notas)}` : '');
+
+  try {
+    await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: mensaje,
+        parse_mode: 'HTML'
+      })
+    });
+  } catch (e) {
+    console.error('Error notificando Telegram:', e.message);
+  }
+}
+
 app.post('/api/enviar-pedido', async (req, res) => {
   try {
     const { email, nombre, telefono, direccion, notas, pedido } = req.body;
