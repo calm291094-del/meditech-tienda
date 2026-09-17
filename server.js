@@ -493,30 +493,128 @@ app.put('/api/pedidos/:id', authenticateToken, esAdmin, (req, res) => {
   res.json(pedidos[index]);
 });
 
-app.post('/api/enviar-pedido', (req, res) => {
+app.post('/api/enviar-pedido', async (req, res) => {
   try {
-    const { email, nombre, pedido, total } = req.body;
+    const { email, nombre, telefono, direccion, notas, pedido } = req.body;
+
+    // ---- Validaciones básicas ----
     if (!pedido || !Array.isArray(pedido) || pedido.length === 0) {
       return res.status(400).json({ success: false, error: 'El pedido está vacío' });
     }
-    const items = pedido.map(p => ({
-      nombre: p.nombre || 'Producto',
-      cantidad: parseInt(p.cantidad) || 1,
-      precio: parseFloat(p.precio) || 0
-    }));
+    if (!nombre || nombre.trim().length < 2) {
+      return res.status(400).json({ success: false, error: 'Nombre inválido' });
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ success: false, error: 'Email inválido' });
+    }
+    if (pedido.length > 50) {
+      return res.status(400).json({ success: false, error: 'Demasiados items en el pedido' });
+    }
+
+    // ---- Cargar productos REALES del backend ----
+    const productos = leerArrayJSON('productos.json');
+    const itemsValidados = [];
+    let totalReal = 0;
+
+    for (const item of pedido) {
+      const idPedido = item.id || item.producto_id;
+      const cantidad = parseInt(item.cantidad);
+
+      if (!idPedido || isNaN(cantidad) || cantidad < 1) {
+        return res.status(400).json({ 
+          success: false, 
+          error: `Item inválido: ${item.nombre || 'sin nombre'}` 
+        });
+      }
+
+      // 🔒 Buscar producto REAL en el backend
+      const productoReal = productos.find(p => String(p.id) === String(idPedido));
+      if (!productoReal) {
+        return res.status(400).json({ 
+          success: false, 
+          error: `Producto no encontrado: ${item.nombre || idPedido}` 
+        });
+      }
+
+      // 🔒 Validar disponibilidad
+      if (productoReal.available === false || productoReal.stock <= 0) {
+        return res.status(400).json({ 
+          success: false, 
+          error: `El producto "${productoReal.name}" está agotado` 
+        });
+      }
+
+      // 🔒 Validar stock suficiente
+      if (cantidad > productoReal.stock) {
+        return res.status(400).json({ 
+          success: false, 
+          error: `Solo hay ${productoReal.stock} unidades de "${productoReal.name}"` 
+        });
+      }
+
+      // 🔒 Precio REAL del servidor (ignora el que mande el cliente)
+      const precioReal = parseFloat(productoReal.price) || 0;
+      const subtotalReal = precioReal * cantidad;
+      totalReal += subtotalReal;
+
+      itemsValidados.push({
+        id: productoReal.id,
+        nombre: productoReal.name,
+        categoria: productoReal.category,
+        precio: precioReal,
+        cantidad,
+        subtotal: subtotalReal
+      });
+    }
+
+    // ---- Crear pedido validado ----
     const nuevoPedido = {
       id: 'PED-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-      cliente: nombre || 'Cliente',
-      email: email || 'cliente@meditech.com',
+      cliente: nombre.trim(),
+      email: email.trim().toLowerCase(),
+      telefono: (telefono || '').trim(),
+      direccion: (direccion || '').trim(),
+      notas: (notas || '').trim(),
       fecha: new Date().toISOString(),
-      items,
-      total: parseFloat(total) || items.reduce((s, i) => s + i.precio * i.cantidad, 0),
-      estado: 'pendiente'
+      items: itemsValidados,
+      total: totalReal,
+      estado: 'pendiente',
+      historial: [
+        { estado: 'pendiente', fecha: new Date().toISOString(), por: 'cliente' }
+      ]
     };
+
+    // ---- Descontar stock ----
+    for (const item of itemsValidados) {
+      const idx = productos.findIndex(p => String(p.id) === String(item.id));
+      if (idx !== -1) {
+        productos[idx].stock = Math.max(0, (productos[idx].stock || 0) - item.cantidad);
+        if (productos[idx].stock === 0) {
+          productos[idx].available = false;
+        }
+      }
+    }
+    escribirJSON('productos.json', productos);
+
+    // ---- Guardar pedido ----
     const pedidos = leerArrayJSON('pedidos.json');
     pedidos.push(nuevoPedido);
     escribirJSON('pedidos.json', pedidos);
-    res.status(200).json({ success: true, message: 'Pedido recibido correctamente', pedido: nuevoPedido });
+
+    // ---- Notificar al admin por Telegram (opcional, ver mejora #4) ----
+    notificarTelegram(nuevoPedido).catch(() => {});
+
+    res.status(200).json({ 
+      success: true, 
+      message: 'Pedido recibido correctamente', 
+      pedido: {
+        id: nuevoPedido.id,
+        total: nuevoPedido.total,
+        items: nuevoPedido.items.length,
+        estado: nuevoPedido.estado
+      }
+    });
+
   } catch (e) {
     console.error('❌ Error en enviar-pedido:', e);
     res.status(500).json({ success: false, error: 'Error interno del servidor' });
