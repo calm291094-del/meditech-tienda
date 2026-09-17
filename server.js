@@ -172,7 +172,7 @@ function escribirJSON(nombre, datos) {
 
 // --- Inicialización con descarga desde GitHub ---
 async function inicializarArchivos() {
-  const archivos = ['usuarios.json', 'productos.json', 'pedidos.json'];
+  const archivos = ['usuarios.json', 'productos.json', 'pedidos.json', 'ania_tasks.json'];
   for (const f of archivos) {
     // Si existe en GitHub, se trae (y sobreescribe el local efímero)
     const bajado = await descargarJSONDeGitHub(f);
@@ -681,6 +681,66 @@ app.post('/api/enviar-pedido', async (req, res) => {
   }
 });
 
+// ============================================================
+// 🧠 MÓDULO ANIA — Gestión de tareas y recordatorios
+// ============================================================
+
+const USUARIO_ANIA = process.env.ANIA_USER || 'admin';
+
+function leerTareas() {
+  return leerArrayJSON('ania_tasks.json');
+}
+function guardarTareas(t) {
+  escribirJSON('ania_tasks.json', t);
+}
+
+// --- GET: listar tareas ---
+app.get('/api/ania/tasks', (req, res) => {
+  const user = req.query.user || USUARIO_ANIA;
+  const todas = leerTareas().filter(t => t.usuario === user);
+  res.json(todas);
+});
+
+// --- POST: crear tarea ---
+app.post('/api/ania/tasks', (req, res) => {
+  const { texto, remindAt, usuario, source } = req.body || {};
+  if (!texto || typeof texto !== 'string' || texto.trim().length < 2) {
+    return res.status(400).json({ error: 'Texto de tarea inválido' });
+  }
+  const tareas = leerTareas();
+  const nueva = {
+    id: 'T' + Date.now() + Math.random().toString(36).slice(2, 6),
+    usuario: usuario || USUARIO_ANIA,
+    texto: texto.trim(),
+    remindAt: remindAt || null,
+    done: false,
+    notified: false,
+    source: source || 'web',
+    created: new Date().toISOString()
+  };
+  tareas.push(nueva);
+  guardarTareas(tareas);
+  res.status(201).json(nueva);
+});
+
+// --- PUT: actualizar tarea (marcar hecha, editar) ---
+app.put('/api/ania/tasks/:id', (req, res) => {
+  const tareas = leerTareas();
+  const idx = tareas.findIndex(t => t.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Tarea no encontrada' });
+  tareas[idx] = { ...tareas[idx], ...req.body, updated: new Date().toISOString() };
+  guardarTareas(tareas);
+  res.json(tareas[idx]);
+});
+
+// --- DELETE: borrar tarea ---
+app.delete('/api/ania/tasks/:id', (req, res) => {
+  const tareas = leerTareas();
+  const nuevas = tareas.filter(t => t.id !== req.params.id);
+  guardarTareas(nuevas);
+  res.json({ ok: true });
+});
+
 // ---- CONFIG ----
 app.get('/api/config', (req, res) => { // ✅ sintaxis corregida
   res.json({
@@ -859,6 +919,55 @@ app.get('/api/productos-resumen', (req, res) => {
     console.log('👤 Usuario admin creado');
   }
 
+  // ============================================================
+  // ⏰ CRON: revisa tareas vencidas cada 30s y notifica por Telegram
+  // ============================================================
+  async function revisarTareasVencidas() {
+    try {
+      const ahora = Date.now();
+      const tareas = leerArrayJSON('ania_tasks.json');
+      let cambios = false;
+
+      for (const t of tareas) {
+        if (t.done || t.notified) continue;
+        if (!t.remindAt) continue;
+        if (new Date(t.remindAt).getTime() > ahora) continue;
+
+        await enviarRecordatorioTelegram(t);
+        t.notified = true;
+        t.notifiedAt = new Date().toISOString();
+        cambios = true;
+      }
+
+      if (cambios) escribirJSON('ania_tasks.json', tareas);
+    } catch (e) {
+      console.error('Cron tareas error:', e.message);
+    }
+  }
+
+  async function enviarRecordatorioTelegram(tarea) {
+    const TOKEN = process.env.TELEGRAM_TOKEN;
+    const CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
+    if (!TOKEN || !CHAT_ID) return;
+    try {
+      await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: CHAT_ID,
+          text: `⏰ <b>RECORDATORIO</b>\n\n📋 ${tarea.texto}\n\n<i>Fuente: ${tarea.source || 'web'}</i>`,
+          parse_mode: 'HTML'
+        })
+      });
+      console.log(`📨 Recordatorio enviado: ${tarea.texto}`);
+    } catch (e) {
+      console.error('Error enviando recordatorio:', e.message);
+    }
+  }
+
+  // Ejecutar cada 30 segundos
+  setInterval(revisarTareasVencidas, 30 * 1000);
+  
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Servidor en puerto ${PORT} | Datos en: ${DATA_DIR}`);
     console.log(`📦 GitHub sync: ${GITHUB_TOKEN ? 'ACTIVO' : 'DESACTIVADO (falta GITHUB_TOKEN)'}`);
