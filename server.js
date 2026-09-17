@@ -47,10 +47,16 @@ setInterval(() => {
 }, 5 * 60 * 1000).unref();
 
 // ============================================================
-// ARCHIVOS JSON (lectura tolerante + escritura atómica)
+// ARCHIVOS JSON con persistencia en GitHub
 // ============================================================
 const rutaJSON = (nombre) => path.join(DATA_DIR, nombre);
 
+const GITHUB_USER = process.env.GITHUB_USER || 'calm291094-del';
+const GITHUB_REPO = process.env.GITHUB_REPO || 'meditech-tienda';
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
+const GH_BRANCH = process.env.GITHUB_BRANCH || 'main';
+
+// --- Leer desde disco (rápido) ---
 function leerArrayJSON(nombre) {
   try {
     const parsed = JSON.parse(fs.readFileSync(rutaJSON(nombre), 'utf8'));
@@ -65,21 +71,115 @@ function leerArrayJSON(nombre) {
   }
 }
 
-function escribirJSON(nombre, datos) {
-  const final = rutaJSON(nombre);
-  const tmp = final + '.tmp';
+// --- Descargar un JSON desde GitHub (al arrancar) ---
+async function descargarJSONDeGitHub(nombre) {
+  if (!GITHUB_TOKEN) return false;
   try {
-    fs.writeFileSync(tmp, JSON.stringify(datos, null, 2));
-    fs.renameSync(tmp, final); // atómico: evita archivos corruptos
-    console.log(`✅ ${nombre} guardado`);
+    const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${nombre}?ref=${GH_BRANCH}`;
+    const r = await fetch(url, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github+json',
+        'User-Agent': 'MediTech-Backend'
+      }
+    });
+    if (!r.ok) {
+      console.log(`ℹ️  ${nombre} no existe aún en GitHub (HTTP ${r.status})`);
+      return false;
+    }
+    const data = await r.json();
+    const contenido = Buffer.from(data.content, 'base64').toString('utf8');
+    fs.writeFileSync(rutaJSON(nombre), contenido);
+    console.log(`⬇️  ${nombre} descargado de GitHub`);
+    return true;
   } catch (e) {
-    console.error(`❌ Error guardando ${nombre}:`, e.message);
+    console.error(`❌ Error descargando ${nombre}:`, e.message);
+    return false;
   }
 }
 
-function inicializarArchivos() {
-  for (const f of ['usuarios.json', 'productos.json', 'pedidos.json']) {
-    if (!fs.existsSync(rutaJSON(f))) escribirJSON(f, []);
+// --- Subir un JSON a GitHub (tras cada escritura) ---
+async function subirJSONAGitHub(nombre, contenido, mensaje) {
+  if (!GITHUB_TOKEN) return false;
+  try {
+    const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${nombre}`;
+
+    // 1. Obtener el SHA actual (necesario para actualizar)
+    let sha = null;
+    const getR = await fetch(`${url}?ref=${GH_BRANCH}`, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github+json',
+        'User-Agent': 'MediTech-Backend'
+      }
+    });
+    if (getR.ok) {
+      const d = await getR.json();
+      sha = d.sha;
+    }
+
+    // 2. Commit
+    const body = {
+      message: mensaje || `🔄 update ${nombre}`,
+      content: Buffer.from(contenido).toString('base64'),
+      branch: GH_BRANCH,
+      ...(sha ? { sha } : {})
+    };
+
+    const putR = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+        'User-Agent': 'MediTech-Backend'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (putR.ok) {
+      console.log(`⬆️  ${nombre} subido a GitHub`);
+      return true;
+    } else {
+      const err = await putR.text();
+      console.error(`❌ Error subiendo ${nombre}:`, err);
+      return false;
+    }
+  } catch (e) {
+    console.error(`❌ Error subiendo ${nombre}:`, e.message);
+    return false;
+  }
+}
+
+// --- Escribir en disco Y en GitHub ---
+function escribirJSON(nombre, datos) {
+  const final = rutaJSON(nombre);
+  const tmp = final + '.tmp';
+  const contenido = JSON.stringify(datos, null, 2);
+
+  try {
+    fs.writeFileSync(tmp, contenido);
+    fs.renameSync(tmp, final);
+    console.log(`✅ ${nombre} guardado en disco`);
+  } catch (e) {
+    console.error(`❌ Error guardando ${nombre}:`, e.message);
+    return;
+  }
+
+  // Subir a GitHub en background (no bloquea la respuesta)
+  subirJSONAGitHub(nombre, contenido, `🔄 update ${nombre}`).catch(() => {});
+}
+
+// --- Inicialización con descarga desde GitHub ---
+async function inicializarArchivos() {
+  const archivos = ['usuarios.json', 'productos.json', 'pedidos.json'];
+  for (const f of archivos) {
+    // Si existe en GitHub, se trae (y sobreescribe el local efímero)
+    const bajado = await descargarJSONDeGitHub(f);
+    // Si no existe ni en disco ni en GitHub, se crea vacío
+    if (!bajado && !fs.existsSync(rutaJSON(f))) {
+      escribirJSON(f, []);
+    }
   }
 }
 
@@ -498,22 +598,27 @@ app.get('/api/productos-resumen', (req, res) => {
 // ============================================================
 // 🚀 ARRANQUE
 // ============================================================
-inicializarArchivos();
-
-// Crear admin inicial si no existe (usa ADMIN_USER / ADMIN_PASS en Render)
 (async () => {
+  await inicializarArchivos();  // 👈 ahora es async
+
+  // Crear admin inicial si no existe
   const usuarios = leerArrayJSON('usuarios.json');
   if (!usuarios.some(u => u.role === 'admin')) {
     const hash = await bcrypt.hash(process.env.ADMIN_PASS || 'admin123', 10);
     usuarios.push({
-      id: 1, username: process.env.ADMIN_USER || 'admin', password_hash: hash,
-      name: 'Administrador', role: 'admin', created_at: new Date().toISOString()
+      id: 1,
+      username: process.env.ADMIN_USER || 'admin',
+      password_hash: hash,
+      name: 'Administrador',
+      role: 'admin',
+      created_at: new Date().toISOString()
     });
     escribirJSON('usuarios.json', usuarios);
-    console.log('👤 Usuario admin creado (revisa ADMIN_USER/ADMIN_PASS)');
+    console.log('👤 Usuario admin creado');
   }
-})();
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Servidor en puerto ${PORT} | Datos en: ${DATA_DIR}`);
-});
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Servidor en puerto ${PORT} | Datos en: ${DATA_DIR}`);
+    console.log(`📦 GitHub sync: ${GITHUB_TOKEN ? 'ACTIVO' : 'DESACTIVADO (falta GITHUB_TOKEN)'}`);
+  });
+})();
