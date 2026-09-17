@@ -488,7 +488,30 @@ app.put('/api/pedidos/:id', authenticateToken, esAdmin, (req, res) => {
   const pedidos = leerArrayJSON('pedidos.json');
   const index = pedidos.findIndex(p => p.id == req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Pedido no encontrado' });
-  pedidos[index] = { ...pedidos[index], ...req.body, actualizado: new Date().toISOString() };
+
+  const pedido = pedidos[index];
+  const estadoAnterior = pedido.estado;
+  const nuevoEstado = req.body.estado;
+  const nota = req.body.nota || '';
+
+  // Registrar en historial si cambió el estado
+  if (nuevoEstado && nuevoEstado !== estadoAnterior) {
+    pedido.historial = pedido.historial || [];
+    pedido.historial.push({
+      estado: nuevoEstado,
+      anterior: estadoAnterior,
+      fecha: new Date().toISOString(),
+      por: req.user.username,
+      nota
+    });
+  }
+
+  pedidos[index] = {
+    ...pedido,
+    ...req.body,
+    actualizado: new Date().toISOString()
+  };
+
   escribirJSON('pedidos.json', pedidos);
   res.json(pedidos[index]);
 });
