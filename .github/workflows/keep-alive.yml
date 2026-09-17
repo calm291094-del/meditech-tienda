@@ -1,17 +1,30 @@
 # .github/workflows/keep-alive.yml
-name: Keep Alive - MediTech Bot
+name: Keep Alive - MediTech Backend
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    # Cada 14 min en horario Cuba (8 AM a 11 PM = 12:00 a 03:00 UTC del día siguiente)
+    # Reduce horas consumidas y solo mantiene vivo el backend cuando se usa
+    - cron: '*/14 12-23,0-2 * * *'
   workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
     steps:
-      - name: Visitar el bot para mantenerlo activo
+      - name: 🔔 Ping al BACKEND (meditech-bot)
         run: |
-          echo "🔄 Visitando el bot para mantenerlo activo..."
-          curl -s -o /dev/null -w "%{http_code}" https://meditech-tienda.onrender.com/telegram-bot.html
-          echo "✅ Pong exitoso - Bot mantenido activo"
+          echo "🔔 Despertando backend..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            --max-time 60 \
+            https://meditech-bot.onrender.com/api/health)
+          echo "HTTP $HTTP_CODE"
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Backend despierto"
+          else
+            echo "⚠️ Backend respondió $HTTP_CODE (puede estar arrancando)"
+          fi
+
+      - name: 📊 Timestamp
+        run: echo "Ejecutado: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
