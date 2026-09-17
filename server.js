@@ -329,11 +329,20 @@ app.post('/api/register', async (req, res) => {
     };
     usuarios.push(newUser);
     escribirJSON('usuarios.json', usuarios);
+    
+    const accessToken = generarToken(newUser);
+    const refreshToken = jwt.sign(
+      { id: newUser.id, username: newUser.username, role: newUser.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
     res.status(201).json({
       message: 'Usuario creado correctamente',
       usuario: { id: newUser.id, username, name, email, role: 'user' },
-      token: generarToken(newUser)
+      token: accessToken,
+      refreshToken
     });
+    
   } catch (e) {
     console.error('Error en registro:', e);
     res.status(500).json({ error: 'Error interno del servidor' });
@@ -357,10 +366,50 @@ app.post('/api/login', async (req, res) => {
     const usuarioSinPass = { ...user };
     delete usuarioSinPass.password_hash;
     delete usuarioSinPass.password;
-    res.json({ message: 'Login exitoso', usuario: usuarioSinPass, token: generarToken(user) });
+
+    const accessToken = generarToken(user);
+    const refreshToken = jwt.sign(
+      { id: user.id, username: user.username, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    res.json({ 
+      message: 'Login exitoso', 
+      usuario: usuarioSinPass, 
+      token: accessToken,
+      refreshToken
+    });
+    
   } catch (e) {
     console.error('🔥 ERROR EN LOGIN:', e);
     res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
+// ---- REFRESH TOKEN ----
+app.post('/api/refresh', (req, res) => {
+  const { refreshToken } = req.body || {};
+  if (!refreshToken) {
+    return res.status(400).json({ error: 'Falta refreshToken' });
+  }
+  try {
+    const payload = jwt.verify(refreshToken, JWT_SECRET);
+    const usuarios = leerArrayJSON('usuarios.json');
+    const user = usuarios.find(u => u.id === payload.id || u.username === payload.username);
+    if (!user) {
+      return res.status(401).json({ error: 'Usuario no encontrado' });
+    }
+
+    const nuevoAccess = generarToken(user);
+    const nuevoRefresh = jwt.sign(
+      { id: user.id, username: user.username, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({ token: nuevoAccess, refreshToken: nuevoRefresh });
+  } catch (e) {
+    return res.status(403).json({ error: 'Refresh token inválido o expirado' });
   }
 });
 
