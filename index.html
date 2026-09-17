@@ -1168,5 +1168,19 @@
 })();
 </script>
 
+<script>
+// Despertar el backend en background al cargar la página
+(function() {
+  fetch('https://meditech-bot.onrender.com/api/health', { 
+    method: 'GET',
+    mode: 'cors',
+    cache: 'no-cache'
+  })
+  .then(r => r.json())
+  .then(d => console.log('🟢 Backend despierto:', d.status))
+  .catch(() => console.log('🟡 Backend despertando (cold start)...'));
+})();
+</script>
+
 </body>
 </html>
