@@ -35,6 +35,9 @@ async function handleLogin(e) {
             body: JSON.stringify({ username, password }) 
         });
         localStorage.setItem('token', data.token);
+        if (data.refreshToken) {
+            localStorage.setItem('refreshToken', data.refreshToken);
+        }
         localStorage.setItem('session', JSON.stringify(data.usuario));
         S.currentUser = data.usuario;
         updateUIForLoggedUser();
@@ -54,12 +57,17 @@ async function handleRegister(e) {
     const password = document.getElementById('register-password').value;
     try {
         showNotif('📝 Creando cuenta...', 'info');
+
         const data = await apiRequest('/register', { 
             method: 'POST', 
             body: JSON.stringify({ username, password, name, email }) 
         });
         localStorage.setItem('token', data.token);
+        if (data.refreshToken) {
+            localStorage.setItem('refreshToken', data.refreshToken);
+        }
         localStorage.setItem('session', JSON.stringify(data.usuario));
+        
         S.currentUser = data.usuario;
         updateUIForLoggedUser();
         closeRegisterModal();
@@ -74,6 +82,7 @@ function logout() {
     S.currentUser = null;
     S.cart = [];
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');   // 👈 LÍNEA NUEVA
     localStorage.removeItem('session');
     document.body.classList.remove('admin-mode');
     updateUIForLoggedOut();
