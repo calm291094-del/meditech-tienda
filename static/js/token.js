@@ -5,22 +5,9 @@
 async function loadToken() {
     console.log('🔑 Cargando token desde la base de datos...');
     
-    try {
-        const response = await fetch(`${API_URL}/config/github-token-public`);
-        if (response.ok) {
-            const data = await response.json();
-            if (data.token && data.token !== '') {
-                localStorage.setItem('github_token', data.token);
-                window.GITHUB_TOKEN = data.token;
-                HEADERS['Authorization'] = `token ${data.token}`;
-                console.log('✅ Token cargado desde la base de datos');
-                return true;
-            }
-        }
-        console.warn('⚠️ No hay token en la base de datos');
-    } catch (error) {
-        console.warn('⚠️ No se pudo cargar token desde la base de datos:', error.message);
-    }
+    // ⚠️ El endpoint /config/github-token-public fue eliminado por seguridad
+    // Ahora el token solo se lee desde localStorage o desde el endpoint admin
+    console.log('ℹ️  Token público deshabilitado; usando localStorage');
     
     const savedToken = localStorage.getItem('github_token');
     if (savedToken && savedToken !== '' && savedToken !== 'ghp_PEGA_AQUI_TU_NUEVO_TOKEN') {
@@ -129,16 +116,7 @@ function showTokenStatus(message, type) {
 
 async function loadConfigInfo() {
     try {
-        const response = await fetch(`${API_URL}/config/github-token-public`);
-        let currentToken = '';
-        if (response.ok) {
-            const data = await response.json();
-            currentToken = data.token || '';
-        }
-        
-        if (!currentToken) {
-            currentToken = localStorage.getItem('github_token') || '';
-        }
+        let currentToken = localStorage.getItem('github_token') || '';
         
         const tokenDisplay = document.getElementById('current-token-display');
         if (tokenDisplay) {
