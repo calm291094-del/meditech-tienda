@@ -1,19 +1,26 @@
-{
-  "usuarios": [
-    {
-      "username": "root",
-      "password": "Root*4815162342+-",
-      "name": "Administrador",
-      "email": "admin@meditech.com",
-      "role": "admin"
-    },
-    {
-      "username": "cliente",
-      "password": "Cliente123",
-      "name": "cliente",
-      "email": "cliente@gmail.com",
-      "role": "user",
-      "fecha": "2026-07-07T12:29:43.970Z"
-    }
-  ]
-}
+[
+  {
+    "username": "root",
+    "password": "Root*4815162342+-",
+    "name": "Administrador",
+    "email": "admin@meditech.com",
+    "role": "admin"
+  },
+  {
+    "username": "cliente",
+    "password": "Cliente123",
+    "name": "cliente",
+    "email": "cliente@gmail.com",
+    "role": "user",
+    "fecha": "2026-07-07T12:29:43.970Z"
+  },
+  {
+    "id": 1789653556227,
+    "username": "Adrian",
+    "password_hash": "$2a$10$Y.FefS/HBDO8iXQGE/NxXuMMYMQrQKW2/Alzm1fgEg/5GZgj3.78a",
+    "name": "Adrian Nicles",
+    "email": "Adrian@nauta.cu",
+    "role": "user",
+    "created_at": "2026-09-17T13:59:16.227Z"
+  }
+]
