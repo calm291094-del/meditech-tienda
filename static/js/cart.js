@@ -278,78 +278,100 @@ function closeCart() {
 // FUNCIÓN PARA ENVIAR PEDIDO POR CORREO (EMAILJS)
 // ============================================================
 async function enviarPedidoPorCorreo() {
-    console.log('📤 enviarPedidoPorCorreo llamada (EmailJS)');
-    
-    if (!S.cart || S.cart.length === 0) {
-        showNotif('⚠️ El carrito está vacío', 'warning');
-        return;
-    }
+  console.log('📤 enviarPedidoPorCorreo llamada');
 
-    const user = S.currentUser || JSON.parse(localStorage.getItem('session') || '{}');
-    const userEmail = user?.email || 'cliente@meditech.com';
-    const userName = user?.name || 'Cliente';
+  if (!S.cart || S.cart.length === 0) {
+    showNotif('⚠️ El carrito está vacío', 'warning');
+    return;
+  }
 
-    let total = 0;
-    let subtotal = 0;
-    const pedidoData = S.cart.map(item => {
-        const producto = item.producto || {};
-        const precio = parseFloat(producto.price) || 0;
-        const cantidad = item.cantidad || 1;
-        const itemSubtotal = precio * cantidad;
-        subtotal += itemSubtotal;
-        total += itemSubtotal;
-        return {
-            nombre: producto.name || 'Producto',
-            cantidad: cantidad,
-            precio: precio.toFixed(2),
-            subtotal: itemSubtotal.toFixed(2)
-        };
+  const user = S.currentUser || JSON.parse(localStorage.getItem('session') || '{}');
+  const userEmail = user?.email || '';
+  const userName = user?.name || '';
+
+  if (!userEmail) {
+    showNotif('⚠️ Necesitas un email en tu perfil', 'error');
+    return;
+  }
+
+  // 🔒 Enviar SOLO id + cantidad (el servidor recalcula precios y total)
+  const pedidoData = S.cart.map(item => ({
+    id: item.producto.id,           // 👈 CRÍTICO: enviar el id
+    nombre: item.producto.name,      // referencia, no se usa para calcular
+    cantidad: item.cantidad
+  }));
+
+  // Pedir datos adicionales al cliente
+  const telefono = prompt('📞 Tu teléfono (para coordinar la entrega):', '');
+  if (telefono === null) return;
+  
+  const direccion = prompt('📍 Dirección de entrega:', '');
+  if (direccion === null) return;
+
+  const notas = prompt('📝 Notas adicionales (opcional):', '') || '';
+
+  try {
+    showNotif('📤 Enviando pedido...', 'info');
+
+    const res = await fetch(`${API_URL}/enviar-pedido`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre: userName,
+        email: userEmail,
+        telefono,
+        direccion,
+        notas,
+        pedido: pedidoData
+      })
     });
 
-    // ✅ Configuración de EmailJS
-    const EMAILJS_PUBLIC_KEY = '-oSvhsO6mZn5cdCz6'; // Reemplaza con tu clave
-    const EMAILJS_SERVICE_ID = 'service_v1tiylh'; // Reemplaza con tu Service ID
-    const EMAILJS_TEMPLATE_ID = 'template_edjk1yg'; // Reemplaza con tu Template ID
+    const data = await res.json();
 
-    try {
-        emailjs.init(EMAILJS_PUBLIC_KEY);
-
-        const payload = {
-            // ✅ Variables que espera la plantilla
-            nombre: userName,
-            email: userEmail,
-            order_id: 'PED-' + Date.now() + '-' + Math.random().toString(36).substring(2, 6),
-            fecha: new Date().toLocaleString(),
-            items: pedidoData,
-            subtotal: subtotal.toFixed(2),
-            shipping: 'Gratis',
-            total: total.toFixed(2),
-            notes: 'Gracias por tu compra. Te contactaremos pronto.'
-        };
-
-        console.log('📤 Enviando pedido con EmailJS:', payload);
-
-        showNotif('📤 Enviando pedido...', 'info');
-
-        const response = await emailjs.send(
-            EMAILJS_SERVICE_ID,
-            EMAILJS_TEMPLATE_ID,
-            payload
-        );
-
-        console.log('✅ EmailJS respuesta:', response);
-        showNotif('✅ Pedido enviado correctamente', 'success');
-        
-        S.cart = [];
-        guardarCarrito();
-        actualizarContadorCarrito();
-        closeCart();
-        renderCartItems();
-
-    } catch (error) {
-        console.error('❌ Error con EmailJS:', error);
-        showNotif(`❌ Error al enviar: ${error.text || error.message}`, 'error');
+    if (!data.success) {
+      throw new Error(data.error || 'Error al enviar el pedido');
     }
+
+    // ✅ Notificar al cliente por EmailJS (confirmación)
+    try {
+      await enviarEmailConfirmacionCliente(data.pedido, userEmail, userName);
+    } catch (e) {
+      console.warn('No se pudo enviar el email de confirmación:', e);
+    }
+
+    showNotif(`✅ Pedido ${data.pedido.id} recibido. Te contactaremos pronto.`, 'success');
+
+    S.cart = [];
+    guardarCarrito();
+    actualizarContadorCarrito();
+    closeCart();
+    renderCartItems();
+
+    // Recargar productos porque cambió el stock
+    if (typeof cargarProductos === 'function') {
+      await cargarProductos();
+    }
+
+  } catch (error) {
+    console.error('❌ Error:', error);
+    showNotif(`❌ ${error.message}`, 'error');
+  }
+}
+
+
+async function enviarEmailConfirmacionCliente(pedidoResumen, email, nombre) {
+  const EMAILJS_PUBLIC_KEY = '-oSvhsO6mZn5cdCz6';
+  const EMAILJS_SERVICE_ID = 'service_v1tiylh';
+  const EMAILJS_TEMPLATE_ID = 'template_edjk1yg'; // usa otro template si quieres
+
+  emailjs.init(EMAILJS_PUBLIC_KEY);
+  await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+    nombre,
+    email,
+    order_id: pedidoResumen.id,
+    total: pedidoResumen.total,
+    mensaje: 'Tu pedido ha sido recibido. Te contactaremos para coordinar la entrega.'
+  });
 }
 
 
