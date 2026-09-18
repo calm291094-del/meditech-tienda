@@ -59,5 +59,15 @@
     "source": "web",
     "created": "2026-09-18T14:25:26.589Z",
     "notifiedAt": "2026-09-18T14:30:13.120Z"
+  },
+  {
+    "id": "T1789741827007fkkd",
+    "usuario": "admin",
+    "texto": "Recuerdame am tomar agua",
+    "remindAt": "2026-09-18T14:30:00.000Z",
+    "done": false,
+    "notified": false,
+    "source": "web",
+    "created": "2026-09-18T14:30:27.007Z"
   }
 ]
