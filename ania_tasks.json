@@ -143,9 +143,10 @@
     "texto": "Recuerdame am tomar agua",
     "remindAt": "2026-09-18T14:30:00.000Z",
     "done": false,
-    "notified": false,
+    "notified": true,
     "source": "web",
-    "created": "2026-09-18T14:34:11.813Z"
+    "created": "2026-09-18T14:34:11.813Z",
+    "notifiedAt": "2026-09-18T14:34:13.138Z"
   },
   {
     "id": "T1789742051923kkcp",
@@ -153,8 +154,9 @@
     "texto": "Recuerdame am tomar agua",
     "remindAt": "2026-09-18T14:30:00.000Z",
     "done": false,
-    "notified": false,
+    "notified": true,
     "source": "web",
-    "created": "2026-09-18T14:34:11.923Z"
+    "created": "2026-09-18T14:34:11.923Z",
+    "notifiedAt": "2026-09-18T14:34:13.138Z"
   }
 ]
