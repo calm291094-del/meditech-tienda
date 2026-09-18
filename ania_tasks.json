@@ -99,8 +99,20 @@
     "texto": "Recuerdame am tomar agua",
     "remindAt": "2026-09-18T14:30:00.000Z",
     "done": false,
-    "notified": false,
+    "notified": true,
     "source": "web",
-    "created": "2026-09-18T14:32:41.901Z"
+    "created": "2026-09-18T14:32:41.901Z",
+    "notifiedAt": "2026-09-18T14:32:43.130Z"
+  },
+  {
+    "id": "T1789741962117ibt0",
+    "usuario": "admin",
+    "texto": "Recuerdame am tomar agua",
+    "remindAt": "2026-09-18T14:30:00.000Z",
+    "done": false,
+    "notified": true,
+    "source": "web",
+    "created": "2026-09-18T14:32:42.117Z",
+    "notifiedAt": "2026-09-18T14:32:43.130Z"
   }
 ]
