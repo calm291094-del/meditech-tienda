@@ -954,25 +954,31 @@ async function revisarTareasVencidas() {
   }
 }
 
-  async function enviarRecordatorioTelegram(tarea) {
-    const TOKEN = process.env.TELEGRAM_TOKEN;
-    const CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
-    if (!TOKEN || !CHAT_ID) return;
-    try {
-      await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: `⏰ <b>RECORDATORIO</b>\n\n📋 ${tarea.texto}\n\n<i>Fuente: ${tarea.source || 'web'}</i>`,
-          parse_mode: 'HTML'
-        })
-      });
-      console.log(`📨 Recordatorio enviado: ${tarea.texto}`);
-    } catch (e) {
-      console.error('Error enviando recordatorio:', e.message);
-    }
+async function enviarRecordatorioTelegram(tarea) {
+  const TOKEN = process.env.TELEGRAM_TOKEN;
+  const CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID || process.env.TELEGRAM_CHAT_ID;
+  if (!TOKEN || !CHAT_ID) return;
+  const escTG = (s) => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const hora = new Date(tarea.remindAt).toLocaleString('es-CU', {
+    timeZone: 'America/Havana', hour:'2-digit', minute:'2-digit',
+    day:'numeric', month:'short'
+  });
+  try {
+    await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: `⏰ <b>Recordatorio</b>\n\n📋 ${escTG(tarea.texto)}\n\n<i>Agendado para ${escTG(hora)} · Cuba</i>`,
+        parse_mode:'HTML',
+        disable_notification: false
+      })
+    });
+    console.log(`📨 Recordatorio Telegram: ${tarea.texto}`);
+  } catch (e) {
+    console.error('Error enviando recordatorio:', e.message);
   }
+}
 
   // Ejecutar cada 30 segundos
   setInterval(revisarTareasVencidas, 30 * 1000);
