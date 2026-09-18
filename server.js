@@ -703,7 +703,7 @@ app.get('/api/ania/tasks', (req, res) => {
 
 // --- POST: crear tarea ---
 app.post('/api/ania/tasks', (req, res) => {
-  const { texto, remindAt, usuario, source } = req.body || {};
+  const { texto, remindAt, usuario, source, notifyVia } = req.body || {};
   if (!texto || typeof texto !== 'string' || texto.trim().length < 2) {
     return res.status(400).json({ error: 'Texto de tarea inválido' });
   }
@@ -716,6 +716,8 @@ app.post('/api/ania/tasks', (req, res) => {
     done: false,
     notified: false,
     source: source || 'web',
+    // ✅ FIX: 'local' (web), 'telegram' (bot), 'both'
+    notifyVia: notifyVia || (source === 'telegram' ? 'telegram' : 'local'),
     created: new Date().toISOString()
   };
   tareas.push(nueva);
@@ -922,28 +924,35 @@ app.get('/api/productos-resumen', (req, res) => {
   // ============================================================
   // ⏰ CRON: revisa tareas vencidas cada 30s y notifica por Telegram
   // ============================================================
-  async function revisarTareasVencidas() {
-    try {
-      const ahora = Date.now();
-      const tareas = leerArrayJSON('ania_tasks.json');
-      let cambios = false;
+async function revisarTareasVencidas() {
+  try {
+    const ahora = Date.now();
+    const tareas = leerArrayJSON('ania_tasks.json');
+    let cambios = false;
 
-      for (const t of tareas) {
-        if (t.done || t.notified) continue;
-        if (!t.remindAt) continue;
-        if (new Date(t.remindAt).getTime() > ahora) continue;
+    for (const t of tareas) {
+      if (t.done || t.notified) continue;
+      if (!t.remindAt) continue;
+      if (new Date(t.remindAt).getTime() > ahora) continue;
 
+      // ✅ FIX: solo notificar por Telegram si la tarea lo pide
+      // Las tareas creadas en la web (source:'web' / notifyVia:'local')
+      // se avisan SOLO en el navegador → no duplicamos.
+      const via = t.notifyVia || (t.source === 'telegram' ? 'telegram' : 'local');
+      if (via === 'telegram' || via === 'both') {
         await enviarRecordatorioTelegram(t);
-        t.notified = true;
-        t.notifiedAt = new Date().toISOString();
-        cambios = true;
       }
 
-      if (cambios) escribirJSON('ania_tasks.json', tareas);
-    } catch (e) {
-      console.error('Cron tareas error:', e.message);
+      t.notified = true;
+      t.notifiedAt = new Date().toISOString();
+      cambios = true;
     }
+
+    if (cambios) escribirJSON('ania_tasks.json', tareas);
+  } catch (e) {
+    console.error('Cron tareas error:', e.message);
   }
+}
 
   async function enviarRecordatorioTelegram(tarea) {
     const TOKEN = process.env.TELEGRAM_TOKEN;
