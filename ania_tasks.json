@@ -191,5 +191,16 @@
     "source": "web",
     "created": "2026-09-18T15:23:28.387Z",
     "notifiedAt": "2026-09-18T16:30:18.735Z"
+  },
+  {
+    "id": "T17897523129630uf0",
+    "usuario": "admin",
+    "texto": "Has anotado",
+    "remindAt": null,
+    "done": false,
+    "notified": false,
+    "source": "web",
+    "notifyVia": "local",
+    "created": "2026-09-18T17:25:12.963Z"
   }
 ]
