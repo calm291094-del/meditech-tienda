@@ -77,8 +77,20 @@
     "texto": "Recuerdame am tomar agua",
     "remindAt": "2026-09-18T14:30:00.000Z",
     "done": false,
-    "notified": false,
+    "notified": true,
     "source": "web",
-    "created": "2026-09-18T14:31:56.921Z"
+    "created": "2026-09-18T14:31:56.921Z",
+    "notifiedAt": "2026-09-18T14:32:13.129Z"
+  },
+  {
+    "id": "T17897419172718xbc",
+    "usuario": "admin",
+    "texto": "Recuerdame am tomar agua",
+    "remindAt": "2026-09-18T14:30:00.000Z",
+    "done": false,
+    "notified": true,
+    "source": "web",
+    "created": "2026-09-18T14:31:57.271Z",
+    "notifiedAt": "2026-09-18T14:32:13.129Z"
   }
 ]
