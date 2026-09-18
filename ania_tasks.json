@@ -187,8 +187,9 @@
     "texto": "Irme",
     "remindAt": "2026-09-18T16:30:00.000Z",
     "done": false,
-    "notified": false,
+    "notified": true,
     "source": "web",
-    "created": "2026-09-18T15:23:28.387Z"
+    "created": "2026-09-18T15:23:28.387Z",
+    "notifiedAt": "2026-09-18T16:30:18.735Z"
   }
 ]
