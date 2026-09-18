@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "id": "T1789740357489yg6e",
+    "usuario": "admin",
+    "texto": "Recuerdame y 7 tomar agua",
+    "remindAt": "2026-09-19T14:00:00.000Z",
+    "done": false,
+    "notified": false,
+    "source": "web",
+    "created": "2026-09-18T14:05:57.489Z"
+  },
+  {
+    "id": "T1789740357577j945",
+    "usuario": "admin",
+    "texto": "Recuerdame y 7 tomar agua",
+    "remindAt": "2026-09-19T14:00:00.000Z",
+    "done": false,
+    "notified": false,
+    "source": "web",
+    "created": "2026-09-18T14:05:57.577Z"
+  }
+]
