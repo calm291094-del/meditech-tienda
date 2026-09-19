@@ -5,9 +5,10 @@
     "texto": "Recuerdame y 7 tomar agua",
     "remindAt": "2026-09-19T14:00:00.000Z",
     "done": false,
-    "notified": false,
+    "notified": true,
     "source": "web",
-    "created": "2026-09-18T14:05:57.489Z"
+    "created": "2026-09-18T14:05:57.489Z",
+    "notifiedAt": "2026-09-19T14:49:58.380Z"
   },
   {
     "id": "T1789740357577j945",
@@ -15,9 +16,10 @@
     "texto": "Recuerdame y 7 tomar agua",
     "remindAt": "2026-09-19T14:00:00.000Z",
     "done": false,
-    "notified": false,
+    "notified": true,
     "source": "web",
-    "created": "2026-09-18T14:05:57.577Z"
+    "created": "2026-09-18T14:05:57.577Z",
+    "notifiedAt": "2026-09-19T14:49:58.380Z"
   },
   {
     "id": "T1789740388032k2oh",
@@ -25,9 +27,10 @@
     "texto": "Recuerdame :7 am tomar agua",
     "remindAt": "2026-09-19T14:00:00.000Z",
     "done": false,
-    "notified": false,
+    "notified": true,
     "source": "web",
-    "created": "2026-09-18T14:06:28.032Z"
+    "created": "2026-09-18T14:06:28.032Z",
+    "notifiedAt": "2026-09-19T14:49:58.380Z"
   },
   {
     "id": "T1789741511542t5mu",
@@ -35,9 +38,10 @@
     "texto": "Recuerdame am tomar agua",
     "remindAt": "2026-09-19T14:07:00.000Z",
     "done": false,
-    "notified": false,
+    "notified": true,
     "source": "web",
-    "created": "2026-09-18T14:25:11.542Z"
+    "created": "2026-09-18T14:25:11.542Z",
+    "notifiedAt": "2026-09-19T14:49:58.380Z"
   },
   {
     "id": "T178974151174543al",
@@ -45,9 +49,10 @@
     "texto": "Recuerdame am tomar agua",
     "remindAt": "2026-09-19T14:07:00.000Z",
     "done": false,
-    "notified": false,
+    "notified": true,
     "source": "web",
-    "created": "2026-09-18T14:25:11.745Z"
+    "created": "2026-09-18T14:25:11.745Z",
+    "notifiedAt": "2026-09-19T14:49:58.380Z"
   },
   {
     "id": "T1789741526589j940",
