@@ -214,10 +214,11 @@
     "texto": "Tomar agua",
     "remindAt": "2026-09-20T13:00:00.000Z",
     "done": false,
-    "notified": false,
+    "notified": true,
     "source": "web",
     "notifyVia": "local",
-    "created": "2026-09-19T16:08:16.121Z"
+    "created": "2026-09-19T16:08:16.121Z",
+    "notifiedAt": "2026-09-20T13:04:42.264Z"
   },
   {
     "id": "T1789834096212od83",
@@ -225,9 +226,10 @@
     "texto": "Tomar agua",
     "remindAt": "2026-09-20T13:00:00.000Z",
     "done": false,
-    "notified": false,
+    "notified": true,
     "source": "web",
     "notifyVia": "local",
-    "created": "2026-09-19T16:08:16.212Z"
+    "created": "2026-09-19T16:08:16.212Z",
+    "notifiedAt": "2026-09-20T13:04:42.265Z"
   }
 ]
